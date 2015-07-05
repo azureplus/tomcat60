@@ -18,13 +18,11 @@
 package org.apache.catalina.ha;
 
 
-
-
-import java.io.Serializable;
-
 import org.apache.catalina.tribes.ChannelListener;
 import org.apache.catalina.tribes.Member;
 import org.apache.catalina.util.StringManager;
+
+import java.io.Serializable;
 
 
 /**

@@ -19,14 +19,14 @@
 package org.apache.catalina;
 
 
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.naming.directory.DirContext;
-
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.juli.logging.Log;
+
+import javax.naming.directory.DirContext;
+import javax.servlet.ServletException;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
 
 
 /**

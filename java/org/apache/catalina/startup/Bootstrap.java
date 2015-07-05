@@ -19,6 +19,13 @@
 package org.apache.catalina.startup;
 
 
+import org.apache.catalina.security.SecurityClassLoad;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -26,14 +33,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-
-import org.apache.catalina.security.SecurityClassLoad;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 
 
 /**
@@ -88,6 +87,7 @@ public final class Bootstrap {
 
 
     private void initClassLoaders() {
+        log.info("----------------initClassLoaders--------------");
         try {
             commonLoader = createClassLoader("common", null);
             if( commonLoader == null ) {

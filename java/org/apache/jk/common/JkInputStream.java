@@ -17,21 +17,19 @@
 
 package org.apache.jk.common;
 
-import java.io.IOException;
-
-import org.apache.coyote.OutputBuffer;
 import org.apache.coyote.InputBuffer;
+import org.apache.coyote.OutputBuffer;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
-
 import org.apache.jk.core.Msg;
 import org.apache.jk.core.MsgContext;
-
 import org.apache.tomcat.util.buf.ByteChunk;
-import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.buf.C2BConverter;
+import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.HttpMessages;
 import org.apache.tomcat.util.http.MimeHeaders;
+
+import java.io.IOException;
 
 /** Generic input stream impl on top of ajp
  */

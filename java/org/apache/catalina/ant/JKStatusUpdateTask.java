@@ -17,10 +17,10 @@
 
 package org.apache.catalina.ant;
 
+import org.apache.tools.ant.BuildException;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-
-import org.apache.tools.ant.BuildException;
 
 /**
  * Ant task that implements the <code>/status</code> command, supported by the

@@ -18,12 +18,8 @@
 
 package org.apache.naming;
 
+import javax.naming.*;
 import java.util.Hashtable;
-import javax.naming.Context;
-import javax.naming.Name;
-import javax.naming.NameParser;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 
 /**
  * Catalina JNDI Context implementation.

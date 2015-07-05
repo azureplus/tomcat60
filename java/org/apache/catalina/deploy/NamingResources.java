@@ -19,13 +19,13 @@
 package org.apache.catalina.deploy;
 
 
+import org.apache.catalina.ServerFactory;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.io.Serializable;
-
-import org.apache.catalina.ServerFactory;
 
 
 /**

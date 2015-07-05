@@ -19,13 +19,13 @@
 package org.apache.catalina.users;
 
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.apache.catalina.Group;
 import org.apache.catalina.Role;
 import org.apache.catalina.UserDatabase;
 import org.apache.catalina.util.RequestUtil;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * <p>Concrete implementation of {@link org.apache.catalina.User} for the

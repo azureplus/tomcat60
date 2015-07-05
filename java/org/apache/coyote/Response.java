@@ -17,14 +17,14 @@
 
 package org.apache.coyote;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Locale;
-
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.http.parser.HttpParser;
 import org.apache.tomcat.util.http.parser.MediaType;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Locale;
 
 /**
  * Response object.

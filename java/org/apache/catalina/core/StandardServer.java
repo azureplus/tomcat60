@@ -16,6 +16,19 @@
  */
 package org.apache.catalina.core;
 
+import org.apache.catalina.*;
+import org.apache.catalina.deploy.NamingResources;
+import org.apache.catalina.util.LifecycleSupport;
+import org.apache.catalina.util.ServerInfo;
+import org.apache.catalina.util.StringManager;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.buf.StringCache;
+import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.MBeanRegistration;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -26,26 +39,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.AccessControlException;
 import java.util.Random;
-
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.apache.catalina.Context;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Server;
-import org.apache.catalina.ServerFactory;
-import org.apache.catalina.Service;
-import org.apache.catalina.deploy.NamingResources;
-import org.apache.catalina.util.LifecycleSupport;
-import org.apache.catalina.util.StringManager;
-import org.apache.catalina.util.ServerInfo;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
-import org.apache.tomcat.util.buf.StringCache;
-import org.apache.tomcat.util.modeler.Registry;
 
 
 

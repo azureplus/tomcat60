@@ -17,19 +17,18 @@
 
 package org.apache.jk.common;
 
-import java.io.IOException;
-
-import javax.management.ObjectName;
-
 import org.apache.jk.apr.AprImpl;
+import org.apache.jk.core.JkChannel;
 import org.apache.jk.core.JkHandler;
 import org.apache.jk.core.Msg;
 import org.apache.jk.core.MsgContext;
-import org.apache.jk.core.JkChannel;
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.C2BConverter;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.ObjectName;
+import java.io.IOException;
 
 
 /**

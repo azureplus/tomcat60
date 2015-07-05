@@ -17,8 +17,8 @@
 
 package org.apache.catalina.ssi;
 
-import java.io.ByteArrayOutputStream;
 import javax.servlet.ServletOutputStream;
+import java.io.ByteArrayOutputStream;
 
 
 /**

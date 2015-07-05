@@ -17,25 +17,19 @@
 
 package org.apache.jasper.compiler;
 
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.Vector;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-
-import javax.el.FunctionMapper;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-
-
 import org.apache.el.ExpressionFactoryImpl;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.el.ExpressionEvaluatorImpl;
 import org.xml.sax.Attributes;
+
+import javax.el.FunctionMapper;
+import javax.servlet.jsp.el.ExpressionEvaluator;
+import java.io.*;
+import java.util.Vector;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 /** 
  * This class has all the utility method(s).

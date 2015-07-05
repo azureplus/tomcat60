@@ -16,20 +16,13 @@
  */
 package org.apache.jasper.compiler;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
 import org.apache.el.ExpressionFactoryImpl;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
 
 import javax.el.ExpressionFactory;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
+import java.util.*;
 
 /**
  * A repository for various info about the translation unit under compilation.

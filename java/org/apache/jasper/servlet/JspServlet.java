@@ -17,19 +17,7 @@
 
 package org.apache.jasper.servlet;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.PeriodicEventListener;
-
 import org.apache.jasper.Constants;
 import org.apache.jasper.EmbeddedServletOptions;
 import org.apache.jasper.Options;
@@ -38,6 +26,16 @@ import org.apache.jasper.compiler.Localizer;
 import org.apache.jasper.security.SecurityUtil;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
 
 /**
  * The JSP engine (a.k.a Jasper).

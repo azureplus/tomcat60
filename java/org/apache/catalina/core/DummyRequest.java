@@ -19,6 +19,20 @@
 package org.apache.catalina.core;
 
 
+import org.apache.catalina.Context;
+import org.apache.catalina.Host;
+import org.apache.catalina.Wrapper;
+import org.apache.catalina.connector.Connector;
+import org.apache.catalina.connector.Response;
+import org.apache.tomcat.util.buf.MessageBytes;
+
+import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,21 +43,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-
-import javax.servlet.FilterChain;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.apache.catalina.Context;
-import org.apache.catalina.Host;
-import org.apache.catalina.Wrapper;
-import org.apache.catalina.connector.Connector;
-import org.apache.catalina.connector.Response;
-import org.apache.tomcat.util.buf.MessageBytes;
 
 
 /**

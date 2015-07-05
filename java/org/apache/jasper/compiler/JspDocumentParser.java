@@ -16,6 +16,23 @@
  */
 package org.apache.jasper.compiler;
 
+import org.apache.jasper.Constants;
+import org.apache.jasper.JasperException;
+import org.apache.jasper.JspCompilationContext;
+import org.apache.tomcat.util.descriptor.DigesterFactory;
+import org.apache.tomcat.util.descriptor.LocalResolver;
+import org.apache.tomcat.util.security.PrivilegedGetTccl;
+import org.apache.tomcat.util.security.PrivilegedSetTccl;
+import org.xml.sax.*;
+import org.xml.sax.ext.DefaultHandler2;
+import org.xml.sax.ext.EntityResolver2;
+import org.xml.sax.helpers.AttributesImpl;
+
+import javax.servlet.jsp.tagext.TagFileInfo;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.CharArrayWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,29 +41,6 @@ import java.security.AccessController;
 import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarFile;
-
-import javax.servlet.jsp.tagext.TagFileInfo;
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagLibraryInfo;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.apache.jasper.Constants;
-import org.apache.jasper.JasperException;
-import org.apache.jasper.JspCompilationContext;
-import org.apache.tomcat.util.descriptor.DigesterFactory;
-import org.apache.tomcat.util.descriptor.LocalResolver;
-import org.apache.tomcat.util.security.PrivilegedGetTccl;
-import org.apache.tomcat.util.security.PrivilegedSetTccl;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.ext.DefaultHandler2;
-import org.xml.sax.ext.EntityResolver2;
-import org.xml.sax.helpers.AttributesImpl;
 
 /**
  * Class implementing a parser for a JSP document, that is, a JSP page in XML

@@ -18,15 +18,14 @@
 
 package org.apache.el.parser;
 
-import java.util.Arrays;
+import org.apache.el.lang.ELSupport;
+import org.apache.el.lang.EvaluationContext;
+import org.apache.el.util.MessageFactory;
 
 import javax.el.ELException;
 import javax.el.MethodInfo;
 import javax.el.PropertyNotWritableException;
-
-import org.apache.el.lang.ELSupport;
-import org.apache.el.lang.EvaluationContext;
-import org.apache.el.util.MessageFactory;
+import java.util.Arrays;
 
 
 /**

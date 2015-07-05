@@ -17,9 +17,9 @@
 
 package org.apache.jk.core;
 
-import java.io.IOException;
-
 import org.apache.coyote.Request;
+
+import java.io.IOException;
 
 /**
  * A Channel represents a connection point to the outside world.

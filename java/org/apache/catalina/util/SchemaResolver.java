@@ -17,12 +17,12 @@
 package org.apache.catalina.util;
 
 
-import java.util.HashMap;
-
 import org.apache.tomcat.util.digester.Digester;
-import org.xml.sax.InputSource;
 import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import java.util.HashMap;
 
 /**
  * This class implements a local SAX's <code>EntityResolver</code>. All

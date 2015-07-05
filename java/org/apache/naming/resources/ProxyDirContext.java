@@ -18,23 +18,17 @@
 
 package org.apache.naming.resources;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Hashtable;
+import org.apache.naming.StringManager;
 
-import javax.naming.Context;
-import javax.naming.Name;
-import javax.naming.NameNotFoundException;
-import javax.naming.NameParser;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
+import javax.naming.*;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
-
-import org.apache.naming.StringManager;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
 
 /**
  * Proxy Directory Context implementation.

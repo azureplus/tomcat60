@@ -17,10 +17,10 @@
 
 package org.apache.el.lang;
 
+import org.apache.el.util.MessageFactory;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
-import org.apache.el.util.MessageFactory;
 
 
 /**

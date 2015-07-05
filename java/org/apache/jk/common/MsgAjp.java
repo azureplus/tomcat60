@@ -17,12 +17,12 @@
 
 package org.apache.jk.common;
 
-import java.io.IOException;
-
 import org.apache.jk.core.Msg;
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.CharChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
+
+import java.io.IOException;
 
 /**
  * A single packet for communication between the web server and the

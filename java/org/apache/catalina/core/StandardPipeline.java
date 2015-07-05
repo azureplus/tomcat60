@@ -19,23 +19,16 @@
 package org.apache.catalina.core;
 
 
-import java.util.ArrayList;
-
-import javax.management.ObjectName;
-
-import org.apache.catalina.Contained;
-import org.apache.catalina.Container;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Pipeline;
-import org.apache.catalina.Valve;
+import org.apache.catalina.*;
 import org.apache.catalina.util.LifecycleSupport;
 import org.apache.catalina.util.StringManager;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.ObjectName;
+import java.util.ArrayList;
 
 
 /**

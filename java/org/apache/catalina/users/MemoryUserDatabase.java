@@ -19,14 +19,6 @@
 package org.apache.catalina.users;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Iterator;
 import org.apache.catalina.Group;
 import org.apache.catalina.Role;
 import org.apache.catalina.User;
@@ -37,6 +29,10 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.digester.Digester;
 import org.apache.tomcat.util.digester.ObjectCreationFactory;
 import org.xml.sax.Attributes;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
 
 
 /**

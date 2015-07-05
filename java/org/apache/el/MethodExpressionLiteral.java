@@ -17,18 +17,17 @@
 
 package org.apache.el;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import org.apache.el.lang.ELSupport;
+import org.apache.el.util.ReflectionUtil;
 
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.MethodExpression;
 import javax.el.MethodInfo;
-
-import org.apache.el.lang.ELSupport;
-import org.apache.el.util.ReflectionUtil;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 
 public class MethodExpressionLiteral extends MethodExpression implements Externalizable {

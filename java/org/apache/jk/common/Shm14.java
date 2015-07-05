@@ -17,14 +17,14 @@
 
 package org.apache.jk.common;
 
+import org.apache.jk.core.Msg;
+import org.apache.jk.core.MsgContext;
+import org.apache.tomcat.util.IntrospectionUtils;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-
-import org.apache.jk.core.Msg;
-import org.apache.jk.core.MsgContext;
-import org.apache.tomcat.util.IntrospectionUtils;
 
 /** Shm implementation using JDK1.4 nio.
  *

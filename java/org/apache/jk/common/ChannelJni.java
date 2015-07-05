@@ -17,14 +17,13 @@
 
 package org.apache.jk.common;
 
-import java.io.IOException;
-
+import org.apache.coyote.Request;
+import org.apache.jk.core.JkChannel;
 import org.apache.jk.core.JkHandler;
 import org.apache.jk.core.Msg;
 import org.apache.jk.core.MsgContext;
-import org.apache.jk.core.JkChannel;
 
-import org.apache.coyote.Request;
+import java.io.IOException;
 /** Pass messages using jni 
  *
  * @author Costin Manolache

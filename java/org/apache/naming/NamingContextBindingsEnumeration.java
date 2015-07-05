@@ -18,13 +18,8 @@
 
 package org.apache.naming;
 
+import javax.naming.*;
 import java.util.Iterator;
-
-import javax.naming.Binding;
-import javax.naming.CompositeName;
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 
 /**
  * Naming enumeration implementation.

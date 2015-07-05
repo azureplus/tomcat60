@@ -16,15 +16,15 @@
  */
 package org.apache.jasper.compiler;
 
+import org.apache.jasper.JasperException;
+import org.apache.jasper.JspCompilationContext;
+import org.xml.sax.SAXException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-
-import org.apache.jasper.JasperException;
-import org.apache.jasper.JspCompilationContext;
-import org.xml.sax.SAXException;
 
 /**
  * Class responsible for dispatching JSP parse and javac compilation errors

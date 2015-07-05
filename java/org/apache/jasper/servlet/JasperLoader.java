@@ -17,14 +17,14 @@
 
 package org.apache.jasper.servlet;
 
+import org.apache.jasper.Constants;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
-
-import org.apache.jasper.Constants;
 
 /**
  * Class loader for loading servlet class files (corresponding to JSP files) 

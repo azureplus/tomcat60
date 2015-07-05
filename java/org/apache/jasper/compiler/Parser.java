@@ -16,21 +16,20 @@
  */
 package org.apache.jasper.compiler;
 
-import java.io.CharArrayWriter;
-import java.io.FileNotFoundException;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.List;
+import org.apache.jasper.JasperException;
+import org.apache.jasper.JspCompilationContext;
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.AttributesImpl;
 
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TagFileInfo;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
-
-import org.apache.jasper.JasperException;
-import org.apache.jasper.JspCompilationContext;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.AttributesImpl;
+import java.io.CharArrayWriter;
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class implements a parser for a JSP page (non-xml view). JSP page

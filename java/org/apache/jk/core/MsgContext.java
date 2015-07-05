@@ -17,22 +17,21 @@
 
 package org.apache.jk.core;
 
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.net.InetAddress;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-
 import org.apache.coyote.ActionCode;
 import org.apache.coyote.ActionHook;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
-
+import org.apache.jk.common.JkInputStream;
+import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.C2BConverter;
 import org.apache.tomcat.util.buf.MessageBytes;
-import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.net.SSLSupport;
-import org.apache.jk.common.JkInputStream;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 
 /**

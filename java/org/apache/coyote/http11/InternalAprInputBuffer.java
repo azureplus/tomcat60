@@ -18,19 +18,19 @@
 
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.io.EOFException;
-import java.net.SocketTimeoutException;
-import java.nio.ByteBuffer;
-
+import org.apache.coyote.InputBuffer;
+import org.apache.coyote.Request;
 import org.apache.tomcat.jni.Socket;
 import org.apache.tomcat.jni.Status;
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.res.StringManager;
-import org.apache.coyote.InputBuffer;
-import org.apache.coyote.Request;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
 
 /**
  * Implementation of InputBuffer which provides HTTP request header parsing as

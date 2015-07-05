@@ -17,20 +17,13 @@
 
 package org.apache.jasper.compiler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import org.apache.jasper.JasperException;
+import org.apache.jasper.JspCompilationContext;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.apache.jasper.JasperException;
-import org.apache.jasper.JspCompilationContext;
 
 /**
  * Contains static utilities for generating SMAP data based on the

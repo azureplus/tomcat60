@@ -17,13 +17,13 @@
 
 package org.apache.jk.common;
 
-import java.io.IOException;
-
 import org.apache.jk.core.JkHandler;
 import org.apache.jk.core.Msg;
 import org.apache.jk.core.MsgContext;
 import org.apache.jk.core.WorkerEnv;
 import org.apache.tomcat.util.buf.MessageBytes;
+
+import java.io.IOException;
 
 
 /** A dummy worker, will just send back a dummy response.

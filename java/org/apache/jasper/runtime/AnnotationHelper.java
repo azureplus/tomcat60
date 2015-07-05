@@ -17,11 +17,10 @@
 
 package org.apache.jasper.runtime;
 
-import java.lang.reflect.InvocationTargetException;
+import org.apache.AnnotationProcessor;
 
 import javax.naming.NamingException;
-
-import org.apache.AnnotationProcessor;
+import java.lang.reflect.InvocationTargetException;
 
 
 /**

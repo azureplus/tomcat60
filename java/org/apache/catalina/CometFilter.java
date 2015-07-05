@@ -18,10 +18,9 @@
 
 package org.apache.catalina;
 
-import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
+import java.io.IOException;
 
 /**
  * A Comet filter, similar to regular filters, performs filtering tasks on either 

@@ -17,13 +17,13 @@
 
 package org.apache.jk.config;
 
+import org.apache.catalina.Context;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
-
-import org.apache.catalina.Context;
 
 
 /**

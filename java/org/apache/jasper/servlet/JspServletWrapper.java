@@ -17,20 +17,6 @@
 
 package org.apache.jasper.servlet;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.SingleThreadModel;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.tagext.TagInfo;
-
 import org.apache.AnnotationProcessor;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
@@ -42,6 +28,14 @@ import org.apache.jasper.compiler.Localizer;
 import org.apache.jasper.runtime.JspSourceDependent;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.tagext.TagInfo;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * The JSP engine (a.k.a Jasper).

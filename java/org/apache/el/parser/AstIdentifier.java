@@ -18,17 +18,11 @@
 
 package org.apache.el.parser;
 
-import javax.el.ELException;
-import javax.el.MethodExpression;
-import javax.el.MethodInfo;
-import javax.el.MethodNotFoundException;
-import javax.el.PropertyNotFoundException;
-import javax.el.ValueExpression;
-import javax.el.VariableMapper;
-
 import org.apache.el.lang.EvaluationContext;
 import org.apache.el.util.MessageFactory;
 import org.apache.el.util.Validation;
+
+import javax.el.*;
 
 
 /**

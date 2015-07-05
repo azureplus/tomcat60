@@ -19,19 +19,18 @@
 package org.apache.catalina.core;
 
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.util.Locale;
+import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
+import org.apache.catalina.connector.Request;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.Context;
-import org.apache.catalina.connector.Connector;
-import org.apache.catalina.connector.Request;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.Locale;
 
 
 /**

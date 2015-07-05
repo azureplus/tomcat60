@@ -17,24 +17,13 @@
 
 package org.apache.juli;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilePermission;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLClassLoader;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.Permission;
 import java.security.PrivilegedAction;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Handler;
 import java.util.logging.Level;

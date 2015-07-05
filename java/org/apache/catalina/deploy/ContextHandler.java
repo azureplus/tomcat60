@@ -20,8 +20,8 @@ package org.apache.catalina.deploy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Representation of a handler reference for a web service, as

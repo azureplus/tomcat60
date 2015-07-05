@@ -17,9 +17,9 @@
 
 package org.apache.coyote.ajp;
 
-import java.util.Hashtable;
-
 import org.apache.tomcat.util.buf.ByteChunk;
+
+import java.util.Hashtable;
 
 
 /**

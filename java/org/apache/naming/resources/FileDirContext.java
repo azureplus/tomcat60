@@ -18,15 +18,10 @@
 
 package org.apache.naming.resources;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Hashtable;
+import org.apache.catalina.util.RequestUtil;
+import org.apache.naming.NamingContextBindingsEnumeration;
+import org.apache.naming.NamingContextEnumeration;
+import org.apache.naming.NamingEntry;
 
 import javax.naming.NameAlreadyBoundException;
 import javax.naming.NamingEnumeration;
@@ -36,11 +31,11 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
-
-import org.apache.catalina.util.RequestUtil;
-import org.apache.naming.NamingContextBindingsEnumeration;
-import org.apache.naming.NamingContextEnumeration;
-import org.apache.naming.NamingEntry;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Hashtable;
 
 /**
  * Filesystem Directory Context implementation helper class.

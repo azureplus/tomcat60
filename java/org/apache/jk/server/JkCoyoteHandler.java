@@ -17,22 +17,16 @@
 
 package org.apache.jk.server;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.apache.coyote.Adapter;
-import org.apache.coyote.ProtocolHandler;
-import org.apache.coyote.Request;
-import org.apache.coyote.Response;
-import org.apache.coyote.RequestInfo;
-import org.apache.coyote.Constants;
+import org.apache.coyote.*;
 import org.apache.jk.core.JkHandler;
 import org.apache.jk.core.Msg;
 import org.apache.jk.core.MsgContext;
 import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.io.IOException;
+import java.util.Iterator;
 
 /** Plugs Jk into Coyote. Must be named "type=JkHandler,name=container"
  *

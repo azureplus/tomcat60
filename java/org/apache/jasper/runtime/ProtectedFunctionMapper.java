@@ -17,10 +17,9 @@
 
 package org.apache.jasper.runtime;
 
+import javax.servlet.jsp.el.FunctionMapper;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-
-import javax.servlet.jsp.el.FunctionMapper;
 
 /**
  * Maps EL functions to their Java method counterparts. Keeps the actual Method

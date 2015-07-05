@@ -25,18 +25,14 @@
 
 package org.apache.jasper.xmlparser;
 
-import java.io.EOFException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.Locale;
-import java.util.jar.JarFile;
-
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.compiler.ErrorDispatcher;
 import org.apache.jasper.compiler.JspUtil;
+
+import java.io.*;
+import java.util.Locale;
+import java.util.jar.JarFile;
 
 public class XMLEncodingDetector {
     

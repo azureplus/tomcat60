@@ -19,42 +19,27 @@
 package org.apache.catalina.core;
 
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.naming.Binding;
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeEvent;
-import javax.servlet.ServletContextAttributeListener;
-
 import org.apache.catalina.Context;
+import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
 import org.apache.catalina.Wrapper;
-import org.apache.catalina.util.Enumerator;
-import org.apache.catalina.util.RequestUtil;
-import org.apache.catalina.util.ResourceSet;
-import org.apache.catalina.util.ServerInfo;
-import org.apache.catalina.util.StringManager;
+import org.apache.catalina.util.*;
 import org.apache.naming.resources.DirContextURLStreamHandler;
 import org.apache.naming.resources.Resource;
 import org.apache.tomcat.util.buf.CharChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.mapper.MappingData;
-import org.apache.catalina.Globals;
+
+import javax.naming.Binding;
+import javax.naming.NamingException;
+import javax.naming.directory.DirContext;
+import javax.servlet.*;
+import java.io.File;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**

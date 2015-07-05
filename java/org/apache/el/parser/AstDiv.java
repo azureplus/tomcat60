@@ -18,10 +18,10 @@
 
 package org.apache.el.parser;
 
-import javax.el.ELException;
-
 import org.apache.el.lang.ELArithmetic;
 import org.apache.el.lang.EvaluationContext;
+
+import javax.el.ELException;
 
 
 /**

@@ -19,6 +19,25 @@
 package org.apache.catalina.realm;
 
 
+import org.apache.catalina.*;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
+import org.apache.catalina.core.ContainerBase;
+import org.apache.catalina.deploy.SecurityCollection;
+import org.apache.catalina.deploy.SecurityConstraint;
+import org.apache.catalina.util.HexUtils;
+import org.apache.catalina.util.LifecycleSupport;
+import org.apache.catalina.util.MD5Encoder;
+import org.apache.catalina.util.StringManager;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.Attribute;
+import javax.management.MBeanRegistration;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -28,32 +47,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-
-import javax.management.Attribute;
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
-import org.apache.catalina.Globals;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Realm;
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
-import org.apache.catalina.core.ContainerBase;
-import org.apache.catalina.deploy.SecurityConstraint;
-import org.apache.catalina.deploy.SecurityCollection;
-import org.apache.catalina.util.HexUtils;
-import org.apache.catalina.util.LifecycleSupport;
-import org.apache.catalina.util.MD5Encoder;
-import org.apache.catalina.util.StringManager;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
-import org.apache.tomcat.util.modeler.Registry;
 
 /**
  * Simple implementation of <b>Realm</b> that reads an XML file to configure

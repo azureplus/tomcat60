@@ -18,12 +18,11 @@
 
 package org.apache.el.parser;
 
-import java.util.Collection;
-import java.util.Map;
+import org.apache.el.lang.EvaluationContext;
 
 import javax.el.ELException;
-
-import org.apache.el.lang.EvaluationContext;
+import java.util.Collection;
+import java.util.Map;
 
 
 /**

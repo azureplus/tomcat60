@@ -17,16 +17,11 @@
 
 package org.apache.jk.core;
 
+import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.*;
 import java.io.IOException;
 import java.util.Properties;
-
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import javax.management.ObjectName;
-
-import org.apache.tomcat.util.modeler.Registry;
 
 /**
  *

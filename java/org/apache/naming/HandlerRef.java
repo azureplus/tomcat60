@@ -16,12 +16,11 @@
  */ 
 package org.apache.naming;
 
-import java.util.Enumeration;
-
 import javax.naming.Context;
 import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
+import java.util.Enumeration;
 
 /**
  * Represents a reference handler for a web service.

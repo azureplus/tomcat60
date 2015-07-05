@@ -17,27 +17,7 @@
 
 package org.apache.coyote.ajp;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.coyote.ActionCode;
-import org.apache.coyote.ActionHook;
-import org.apache.coyote.Adapter;
-import org.apache.coyote.InputBuffer;
-import org.apache.coyote.OutputBuffer;
-import org.apache.coyote.Request;
-import org.apache.coyote.RequestInfo;
-import org.apache.coyote.Response;
+import org.apache.coyote.*;
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.HexUtils;
 import org.apache.tomcat.util.buf.MessageBytes;
@@ -45,6 +25,14 @@ import org.apache.tomcat.util.http.HttpMessages;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.JIoEndpoint;
 import org.apache.tomcat.util.res.StringManager;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 
 /**

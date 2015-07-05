@@ -19,6 +19,8 @@
 package org.apache.catalina.ant;
 
 
+import org.apache.tools.ant.BuildException;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,8 +28,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-
-import org.apache.tools.ant.BuildException;
 
 
 /**

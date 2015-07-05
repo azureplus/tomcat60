@@ -18,9 +18,8 @@
 
 package org.apache.catalina;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
+import java.io.IOException;
 
 /**
  * A CometFilterChain is an object provided by the servlet container to the developer

@@ -16,9 +16,8 @@
  */
 package org.apache.jasper.el;
 
-import java.lang.reflect.Method;
-
 import javax.servlet.jsp.el.FunctionMapper;
+import java.lang.reflect.Method;
 
 public final class FunctionMapperImpl extends javax.el.FunctionMapper {
 	

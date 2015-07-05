@@ -19,15 +19,6 @@
 package org.apache.catalina.core;
 
 
-import java.io.IOException;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.catalina.CometEvent;
 import org.apache.catalina.CometProcessor;
 import org.apache.catalina.Context;
@@ -39,6 +30,14 @@ import org.apache.catalina.util.StringManager;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.log.SystemLogHandler;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Valve that implements the default basic behavior for the

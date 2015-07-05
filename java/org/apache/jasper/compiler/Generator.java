@@ -17,22 +17,12 @@
 
 package org.apache.jasper.compiler;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import org.apache.jasper.Constants;
+import org.apache.jasper.JasperException;
+import org.apache.jasper.JspCompilationContext;
+import org.apache.jasper.compiler.Node.NamedAttribute;
+import org.apache.jasper.runtime.JspRuntimeLibrary;
+import org.xml.sax.Attributes;
 
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
@@ -40,13 +30,13 @@ import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
-
-import org.apache.jasper.Constants;
-import org.apache.jasper.JasperException;
-import org.apache.jasper.JspCompilationContext;
-import org.apache.jasper.compiler.Node.NamedAttribute;
-import org.apache.jasper.runtime.JspRuntimeLibrary;
-import org.xml.sax.Attributes;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 /**
  * Generate Java source from Nodes

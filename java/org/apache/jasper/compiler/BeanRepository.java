@@ -17,9 +17,9 @@
 package org.apache.jasper.compiler;
 
 
-import java.util.HashMap;
-
 import org.apache.jasper.JasperException;
+
+import java.util.HashMap;
 
 /**
  * Repository of {page, request, session, application}-scoped beans 

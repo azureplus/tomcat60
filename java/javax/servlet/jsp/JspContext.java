@@ -16,11 +16,10 @@
 */ 
 package javax.servlet.jsp;
 
-import java.util.Enumeration;
-
 import javax.el.ELContext;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.VariableResolver;
+import java.util.Enumeration;
 
 /**
  * <p>

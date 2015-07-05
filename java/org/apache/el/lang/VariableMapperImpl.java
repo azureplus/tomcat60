@@ -17,15 +17,14 @@
 
 package org.apache.el.lang;
 
+import javax.el.ValueExpression;
+import javax.el.VariableMapper;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.el.ValueExpression;
-import javax.el.VariableMapper;
 
 public class VariableMapperImpl extends VariableMapper implements Externalizable {
 

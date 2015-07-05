@@ -19,6 +19,13 @@
 package org.apache.catalina.core;
 
 
+import org.apache.catalina.Globals;
+import org.apache.catalina.security.SecurityUtil;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,14 +37,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Set;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
-import org.apache.catalina.Globals;
-import org.apache.catalina.security.SecurityUtil;
 
 
 /**

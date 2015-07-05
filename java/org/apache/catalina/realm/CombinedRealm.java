@@ -17,15 +17,6 @@
 
 package org.apache.catalina.realm;
 
-import java.security.Principal;
-
-import java.security.cert.X509Certificate;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.management.ObjectName;
-
 import org.apache.catalina.Container;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
@@ -33,6 +24,13 @@ import org.apache.catalina.Realm;
 import org.apache.catalina.util.StringManager;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+
+import javax.management.ObjectName;
+import java.security.Principal;
+import java.security.cert.X509Certificate;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Realm implementation that contains one or more realms. Authentication is

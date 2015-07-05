@@ -19,21 +19,20 @@
 package org.apache.catalina.realm;
 
 
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.ServerFactory;
+import org.apache.catalina.core.StandardServer;
+import org.apache.catalina.util.StringManager;
+import org.apache.naming.ContextBindings;
+
+import javax.naming.Context;
+import javax.sql.DataSource;
 import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
-import javax.naming.Context;
-import javax.sql.DataSource;
-
-import org.apache.naming.ContextBindings;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.ServerFactory;
-import org.apache.catalina.core.StandardServer;
-import org.apache.catalina.util.StringManager;
 
 /**
 *

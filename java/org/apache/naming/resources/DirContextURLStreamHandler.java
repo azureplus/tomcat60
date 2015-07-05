@@ -17,13 +17,12 @@
 
 package org.apache.naming.resources;
 
+import javax.naming.directory.DirContext;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.Hashtable;
-
-import javax.naming.directory.DirContext;
 
 /**
  * Stream handler to a JNDI directory context.

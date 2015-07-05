@@ -19,15 +19,15 @@
 package org.apache.catalina.core;
 
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.catalina.CometFilter;
 import org.apache.catalina.Globals;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.deploy.FilterMap;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Factory for the creation and caching of Filters and creationg 

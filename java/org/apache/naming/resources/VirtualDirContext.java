@@ -16,17 +16,12 @@
  */
 package org.apache.naming.resources;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import org.apache.naming.NamingEntry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
-
-import org.apache.naming.NamingEntry;
+import java.io.File;
+import java.util.*;
 
 /**
  * Extended FileDirContext implementation that will allow loading of tld files

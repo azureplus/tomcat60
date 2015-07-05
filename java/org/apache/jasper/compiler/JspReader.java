@@ -17,20 +17,20 @@
 
 package org.apache.jasper.compiler;
 
-import java.io.CharArrayWriter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Vector;
-import java.util.jar.JarFile;
-import java.net.URL;
-import java.net.MalformedURLException;
-
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+
+import java.io.CharArrayWriter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Vector;
+import java.util.jar.JarFile;
 
 /**
  * JspReader is an input buffer for the JSP parser. It should allow

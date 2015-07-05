@@ -17,23 +17,19 @@
 
 package org.apache.jk.common;
 
-import java.net.URLEncoder;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import javax.management.ObjectName;
-
-import org.apache.jk.core.JkHandler;
-import org.apache.jk.core.Msg;
-import org.apache.jk.core.MsgContext;
-import org.apache.jk.core.JkChannel;
-import org.apache.jk.core.WorkerEnv;
 import org.apache.coyote.Request;
 import org.apache.coyote.RequestGroupInfo;
 import org.apache.coyote.RequestInfo;
+import org.apache.jk.core.*;
 import org.apache.tomcat.util.modeler.Registry;
 import org.apache.tomcat.util.threads.ThreadPool;
 import org.apache.tomcat.util.threads.ThreadPoolRunnable;
+
+import javax.management.ObjectName;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
 
 
 /** Pass messages using unix domain sockets.

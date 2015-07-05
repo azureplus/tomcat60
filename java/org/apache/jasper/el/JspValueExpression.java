@@ -16,16 +16,11 @@
  */
 package org.apache.jasper.el;
 
+import javax.el.*;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-
-import javax.el.ELContext;
-import javax.el.ELException;
-import javax.el.PropertyNotFoundException;
-import javax.el.PropertyNotWritableException;
-import javax.el.ValueExpression;
 
 /**
  * Wrapper for providing context to ValueExpressions

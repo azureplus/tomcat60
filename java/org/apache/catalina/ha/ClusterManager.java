@@ -19,8 +19,9 @@ package org.apache.catalina.ha;
 
 
 import org.apache.catalina.Manager;
-import java.io.IOException;
 import org.apache.catalina.tribes.io.ReplicationStream;
+
+import java.io.IOException;
 
 
 /**

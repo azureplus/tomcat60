@@ -17,13 +17,13 @@
 
 package org.apache.jk.config;
 
+import org.w3c.dom.Node;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Vector;
-
-import org.w3c.dom.Node;
 
 
 /* Naming conventions:

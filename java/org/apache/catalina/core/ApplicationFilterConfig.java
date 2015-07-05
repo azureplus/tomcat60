@@ -19,23 +19,6 @@
 package org.apache.catalina.core;
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.management.ObjectName;
-import javax.naming.NamingException;
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
 import org.apache.AnnotationProcessor;
 import org.apache.catalina.Context;
 import org.apache.catalina.Globals;
@@ -47,6 +30,18 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.log.SystemLogHandler;
 import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.ObjectName;
+import javax.naming.NamingException;
+import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 
 /**

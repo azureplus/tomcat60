@@ -17,8 +17,8 @@
 
 package org.apache.jk.core;
 
-import java.util.Hashtable;
 import javax.management.ObjectName;
+import java.util.Hashtable;
 
 /**
  * The controller object. It manages all other jk objects, acting as the root of

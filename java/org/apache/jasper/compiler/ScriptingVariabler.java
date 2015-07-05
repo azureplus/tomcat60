@@ -17,9 +17,13 @@
 
 package org.apache.jasper.compiler;
 
-import java.util.*;
-import javax.servlet.jsp.tagext.*;
 import org.apache.jasper.JasperException;
+
+import javax.servlet.jsp.tagext.TagVariableInfo;
+import javax.servlet.jsp.tagext.VariableInfo;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * Class responsible for determining the scripting variables that every

@@ -17,44 +17,20 @@
 
 package org.apache.catalina.realm;
 
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.util.Base64;
+import org.apache.tomcat.util.buf.ByteChunk;
+import org.apache.tomcat.util.buf.CharChunk;
+
+import javax.naming.*;
+import javax.naming.directory.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
-
-import javax.naming.Context;
-import javax.naming.CommunicationException;
-import javax.naming.CompositeName;
-import javax.naming.InvalidNameException;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.NameParser;
-import javax.naming.Name;
-import javax.naming.AuthenticationException;
-import javax.naming.PartialResultException;
-import javax.naming.ServiceUnavailableException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.util.Base64;
-import org.apache.tomcat.util.buf.ByteChunk;
-import org.apache.tomcat.util.buf.CharChunk;
 
 /**
  * <p>Implementation of <strong>Realm</strong> that works with a directory

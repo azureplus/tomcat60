@@ -17,15 +17,15 @@
 
 package org.apache.jk.common;
 
-import java.io.IOException;
-import java.util.Vector;
-
 import org.apache.jk.apr.AprImpl;
 import org.apache.jk.core.Msg;
 import org.apache.jk.core.MsgContext;
 import org.apache.jk.core.WorkerEnv;
 import org.apache.tomcat.util.IntrospectionUtils;
 import org.apache.tomcat.util.buf.C2BConverter;
+
+import java.io.IOException;
+import java.util.Vector;
 
 /* The code is a bit confusing at this moment - the class is used as
    a Bean, or ant Task, or CLI - i.e. you set properties and call execute.

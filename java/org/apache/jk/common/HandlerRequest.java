@@ -17,22 +17,11 @@
 
 package org.apache.jk.common;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.CharConversionException;
-import java.net.InetAddress;
-import java.util.Properties;
-
+import org.apache.coyote.Constants;
 import org.apache.coyote.Request;
 import org.apache.coyote.RequestInfo;
 import org.apache.coyote.Response;
-import org.apache.coyote.Constants;
-import org.apache.jk.core.JkHandler;
-import org.apache.jk.core.Msg;
-import org.apache.jk.core.MsgContext;
-import org.apache.jk.core.WorkerEnv;
-import org.apache.jk.core.JkChannel;
+import org.apache.jk.core.*;
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.CharChunk;
 import org.apache.tomcat.util.buf.HexUtils;
@@ -40,6 +29,13 @@ import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.SSLSupport;
 import org.apache.tomcat.util.threads.ThreadWithAttributes;
+
+import java.io.CharConversionException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Properties;
 
 /**
  * Handle messages related with basic request information.

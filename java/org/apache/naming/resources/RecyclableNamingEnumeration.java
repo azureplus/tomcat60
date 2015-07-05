@@ -18,11 +18,10 @@
 
 package org.apache.naming.resources;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Naming enumeration implementation.

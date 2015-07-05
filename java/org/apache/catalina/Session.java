@@ -19,10 +19,9 @@
 package org.apache.catalina;
 
 
+import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.Iterator;
-
-import javax.servlet.http.HttpSession;
 
 
 /**

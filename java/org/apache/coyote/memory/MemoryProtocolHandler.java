@@ -17,16 +17,11 @@
 
 package org.apache.coyote.memory;
 
-import java.io.IOException;
-import java.util.Iterator;
+import org.apache.coyote.*;
 import org.apache.tomcat.util.buf.ByteChunk;
 
-import org.apache.coyote.Adapter;
-import org.apache.coyote.InputBuffer;
-import org.apache.coyote.OutputBuffer;
-import org.apache.coyote.ProtocolHandler;
-import org.apache.coyote.Request;
-import org.apache.coyote.Response;
+import java.io.IOException;
+import java.util.Iterator;
 
 
 /**

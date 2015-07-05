@@ -17,14 +17,15 @@
 
 package org.apache.jasper.compiler;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.*;
-import javax.servlet.jsp.tagext.FunctionInfo;
-
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
 import org.apache.tomcat.util.security.PrivilegedGetTccl;
+
+import javax.servlet.jsp.tagext.FunctionInfo;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This class generates functions mappers for the EL expressions in the page.

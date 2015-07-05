@@ -17,22 +17,11 @@
 
 package org.apache.jasper.el;
 
-import java.util.Iterator;
-
-import javax.el.ArrayELResolver;
-import javax.el.BeanELResolver;
-import javax.el.CompositeELResolver;
-import javax.el.ELContext;
-import javax.el.ELException;
-import javax.el.ELResolver;
-import javax.el.ListELResolver;
-import javax.el.MapELResolver;
-import javax.el.PropertyNotFoundException;
-import javax.el.PropertyNotWritableException;
-import javax.el.ResourceBundleELResolver;
-import javax.servlet.jsp.el.VariableResolver;
-
 import org.apache.jasper.Constants;
+
+import javax.el.*;
+import javax.servlet.jsp.el.VariableResolver;
+import java.util.Iterator;
 
 public final class ELResolverImpl extends ELResolver {
 	/** @deprecated - Use getDefaultResolver(). Needs to be made private */

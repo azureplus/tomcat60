@@ -18,10 +18,9 @@
 
 package org.apache.catalina;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import java.io.IOException;
 
 /**
  * This interface should be implemented by servlets which would like to handle

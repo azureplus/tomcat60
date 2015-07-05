@@ -17,18 +17,19 @@
 
 package org.apache.jasper;
 
-import java.io.File;
-import java.util.*;
+import org.apache.jasper.compiler.JspConfig;
+import org.apache.jasper.compiler.Localizer;
+import org.apache.jasper.compiler.TagPluginManager;
+import org.apache.jasper.compiler.TldLocationsCache;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-
-import org.apache.jasper.compiler.TldLocationsCache;
-import org.apache.jasper.compiler.JspConfig;
-import org.apache.jasper.compiler.TagPluginManager;
-import org.apache.jasper.compiler.Localizer;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import java.io.File;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * A class to hold all init parameters specific to the JSP engine.

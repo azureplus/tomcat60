@@ -17,13 +17,14 @@
  
 package org.apache.jk.apr;
 
+import org.apache.jk.core.JkChannel;
+import org.apache.jk.core.JkHandler;
+import org.apache.jk.core.MsgContext;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Hashtable;
-import org.apache.jk.core.JkHandler;
-import org.apache.jk.core.MsgContext;
-import org.apache.jk.core.JkChannel;
 
 /** Implements the interface with the APR library. This is for internal-use
  *  only. The goal is to use 'natural' mappings for user code - for example

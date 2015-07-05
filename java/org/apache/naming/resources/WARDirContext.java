@@ -18,31 +18,22 @@
 
 package org.apache.naming.resources;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
+import org.apache.naming.NamingContextBindingsEnumeration;
+import org.apache.naming.NamingContextEnumeration;
+import org.apache.naming.NamingEntry;
 
-import javax.naming.CompositeName;
-import javax.naming.Name;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.OperationNotSupportedException;
+import javax.naming.*;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
-
-import org.apache.naming.NamingContextBindingsEnumeration;
-import org.apache.naming.NamingContextEnumeration;
-import org.apache.naming.NamingEntry;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 /**
  * WAR Directory Context implementation.

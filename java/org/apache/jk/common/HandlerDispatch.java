@@ -17,11 +17,11 @@
 
 package org.apache.jk.common;
 
-import java.io.IOException;
-
 import org.apache.jk.core.JkHandler;
 import org.apache.jk.core.Msg;
 import org.apache.jk.core.MsgContext;
+
+import java.io.IOException;
 
 
 

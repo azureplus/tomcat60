@@ -17,17 +17,13 @@
 package org.apache.catalina.ssi;
 
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TimeZone;
 import org.apache.catalina.util.DateTool;
 import org.apache.catalina.util.Strftime;
 import org.apache.catalina.util.URLEncoder;
 import org.apache.tomcat.util.http.HttpMessages;
+
+import java.io.IOException;
+import java.util.*;
 /**
  * Allows the different SSICommand implementations to share data/talk to each
  * other

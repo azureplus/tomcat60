@@ -16,15 +16,9 @@
  */
 package org.apache.jasper.el;
 
-import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.ELParseException;
-import javax.servlet.jsp.el.Expression;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.FunctionMapper;
-import javax.servlet.jsp.el.VariableResolver;
+import javax.servlet.jsp.el.*;
 
 
 public final class ExpressionEvaluatorImpl extends ExpressionEvaluator {

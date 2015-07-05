@@ -19,15 +19,10 @@
 package org.apache.catalina.realm;
 
 
-import java.io.IOException;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.TextInputCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-
 import org.apache.catalina.util.StringManager;
+
+import javax.security.auth.callback.*;
+import java.io.IOException;
 
 /**
  * <p>Implementation of the JAAS <code>CallbackHandler</code> interface,

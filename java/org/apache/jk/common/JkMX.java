@@ -20,10 +20,10 @@ package org.apache.jk.common;
 
 import org.apache.jk.core.JkHandler;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import javax.management.Attribute;
+import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import java.io.IOException;
 
 /**

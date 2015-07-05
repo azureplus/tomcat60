@@ -17,48 +17,24 @@
 
 package org.apache.jk.common;
 
-import java.util.Set;
-import java.util.Iterator;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Selector;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.ClosedSelectorException;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.CancelledKeyException;
-import java.nio.channels.ClosedChannelException;
-import java.net.URLEncoder;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-
-import javax.management.ListenerNotFoundException;
-import javax.management.MBeanNotificationInfo;
-import javax.management.Notification;
-import javax.management.NotificationBroadcaster;
-import javax.management.NotificationBroadcasterSupport;
-import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
-import javax.management.ObjectName;
-
-import org.apache.tomcat.util.modeler.Registry;
-import org.apache.jk.core.JkHandler;
-import org.apache.jk.core.Msg;
-import org.apache.jk.core.MsgContext;
-import org.apache.jk.core.JkChannel;
-import org.apache.jk.core.WorkerEnv;
+import org.apache.coyote.ActionCode;
 import org.apache.coyote.Request;
 import org.apache.coyote.RequestGroupInfo;
 import org.apache.coyote.RequestInfo;
-import org.apache.coyote.ActionCode;
+import org.apache.jk.core.*;
+import org.apache.tomcat.util.modeler.Registry;
 import org.apache.tomcat.util.threads.ThreadPool;
 import org.apache.tomcat.util.threads.ThreadPoolRunnable;
+
+import javax.management.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
+import java.util.Iterator;
+import java.util.Set;
 
 /** 
  * Accept ( and send ) TCP messages.

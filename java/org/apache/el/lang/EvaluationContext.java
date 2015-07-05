@@ -17,12 +17,11 @@
 
 package org.apache.el.lang;
 
-import java.util.Locale;
-
 import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.el.FunctionMapper;
 import javax.el.VariableMapper;
+import java.util.Locale;
 
 public final class EvaluationContext extends ELContext {
 

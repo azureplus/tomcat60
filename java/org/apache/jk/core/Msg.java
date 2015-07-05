@@ -17,10 +17,10 @@
 
 package org.apache.jk.core;
 
-import java.io.IOException;
-
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
+
+import java.io.IOException;
 
 
 /**

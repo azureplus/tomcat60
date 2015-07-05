@@ -19,28 +19,17 @@
 package org.apache.catalina.core;
 
 
-import java.io.IOException;
-import java.security.Principal;
-import java.security.PrivilegedActionException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.CometEvent;
-import org.apache.catalina.CometFilter;
-import org.apache.catalina.CometFilterChain;
-import org.apache.catalina.CometProcessor;
-import org.apache.catalina.Globals;
-import org.apache.catalina.InstanceEvent;
+import org.apache.catalina.*;
 import org.apache.catalina.security.SecurityUtil;
 import org.apache.catalina.util.InstanceSupport;
 import org.apache.catalina.util.StringManager;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.security.Principal;
+import java.security.PrivilegedActionException;
 
 /**
  * Implementation of <code>javax.servlet.FilterChain</code> used to manage

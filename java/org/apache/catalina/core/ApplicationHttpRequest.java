@@ -19,26 +19,20 @@
 package org.apache.catalina.core;
 
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import org.apache.catalina.Context;
+import org.apache.catalina.Globals;
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
+import org.apache.catalina.util.Enumerator;
+import org.apache.catalina.util.RequestUtil;
+import org.apache.catalina.util.StringManager;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
-
-import org.apache.catalina.Context;
-import org.apache.catalina.Globals;
-import org.apache.catalina.Session;
-import org.apache.catalina.Manager;
-import org.apache.catalina.util.Enumerator;
-import org.apache.catalina.util.RequestUtil;
-import org.apache.catalina.util.StringManager;
+import java.io.IOException;
+import java.util.*;
 
 
 /**

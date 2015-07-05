@@ -16,17 +16,12 @@
  */
 package org.apache.jasper.el;
 
+import org.apache.jasper.Constants;
+
+import javax.el.*;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.el.ELContext;
-import javax.el.ELResolver;
-import javax.el.FunctionMapper;
-import javax.el.ValueExpression;
-import javax.el.VariableMapper;
-
-import org.apache.jasper.Constants;
 
 /**
  * Implementation of ELContext

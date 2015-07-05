@@ -18,35 +18,22 @@
 
 package org.apache.catalina.core;
 
+import org.apache.catalina.Context;
+import org.apache.catalina.Globals;
+import org.apache.catalina.InstanceEvent;
+import org.apache.catalina.Wrapper;
+import org.apache.catalina.connector.*;
+import org.apache.catalina.util.InstanceSupport;
+import org.apache.catalina.util.StringManager;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestWrapper;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletResponseWrapper;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.Context;
-import org.apache.catalina.Globals;
-import org.apache.catalina.InstanceEvent;
-import org.apache.catalina.Wrapper;
-import org.apache.catalina.connector.ClientAbortException;
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.RequestFacade;
-import org.apache.catalina.connector.Response;
-import org.apache.catalina.connector.ResponseFacade;
-import org.apache.catalina.util.InstanceSupport;
-import org.apache.catalina.util.StringManager;
 
 /**
  * Standard implementation of <code>RequestDispatcher</code> that allows a

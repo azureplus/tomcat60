@@ -19,27 +19,19 @@
 package org.apache.catalina.core;
 
 
+import org.apache.catalina.*;
+import org.apache.catalina.loader.WebappClassLoader;
+import org.apache.catalina.startup.HostConfig;
+import org.apache.catalina.valves.ValveBase;
+import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
-import org.apache.catalina.Host;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleEvent;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Valve;
-import org.apache.catalina.loader.WebappClassLoader;
-import org.apache.catalina.startup.HostConfig;
-import org.apache.catalina.valves.ValveBase;
-import org.apache.tomcat.util.modeler.Registry;
 
 
 /**

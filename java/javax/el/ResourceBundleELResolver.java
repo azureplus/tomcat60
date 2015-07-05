@@ -18,12 +18,7 @@
 package javax.el;
 
 import java.beans.FeatureDescriptor;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class ResourceBundleELResolver extends ELResolver {
 

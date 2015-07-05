@@ -16,12 +16,11 @@
  */
 package org.apache.jasper.el;
 
-import java.util.Locale;
-
 import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.el.FunctionMapper;
 import javax.el.VariableMapper;
+import java.util.Locale;
 
 /**
  * Simple ELContextWrapper for runtime evaluation of EL w/ dynamic FunctionMappers

@@ -17,6 +17,17 @@
 
 package org.apache.coyote.ajp;
 
+import org.apache.coyote.*;
+import org.apache.tomcat.util.modeler.Registry;
+import org.apache.tomcat.util.net.AbstractEndpoint;
+import org.apache.tomcat.util.net.AprEndpoint;
+import org.apache.tomcat.util.net.AprEndpoint.Handler;
+import org.apache.tomcat.util.net.SocketStatus;
+import org.apache.tomcat.util.res.StringManager;
+
+import javax.management.MBeanRegistration;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.util.Hashtable;
@@ -25,23 +36,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.apache.coyote.AbstractProtocol;
-import org.apache.coyote.ActionCode;
-import org.apache.coyote.ActionHook;
-import org.apache.coyote.Adapter;
-import org.apache.coyote.RequestGroupInfo;
-import org.apache.coyote.RequestInfo;
-import org.apache.tomcat.util.modeler.Registry;
-import org.apache.tomcat.util.net.AbstractEndpoint;
-import org.apache.tomcat.util.net.AprEndpoint;
-import org.apache.tomcat.util.net.SocketStatus;
-import org.apache.tomcat.util.net.AprEndpoint.Handler;
-import org.apache.tomcat.util.res.StringManager;
 
 
 /**

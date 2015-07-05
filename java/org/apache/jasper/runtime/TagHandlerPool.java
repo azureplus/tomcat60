@@ -17,14 +17,14 @@
 
 package org.apache.jasper.runtime;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
-
 import org.apache.AnnotationProcessor;
 import org.apache.jasper.Constants;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.Tag;
 
 /**
  * Pool of tag handlers that can be reused.

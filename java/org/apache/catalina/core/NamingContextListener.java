@@ -19,15 +19,13 @@
 package org.apache.catalina.core;
 
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.StringTokenizer;
+import org.apache.catalina.*;
+import org.apache.catalina.deploy.*;
+import org.apache.catalina.util.StringManager;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.naming.*;
+import org.apache.tomcat.util.modeler.Registry;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -35,42 +33,11 @@ import javax.naming.NameAlreadyBoundException;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.ContainerEvent;
-import org.apache.catalina.ContainerListener;
-import org.apache.catalina.Context;
-import org.apache.catalina.Engine;
-import org.apache.catalina.Host;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleEvent;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Server;
-import org.apache.catalina.Service;
-import org.apache.catalina.deploy.ContextEjb;
-import org.apache.catalina.deploy.ContextEnvironment;
-import org.apache.catalina.deploy.ContextHandler;
-import org.apache.catalina.deploy.ContextLocalEjb;
-import org.apache.catalina.deploy.ContextResource;
-import org.apache.catalina.deploy.ContextResourceEnvRef;
-import org.apache.catalina.deploy.ContextResourceLink;
-import org.apache.catalina.deploy.ContextService;
-import org.apache.catalina.deploy.ContextTransaction;
-import org.apache.catalina.deploy.NamingResources;
-import org.apache.catalina.util.StringManager;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
-import org.apache.naming.ContextAccessController;
-import org.apache.naming.ContextBindings;
-import org.apache.naming.EjbRef;
-import org.apache.naming.HandlerRef;
-import org.apache.naming.NamingContext;
-import org.apache.naming.ResourceEnvRef;
-import org.apache.naming.ResourceLinkRef;
-import org.apache.naming.ResourceRef;
-import org.apache.naming.ServiceRef;
-import org.apache.naming.TransactionRef;
-import org.apache.tomcat.util.modeler.Registry;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
 
 /**
