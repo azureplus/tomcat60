@@ -29,10 +29,10 @@ import java.net.URLEncoder;
  * Tomcat manager application.
  *
  * @author Craig R. McClanahan
- *
  * @deprecated Replaced by UndeployTask
  */
-public class RemoveTask extends AbstractCatalinaTask {
+public class RemoveTask extends AbstractCatalinaTask
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -43,11 +43,13 @@ public class RemoveTask extends AbstractCatalinaTask {
      */
     protected String path = null;
 
-    public String getPath() {
+    public String getPath()
+    {
         return (this.path);
     }
 
-    public void setPath(String path) {
+    public void setPath(String path)
+    {
         this.path = path;
     }
 
@@ -58,14 +60,16 @@ public class RemoveTask extends AbstractCatalinaTask {
     /**
      * Execute the requested operation.
      *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
 
         super.execute();
-        if (path == null) {
+        if (path == null)
+        {
             throw new BuildException
-                ("Must specify 'path' attribute");
+                    ("Must specify 'path' attribute");
         }
         execute("/remove?path=" + URLEncoder.encode(this.path));
 

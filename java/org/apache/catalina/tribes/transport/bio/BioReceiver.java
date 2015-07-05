@@ -16,59 +16,68 @@
  */
 package org.apache.catalina.tribes.transport.bio;
 
+import org.apache.catalina.tribes.ChannelReceiver;
+import org.apache.catalina.tribes.io.ListenCallback;
+import org.apache.catalina.tribes.io.ObjectReader;
+import org.apache.catalina.tribes.transport.AbstractRxTask;
+import org.apache.catalina.tribes.transport.ReceiverBase;
+import org.apache.catalina.tribes.transport.RxTaskPool;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.apache.catalina.tribes.ChannelReceiver;
-import org.apache.catalina.tribes.io.ListenCallback;
-import org.apache.catalina.tribes.io.ObjectReader;
-import org.apache.catalina.tribes.transport.ReceiverBase;
-import org.apache.catalina.tribes.transport.RxTaskPool;
-import org.apache.catalina.tribes.transport.AbstractRxTask;
-
 /**
- *
  * @author Filip Hanik
- *
  */
-public class BioReceiver extends ReceiverBase implements Runnable, ChannelReceiver, ListenCallback {
+public class BioReceiver extends ReceiverBase implements Runnable, ChannelReceiver, ListenCallback
+{
 
     protected static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(BioReceiver.class);
 
     protected ServerSocket serverSocket;
 
-    public BioReceiver() {
+    public BioReceiver()
+    {
     }
 
 
-    public void start() throws IOException {
+    public void start() throws IOException
+    {
         super.start();
-        try {
-            setPool(new RxTaskPool(getMaxThreads(),getMinThreads(),this));
-        } catch (Exception x) {
+        try
+        {
+            setPool(new RxTaskPool(getMaxThreads(), getMinThreads(), this));
+        }
+        catch (Exception x)
+        {
             log.fatal("ThreadPool can initilzed. Listener not started", x);
-            if ( x instanceof IOException ) throw (IOException)x;
+            if (x instanceof IOException) throw (IOException) x;
             else throw new IOException(x.getMessage());
         }
-        try {
+        try
+        {
             getBind();
             bind();
             Thread t = new Thread(this, "BioReceiver");
             t.setDaemon(true);
             t.start();
-        } catch (Exception x) {
+        }
+        catch (Exception x)
+        {
             log.fatal("Unable to start cluster receiver", x);
-            if ( x instanceof IOException ) throw (IOException)x;
+            if (x instanceof IOException) throw (IOException) x;
             else throw new IOException(x.getMessage());
         }
     }
-    
-    public AbstractRxTask createRxTask() {
+
+    public AbstractRxTask createRxTask()
+    {
         return getReplicationThread();
     }
-    
-    protected BioReplicationTask getReplicationThread() {
+
+    protected BioReplicationTask getReplicationThread()
+    {
         BioReplicationTask result = new BioReplicationTask(this);
         result.setOptions(getWorkerThreadOptions());
         result.setUseBufferPool(this.getUseBufferPool());
@@ -76,72 +85,90 @@ public class BioReceiver extends ReceiverBase implements Runnable, ChannelReceiv
     }
 
 
-    public void stop() {
+    public void stop()
+    {
         setListen(false);
-        try {
+        try
+        {
             this.serverSocket.close();
-        }catch ( Exception x ) {}
+        }
+        catch (Exception x)
+        {
+        }
         super.stop();
     }
-    
-    
-    protected void bind() throws IOException {
+
+
+    protected void bind() throws IOException
+    {
         // allocate an unbound server socket channel
         serverSocket = new ServerSocket();
         // set the port the server channel will listen to
         //serverSocket.bind(new InetSocketAddress(getBind(), getTcpListenPort()));
-        bind(serverSocket,getPort(),getAutoBind());
+        bind(serverSocket, getPort(), getAutoBind());
     }
-    
-    
-    public void run() {
-        try {
+
+
+    public void run()
+    {
+        try
+        {
             listen();
-        } catch (Exception x) {
+        }
+        catch (Exception x)
+        {
             log.error("Unable to run replication listener.", x);
         }
     }
-    
-    public void listen() throws Exception {
-        if (doListen()) {
+
+    public void listen() throws Exception
+    {
+        if (doListen())
+        {
             log.warn("ServerSocket already started");
             return;
         }
         setListen(true);
 
-        while ( doListen() ) {
+        while (doListen())
+        {
             Socket socket = null;
-            if ( getTaskPool().available() < 1 ) {
-                if ( log.isWarnEnabled() )
+            if (getTaskPool().available() < 1)
+            {
+                if (log.isWarnEnabled())
                     log.warn("All BIO server replication threads are busy, unable to handle more requests until a thread is freed up.");
             }
-            BioReplicationTask task = (BioReplicationTask)getTaskPool().getRxTask();
-            if ( task == null ) continue; //should never happen
-            try {
+            BioReplicationTask task = (BioReplicationTask) getTaskPool().getRxTask();
+            if (task == null) continue; //should never happen
+            try
+            {
                 socket = serverSocket.accept();
-            }catch ( Exception x ) {
-                if ( doListen() ) throw x;
             }
-            if ( !doListen() ) {
+            catch (Exception x)
+            {
+                if (doListen()) throw x;
+            }
+            if (!doListen())
+            {
                 task.setDoRun(false);
-                task.serviceSocket(null,null);
+                task.serviceSocket(null, null);
                 getExecutor().execute(task);
                 break; //regular shutdown
             }
-            if ( socket == null ) continue;
+            if (socket == null) continue;
             socket.setReceiveBufferSize(getRxBufSize());
             socket.setSendBufferSize(getTxBufSize());
             socket.setTcpNoDelay(getTcpNoDelay());
             socket.setKeepAlive(getSoKeepAlive());
             socket.setOOBInline(getOoBInline());
             socket.setReuseAddress(getSoReuseAddress());
-            socket.setSoLinger(getSoLingerOn(),getSoLingerTime());
+            socket.setSoLinger(getSoLingerOn(), getSoLingerTime());
             socket.setTrafficClass(getSoTrafficClass());
             socket.setSoTimeout(getTimeout());
             ObjectReader reader = new ObjectReader(socket);
-            task.serviceSocket(socket,reader);
+            task.serviceSocket(socket, reader);
         }//while
     }
-    
+
 
 }

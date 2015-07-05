@@ -16,13 +16,6 @@
  */
 package org.apache.tomcat.util.descriptor;
 
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.digester.Digester;
@@ -30,44 +23,52 @@ import org.apache.tomcat.util.digester.RuleSet;
 import org.apache.tomcat.util.res.StringManager;
 import org.xml.sax.ext.EntityResolver2;
 
+import javax.servlet.ServletContext;
+import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Wrapper class around the Digester that hide Digester's initialization
  * details.
  */
-public class DigesterFactory {
-
-    private static final Log log = LogFactory.getLog(DigesterFactory.class);
-    private static final StringManager sm =
-            StringManager.getManager(Constants.PACKAGE_NAME);
-
-    private static final Class<ServletContext> CLASS_SERVLET_CONTEXT;
-    private static final Class<?> CLASS_JSP_CONTEXT;
-
-    static {
-        CLASS_SERVLET_CONTEXT = ServletContext.class;
-        Class<?> jspContext = null;
-        try {
-            jspContext = Class.forName("javax.servlet.jsp.JspContext");
-        } catch (ClassNotFoundException e) {
-            // Ignore - JSP API is not present.
-        }
-        CLASS_JSP_CONTEXT = jspContext;
-    }
-
+public class DigesterFactory
+{
 
     /**
      * Mapping of well-known public IDs used by the Servlet API to the matching
      * local resource.
      */
-    public static final Map<String,String> SERVLET_API_PUBLIC_IDS;
-
+    public static final Map<String, String> SERVLET_API_PUBLIC_IDS;
     /**
      * Mapping of well-known system IDs used by the Servlet API to the matching
      * local resource.
      */
-    public static final Map<String,String> SERVLET_API_SYSTEM_IDS;
+    public static final Map<String, String> SERVLET_API_SYSTEM_IDS;
+    private static final Log log = LogFactory.getLog(DigesterFactory.class);
+    private static final StringManager sm =
+            StringManager.getManager(Constants.PACKAGE_NAME);
+    private static final Class<ServletContext> CLASS_SERVLET_CONTEXT;
+    private static final Class<?> CLASS_JSP_CONTEXT;
 
-    static {
+    static
+    {
+        CLASS_SERVLET_CONTEXT = ServletContext.class;
+        Class<?> jspContext = null;
+        try
+        {
+            jspContext = Class.forName("javax.servlet.jsp.JspContext");
+        }
+        catch (ClassNotFoundException e)
+        {
+            // Ignore - JSP API is not present.
+        }
+        CLASS_JSP_CONTEXT = jspContext;
+    }
+
+    static
+    {
         Map<String, String> publicIds = new HashMap<String, String>();
         Map<String, String> systemIds = new HashMap<String, String>();
 
@@ -106,26 +107,33 @@ public class DigesterFactory {
         SERVLET_API_SYSTEM_IDS = Collections.unmodifiableMap(systemIds);
     }
 
-    private static void addSelf(Map<String, String> ids, String id) {
+    private static void addSelf(Map<String, String> ids, String id)
+    {
         String location = locationFor(id);
-        if (location != null) {
+        if (location != null)
+        {
             ids.put(id, location);
             ids.put(location, location);
         }
     }
 
-    private static void add(Map<String,String> ids, String id, String location) {
-        if (location != null) {
+    private static void add(Map<String, String> ids, String id, String location)
+    {
+        if (location != null)
+        {
             ids.put(id, location);
         }
     }
 
-    private static String locationFor(String name) {
+    private static String locationFor(String name)
+    {
         URL location = CLASS_SERVLET_CONTEXT.getResource("resources/" + name);
-        if (location == null && CLASS_JSP_CONTEXT != null) {
+        if (location == null && CLASS_JSP_CONTEXT != null)
+        {
             location = CLASS_JSP_CONTEXT.getResource("resources/" + name);
         }
-        if (location == null) {
+        if (location == null)
+        {
             log.warn(sm.getString("digesterFactory.missingSchema", name));
             return null;
         }
@@ -135,15 +143,17 @@ public class DigesterFactory {
 
     /**
      * Create a <code>Digester</code> parser.
-     * @param xmlValidation turn on/off xml validation
+     *
+     * @param xmlValidation     turn on/off xml validation
      * @param xmlNamespaceAware turn on/off namespace validation
-     * @param rule an instance of <code>RuleSet</code> used for parsing the xml.
-     * @param blockExternal turn on/off the blocking of external resources
+     * @param rule              an instance of <code>RuleSet</code> used for parsing the xml.
+     * @param blockExternal     turn on/off the blocking of external resources
      */
     public static Digester newDigester(boolean xmlValidation,
                                        boolean xmlNamespaceAware,
                                        RuleSet rule,
-                                       boolean blockExternal) {
+                                       boolean blockExternal)
+    {
         Digester digester = new Digester();
         digester.setNamespaceAware(xmlNamespaceAware);
         digester.setValidating(xmlValidation);
@@ -151,7 +161,8 @@ public class DigesterFactory {
         EntityResolver2 resolver = new LocalResolver(SERVLET_API_PUBLIC_IDS,
                 SERVLET_API_SYSTEM_IDS, blockExternal);
         digester.setEntityResolver(resolver);
-        if (rule != null) {
+        if (rule != null)
+        {
             digester.addRuleSet(rule);
         }
 

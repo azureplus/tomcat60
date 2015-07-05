@@ -40,9 +40,9 @@ import java.util.Properties;
  * <ul>
  * <li>
  * <li><strong>mail.smtp.host</strong> - Hostname for outbound transport
- *     connections.  Defaults to <code>localhost</code> if not specified.</li>
+ * connections.  Defaults to <code>localhost</code> if not specified.</li>
  * </ul>
- *
+ * <p/>
  * <p>This factory can be configured in a <code>&lt;DefaultContext&gt;</code>
  * or <code>&lt;Context&gt;</code> element in your <code>conf/server.xml</code>
  * configuration file.  An example of factory configuration is:</p>
@@ -62,10 +62,10 @@ import java.util.Properties;
  * </pre>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class MailSessionFactory implements ObjectFactory {
+public class MailSessionFactory implements ObjectFactory
+{
 
 
     /**
@@ -78,22 +78,21 @@ public class MailSessionFactory implements ObjectFactory {
      * Create and return an object instance based on the specified
      * characteristics.
      *
-     * @param refObj Reference information containing our parameters, or null
-     *  if there are no parameters
-     * @param name The name of this object, relative to context, or null
-     *  if there is no name
+     * @param refObj  Reference information containing our parameters, or null
+     *                if there are no parameters
+     * @param name    The name of this object, relative to context, or null
+     *                if there is no name
      * @param context The context to which name is relative, or null if name
-     *  is relative to the default initial context
-     * @param env Environment variables, or null if there are none
-     *
-     * @exception Exception if an error occurs during object creation
+     *                is relative to the default initial context
+     * @param env     Environment variables, or null if there are none
+     * @throws Exception if an error occurs during object creation
      */
     public Object getObjectInstance(Object refObj, Name name, Context context,
-				    Hashtable env) throws Exception 
+                                    Hashtable env) throws Exception
     {
 
         // Return null if we cannot create an object of the requested type
-	final Reference ref = (Reference) refObj;
+        final Reference ref = (Reference) refObj;
         if (!ref.getClassName().equals(factoryType))
             return (null);
 
@@ -102,54 +101,64 @@ public class MailSessionFactory implements ObjectFactory {
         // exceptions.
         //
         // Bugzilla 31288, 33077: add support for authentication.
-        return AccessController.doPrivileged( new PrivilegedAction() {
-		public Object run() {
+        return AccessController.doPrivileged(new PrivilegedAction()
+        {
+            public Object run()
+            {
 
-                    // Create the JavaMail properties we will use
-                    Properties props = new Properties();
-                    props.put("mail.transport.protocol", "smtp");
-                    props.put("mail.smtp.host", "localhost");
+                // Create the JavaMail properties we will use
+                Properties props = new Properties();
+                props.put("mail.transport.protocol", "smtp");
+                props.put("mail.smtp.host", "localhost");
 
-                    String password = null;
+                String password = null;
 
-                    Enumeration attrs = ref.getAll();
-                    while (attrs.hasMoreElements()) {
-                        RefAddr attr = (RefAddr) attrs.nextElement();
-                        if ("factory".equals(attr.getType())) {
-                            continue;
-                        }
-
-                        if ("password".equals(attr.getType())) {
-                            password = (String) attr.getContent();
-                            continue;
-                        }
-
-                        props.put(attr.getType(), (String) attr.getContent());
+                Enumeration attrs = ref.getAll();
+                while (attrs.hasMoreElements())
+                {
+                    RefAddr attr = (RefAddr) attrs.nextElement();
+                    if ("factory".equals(attr.getType()))
+                    {
+                        continue;
                     }
 
-                    Authenticator auth = null;
-                    if (password != null) {
-                        String user = props.getProperty("mail.smtp.user");
-                        if(user == null) {
-                            user = props.getProperty("mail.user");
-                        }
-                        
-                        if(user != null) {
-                            final PasswordAuthentication pa = new PasswordAuthentication(user, password);
-                            auth = new Authenticator() {
-                                    protected PasswordAuthentication getPasswordAuthentication() {
-                                        return pa;
-                                    }
-                                };
-                        }
+                    if ("password".equals(attr.getType()))
+                    {
+                        password = (String) attr.getContent();
+                        continue;
                     }
 
-                    // Create and return the new Session object
-                    Session session = Session.getInstance(props, auth);
-                    return (session);
+                    props.put(attr.getType(), (String) attr.getContent());
+                }
 
-		}
-	    } );
+                Authenticator auth = null;
+                if (password != null)
+                {
+                    String user = props.getProperty("mail.smtp.user");
+                    if (user == null)
+                    {
+                        user = props.getProperty("mail.user");
+                    }
+
+                    if (user != null)
+                    {
+                        final PasswordAuthentication pa = new PasswordAuthentication(user, password);
+                        auth = new Authenticator()
+                        {
+                            protected PasswordAuthentication getPasswordAuthentication()
+                            {
+                                return pa;
+                            }
+                        };
+                    }
+                }
+
+                // Create and return the new Session object
+                Session session = Session.getInstance(props, auth);
+                return (session);
+
+            }
+        });
 
     }
 

@@ -30,10 +30,10 @@ import org.xml.sax.Attributes;
  * XML file processed by <code>MemoryRealm</code>.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class MemoryRuleSet extends RuleSetBase {
+public class MemoryRuleSet extends RuleSetBase
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -52,7 +52,8 @@ public class MemoryRuleSet extends RuleSetBase {
      * Construct an instance of this <code>RuleSet</code> with the default
      * matching pattern prefix.
      */
-    public MemoryRuleSet() {
+    public MemoryRuleSet()
+    {
 
         this("tomcat-users/");
 
@@ -64,9 +65,10 @@ public class MemoryRuleSet extends RuleSetBase {
      * matching pattern prefix.
      *
      * @param prefix Prefix for matching pattern rules (including the
-     *  trailing slash character)
+     *               trailing slash character)
      */
-    public MemoryRuleSet(String prefix) {
+    public MemoryRuleSet(String prefix)
+    {
 
         super();
         this.namespaceURI = null;
@@ -85,9 +87,10 @@ public class MemoryRuleSet extends RuleSetBase {
      * by a Digester instance.</p>
      *
      * @param digester Digester instance to which the new Rule instances
-     *  should be added.
+     *                 should be added.
      */
-    public void addRuleInstances(Digester digester) {
+    public void addRuleInstances(Digester digester)
+    {
 
         digester.addRule(prefix + "user", new MemoryUserRule());
 
@@ -100,13 +103,15 @@ public class MemoryRuleSet extends RuleSetBase {
 /**
  * Private class used when parsing the XML database file.
  */
-final class MemoryUserRule extends Rule {
+final class MemoryUserRule extends Rule
+{
 
 
     /**
      * Construct a new instance of this <code>Rule</code>.
      */
-    public MemoryUserRule() {
+    public MemoryUserRule()
+    {
     }
 
 
@@ -116,17 +121,19 @@ final class MemoryUserRule extends Rule {
      * @param attributes The attribute list for this element
      */
     public void begin(String namespace, String name, Attributes attributes)
-        throws Exception {
+            throws Exception
+    {
 
         String username = attributes.getValue("name");
-        if (username == null) {
+        if (username == null)
+        {
             username = attributes.getValue("username");
         }
         String password = attributes.getValue("password");
         String roles = attributes.getValue("roles");
 
         MemoryRealm realm =
-            (MemoryRealm) digester.peek(digester.getCount() - 1);
+                (MemoryRealm) digester.peek(digester.getCount() - 1);
         realm.addUser(username, password, roles);
 
     }

@@ -17,16 +17,17 @@
 
 package org.apache.catalina.tribes.transport.bio;
 
+import org.apache.catalina.tribes.ChannelMessage;
+import org.apache.catalina.tribes.io.BufferPool;
+import org.apache.catalina.tribes.io.ChannelData;
+import org.apache.catalina.tribes.io.ListenCallback;
 import org.apache.catalina.tribes.io.ObjectReader;
-import org.apache.catalina.tribes.transport.Constants;
 import org.apache.catalina.tribes.transport.AbstractRxTask;
-import java.net.Socket;
+import org.apache.catalina.tribes.transport.Constants;
+
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.apache.catalina.tribes.io.ListenCallback;
-import org.apache.catalina.tribes.ChannelMessage;
-import org.apache.catalina.tribes.io.ChannelData;
-import org.apache.catalina.tribes.io.BufferPool;
+import java.net.Socket;
 
 /**
  * A worker thread class which can drain channels and echo-back the input. Each
@@ -37,61 +38,83 @@ import org.apache.catalina.tribes.io.BufferPool;
  * serviceChannel() method stores the key reference in the thread object then
  * calls notify() to wake it up. When the channel has been drained, the worker
  * thread returns itself to its parent pool.
- * 
- * @author Filip Hanik
- * 
  *
+ * @author Filip Hanik
  */
-public class BioReplicationTask extends AbstractRxTask {
+public class BioReplicationTask extends AbstractRxTask
+{
 
 
-    protected static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog( BioReplicationTask.class );
-    
+    protected static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(BioReplicationTask.class);
+
     protected Socket socket;
     protected ObjectReader reader;
-    
-    public BioReplicationTask (ListenCallback callback) {
+
+    public BioReplicationTask(ListenCallback callback)
+    {
         super(callback);
     }
 
     // loop forever waiting for work to do
     public synchronized void run()
     {
-        if ( socket == null ) return;
-        try {
+        if (socket == null) return;
+        try
+        {
             drainSocket();
-        } catch ( Exception x ) {
+        }
+        catch (Exception x)
+        {
             log.error("Unable to service bio socket");
-        }finally {
-            try {socket.close();}catch ( Exception ignore){}
-            try {reader.close();}catch ( Exception ignore){}
+        }
+        finally
+        {
+            try
+            {
+                socket.close();
+            }
+            catch (Exception ignore)
+            {
+            }
+            try
+            {
+                reader.close();
+            }
+            catch (Exception ignore)
+            {
+            }
             reader = null;
             socket = null;
         }
         // done, ready for more, return to pool
-        if ( getTaskPool() != null ) getTaskPool().returnWorker (this);
+        if (getTaskPool() != null) getTaskPool().returnWorker(this);
     }
 
-    
-    public synchronized void serviceSocket(Socket socket, ObjectReader reader) {
+
+    public synchronized void serviceSocket(Socket socket, ObjectReader reader)
+    {
         this.socket = socket;
         this.reader = reader;
-        this.notify();		// awaken the thread
+        this.notify();        // awaken the thread
     }
-    
-    protected void execute(ObjectReader reader) throws Exception{
+
+    protected void execute(ObjectReader reader) throws Exception
+    {
         int pkgcnt = reader.count();
 
-        if ( pkgcnt > 0 ) {
+        if (pkgcnt > 0)
+        {
             ChannelMessage[] msgs = reader.execute();
-            for ( int i=0; i<msgs.length; i++ ) {
+            for (int i = 0; i < msgs.length; i++)
+            {
                 /**
                  * Use send ack here if you want to ack the request to the remote 
                  * server before completing the request
                  * This is considered an asynchronized request
                  */
                 if (ChannelData.sendAckAsync(msgs[i].getOptions())) sendAck(Constants.ACK_COMMAND);
-                try {
+                try
+                {
                     //process the message
                     getCallback().messageDataReceived(msgs[i]);
                     /**
@@ -100,18 +123,21 @@ public class BioReplicationTask extends AbstractRxTask {
                      * This is considered a synchronized request
                      */
                     if (ChannelData.sendAckSync(msgs[i].getOptions())) sendAck(Constants.ACK_COMMAND);
-                }catch  ( Exception x ) {
-                    if (ChannelData.sendAckSync(msgs[i].getOptions())) sendAck(Constants.FAIL_ACK_COMMAND);
-                    log.error("Error thrown from messageDataReceived.",x);
                 }
-                if ( getUseBufferPool() ) {
+                catch (Exception x)
+                {
+                    if (ChannelData.sendAckSync(msgs[i].getOptions())) sendAck(Constants.FAIL_ACK_COMMAND);
+                    log.error("Error thrown from messageDataReceived.", x);
+                }
+                if (getUseBufferPool())
+                {
                     BufferPool.getBufferPool().returnBuffer(msgs[i].getMessage());
                     msgs[i].setMessage(null);
                 }
-            }                       
+            }
         }
 
-       
+
     }
 
     /**
@@ -122,41 +148,59 @@ public class BioReplicationTask extends AbstractRxTask {
      * re-enables OP_READ and calls wakeup() on the selector
      * so the selector will resume watching this channel.
      */
-    protected void drainSocket () throws Exception {
+    protected void drainSocket() throws Exception
+    {
         InputStream in = socket.getInputStream();
         // loop while data available, channel is non-blocking
         byte[] buf = new byte[1024];
         int length = in.read(buf);
-        while ( length >= 0 ) {
-            int count = reader.append(buf,0,length,true);
-            if ( count > 0 ) execute(reader);
+        while (length >= 0)
+        {
+            int count = reader.append(buf, 0, length, true);
+            if (count > 0) execute(reader);
             length = in.read(buf);
         }
     }
 
 
-
-
     /**
      * send a reply-acknowledgement (6,2,3)
      */
-    protected void sendAck(byte[] command) {
-        try {
+    protected void sendAck(byte[] command)
+    {
+        try
+        {
             OutputStream out = socket.getOutputStream();
             out.write(command);
             out.flush();
-            if (log.isTraceEnabled()) {
+            if (log.isTraceEnabled())
+            {
                 log.trace("ACK sent to " + socket.getPort());
             }
-        } catch ( java.io.IOException x ) {
-            log.warn("Unable to send ACK back through channel, channel disconnected?: "+x.getMessage());
+        }
+        catch (java.io.IOException x)
+        {
+            log.warn("Unable to send ACK back through channel, channel disconnected?: " + x.getMessage());
         }
     }
-    
-    public void close() {
+
+    public void close()
+    {
         setDoRun(false);
-        try {socket.close();}catch ( Exception ignore){}
-        try {reader.close();}catch ( Exception ignore){}
+        try
+        {
+            socket.close();
+        }
+        catch (Exception ignore)
+        {
+        }
+        try
+        {
+            reader.close();
+        }
+        catch (Exception ignore)
+        {
+        }
         reader = null;
         socket = null;
         super.close();

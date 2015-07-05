@@ -25,19 +25,30 @@ import java.io.IOException;
  * of a request by a remote client.
  *
  * @author Glenn L. Nielsen
- *
  */
 
-public final class ClientAbortException extends IOException {
+public final class ClientAbortException extends IOException
+{
 
 
     //------------------------------------------------------------ Constructors
 
 
     /**
+     * The error message passed to our constructor (if any)
+     */
+    protected String message = null;
+    /**
+     * The underlying exception or error passed to our constructor (if any)
+     */
+    protected Throwable throwable = null;
+
+
+    /**
      * Construct a new ClientAbortException with no other information.
      */
-    public ClientAbortException() {
+    public ClientAbortException()
+    {
 
         this(null, null);
 
@@ -49,11 +60,15 @@ public final class ClientAbortException extends IOException {
      *
      * @param message Message describing this exception
      */
-    public ClientAbortException(String message) {
+    public ClientAbortException(String message)
+    {
 
         this(message, null);
 
     }
+
+
+    //------------------------------------------------------ Instance Variables
 
 
     /**
@@ -61,7 +76,8 @@ public final class ClientAbortException extends IOException {
      *
      * @param throwable Throwable that caused this exception
      */
-    public ClientAbortException(Throwable throwable) {
+    public ClientAbortException(Throwable throwable)
+    {
 
         this(null, throwable);
 
@@ -72,10 +88,11 @@ public final class ClientAbortException extends IOException {
      * Construct a new ClientAbortException for the specified message
      * and throwable.
      *
-     * @param message Message describing this exception
+     * @param message   Message describing this exception
      * @param throwable Throwable that caused this exception
      */
-    public ClientAbortException(String message, Throwable throwable) {
+    public ClientAbortException(String message, Throwable throwable)
+    {
 
         super();
         this.message = message;
@@ -84,28 +101,13 @@ public final class ClientAbortException extends IOException {
     }
 
 
-    //------------------------------------------------------ Instance Variables
-
-
-    /**
-     * The error message passed to our constructor (if any)
-     */
-    protected String message = null;
-
-
-    /**
-     * The underlying exception or error passed to our constructor (if any)
-     */
-    protected Throwable throwable = null;
-
-
     //---------------------------------------------------------- Public Methods
-
 
     /**
      * Returns the message associated with this exception, if any.
      */
-    public String getMessage() {
+    public String getMessage()
+    {
 
         return (message);
 
@@ -115,26 +117,31 @@ public final class ClientAbortException extends IOException {
     /**
      * Returns the cause that caused this exception, if any.
      */
-    public Throwable getCause() {
-        
+    public Throwable getCause()
+    {
+
         return (throwable);
-        
+
     }
 
-    
+
     /**
      * Return a formatted string that describes this exception.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ClientAbortException:  ");
-        if (message != null) {
+        if (message != null)
+        {
             sb.append(message);
-            if (throwable != null) {
+            if (throwable != null)
+            {
                 sb.append(":  ");
             }
         }
-        if (throwable != null) {
+        if (throwable != null)
+        {
             sb.append(throwable.toString());
         }
         return (sb.toString());

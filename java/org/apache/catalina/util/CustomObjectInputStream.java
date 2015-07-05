@@ -30,11 +30,11 @@ import java.lang.reflect.Proxy;
  *
  * @author Craig R. McClanahan
  * @author Bip Thelin
- *
  */
 
 public final class CustomObjectInputStream
-    extends ObjectInputStream {
+        extends ObjectInputStream
+{
 
 
     /**
@@ -46,14 +46,14 @@ public final class CustomObjectInputStream
     /**
      * Construct a new instance of CustomObjectInputStream
      *
-     * @param stream The input stream we will read from
+     * @param stream      The input stream we will read from
      * @param classLoader The class loader used to instantiate objects
-     *
-     * @exception IOException if an input/output error occurs
+     * @throws IOException if an input/output error occurs
      */
     public CustomObjectInputStream(InputStream stream,
                                    ClassLoader classLoader)
-        throws IOException {
+            throws IOException
+    {
 
         super(stream);
         this.classLoader = classLoader;
@@ -65,19 +65,25 @@ public final class CustomObjectInputStream
      * description, by using the class loader assigned to this Context.
      *
      * @param classDesc Class description from the input stream
-     *
-     * @exception ClassNotFoundException if this class cannot be found
-     * @exception IOException if an input/output error occurs
+     * @throws ClassNotFoundException if this class cannot be found
+     * @throws IOException            if an input/output error occurs
      */
     public Class resolveClass(ObjectStreamClass classDesc)
-        throws ClassNotFoundException, IOException {
-        try {
+            throws ClassNotFoundException, IOException
+    {
+        try
+        {
             return Class.forName(classDesc.getName(), false, classLoader);
-        } catch (ClassNotFoundException e) {
-            try {
+        }
+        catch (ClassNotFoundException e)
+        {
+            try
+            {
                 // Try also the superclass because of primitive types
                 return super.resolveClass(classDesc);
-            } catch (ClassNotFoundException e2) {
+            }
+            catch (ClassNotFoundException e2)
+            {
                 // Rethrow original exception, as it can have more information
                 // about why the class was not found. BZ 48007
                 throw e;
@@ -92,15 +98,19 @@ public final class CustomObjectInputStream
      * Context.
      */
     protected Class resolveProxyClass(String[] interfaces)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException
+    {
 
         Class[] cinterfaces = new Class[interfaces.length];
         for (int i = 0; i < interfaces.length; i++)
             cinterfaces[i] = classLoader.loadClass(interfaces[i]);
 
-        try {
+        try
+        {
             return Proxy.getProxyClass(classLoader, cinterfaces);
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e)
+        {
             throw new ClassNotFoundException(null, e);
         }
     }

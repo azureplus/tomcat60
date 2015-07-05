@@ -36,17 +36,12 @@ import java.util.Locale;
  * @author Hans Bergsten <hans@gefionsoftware.com>
  * @author Remy Maucherat
  */
-public final class Response {
+public final class Response
+{
 
 
     // ----------------------------------------------------------- Constructors
 
-
-    public Response() {
-    }
-
-
-    // ----------------------------------------------------- Class Variables
 
     /**
      * Default locale as mandated by the spec.
@@ -54,8 +49,14 @@ public final class Response {
     private static Locale DEFAULT_LOCALE = Locale.getDefault();
 
 
-    // ----------------------------------------------------- Instance Variables
+    // ----------------------------------------------------- Class Variables
+    /**
+     * Action hook.
+     */
+    public ActionHook hook;
 
+
+    // ----------------------------------------------------- Instance Variables
     /**
      * Status code.
      */
@@ -90,14 +91,6 @@ public final class Response {
      * Committed flag.
      */
     protected boolean commited = false;
-
-
-    /**
-     * Action hook.
-     */
-    public ActionHook hook;
-
-
     /**
      * HTTP specific fields.
      */
@@ -105,59 +98,65 @@ public final class Response {
     protected String contentLanguage = null;
     protected String characterEncoding = Constants.DEFAULT_CHARACTER_ENCODING;
     protected long contentLength = -1;
-    private Locale locale = DEFAULT_LOCALE;
-
-    // General informations
-    private long bytesWritten=0;
-
     /**
      * Holds request error exception.
      */
     protected Exception errorException = null;
-
     /**
      * Has the charset been explicitly set.
      */
     protected boolean charsetSet = false;
-
     /**
      * Request error URI.
      */
     protected String errorURI = null;
-
     protected Request req;
+    private Locale locale = DEFAULT_LOCALE;
+    // General informations
+    private long bytesWritten = 0;
+
+    public Response()
+    {
+    }
 
     // ------------------------------------------------------------- Properties
 
-    public Request getRequest() {
+    public Request getRequest()
+    {
         return req;
     }
 
-    public void setRequest( Request req ) {
-        this.req=req;
+    public void setRequest(Request req)
+    {
+        this.req = req;
     }
 
-    public OutputBuffer getOutputBuffer() {
+    public OutputBuffer getOutputBuffer()
+    {
         return outputBuffer;
     }
 
 
-    public void setOutputBuffer(OutputBuffer outputBuffer) {
+    public void setOutputBuffer(OutputBuffer outputBuffer)
+    {
         this.outputBuffer = outputBuffer;
     }
 
 
-    public MimeHeaders getMimeHeaders() {
+    public MimeHeaders getMimeHeaders()
+    {
         return headers;
     }
 
 
-    public ActionHook getHook() {
+    public ActionHook getHook()
+    {
         return hook;
     }
 
 
-    public void setHook(ActionHook hook) {
+    public void setHook(ActionHook hook)
+    {
         this.hook = hook;
     }
 
@@ -165,12 +164,14 @@ public final class Response {
     // -------------------- Per-Response "notes" --------------------
 
 
-    public final void setNote(int pos, Object value) {
+    public final void setNote(int pos, Object value)
+    {
         notes[pos] = value;
     }
 
 
-    public final Object getNote(int pos) {
+    public final Object getNote(int pos)
+    {
         return notes[pos];
     }
 
@@ -178,9 +179,11 @@ public final class Response {
     // -------------------- Actions --------------------
 
 
-    public void action(ActionCode actionCode, Object param) {
-        if (hook != null) {
-            if( param==null )
+    public void action(ActionCode actionCode, Object param)
+    {
+        if (hook != null)
+        {
+            if (param == null)
                 hook.action(actionCode, this);
             else
                 hook.action(actionCode, param);
@@ -191,7 +194,8 @@ public final class Response {
     // -------------------- State --------------------
 
 
-    public int getStatus() {
+    public int getStatus()
+    {
         return status;
     }
 
@@ -199,7 +203,8 @@ public final class Response {
     /**
      * Set the response status
      */
-    public void setStatus( int status ) {
+    public void setStatus(int status)
+    {
         this.status = status;
     }
 
@@ -207,7 +212,8 @@ public final class Response {
     /**
      * Get the status message.
      */
-    public String getMessage() {
+    public String getMessage()
+    {
         return message;
     }
 
@@ -215,68 +221,72 @@ public final class Response {
     /**
      * Set the status message.
      */
-    public void setMessage(String message) {
+    public void setMessage(String message)
+    {
         this.message = message;
     }
 
 
-    public boolean isCommitted() {
+    public boolean isCommitted()
+    {
         return commited;
     }
 
 
-    public void setCommitted(boolean v) {
+    public void setCommitted(boolean v)
+    {
         this.commited = v;
     }
 
 
     // -----------------Error State --------------------
 
+    /**
+     * Get the Exception that occurred during request
+     * processing.
+     */
+    public Exception getErrorException()
+    {
+        return errorException;
+    }
 
     /**
      * Set the error Exception that occurred during
      * request processing.
      */
-    public void setErrorException(Exception ex) {
-    errorException = ex;
+    public void setErrorException(Exception ex)
+    {
+        errorException = ex;
     }
 
+    public boolean isExceptionPresent()
+    {
+        return (errorException != null);
+    }
 
     /**
-     * Get the Exception that occurred during request
-     * processing.
+     * Get the request URI that caused the original error.
      */
-    public Exception getErrorException() {
-        return errorException;
+    public String getErrorURI()
+    {
+        return errorURI;
     }
-
-
-    public boolean isExceptionPresent() {
-        return ( errorException != null );
-    }
-
 
     /**
      * Set request URI that caused an error during
      * request processing.
      */
-    public void setErrorURI(String uri) {
+    public void setErrorURI(String uri)
+    {
         errorURI = uri;
-    }
-
-
-    /** Get the request URI that caused the original error.
-     */
-    public String getErrorURI() {
-        return errorURI;
     }
 
 
     // -------------------- Methods --------------------
 
-
     public void reset()
-        throws IllegalStateException {
+            throws IllegalStateException
+    {
 
         // Reset the headers only if this is the main request,
         // not for included
@@ -295,7 +305,8 @@ public final class Response {
         // stream before resetting the output stream
         //
         // Reset the stream
-        if (commited) {
+        if (commited)
+        {
             //String msg = sm.getString("servletOutputStreamImpl.reset.ise");
             throw new IllegalStateException();
         }
@@ -304,43 +315,51 @@ public final class Response {
     }
 
 
-    public void finish() throws IOException {
+    public void finish() throws IOException
+    {
         action(ActionCode.ACTION_CLOSE, this);
     }
 
 
-    public void acknowledge() throws IOException {
+    public void acknowledge() throws IOException
+    {
         action(ActionCode.ACTION_ACK, this);
     }
 
 
     // -------------------- Headers --------------------
+
     /**
      * Warning: This method always returns <code>false<code> for Content-Type
      * and Content-Length.
      */
-    public boolean containsHeader(String name) {
+    public boolean containsHeader(String name)
+    {
         return headers.getHeader(name) != null;
     }
 
 
-    public void setHeader(String name, String value) {
-        char cc=name.charAt(0);
-        if( cc=='C' || cc=='c' ) {
-            if( checkSpecialHeader(name, value) )
-            return;
+    public void setHeader(String name, String value)
+    {
+        char cc = name.charAt(0);
+        if (cc == 'C' || cc == 'c')
+        {
+            if (checkSpecialHeader(name, value))
+                return;
         }
-        headers.setValue(name).setString( value);
+        headers.setValue(name).setString(value);
     }
 
 
-    public void addHeader(String name, String value) {
-        char cc=name.charAt(0);
-        if( cc=='C' || cc=='c' ) {
-            if( checkSpecialHeader(name, value) )
-            return;
+    public void addHeader(String name, String value)
+    {
+        char cc = name.charAt(0);
+        if (cc == 'C' || cc == 'c')
+        {
+            if (checkSpecialHeader(name, value))
+                return;
         }
-        headers.addValue(name).setString( value );
+        headers.addValue(name).setString(value);
     }
 
 
@@ -349,36 +368,45 @@ public final class Response {
      * Called from set/addHeader.
      * Return true if the header is special, no need to set the header.
      */
-    private boolean checkSpecialHeader( String name, String value) {
+    private boolean checkSpecialHeader(String name, String value)
+    {
         // XXX Eliminate redundant fields !!!
         // ( both header and in special fields )
-        if( name.equalsIgnoreCase( "Content-Type" ) ) {
-            setContentType( value );
+        if (name.equalsIgnoreCase("Content-Type"))
+        {
+            setContentType(value);
             return true;
         }
-        if( name.equalsIgnoreCase( "Content-Length" ) ) {
-            try {
-                long cL=Long.parseLong( value );
-                setContentLength( cL );
+        if (name.equalsIgnoreCase("Content-Length"))
+        {
+            try
+            {
+                long cL = Long.parseLong(value);
+                setContentLength(cL);
                 return true;
-            } catch( NumberFormatException ex ) {
+            }
+            catch (NumberFormatException ex)
+            {
                 // Do nothing - the spec doesn't have any "throws"
                 // and the user might know what he's doing
                 return false;
             }
         }
-        if( name.equalsIgnoreCase( "Content-Language" ) ) {
+        if (name.equalsIgnoreCase("Content-Language"))
+        {
             // XXX XXX Need to construct Locale or something else
         }
         return false;
     }
 
 
-    /** Signal that we're done with the headers, and body will follow.
-     *  Any implementation needs to notify ContextManager, to allow
-     *  interceptors to fix headers.
+    /**
+     * Signal that we're done with the headers, and body will follow.
+     * Any implementation needs to notify ContextManager, to allow
+     * interceptors to fix headers.
      */
-    public void sendHeaders() throws IOException {
+    public void sendHeaders() throws IOException
+    {
         action(ActionCode.ACTION_COMMIT, this);
         commited = true;
     }
@@ -387,7 +415,8 @@ public final class Response {
     // -------------------- I18N --------------------
 
 
-    public Locale getLocale() {
+    public Locale getLocale()
+    {
         return locale;
     }
 
@@ -395,9 +424,11 @@ public final class Response {
      * Called explicitely by user to set the Content-Language and
      * the default encoding
      */
-    public void setLocale(Locale locale) {
+    public void setLocale(Locale locale)
+    {
 
-        if (locale == null) {
+        if (locale == null)
+        {
             return;  // throw an exception?
         }
 
@@ -406,10 +437,12 @@ public final class Response {
 
         // Set the contentLanguage for header output
         contentLanguage = locale.getLanguage();
-        if ((contentLanguage != null) && (contentLanguage.length() > 0)) {
+        if ((contentLanguage != null) && (contentLanguage.length() > 0))
+        {
             String country = locale.getCountry();
             StringBuffer value = new StringBuffer(contentLanguage);
-            if ((country != null) && (country.length() > 0)) {
+            if ((country != null) && (country.length() > 0))
+            {
                 value.append('-');
                 value.append(country);
             }
@@ -421,8 +454,14 @@ public final class Response {
     /**
      * Return the content language.
      */
-    public String getContentLanguage() {
+    public String getContentLanguage()
+    {
         return contentLanguage;
+    }
+
+    public String getCharacterEncoding()
+    {
+        return characterEncoding;
     }
 
     /*
@@ -432,7 +471,8 @@ public final class Response {
      *
      * @param charset String containing the name of the chararacter encoding.
      */
-    public void setCharacterEncoding(String charset) {
+    public void setCharacterEncoding(String charset)
+    {
 
         if (isCommitted())
             return;
@@ -440,36 +480,53 @@ public final class Response {
             return;
 
         characterEncoding = charset;
-        charsetSet=true;
+        charsetSet = true;
     }
 
-    public String getCharacterEncoding() {
-        return characterEncoding;
+    public String getContentType()
+    {
+
+        String ret = contentType;
+
+        if (ret != null
+                && characterEncoding != null
+                && charsetSet)
+        {
+            ret = ret + ";charset=" + characterEncoding;
+        }
+
+        return ret;
     }
 
     /**
      * Sets the content type.
-     *
+     * <p/>
      * This method must preserve any response charset that may already have
      * been set via a call to response.setContentType(), response.setLocale(),
      * or response.setCharacterEncoding().
      *
      * @param type the content type
      */
-    public void setContentType(String type) {
+    public void setContentType(String type)
+    {
 
-        if (type == null) {
+        if (type == null)
+        {
             this.contentType = null;
             return;
         }
 
         MediaType m = null;
-        try {
-             m = HttpParser.parseMediaType(new StringReader(type));
-        } catch (IOException e) {
+        try
+        {
+            m = HttpParser.parseMediaType(new StringReader(type));
+        }
+        catch (IOException e)
+        {
             // Ignore - null test below handles this
         }
-        if (m == null) {
+        if (m == null)
+        {
             // Invalid - Assume no charset and just pass through whatever
             // the user provided.
             this.contentType = type;
@@ -480,46 +537,40 @@ public final class Response {
 
         String charsetValue = m.getCharset();
 
-        if (charsetValue != null) {
+        if (charsetValue != null)
+        {
             charsetValue = charsetValue.trim();
-            if (charsetValue.length() > 0) {
+            if (charsetValue.length() > 0)
+            {
                 charsetSet = true;
                 this.characterEncoding = charsetValue;
             }
         }
     }
 
-    public String getContentType() {
-
-        String ret = contentType;
-
-        if (ret != null
-            && characterEncoding != null
-            && charsetSet) {
-            ret = ret + ";charset=" + characterEncoding;
-        }
-
-        return ret;
-    }
-
-    public void setContentLength(int contentLength) {
+    public void setContentLength(int contentLength)
+    {
         this.contentLength = contentLength;
     }
 
-    public void setContentLength(long contentLength) {
-        this.contentLength = contentLength;
-    }
-
-    public int getContentLength() {
+    public int getContentLength()
+    {
         long length = getContentLengthLong();
 
-        if (length < Integer.MAX_VALUE) {
+        if (length < Integer.MAX_VALUE)
+        {
             return (int) length;
         }
         return -1;
     }
 
-    public long getContentLengthLong() {
+    public void setContentLength(long contentLength)
+    {
+        this.contentLength = contentLength;
+    }
+
+    public long getContentLengthLong()
+    {
         return contentLength;
     }
 
@@ -528,15 +579,16 @@ public final class Response {
      * Write a chunk of bytes.
      */
     public void doWrite(ByteChunk chunk/*byte buffer[], int pos, int count*/)
-        throws IOException
+            throws IOException
     {
         outputBuffer.doWrite(chunk, this);
-        bytesWritten+=chunk.getLength();
+        bytesWritten += chunk.getLength();
     }
 
     // --------------------
 
-    public void recycle() {
+    public void recycle()
+    {
 
         contentType = null;
         contentLanguage = null;
@@ -552,14 +604,16 @@ public final class Response {
         headers.clear();
 
         // update counters
-        bytesWritten=0;
+        bytesWritten = 0;
     }
 
-    public long getBytesWritten() {
+    public long getBytesWritten()
+    {
         return bytesWritten;
     }
 
-    public void setBytesWritten(long bytesWritten) {
+    public void setBytesWritten(long bytesWritten)
+    {
         this.bytesWritten = bytesWritten;
     }
 }

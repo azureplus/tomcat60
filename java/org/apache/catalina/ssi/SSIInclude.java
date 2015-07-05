@@ -19,43 +19,51 @@ package org.apache.catalina.ssi;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 /**
  * Implements the Server-side #include command
- * 
+ *
  * @author Bip Thelin
  * @author Paul Speed
  * @author Dan Sandberg
  * @author David Becker
- *
  */
-public final class SSIInclude implements SSICommand {
+public final class SSIInclude implements SSICommand
+{
     /**
      * @see SSICommand
      */
     public long process(SSIMediator ssiMediator, String commandName,
-            String[] paramNames, String[] paramValues, PrintWriter writer) {
+                        String[] paramNames, String[] paramValues, PrintWriter writer)
+    {
         long lastModified = 0;
         String configErrMsg = ssiMediator.getConfigErrMsg();
-        for (int i = 0; i < paramNames.length; i++) {
+        for (int i = 0; i < paramNames.length; i++)
+        {
             String paramName = paramNames[i];
             String paramValue = paramValues[i];
             String substitutedValue = ssiMediator
                     .substituteVariables(paramValue);
-            try {
+            try
+            {
                 if (paramName.equalsIgnoreCase("file")
-                        || paramName.equalsIgnoreCase("virtual")) {
+                        || paramName.equalsIgnoreCase("virtual"))
+                {
                     boolean virtual = paramName.equalsIgnoreCase("virtual");
                     lastModified = ssiMediator.getFileLastModified(
-                    		 substitutedValue, virtual);
+                            substitutedValue, virtual);
                     String text = ssiMediator.getFileText(substitutedValue,
                             virtual);
                     writer.write(text);
-                } else {
+                } else
+                {
                     ssiMediator.log("#include--Invalid attribute: "
                             + paramName);
                     writer.write(configErrMsg);
                 }
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 ssiMediator.log("#include--Couldn't include file: "
                         + substitutedValue, e);
                 writer.write(configErrMsg);

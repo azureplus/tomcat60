@@ -48,26 +48,177 @@ import java.util.regex.PatternSyntaxException;
  * @author Remy Maucherat
  * @author Filip Hanik
  */
-public class Http11NioProcessor implements ActionHook {
+public class Http11NioProcessor implements ActionHook
+{
 
 
     /**
      * Logger.
      */
     protected static org.apache.juli.logging.Log log
-        = org.apache.juli.logging.LogFactory.getLog(Http11NioProcessor.class);
+            = org.apache.juli.logging.LogFactory.getLog(Http11NioProcessor.class);
 
     /**
      * The string manager for this package.
      */
     protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
 
     /**
      * SSL information.
      */
     protected SSLSupport sslSupport;
+    /**
+     * Associated adapter.
+     */
+    protected Adapter adapter = null;
 
+
+    // ----------------------------------------------------------- Constructors
+    /**
+     * Request object.
+     */
+    protected Request request = null;
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * Response object.
+     */
+    protected Response response = null;
+    /**
+     * Input.
+     */
+    protected InternalNioInputBuffer inputBuffer = null;
+    /**
+     * Output.
+     */
+    protected InternalNioOutputBuffer outputBuffer = null;
+    /**
+     * Error flag.
+     */
+    protected boolean error = false;
+    /**
+     * Keep-alive.
+     */
+    protected boolean keepAlive = true;
+    /**
+     * HTTP/1.1 flag.
+     */
+    protected boolean http11 = true;
+    /**
+     * HTTP/0.9 flag.
+     */
+    protected boolean http09 = false;
+    /**
+     * Sendfile data.
+     */
+    protected NioEndpoint.SendfileData sendfileData = null;
+    /**
+     * Comet used.
+     */
+    protected boolean comet = false;
+    /**
+     * Closed flag, a Comet async thread can
+     * signal for this Nio processor to be closed and recycled instead
+     * of waiting for a timeout.
+     * Closed by HttpServletResponse.getWriter().close()
+     */
+    protected boolean cometClose = false;
+    /**
+     * Content delimitator for the request (if false, the connection will
+     * be closed at the end of the request).
+     */
+    protected boolean contentDelimitation = true;
+    /**
+     * Is there an expectation ?
+     */
+    protected boolean expectation = false;
+    /**
+     * List of restricted user agents.
+     */
+    protected Pattern[] restrictedUserAgents = null;
+    /**
+     * Maximum number of Keep-Alive requests to honor.
+     */
+    protected int maxKeepAliveRequests = -1;
+    /**
+     * SSL enabled ?
+     */
+    protected boolean ssl = false;
+    /**
+     * Socket associated with the current connection.
+     */
+    protected NioChannel socket = null;
+    /**
+     * Remote Address associated with the current connection.
+     */
+    protected String remoteAddr = null;
+    /**
+     * Remote Host associated with the current connection.
+     */
+    protected String remoteHost = null;
+    /**
+     * Local Host associated with the current connection.
+     */
+    protected String localName = null;
+    /**
+     * Local port to which the socket is connected
+     */
+    protected int localPort = -1;
+    /**
+     * Remote port to which the socket is connected
+     */
+    protected int remotePort = -1;
+    /**
+     * The local Host address.
+     */
+    protected String localAddr = null;
+    /**
+     * Maximum timeout on uploads. 5 minutes as in Apache HTTPD server.
+     */
+    protected int timeout = 300000;
+    /**
+     * Flag to disable setting a different time-out on uploads.
+     */
+    protected boolean disableUploadTimeout = false;
+    /**
+     * Allowed compression level.
+     */
+    protected int compressionLevel = 0;
+    /**
+     * Minimum contentsize to make compression.
+     */
+    protected int compressionMinSize = 2048;
+    /**
+     * Socket buffering.
+     */
+    protected int socketBuffer = -1;
+    /**
+     * Max save post size.
+     */
+    protected int maxSavePostSize = 4 * 1024;
+    /**
+     * List of user agents to not use gzip with
+     */
+    protected Pattern noCompressionUserAgents[] = null;
+    /**
+     * List of MIMES which could be gzipped
+     */
+    protected String[] compressableMimeTypes =
+            {"text/html", "text/xml", "text/plain"};
+    /**
+     * Host name (used to avoid useless B2C conversion on the host name).
+     */
+    protected char[] hostNameC = new char[0];
+    /**
+     * Associated endpoint.
+     */
+    protected NioEndpoint endpoint;
+    /**
+     * Allow a customized the server header for the tin-foil hat folks.
+     */
+    protected String server = null;
     /*
      * Tracks how many internal filters are in the filter library so they
      * are skipped when looking for pluggable filters. 
@@ -75,10 +226,8 @@ public class Http11NioProcessor implements ActionHook {
     private int pluggableFilterIndex = Integer.MAX_VALUE;
 
 
-    // ----------------------------------------------------------- Constructors
-
-
-    public Http11NioProcessor(int rxBufSize, int txBufSize, int maxHttpHeaderSize, NioEndpoint endpoint) {
+    public Http11NioProcessor(int rxBufSize, int txBufSize, int maxHttpHeaderSize, NioEndpoint endpoint)
+    {
 
         this.endpoint = endpoint;
 
@@ -102,234 +251,21 @@ public class Http11NioProcessor implements ActionHook {
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * Associated adapter.
-     */
-    protected Adapter adapter = null;
-
-
-    /**
-     * Request object.
-     */
-    protected Request request = null;
-
-
-    /**
-     * Response object.
-     */
-    protected Response response = null;
-
-
-    /**
-     * Input.
-     */
-    protected InternalNioInputBuffer inputBuffer = null;
-
-
-    /**
-     * Output.
-     */
-    protected InternalNioOutputBuffer outputBuffer = null;
-
-
-    /**
-     * Error flag.
-     */
-    protected boolean error = false;
-
-
-    /**
-     * Keep-alive.
-     */
-    protected boolean keepAlive = true;
-
-
-    /**
-     * HTTP/1.1 flag.
-     */
-    protected boolean http11 = true;
-
-
-    /**
-     * HTTP/0.9 flag.
-     */
-    protected boolean http09 = false;
-
-    /**
-     * Sendfile data.
-     */
-    protected NioEndpoint.SendfileData sendfileData = null;
-
-    /**
-     * Comet used.
-     */
-    protected boolean comet = false;
-    
-    /**
-     * Closed flag, a Comet async thread can 
-     * signal for this Nio processor to be closed and recycled instead
-     * of waiting for a timeout.
-     * Closed by HttpServletResponse.getWriter().close()
-     */
-    protected boolean cometClose = false;
-
-    /**
-     * Content delimitator for the request (if false, the connection will
-     * be closed at the end of the request).
-     */
-    protected boolean contentDelimitation = true;
-
-
-    /**
-     * Is there an expectation ?
-     */
-    protected boolean expectation = false;
-
-
-    /**
-     * List of restricted user agents.
-     */
-    protected Pattern[] restrictedUserAgents = null;
-
-
-    /**
-     * Maximum number of Keep-Alive requests to honor.
-     */
-    protected int maxKeepAliveRequests = -1;
-
-
-    /**
-     * SSL enabled ?
-     */
-    protected boolean ssl = false;
-
-
-    /**
-     * Socket associated with the current connection.
-     */
-    protected NioChannel socket = null;
-
-
-    /**
-     * Remote Address associated with the current connection.
-     */
-    protected String remoteAddr = null;
-
-
-    /**
-     * Remote Host associated with the current connection.
-     */
-    protected String remoteHost = null;
-
-
-    /**
-     * Local Host associated with the current connection.
-     */
-    protected String localName = null;
-
-
-
-    /**
-     * Local port to which the socket is connected
-     */
-    protected int localPort = -1;
-
-
-    /**
-     * Remote port to which the socket is connected
-     */
-    protected int remotePort = -1;
-
-
-    /**
-     * The local Host address.
-     */
-    protected String localAddr = null;
-
-
-    /**
-     * Maximum timeout on uploads. 5 minutes as in Apache HTTPD server.
-     */
-    protected int timeout = 300000;
-
-
-    /**
-     * Flag to disable setting a different time-out on uploads.
-     */
-    protected boolean disableUploadTimeout = false;
-
-
-    /**
-     * Allowed compression level.
-     */
-    protected int compressionLevel = 0;
-
-
-    /**
-     * Minimum contentsize to make compression.
-     */
-    protected int compressionMinSize = 2048;
-
-
-    /**
-     * Socket buffering.
-     */
-    protected int socketBuffer = -1;
-
-
-    /**
-     * Max save post size.
-     */
-    protected int maxSavePostSize = 4 * 1024;
-
-
-    /**
-     * List of user agents to not use gzip with
-     */
-    protected Pattern noCompressionUserAgents[] = null;
-
-    /**
-     * List of MIMES which could be gzipped
-     */
-    protected String[] compressableMimeTypes =
-    { "text/html", "text/xml", "text/plain" };
-
-
-    /**
-     * Host name (used to avoid useless B2C conversion on the host name).
-     */
-    protected char[] hostNameC = new char[0];
-
-
-    /**
-     * Associated endpoint.
-     */
-    protected NioEndpoint endpoint;
-
-
-    /**
-     * Allow a customized the server header for the tin-foil hat folks.
-     */
-    protected String server = null;
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return compression level.
      */
-    public String getCompression() {
-        switch (compressionLevel) {
-        case 0:
-            return "off";
-        case 1:
-            return "on";
-        case 2:
-            return "force";
+    public String getCompression()
+    {
+        switch (compressionLevel)
+        {
+            case 0:
+                return "off";
+            case 1:
+                return "on";
+            case 2:
+                return "force";
         }
         return "off";
     }
@@ -338,20 +274,28 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Set compression level.
      */
-    public void setCompression(String compression) {
-        if (compression.equals("on")) {
+    public void setCompression(String compression)
+    {
+        if (compression.equals("on"))
+        {
             this.compressionLevel = 1;
-        } else if (compression.equals("force")) {
+        } else if (compression.equals("force"))
+        {
             this.compressionLevel = 2;
-        } else if (compression.equals("off")) {
+        } else if (compression.equals("off"))
+        {
             this.compressionLevel = 0;
-        } else {
-            try {
+        } else
+        {
+            try
+            {
                 // Try to parse compression as an int, which would give the
                 // minimum compression size
                 compressionMinSize = Integer.parseInt(compression);
                 this.compressionLevel = 1;
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 this.compressionLevel = 0;
             }
         }
@@ -360,7 +304,8 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Set Minimum size to trigger compression.
      */
-    public void setCompressionMinSize(int compressionMinSize) {
+    public void setCompressionMinSize(int compressionMinSize)
+    {
         this.compressionMinSize = compressionMinSize;
     }
 
@@ -372,12 +317,16 @@ public class Http11NioProcessor implements ActionHook {
      *
      * @param userAgent user-agent string
      */
-    public void addNoCompressionUserAgent(String userAgent) {
-        try {
+    public void addNoCompressionUserAgent(String userAgent)
+    {
+        try
+        {
             Pattern nRule = Pattern.compile(userAgent);
             noCompressionUserAgents =
-                addREArray(noCompressionUserAgents, nRule);
-        } catch (PatternSyntaxException pse) {
+                    addREArray(noCompressionUserAgents, nRule);
+        }
+        catch (PatternSyntaxException pse)
+        {
             log.error(sm.getString("http11processor.regexp.error", userAgent), pse);
         }
     }
@@ -388,7 +337,8 @@ public class Http11NioProcessor implements ActionHook {
      * a large number of connectors, where it would be better to have all of
      * them referenced a single array).
      */
-    public void setNoCompressionUserAgents(Pattern[] noCompressionUserAgents) {
+    public void setNoCompressionUserAgents(Pattern[] noCompressionUserAgents)
+    {
         this.noCompressionUserAgents = noCompressionUserAgents;
     }
 
@@ -396,14 +346,17 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Set no compression user agent list.
      * List contains users agents separated by ',' :
-     *
+     * <p/>
      * ie: "gorilla,desesplorer,tigrus"
      */
-    public void setNoCompressionUserAgents(String noCompressionUserAgents) {
-        if (noCompressionUserAgents != null) {
+    public void setNoCompressionUserAgents(String noCompressionUserAgents)
+    {
+        if (noCompressionUserAgents != null)
+        {
             StringTokenizer st = new StringTokenizer(noCompressionUserAgents, ",");
 
-            while (st.hasMoreTokens()) {
+            while (st.hasMoreTokens())
+            {
                 addNoCompressionUserAgent(st.nextToken().trim());
             }
         }
@@ -416,9 +369,10 @@ public class Http11NioProcessor implements ActionHook {
      *
      * @param mimeType mime-type string
      */
-    public void addCompressableMimeType(String mimeType) {
+    public void addCompressableMimeType(String mimeType)
+    {
         compressableMimeTypes =
-            addStringArray(compressableMimeTypes, mimeType);
+                addStringArray(compressableMimeTypes, mimeType);
     }
 
 
@@ -427,7 +381,8 @@ public class Http11NioProcessor implements ActionHook {
      * a large number of connectors, where it would be better to have all of
      * them referenced a single array).
      */
-    public void setCompressableMimeTypes(String[] compressableMimeTypes) {
+    public void setCompressableMimeTypes(String[] compressableMimeTypes)
+    {
         this.compressableMimeTypes = compressableMimeTypes;
     }
 
@@ -435,15 +390,18 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Set compressable mime-type list
      * List contains users agents separated by ',' :
-     *
+     * <p/>
      * ie: "text/html,text/xml,text/plain"
      */
-    public void setCompressableMimeTypes(String compressableMimeTypes) {
-        if (compressableMimeTypes != null) {
+    public void setCompressableMimeTypes(String compressableMimeTypes)
+    {
+        if (compressableMimeTypes != null)
+        {
             this.compressableMimeTypes = null;
             StringTokenizer st = new StringTokenizer(compressableMimeTypes, ",");
 
-            while (st.hasMoreTokens()) {
+            while (st.hasMoreTokens())
+            {
                 addCompressableMimeType(st.nextToken().trim());
             }
         }
@@ -453,10 +411,10 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Return the list of restricted user agents.
      */
-    public String[] findCompressableMimeTypes() {
+    public String[] findCompressableMimeTypes()
+    {
         return (compressableMimeTypes);
     }
-
 
 
     // --------------------------------------------------------- Public Methods
@@ -467,18 +425,25 @@ public class Http11NioProcessor implements ActionHook {
      *
      * @param className class name of the filter
      */
-    protected void addFilter(String className) {
-        try {
+    protected void addFilter(String className)
+    {
+        try
+        {
             Class clazz = Class.forName(className);
             Object obj = clazz.newInstance();
-            if (obj instanceof InputFilter) {
+            if (obj instanceof InputFilter)
+            {
                 inputBuffer.addFilter((InputFilter) obj);
-            } else if (obj instanceof OutputFilter) {
+            } else if (obj instanceof OutputFilter)
+            {
                 outputBuffer.addFilter((OutputFilter) obj);
-            } else {
+            } else
+            {
                 log.warn(sm.getString("http11processor.filter.unknown", className));
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             log.error(sm.getString("http11processor.filter.error", className), e);
         }
     }
@@ -488,15 +453,17 @@ public class Http11NioProcessor implements ActionHook {
      * General use method
      *
      * @param sArray the StringArray
-     * @param value string
+     * @param value  string
      */
-    private String[] addStringArray(String sArray[], String value) {
+    private String[] addStringArray(String sArray[], String value)
+    {
         String[] result = null;
-        if (sArray == null) {
+        if (sArray == null)
+        {
             result = new String[1];
             result[0] = value;
-        }
-        else {
+        } else
+        {
             result = new String[sArray.length + 1];
             for (int i = 0; i < sArray.length; i++)
                 result[i] = sArray[i];
@@ -510,15 +477,17 @@ public class Http11NioProcessor implements ActionHook {
      * General use method
      *
      * @param rArray the REArray
-     * @param value Obj
+     * @param value  Obj
      */
-    private Pattern[] addREArray(Pattern rArray[], Pattern value) {
+    private Pattern[] addREArray(Pattern rArray[], Pattern value)
+    {
         Pattern[] result = null;
-        if (rArray == null) {
+        if (rArray == null)
+        {
             result = new Pattern[1];
             result[0] = value;
-        }
-        else {
+        } else
+        {
             result = new Pattern[rArray.length + 1];
             for (int i = 0; i < rArray.length; i++)
                 result[i] = rArray[i];
@@ -532,11 +501,14 @@ public class Http11NioProcessor implements ActionHook {
      * General use method
      *
      * @param sArray the StringArray
-     * @param value string
+     * @param value  string
      */
-    private boolean inStringArray(String sArray[], String value) {
-        for (int i = 0; i < sArray.length; i++) {
-            if (sArray[i].equals(value)) {
+    private boolean inStringArray(String sArray[], String value)
+    {
+        for (int i = 0; i < sArray.length; i++)
+        {
+            if (sArray[i].equals(value))
+            {
                 return true;
             }
         }
@@ -548,13 +520,16 @@ public class Http11NioProcessor implements ActionHook {
      * Checks if any entry in the string array starts with the specified value
      *
      * @param sArray the StringArray
-     * @param value string
+     * @param value  string
      */
-    private boolean startsWithStringArray(String sArray[], String value) {
+    private boolean startsWithStringArray(String sArray[], String value)
+    {
         if (value == null)
-           return false;
-        for (int i = 0; i < sArray.length; i++) {
-            if (value.startsWith(sArray[i])) {
+            return false;
+        for (int i = 0; i < sArray.length; i++)
+        {
+            if (value.startsWith(sArray[i]))
+            {
                 return true;
             }
         }
@@ -569,11 +544,15 @@ public class Http11NioProcessor implements ActionHook {
      *
      * @param userAgent user-agent string
      */
-    public void addRestrictedUserAgent(String userAgent) {
-        try {
+    public void addRestrictedUserAgent(String userAgent)
+    {
+        try
+        {
             Pattern nRule = Pattern.compile(userAgent);
             restrictedUserAgents = addREArray(restrictedUserAgents, nRule);
-        } catch (PatternSyntaxException pse) {
+        }
+        catch (PatternSyntaxException pse)
+        {
             log.error(sm.getString("http11processor.regexp.error", userAgent), pse);
         }
     }
@@ -584,7 +563,8 @@ public class Http11NioProcessor implements ActionHook {
      * a large number of connectors, where it would be better to have all of
      * them referenced a single array).
      */
-    public void setRestrictedUserAgents(Pattern[] restrictedUserAgents) {
+    public void setRestrictedUserAgents(Pattern[] restrictedUserAgents)
+    {
         this.restrictedUserAgents = restrictedUserAgents;
     }
 
@@ -592,14 +572,17 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Set restricted user agent list (which will downgrade the connector
      * to HTTP/1.0 mode). List contains users agents separated by ',' :
-     *
+     * <p/>
      * ie: "gorilla,desesplorer,tigrus"
      */
-    public void setRestrictedUserAgents(String restrictedUserAgents) {
-        if (restrictedUserAgents != null) {
+    public void setRestrictedUserAgents(String restrictedUserAgents)
+    {
+        if (restrictedUserAgents != null)
+        {
             StringTokenizer st =
-                new StringTokenizer(restrictedUserAgents, ",");
-            while (st.hasMoreTokens()) {
+                    new StringTokenizer(restrictedUserAgents, ",");
+            while (st.hasMoreTokens())
+            {
                 addRestrictedUserAgent(st.nextToken().trim());
             }
         }
@@ -609,8 +592,9 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Return the list of restricted user agents.
      */
-    public String[] findRestrictedUserAgents() {
-        String[] sarr = new String [restrictedUserAgents.length];
+    public String[] findRestrictedUserAgents()
+    {
+        String[] sarr = new String[restrictedUserAgents.length];
 
         for (int i = 0; i < restrictedUserAgents.length; i++)
             sarr[i] = restrictedUserAgents[i].toString();
@@ -618,109 +602,118 @@ public class Http11NioProcessor implements ActionHook {
         return (sarr);
     }
 
+    /**
+     * Return the number of Keep-Alive requests that we will honor.
+     */
+    public int getMaxKeepAliveRequests()
+    {
+        return maxKeepAliveRequests;
+    }
 
     /**
      * Set the maximum number of Keep-Alive requests to honor.
      * This is to safeguard from DoS attacks.  Setting to a negative
      * value disables the check.
      */
-    public void setMaxKeepAliveRequests(int mkar) {
+    public void setMaxKeepAliveRequests(int mkar)
+    {
         maxKeepAliveRequests = mkar;
     }
-
-
-    /**
-     * Return the number of Keep-Alive requests that we will honor.
-     */
-    public int getMaxKeepAliveRequests() {
-        return maxKeepAliveRequests;
-    }
-
-
-    /**
-     * Set the maximum size of a POST which will be buffered in SSL mode.
-     */
-    public void setMaxSavePostSize(int msps) {
-        maxSavePostSize = msps;
-    }
-
 
     /**
      * Return the maximum size of a POST which will be buffered in SSL mode.
      */
-    public int getMaxSavePostSize() {
+    public int getMaxSavePostSize()
+    {
         return maxSavePostSize;
     }
 
-
     /**
-     * Set the flag to control upload time-outs.
+     * Set the maximum size of a POST which will be buffered in SSL mode.
      */
-    public void setDisableUploadTimeout(boolean isDisabled) {
-        disableUploadTimeout = isDisabled;
+    public void setMaxSavePostSize(int msps)
+    {
+        maxSavePostSize = msps;
     }
 
     /**
      * Get the flag that controls upload time-outs.
      */
-    public boolean getDisableUploadTimeout() {
+    public boolean getDisableUploadTimeout()
+    {
         return disableUploadTimeout;
     }
 
     /**
-     * Set the socket buffer flag.
+     * Set the flag to control upload time-outs.
      */
-    public void setSocketBuffer(int socketBuffer) {
-        this.socketBuffer = socketBuffer;
-        outputBuffer.setSocketBuffer(socketBuffer);
+    public void setDisableUploadTimeout(boolean isDisabled)
+    {
+        disableUploadTimeout = isDisabled;
     }
 
     /**
      * Get the socket buffer flag.
      */
-    public int getSocketBuffer() {
+    public int getSocketBuffer()
+    {
         return socketBuffer;
     }
 
     /**
-     * Set the upload timeout.
+     * Set the socket buffer flag.
      */
-    public void setTimeout( int timeouts ) {
-        timeout = timeouts ;
+    public void setSocketBuffer(int socketBuffer)
+    {
+        this.socketBuffer = socketBuffer;
+        outputBuffer.setSocketBuffer(socketBuffer);
     }
 
     /**
      * Get the upload timeout.
      */
-    public int getTimeout() {
+    public int getTimeout()
+    {
         return timeout;
     }
 
-
     /**
-     * Set the server header name.
+     * Set the upload timeout.
      */
-    public void setServer( String server ) {
-        if (server==null || server.equals("")) {
-            this.server = null;
-        } else {
-            this.server = server;
-        }
+    public void setTimeout(int timeouts)
+    {
+        timeout = timeouts;
     }
 
     /**
      * Get the server header name.
      */
-    public String getServer() {
+    public String getServer()
+    {
         return server;
     }
 
+    /**
+     * Set the server header name.
+     */
+    public void setServer(String server)
+    {
+        if (server == null || server.equals(""))
+        {
+            this.server = null;
+        } else
+        {
+            this.server = server;
+        }
+    }
 
-    /** Get the request associated with this processor.
+    /**
+     * Get the request associated with this processor.
      *
      * @return The request
      */
-    public Request getRequest() {
+    public Request getRequest()
+    {
         return request;
     }
 
@@ -731,30 +724,40 @@ public class Http11NioProcessor implements ActionHook {
      * @throws IOException error during an I/O operation
      */
     public SocketState event(SocketStatus status)
-        throws IOException {
+            throws IOException
+    {
 
         RequestInfo rp = request.getRequestProcessor();
 
-        try {
+        try
+        {
             rp.setStage(org.apache.coyote.Constants.STAGE_SERVICE);
             error = !adapter.event(request, response, status);
-            if ( !error ) {
-                NioEndpoint.KeyAttachment attach = (NioEndpoint.KeyAttachment)socket.getAttachment(false);
-                if (attach != null) {
+            if (!error)
+            {
+                NioEndpoint.KeyAttachment attach = (NioEndpoint.KeyAttachment) socket.getAttachment(false);
+                if (attach != null)
+                {
                     attach.setComet(comet);
-                    if (comet) {
+                    if (comet)
+                    {
                         Integer comettimeout = (Integer) request.getAttribute("org.apache.tomcat.comet.timeout");
                         if (comettimeout != null) attach.setTimeout(comettimeout.longValue());
-                    } else {
+                    } else
+                    {
                         //reset the timeout
                         attach.setTimeout(endpoint.getSocketProperties().getSoTimeout());
                     }
 
                 }
             }
-        } catch (InterruptedIOException e) {
+        }
+        catch (InterruptedIOException e)
+        {
             error = true;
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             log.error(sm.getString("http11processor.request.process"), t);
             // 500 - Internal Server Error
             response.setStatus(500);
@@ -764,14 +767,17 @@ public class Http11NioProcessor implements ActionHook {
 
         rp.setStage(org.apache.coyote.Constants.STAGE_ENDED);
 
-        if (error) {
+        if (error)
+        {
             recycle();
             return SocketState.CLOSED;
-        } else if (!comet) {
+        } else if (!comet)
+        {
             recycle();
             //pay attention to the keep alive flag set in process()
-            return (keepAlive)?SocketState.OPEN:SocketState.CLOSED;
-        } else {
+            return (keepAlive) ? SocketState.OPEN : SocketState.CLOSED;
+        } else
+        {
             return SocketState.LONG;
         }
     }
@@ -783,7 +789,8 @@ public class Http11NioProcessor implements ActionHook {
      * @throws IOException error during an I/O operation
      */
     public SocketState process(NioChannel socket)
-        throws IOException {
+            throws IOException
+    {
         RequestInfo rp = request.getRequestProcessor();
         rp.setStage(org.apache.coyote.Constants.STAGE_PARSE);
 
@@ -798,7 +805,7 @@ public class Http11NioProcessor implements ActionHook {
         error = false;
         keepAlive = true;
         comet = false;
-        
+
 
         int keepAliveLeft = maxKeepAliveRequests;
         long soTimeout = endpoint.getSoTimeout();
@@ -808,14 +815,18 @@ public class Http11NioProcessor implements ActionHook {
         boolean keptAlive = false;
         boolean openSocket = false;
         boolean recycle = true;
-        while (!error && keepAlive && !comet) {
+        while (!error && keepAlive && !comet)
+        {
 
             // Parsing the request header
-            try {
-                if( !disableUploadTimeout && keptAlive && soTimeout > 0 ) {
-                    socket.getIOChannel().socket().setSoTimeout((int)soTimeout);
+            try
+            {
+                if (!disableUploadTimeout && keptAlive && soTimeout > 0)
+                {
+                    socket.getIOChannel().socket().setSoTimeout((int) soTimeout);
                 }
-                if (!inputBuffer.parseRequestLine(keptAlive)) {
+                if (!inputBuffer.parseRequestLine(keptAlive))
+                {
                     //no data available yet, since we might have read part
                     //of the request line, we can't recycle the processor
                     openSocket = true;
@@ -825,7 +836,8 @@ public class Http11NioProcessor implements ActionHook {
                 keptAlive = true;
                 // Set this every time in case limit has been changed via JMX
                 request.getMimeHeaders().setLimit(endpoint.getMaxHeaderCount());
-                if ( !inputBuffer.parseHeaders() ) {
+                if (!inputBuffer.parseHeaders())
+                {
                     //we've read part of the request, don't recycle it
                     //instead associate it with the socket
                     openSocket = true;
@@ -833,17 +845,24 @@ public class Http11NioProcessor implements ActionHook {
                     break;
                 }
                 request.setStartTime(System.currentTimeMillis());
-                if (!disableUploadTimeout) { //only for body, not for request headers
-                    socket.getIOChannel().socket().setSoTimeout((int)timeout);
+                if (!disableUploadTimeout)
+                { //only for body, not for request headers
+                    socket.getIOChannel().socket().setSoTimeout((int) timeout);
                 }
-            } catch (IOException e) {
-                if (log.isDebugEnabled()) {
+            }
+            catch (IOException e)
+            {
+                if (log.isDebugEnabled())
+                {
                     log.debug(sm.getString("http11processor.header.parse"), e);
                 }
                 error = true;
                 break;
-            } catch (Throwable t) {
-                if (log.isDebugEnabled()) {
+            }
+            catch (Throwable t)
+            {
+                if (log.isDebugEnabled())
+                {
                     log.debug(sm.getString("http11processor.header.parse"), t);
                 }
                 // 400 - Bad Request
@@ -852,13 +871,18 @@ public class Http11NioProcessor implements ActionHook {
                 error = true;
             }
 
-            if (!error) {
+            if (!error)
+            {
                 // Setting up filters, and parse some request headers
                 rp.setStage(org.apache.coyote.Constants.STAGE_PREPARE);
-                try {
+                try
+                {
                     prepareRequest();
-                } catch (Throwable t) {
-                    if (log.isDebugEnabled()) {
+                }
+                catch (Throwable t)
+                {
+                    if (log.isDebugEnabled())
+                    {
                         log.debug(sm.getString("http11processor.request.prepare"), t);
                     }
                     // 400 - Internal Server Error
@@ -872,8 +896,10 @@ public class Http11NioProcessor implements ActionHook {
                 keepAlive = false;
 
             // Process the request in the adapter
-            if (!error) {
-                try {
+            if (!error)
+            {
+                try
+                {
                     rp.setStage(org.apache.coyote.Constants.STAGE_SERVICE);
                     adapter.service(request, response);
                     // Handle when the response was committed before a serious
@@ -881,25 +907,33 @@ public class Http11NioProcessor implements ActionHook {
                     // set the status to 500 and set the errorException.
                     // If we fail here, then the response is likely already
                     // committed, so we can't try and set headers.
-                    if(keepAlive && !error) { // Avoid checking twice.
+                    if (keepAlive && !error)
+                    { // Avoid checking twice.
                         error = response.getErrorException() != null ||
                                 statusDropsConnection(response.getStatus());
                     }
                     // Comet support
                     SelectionKey key = socket.getIOChannel().keyFor(socket.getPoller().getSelector());
-                    if (key != null) {
+                    if (key != null)
+                    {
                         NioEndpoint.KeyAttachment attach = (NioEndpoint.KeyAttachment) key.attachment();
-                        if (attach != null)  {
+                        if (attach != null)
+                        {
                             attach.setComet(comet);
-                            if (comet) {
+                            if (comet)
+                            {
                                 Integer comettimeout = (Integer) request.getAttribute("org.apache.tomcat.comet.timeout");
                                 if (comettimeout != null) attach.setTimeout(comettimeout.longValue());
                             }
                         }
                     }
-                } catch (InterruptedIOException e) {
+                }
+                catch (InterruptedIOException e)
+                {
                     error = true;
-                } catch (Throwable t) {
+                }
+                catch (Throwable t)
+                {
                     log.error(sm.getString("http11processor.request.process"), t);
                     // 500 - Internal Server Error
                     response.setStatus(500);
@@ -909,36 +943,40 @@ public class Http11NioProcessor implements ActionHook {
             }
 
             // Finish the handling of the request
-            if (!comet) {
+            if (!comet)
+            {
                 // If we know we are closing the connection, don't drain input.
                 // This way uploading a 100GB file doesn't tie up the thread 
                 // if the servlet has rejected it.
-                if(error)
+                if (error)
                     inputBuffer.setSwallowInput(false);
                 endRequest();
             }
 
             // If there was an error, make sure the request is counted as
             // and error, and update the statistics counter
-            if (error) {
+            if (error)
+            {
                 response.setStatus(500);
             }
             request.updateCounters();
 
-            if (!comet) {
+            if (!comet)
+            {
                 // Next request
                 inputBuffer.nextRequest();
                 outputBuffer.nextRequest();
             }
-            
+
             // Do sendfile as needed: add socket to sendfile and end
-            if (sendfileData != null && !error) {
-                KeyAttachment ka = (KeyAttachment)socket.getAttachment(false);
+            if (sendfileData != null && !error)
+            {
+                KeyAttachment ka = (KeyAttachment) socket.getAttachment(false);
                 ka.setSendfileData(sendfileData);
                 sendfileData.keepAlive = keepAlive;
                 SelectionKey key = socket.getIOChannel().keyFor(socket.getPoller().getSelector());
                 //do the first write on this thread, might as well
-                openSocket = socket.getPoller().processSendfile(key,ka,true,true);
+                openSocket = socket.getPoller().processSendfile(key, ka, true, true);
                 break;
             }
 
@@ -949,30 +987,40 @@ public class Http11NioProcessor implements ActionHook {
 
         rp.setStage(org.apache.coyote.Constants.STAGE_ENDED);
 
-        if (comet) {
-            if (error) {
+        if (comet)
+        {
+            if (error)
+            {
                 recycle();
                 return SocketState.CLOSED;
-            } else {
+            } else
+            {
                 return SocketState.LONG;
             }
-        } else {
-            if ( recycle ) recycle();
+        } else
+        {
+            if (recycle) recycle();
             //return (openSocket) ? (SocketState.OPEN) : SocketState.CLOSED;
-            return (openSocket) ? (recycle?SocketState.OPEN:SocketState.LONG) : SocketState.CLOSED;
+            return (openSocket) ? (recycle ? SocketState.OPEN : SocketState.LONG) : SocketState.CLOSED;
         }
 
     }
 
 
-    public void endRequest() {
+    public void endRequest()
+    {
 
         // Finish the handling of the request
-        try {
+        try
+        {
             inputBuffer.endRequest();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             error = true;
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             log.error(sm.getString("http11processor.request.finish"), t);
             // 500 - Internal Server Error
             // Can't add a 500 to the access log since that has already been
@@ -980,11 +1028,16 @@ public class Http11NioProcessor implements ActionHook {
             response.setStatus(500);
             error = true;
         }
-        try {
+        try
+        {
             outputBuffer.endRequest();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             error = true;
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             log.error(sm.getString("http11processor.response.finish"), t);
             error = true;
         }
@@ -992,7 +1045,8 @@ public class Http11NioProcessor implements ActionHook {
     }
 
 
-    public void recycle() {
+    public void recycle()
+    {
         inputBuffer.recycle();
         outputBuffer.recycle();
         this.socket = null;
@@ -1014,27 +1068,33 @@ public class Http11NioProcessor implements ActionHook {
      * Send an action to the connector.
      *
      * @param actionCode Type of the action
-     * @param param Action parameter
+     * @param param      Action parameter
      */
-    public void action(ActionCode actionCode, Object param) {
+    public void action(ActionCode actionCode, Object param)
+    {
 
-        if (actionCode == ActionCode.ACTION_COMMIT) {
+        if (actionCode == ActionCode.ACTION_COMMIT)
+        {
             // Commit current response
 
             if (response.isCommitted())
                 return;
 
             // Validate and write response headers
-            
-            try {
+
+            try
+            {
                 prepareResponse();
                 outputBuffer.commit();
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 // Set error flag
                 error = true;
             }
 
-        } else if (actionCode == ActionCode.ACTION_ACK) {
+        } else if (actionCode == ActionCode.ACTION_ACK)
+        {
 
             // Acknowlege request
 
@@ -1045,24 +1105,32 @@ public class Http11NioProcessor implements ActionHook {
                 return;
 
             inputBuffer.setSwallowInput(true);
-            try {
+            try
+            {
                 outputBuffer.sendAck();
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 // Set error flag
                 error = true;
             }
 
-        } else if (actionCode == ActionCode.ACTION_CLIENT_FLUSH) {
+        } else if (actionCode == ActionCode.ACTION_CLIENT_FLUSH)
+        {
 
-            try {
+            try
+            {
                 outputBuffer.flush();
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 // Set error flag
                 error = true;
                 response.setErrorException(e);
             }
 
-        } else if (actionCode == ActionCode.ACTION_CLOSE) {
+        } else if (actionCode == ActionCode.ACTION_CLOSE)
+        {
             // Close
 
             // End the processing of the current request, and stop any further
@@ -1071,9 +1139,11 @@ public class Http11NioProcessor implements ActionHook {
             comet = false;
             cometClose = true;
             SelectionKey key = socket.getIOChannel().keyFor(socket.getPoller().getSelector());
-            if ( key != null ) {
+            if (key != null)
+            {
                 NioEndpoint.KeyAttachment attach = (NioEndpoint.KeyAttachment) key.attachment();
-                if ( attach!=null && attach.getComet()) {
+                if (attach != null && attach.getComet())
+                {
                     //if this is a comet connection
                     //then execute the connection closure at the next selector loop
                     //request.getAttributes().remove("org.apache.tomcat.comet.timeout");
@@ -1082,14 +1152,18 @@ public class Http11NioProcessor implements ActionHook {
                 }
             }
 
-            try {
+            try
+            {
                 outputBuffer.endRequest();
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 // Set error flag
                 error = true;
             }
 
-        } else if (actionCode == ActionCode.ACTION_RESET) {
+        } else if (actionCode == ActionCode.ACTION_RESET)
+        {
 
             // Reset response
 
@@ -1097,151 +1171,186 @@ public class Http11NioProcessor implements ActionHook {
 
             outputBuffer.reset();
 
-        } else if (actionCode == ActionCode.ACTION_CUSTOM) {
+        } else if (actionCode == ActionCode.ACTION_CUSTOM)
+        {
 
             // Do nothing
 
-        } else if (actionCode == ActionCode.ACTION_REQ_HOST_ADDR_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.ACTION_REQ_HOST_ADDR_ATTRIBUTE)
+        {
 
             // Get remote host address
-            if ((remoteAddr == null) && (socket != null)) {
+            if ((remoteAddr == null) && (socket != null))
+            {
                 InetAddress inetAddr = socket.getIOChannel().socket().getInetAddress();
-                if (inetAddr != null) {
+                if (inetAddr != null)
+                {
                     remoteAddr = inetAddr.getHostAddress();
                 }
             }
             request.remoteAddr().setString(remoteAddr);
 
-        } else if (actionCode == ActionCode.ACTION_REQ_LOCAL_NAME_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.ACTION_REQ_LOCAL_NAME_ATTRIBUTE)
+        {
 
             // Get local host name
-            if ((localName == null) && (socket != null)) {
+            if ((localName == null) && (socket != null))
+            {
                 InetAddress inetAddr = socket.getIOChannel().socket().getLocalAddress();
-                if (inetAddr != null) {
+                if (inetAddr != null)
+                {
                     localName = inetAddr.getHostName();
                 }
             }
             request.localName().setString(localName);
 
-        } else if (actionCode == ActionCode.ACTION_REQ_HOST_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.ACTION_REQ_HOST_ATTRIBUTE)
+        {
 
             // Get remote host name
-            if ((remoteHost == null) && (socket != null)) {
+            if ((remoteHost == null) && (socket != null))
+            {
                 InetAddress inetAddr = socket.getIOChannel().socket().getInetAddress();
-                if (inetAddr != null) {
+                if (inetAddr != null)
+                {
                     remoteHost = inetAddr.getHostName();
                 }
-                if(remoteHost == null) {
-                    if(remoteAddr != null) {
+                if (remoteHost == null)
+                {
+                    if (remoteAddr != null)
+                    {
                         remoteHost = remoteAddr;
-                    } else { // all we can do is punt
+                    } else
+                    { // all we can do is punt
                         request.remoteHost().recycle();
                     }
                 }
             }
             request.remoteHost().setString(remoteHost);
 
-        } else if (actionCode == ActionCode.ACTION_REQ_LOCAL_ADDR_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.ACTION_REQ_LOCAL_ADDR_ATTRIBUTE)
+        {
 
             if (localAddr == null)
-               localAddr = socket.getIOChannel().socket().getLocalAddress().getHostAddress();
+                localAddr = socket.getIOChannel().socket().getLocalAddress().getHostAddress();
 
             request.localAddr().setString(localAddr);
 
-        } else if (actionCode == ActionCode.ACTION_REQ_REMOTEPORT_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.ACTION_REQ_REMOTEPORT_ATTRIBUTE)
+        {
 
-            if ((remotePort == -1 ) && (socket !=null)) {
+            if ((remotePort == -1) && (socket != null))
+            {
                 remotePort = socket.getIOChannel().socket().getPort();
             }
             request.setRemotePort(remotePort);
 
-        } else if (actionCode == ActionCode.ACTION_REQ_LOCALPORT_ATTRIBUTE) {
+        } else if (actionCode == ActionCode.ACTION_REQ_LOCALPORT_ATTRIBUTE)
+        {
 
-            if ((localPort == -1 ) && (socket !=null)) {
+            if ((localPort == -1) && (socket != null))
+            {
                 localPort = socket.getIOChannel().socket().getLocalPort();
             }
             request.setLocalPort(localPort);
 
-        } else if (actionCode == ActionCode.ACTION_REQ_SSL_ATTRIBUTE ) {
+        } else if (actionCode == ActionCode.ACTION_REQ_SSL_ATTRIBUTE)
+        {
 
-            try {
-                if (sslSupport != null) {
+            try
+            {
+                if (sslSupport != null)
+                {
                     Object sslO = sslSupport.getCipherSuite();
                     if (sslO != null)
                         request.setAttribute
-                            (SSLSupport.CIPHER_SUITE_KEY, sslO);
+                                (SSLSupport.CIPHER_SUITE_KEY, sslO);
                     sslO = sslSupport.getPeerCertificateChain(false);
                     if (sslO != null)
                         request.setAttribute
-                            (SSLSupport.CERTIFICATE_KEY, sslO);
+                                (SSLSupport.CERTIFICATE_KEY, sslO);
                     sslO = sslSupport.getKeySize();
                     if (sslO != null)
                         request.setAttribute
-                            (SSLSupport.KEY_SIZE_KEY, sslO);
+                                (SSLSupport.KEY_SIZE_KEY, sslO);
                     sslO = sslSupport.getSessionId();
                     if (sslO != null)
                         request.setAttribute
-                            (SSLSupport.SESSION_ID_KEY, sslO);
+                                (SSLSupport.SESSION_ID_KEY, sslO);
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 log.warn(sm.getString("http11processor.socket.ssl"), e);
             }
 
-        } else if (actionCode == ActionCode.ACTION_REQ_SSL_CERTIFICATE) {
+        } else if (actionCode == ActionCode.ACTION_REQ_SSL_CERTIFICATE)
+        {
 
-            if( sslSupport != null) {
+            if (sslSupport != null)
+            {
                 /*
                  * Consume and buffer the request body, so that it does not
                  * interfere with the client's handshake messages
                  */
                 InputFilter[] inputFilters = inputBuffer.getFilters();
                 ((BufferedInputFilter) inputFilters[Constants.BUFFERED_FILTER])
-                    .setLimit(maxSavePostSize);
+                        .setLimit(maxSavePostSize);
                 inputBuffer.addActiveFilter
-                    (inputFilters[Constants.BUFFERED_FILTER]);
-                try {
+                        (inputFilters[Constants.BUFFERED_FILTER]);
+                try
+                {
                     Object sslO = sslSupport.getPeerCertificateChain(true);
-                    if( sslO != null) {
+                    if (sslO != null)
+                    {
                         request.setAttribute
-                            (SSLSupport.CERTIFICATE_KEY, sslO);
+                                (SSLSupport.CERTIFICATE_KEY, sslO);
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     log.warn(sm.getString("http11processor.socket.ssl"), e);
                 }
             }
 
-        } else if (actionCode == ActionCode.ACTION_REQ_SET_BODY_REPLAY) {
+        } else if (actionCode == ActionCode.ACTION_REQ_SET_BODY_REPLAY)
+        {
             ByteChunk body = (ByteChunk) param;
 
             InputFilter savedBody = new SavedRequestInputFilter(body);
             savedBody.setRequest(request);
 
             InternalNioInputBuffer internalBuffer = (InternalNioInputBuffer)
-                request.getInputBuffer();
+                    request.getInputBuffer();
             internalBuffer.addActiveFilter(savedBody);
 
-        } else if (actionCode == ActionCode.ACTION_AVAILABLE) {
+        } else if (actionCode == ActionCode.ACTION_AVAILABLE)
+        {
             request.setAvailable(inputBuffer.available());
-        } else if (actionCode == ActionCode.ACTION_COMET_BEGIN) {
+        } else if (actionCode == ActionCode.ACTION_COMET_BEGIN)
+        {
             comet = true;
-        } else if (actionCode == ActionCode.ACTION_COMET_END) {
+        } else if (actionCode == ActionCode.ACTION_COMET_END)
+        {
             comet = false;
-        }  else if (actionCode == ActionCode.ACTION_COMET_CLOSE) {
-            if (socket==null || socket.getAttachment(false)==null) return;
-        	NioEndpoint.KeyAttachment attach = (NioEndpoint.KeyAttachment)socket.getAttachment(false);
+        } else if (actionCode == ActionCode.ACTION_COMET_CLOSE)
+        {
+            if (socket == null || socket.getAttachment(false) == null) return;
+            NioEndpoint.KeyAttachment attach = (NioEndpoint.KeyAttachment) socket.getAttachment(false);
             attach.setCometOps(NioEndpoint.OP_CALLBACK | attach.getCometOps());
             //notify poller if not on a tomcat thread
             RequestInfo rp = request.getRequestProcessor();
-            if ( rp.getStage() != org.apache.coyote.Constants.STAGE_SERVICE ) //async handling
+            if (rp.getStage() != org.apache.coyote.Constants.STAGE_SERVICE) //async handling
                 socket.getPoller().cometInterest(socket);
-        } else if (actionCode == ActionCode.ACTION_COMET_SETTIMEOUT) {
-            if (param==null) return;
-            if (socket==null || socket.getAttachment(false)==null) return;
-            NioEndpoint.KeyAttachment attach = (NioEndpoint.KeyAttachment)socket.getAttachment(false);
-            long timeout = ((Long)param).longValue();
+        } else if (actionCode == ActionCode.ACTION_COMET_SETTIMEOUT)
+        {
+            if (param == null) return;
+            if (socket == null || socket.getAttachment(false) == null) return;
+            NioEndpoint.KeyAttachment attach = (NioEndpoint.KeyAttachment) socket.getAttachment(false);
+            long timeout = ((Long) param).longValue();
             //if we are not piggy backing on a worker thread, set the timeout
             RequestInfo rp = request.getRequestProcessor();
-            if ( rp.getStage() != org.apache.coyote.Constants.STAGE_SERVICE ) //async handling
+            if (rp.getStage() != org.apache.coyote.Constants.STAGE_SERVICE) //async handling
                 attach.setTimeout(timeout);
         }
 
@@ -1250,63 +1359,71 @@ public class Http11NioProcessor implements ActionHook {
 
     // ------------------------------------------------------ Connector Methods
 
+    /**
+     * Get the associated adapter.
+     *
+     * @return the associated adapter
+     */
+    public Adapter getAdapter()
+    {
+        return adapter;
+    }
 
     /**
      * Set the associated adapter.
      *
      * @param adapter the new adapter
      */
-    public void setAdapter(Adapter adapter) {
+    public void setAdapter(Adapter adapter)
+    {
         this.adapter = adapter;
     }
 
-    public void setSslSupport(SSLSupport sslSupport) {
-        this.sslSupport = sslSupport;
-    }
-
-    /**
-     * Get the associated adapter.
-     *
-     * @return the associated adapter
-     */
-    public Adapter getAdapter() {
-        return adapter;
-    }
-
-    public SSLSupport getSslSupport() {
+    public SSLSupport getSslSupport()
+    {
         return sslSupport;
+    }
+
+    public void setSslSupport(SSLSupport sslSupport)
+    {
+        this.sslSupport = sslSupport;
     }
 
     // ------------------------------------------------------ Protected Methods
 
-
     /**
      * After reading the request headers, we have to setup the request filters.
      */
-    protected void prepareRequest() {
+    protected void prepareRequest()
+    {
 
         http11 = true;
         http09 = false;
         contentDelimitation = false;
         expectation = false;
         sendfileData = null;
-        if (ssl) {
+        if (ssl)
+        {
             request.scheme().setString("https");
         }
         MessageBytes protocolMB = request.protocol();
-        if (protocolMB.equals(Constants.HTTP_11)) {
+        if (protocolMB.equals(Constants.HTTP_11))
+        {
             http11 = true;
             protocolMB.setString(Constants.HTTP_11);
-        } else if (protocolMB.equals(Constants.HTTP_10)) {
+        } else if (protocolMB.equals(Constants.HTTP_10))
+        {
             http11 = false;
             keepAlive = false;
             protocolMB.setString(Constants.HTTP_10);
-        } else if (protocolMB.equals("")) {
+        } else if (protocolMB.equals(""))
+        {
             // HTTP/0.9
             http09 = true;
             http11 = false;
             keepAlive = false;
-        } else {
+        } else
+        {
             // Unsupported protocol
             http11 = false;
             error = true;
@@ -1315,9 +1432,11 @@ public class Http11NioProcessor implements ActionHook {
         }
 
         MessageBytes methodMB = request.method();
-        if (methodMB.equals(Constants.GET)) {
+        if (methodMB.equals(Constants.GET))
+        {
             methodMB.setString(Constants.GET);
-        } else if (methodMB.equals(Constants.POST)) {
+        } else if (methodMB.equals(Constants.POST))
+        {
             methodMB.setString(Constants.POST);
         }
 
@@ -1325,12 +1444,15 @@ public class Http11NioProcessor implements ActionHook {
 
         // Check connection header
         MessageBytes connectionValueMB = headers.getValue("connection");
-        if (connectionValueMB != null) {
+        if (connectionValueMB != null)
+        {
             ByteChunk connectionValueBC = connectionValueMB.getByteChunk();
-            if (findBytes(connectionValueBC, Constants.CLOSE_BYTES) != -1) {
+            if (findBytes(connectionValueBC, Constants.CLOSE_BYTES) != -1)
+            {
                 keepAlive = false;
             } else if (findBytes(connectionValueBC,
-                                 Constants.KEEPALIVE_BYTES) != -1) {
+                    Constants.KEEPALIVE_BYTES) != -1)
+            {
                 keepAlive = true;
             }
         }
@@ -1339,20 +1461,25 @@ public class Http11NioProcessor implements ActionHook {
         if (http11)
             expectMB = headers.getValue("expect");
         if ((expectMB != null)
-            && (expectMB.indexOfIgnoreCase("100-continue", 0) != -1)) {
+                && (expectMB.indexOfIgnoreCase("100-continue", 0) != -1))
+        {
             inputBuffer.setSwallowInput(false);
             expectation = true;
         }
 
         // Check user-agent header
-        if ((restrictedUserAgents != null) && ((http11) || (keepAlive))) {
+        if ((restrictedUserAgents != null) && ((http11) || (keepAlive)))
+        {
             MessageBytes userAgentValueMB = headers.getValue("user-agent");
             // Check in the restricted list, and adjust the http11
             // and keepAlive flags accordingly
-            if(userAgentValueMB != null) {
+            if (userAgentValueMB != null)
+            {
                 String userAgentValue = userAgentValueMB.toString();
-                for (int i = 0; i < restrictedUserAgents.length; i++) {
-                    if (restrictedUserAgents[i].matcher(userAgentValue).matches()) {
+                for (int i = 0; i < restrictedUserAgents.length; i++)
+                {
+                    if (restrictedUserAgents[i].matcher(userAgentValue).matches())
+                    {
                         http11 = false;
                         keepAlive = false;
                         break;
@@ -1363,27 +1490,31 @@ public class Http11NioProcessor implements ActionHook {
 
         // Check for a full URI (including protocol://host:port/)
         ByteChunk uriBC = request.requestURI().getByteChunk();
-        if (uriBC.startsWithIgnoreCase("http", 0)) {
+        if (uriBC.startsWithIgnoreCase("http", 0))
+        {
 
             int pos = uriBC.indexOf("://", 0, 3, 4);
             int uriBCStart = uriBC.getStart();
             int slashPos = -1;
-            if (pos != -1) {
+            if (pos != -1)
+            {
                 byte[] uriB = uriBC.getBytes();
                 slashPos = uriBC.indexOf('/', pos + 3);
-                if (slashPos == -1) {
+                if (slashPos == -1)
+                {
                     slashPos = uriBC.getLength();
                     // Set URI as "/"
                     request.requestURI().setBytes
-                        (uriB, uriBCStart + pos + 1, 1);
-                } else {
+                            (uriB, uriBCStart + pos + 1, 1);
+                } else
+                {
                     request.requestURI().setBytes
-                        (uriB, uriBCStart + slashPos,
-                         uriBC.getLength() - slashPos);
+                            (uriB, uriBCStart + slashPos,
+                                    uriBC.getLength() - slashPos);
                 }
                 MessageBytes hostMB = headers.setValue("host");
                 hostMB.setBytes(uriB, uriBCStart + pos + 3,
-                                slashPos - pos - 3);
+                        slashPos - pos - 3);
             }
 
         }
@@ -1395,16 +1526,19 @@ public class Http11NioProcessor implements ActionHook {
         MessageBytes transferEncodingValueMB = null;
         if (http11)
             transferEncodingValueMB = headers.getValue("transfer-encoding");
-        if (transferEncodingValueMB != null) {
+        if (transferEncodingValueMB != null)
+        {
             String transferEncodingValue = transferEncodingValueMB.toString();
             // Parse the comma separated list. "identity" codings are ignored
             int startPos = 0;
             int commaPos = transferEncodingValue.indexOf(',');
             String encodingName = null;
-            while (commaPos != -1) {
+            while (commaPos != -1)
+            {
                 encodingName = transferEncodingValue.substring
-                    (startPos, commaPos).toLowerCase().trim();
-                if (!addInputFilter(inputFilters, encodingName)) {
+                        (startPos, commaPos).toLowerCase().trim();
+                if (!addInputFilter(inputFilters, encodingName))
+                {
                     // Unsupported transfer encoding
                     error = true;
                     // 501 - Unimplemented
@@ -1414,8 +1548,9 @@ public class Http11NioProcessor implements ActionHook {
                 commaPos = transferEncodingValue.indexOf(',', startPos);
             }
             encodingName = transferEncodingValue.substring(startPos)
-                .toLowerCase().trim();
-            if (!addInputFilter(inputFilters, encodingName)) {
+                    .toLowerCase().trim();
+            if (!addInputFilter(inputFilters, encodingName))
+            {
                 // Unsupported transfer encoding
                 error = true;
                 // 501 - Unimplemented
@@ -1425,8 +1560,10 @@ public class Http11NioProcessor implements ActionHook {
 
         // Parse content-length header
         long contentLength = request.getContentLengthLong();
-        if (contentLength >= 0) {
-            if (contentDelimitation) {
+        if (contentLength >= 0)
+        {
+            if (contentDelimitation)
+            {
                 // contentDelimitation being true at this point indicates that
                 // chunked encoding is being used but chunked encoding should
                 // not be used with a content length. RFC 2616, section 4.4,
@@ -1434,7 +1571,8 @@ public class Http11NioProcessor implements ActionHook {
                 // so remove it.
                 headers.removeHeader("content-length");
                 request.setContentLength(-1);
-            } else {
+            } else
+            {
                 inputBuffer.addActiveFilter
                         (inputFilters[Constants.IDENTITY_FILTER]);
                 contentDelimitation = true;
@@ -1444,7 +1582,8 @@ public class Http11NioProcessor implements ActionHook {
         MessageBytes valueMB = headers.getValue("host");
 
         // Check host header
-        if (http11 && (valueMB == null)) {
+        if (http11 && (valueMB == null))
+        {
             error = true;
             // 400 - Bad request
             response.setStatus(400);
@@ -1452,7 +1591,8 @@ public class Http11NioProcessor implements ActionHook {
 
         parseHost(valueMB);
 
-        if (!contentDelimitation) {
+        if (!contentDelimitation)
+        {
             // If there's no content length 
             // (broken HTTP/1.0 or HTTP/1.1), assume
             // the client is not broken and didn't send a body
@@ -1462,14 +1602,15 @@ public class Http11NioProcessor implements ActionHook {
         }
 
         // Advertise sendfile support through a request attribute
-        if (endpoint.getUseSendfile()) 
+        if (endpoint.getUseSendfile())
             request.setAttribute("org.apache.tomcat.sendfile.support", Boolean.TRUE);
         // Advertise comet support through a request attribute
         request.setAttribute("org.apache.tomcat.comet.support", Boolean.TRUE);
         // Advertise comet timeout support
         request.setAttribute("org.apache.tomcat.comet.timeout.support", Boolean.TRUE);
 
-        if (error) {
+        if (error)
+        {
             adapter.log(request, response, 0);
         }
     }
@@ -1478,9 +1619,11 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Parse host.
      */
-    public void parseHost(MessageBytes valueMB) {
+    public void parseHost(MessageBytes valueMB)
+    {
 
-        if (valueMB == null || valueMB.isNull()) {
+        if (valueMB == null || valueMB.isNull())
+        {
             // HTTP/1.0
             // Default is what the socket tells us. Overriden if a host is
             // found/parsed
@@ -1493,43 +1636,54 @@ public class Http11NioProcessor implements ActionHook {
         int valueL = valueBC.getLength();
         int valueS = valueBC.getStart();
         int colonPos = -1;
-        if (hostNameC.length < valueL) {
+        if (hostNameC.length < valueL)
+        {
             hostNameC = new char[valueL];
         }
 
         boolean ipv6 = (valueB[valueS] == '[');
         boolean bracketClosed = false;
-        for (int i = 0; i < valueL; i++) {
+        for (int i = 0; i < valueL; i++)
+        {
             char b = (char) valueB[i + valueS];
             hostNameC[i] = b;
-            if (b == ']') {
+            if (b == ']')
+            {
                 bracketClosed = true;
-            } else if (b == ':') {
-                if (!ipv6 || bracketClosed) {
+            } else if (b == ':')
+            {
+                if (!ipv6 || bracketClosed)
+                {
                     colonPos = i;
                     break;
                 }
             }
         }
 
-        if (colonPos < 0) {
-            if (!ssl) {
+        if (colonPos < 0)
+        {
+            if (!ssl)
+            {
                 // 80 - Default HTTP port
                 request.setServerPort(80);
-            } else {
+            } else
+            {
                 // 443 - Default HTTPS port
                 request.setServerPort(443);
             }
             request.serverName().setChars(hostNameC, 0, valueL);
-        } else {
+        } else
+        {
 
             request.serverName().setChars(hostNameC, 0, colonPos);
 
             int port = 0;
             int mult = 1;
-            for (int i = valueL - 1; i > colonPos; i--) {
+            for (int i = valueL - 1; i > colonPos; i--)
+            {
                 int charValue = HexUtils.getDec(valueB[i + valueS]);
-                if (charValue == -1) {
+                if (charValue == -1)
+                {
                     // Invalid character
                     error = true;
                     // 400 - Bad request
@@ -1549,28 +1703,31 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Check if the resource could be compressed, if the client supports it.
      */
-    private boolean isCompressable() {
+    private boolean isCompressable()
+    {
 
         // Check if content is not already gzipped
         MessageBytes contentEncodingMB =
-            response.getMimeHeaders().getValue("Content-Encoding");
+                response.getMimeHeaders().getValue("Content-Encoding");
 
         if ((contentEncodingMB != null)
-            && (contentEncodingMB.indexOf("gzip") != -1))
+                && (contentEncodingMB.indexOf("gzip") != -1))
             return false;
 
         // If force mode, always compress (test purposes only)
         if (compressionLevel == 2)
-           return true;
+            return true;
 
         // Check if sufficient length to trigger the compression
         long contentLength = response.getContentLengthLong();
         if ((contentLength == -1)
-            || (contentLength > compressionMinSize)) {
+                || (contentLength > compressionMinSize))
+        {
             // Check for compatible MIME-TYPE
-            if (compressableMimeTypes != null) {
+            if (compressableMimeTypes != null)
+            {
                 return (startsWithStringArray(compressableMimeTypes,
-                                              response.getContentType()));
+                        response.getContentType()));
             }
         }
 
@@ -1582,25 +1739,28 @@ public class Http11NioProcessor implements ActionHook {
      * Check if compression should be used for this resource. Already checked
      * that the resource could be compressed if the client supports it.
      */
-    private boolean useCompression() {
+    private boolean useCompression()
+    {
 
         // Check if browser support gzip encoding
         MessageBytes acceptEncodingMB =
-            request.getMimeHeaders().getValue("accept-encoding");
+                request.getMimeHeaders().getValue("accept-encoding");
 
         if ((acceptEncodingMB == null)
-            || (acceptEncodingMB.indexOf("gzip") == -1))
+                || (acceptEncodingMB.indexOf("gzip") == -1))
             return false;
 
         // If force mode, always compress (test purposes only)
         if (compressionLevel == 2)
-           return true;
+            return true;
 
         // Check for incompatible Browser
-        if (noCompressionUserAgents != null) {
+        if (noCompressionUserAgents != null)
+        {
             MessageBytes userAgentValueMB =
-                request.getMimeHeaders().getValue("user-agent");
-            if(userAgentValueMB != null) {
+                    request.getMimeHeaders().getValue("user-agent");
+            if (userAgentValueMB != null)
+            {
                 String userAgentValue = userAgentValueMB.toString();
 
                 // If one Regexp rule match, disable compression
@@ -1613,47 +1773,53 @@ public class Http11NioProcessor implements ActionHook {
         return true;
     }
 
-    
+
     /**
      * When committing the response, we have to validate the set of headers, as
      * well as setup the response filters.
      */
-    protected void prepareResponse() throws IOException {
+    protected void prepareResponse() throws IOException
+    {
 
         boolean entityBody = true;
         contentDelimitation = false;
 
         OutputFilter[] outputFilters = outputBuffer.getFilters();
 
-        if (http09 == true) {
+        if (http09 == true)
+        {
             // HTTP/0.9
             outputBuffer.addActiveFilter
-                (outputFilters[Constants.IDENTITY_FILTER]);
+                    (outputFilters[Constants.IDENTITY_FILTER]);
             return;
         }
 
         int statusCode = response.getStatus();
         if ((statusCode == 204) || (statusCode == 205)
-            || (statusCode == 304)) {
+                || (statusCode == 304))
+        {
             // No entity body
             outputBuffer.addActiveFilter
-                (outputFilters[Constants.VOID_FILTER]);
+                    (outputFilters[Constants.VOID_FILTER]);
             entityBody = false;
             contentDelimitation = true;
         }
 
         MessageBytes methodMB = request.method();
-        if (methodMB.equals("HEAD")) {
+        if (methodMB.equals("HEAD"))
+        {
             // No entity body
             outputBuffer.addActiveFilter
-                (outputFilters[Constants.VOID_FILTER]);
+                    (outputFilters[Constants.VOID_FILTER]);
             contentDelimitation = true;
         }
-        
+
         // Sendfile support
-        if (this.endpoint.getUseSendfile()) {
+        if (this.endpoint.getUseSendfile())
+        {
             String fileName = (String) request.getAttribute("org.apache.tomcat.sendfile.filename");
-            if (fileName != null) {
+            if (fileName != null)
+            {
                 // No entity body sent here
                 outputBuffer.addActiveFilter(outputFilters[Constants.VOID_FILTER]);
                 contentDelimitation = true;
@@ -1665,68 +1831,83 @@ public class Http11NioProcessor implements ActionHook {
         }
 
 
-
         // Check for compression
         boolean isCompressable = false;
         boolean useCompression = false;
-        if (entityBody && (compressionLevel > 0) && (sendfileData == null)) {
+        if (entityBody && (compressionLevel > 0) && (sendfileData == null))
+        {
             isCompressable = isCompressable();
-            if (isCompressable) {
+            if (isCompressable)
+            {
                 useCompression = useCompression();
             }
             // Change content-length to -1 to force chunking
-            if (useCompression) {
+            if (useCompression)
+            {
                 response.setContentLength(-1);
             }
         }
 
         MimeHeaders headers = response.getMimeHeaders();
-        if (!entityBody) {
+        if (!entityBody)
+        {
             response.setContentLength(-1);
-        } else {
+        } else
+        {
             String contentType = response.getContentType();
-            if (contentType != null) {
+            if (contentType != null)
+            {
                 headers.setValue("Content-Type").setString(contentType);
             }
             String contentLanguage = response.getContentLanguage();
-            if (contentLanguage != null) {
+            if (contentLanguage != null)
+            {
                 headers.setValue("Content-Language")
-                    .setString(contentLanguage);
+                        .setString(contentLanguage);
             }
         }
 
         long contentLength = response.getContentLengthLong();
-        if (contentLength != -1) {
+        if (contentLength != -1)
+        {
             headers.setValue("Content-Length").setLong(contentLength);
             outputBuffer.addActiveFilter
-                (outputFilters[Constants.IDENTITY_FILTER]);
+                    (outputFilters[Constants.IDENTITY_FILTER]);
             contentDelimitation = true;
-        } else {
-            if (entityBody && http11) {
+        } else
+        {
+            if (entityBody && http11)
+            {
                 outputBuffer.addActiveFilter
-                    (outputFilters[Constants.CHUNKED_FILTER]);
+                        (outputFilters[Constants.CHUNKED_FILTER]);
                 contentDelimitation = true;
                 headers.addValue(Constants.TRANSFERENCODING).setString(Constants.CHUNKED);
-            } else {
+            } else
+            {
                 outputBuffer.addActiveFilter
-                    (outputFilters[Constants.IDENTITY_FILTER]);
+                        (outputFilters[Constants.IDENTITY_FILTER]);
             }
         }
 
-        if (useCompression) {
+        if (useCompression)
+        {
             outputBuffer.addActiveFilter(outputFilters[Constants.GZIP_FILTER]);
             headers.setValue("Content-Encoding").setString("gzip");
         }
         // If it might be compressed, set the Vary header
-        if (isCompressable) {
+        if (isCompressable)
+        {
             // Make Proxies happy via Vary (from mod_deflate)
             MessageBytes vary = headers.getValue("Vary");
-            if (vary == null) {
+            if (vary == null)
+            {
                 // Add a new Vary header
                 headers.setValue("Vary").setString("Accept-Encoding");
-            } else if (vary.equals("*")) {
+            } else if (vary.equals("*"))
+            {
                 // No action required
-            } else {
+            } else
+            {
                 // Merge into current header
                 headers.setValue("Vary").setString(
                         vary.getString() + ",Accept-Encoding");
@@ -1735,14 +1916,16 @@ public class Http11NioProcessor implements ActionHook {
 
         // Add date header unless application has already set one (e.g. in a
         // Caching Filter)
-        if (headers.getValue("Date") == null) {
+        if (headers.getValue("Date") == null)
+        {
             headers.setValue("Date").setString(
                     FastHttpDateFormat.getCurrentDate());
         }
-        
+
         // FIXME: Add transfer encoding header
 
-        if ((entityBody) && (!contentDelimitation)) {
+        if ((entityBody) && (!contentDelimitation))
+        {
             // Mark as close the connection after the request, and add the
             // connection: close header
             keepAlive = false;
@@ -1751,9 +1934,11 @@ public class Http11NioProcessor implements ActionHook {
         // If we know that the request is bad this early, add the
         // Connection: close header.
         keepAlive = keepAlive && !statusDropsConnection(statusCode);
-        if (!keepAlive) {
+        if (!keepAlive)
+        {
             headers.addValue(Constants.CONNECTION).setString(Constants.CLOSE);
-        } else if (!http11 && !error) {
+        } else if (!http11 && !error)
+        {
             headers.addValue(Constants.CONNECTION).setString(Constants.KEEPALIVE);
         }
 
@@ -1761,16 +1946,19 @@ public class Http11NioProcessor implements ActionHook {
         outputBuffer.sendStatus();
 
         // Add server header
-        if (server != null) {
+        if (server != null)
+        {
             // Always overrides anything the app might set
             headers.setValue("Server").setString(server);
-        } else if (headers.getValue("Server") == null) {
+        } else if (headers.getValue("Server") == null)
+        {
             // If app didn't set the header, use the default
             outputBuffer.write(Constants.SERVER_BYTES);
         }
 
         int size = headers.size();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++)
+        {
             outputBuffer.sendHeader(headers.getName(i), headers.getValue(i));
         }
         outputBuffer.endHeaders();
@@ -1781,7 +1969,8 @@ public class Http11NioProcessor implements ActionHook {
     /**
      * Initialize standard input and output filters.
      */
-    protected void initializeFilters() {
+    protected void initializeFilters()
+    {
 
         // Create and add the identity filters.
         inputBuffer.addFilter(new IdentityInputFilter());
@@ -1814,17 +2003,23 @@ public class Http11NioProcessor implements ActionHook {
      * unsupported)
      */
     protected boolean addInputFilter(InputFilter[] inputFilters,
-                                     String encodingName) {
-        if (encodingName.equals("identity")) {
+                                     String encodingName)
+    {
+        if (encodingName.equals("identity"))
+        {
             // Skip
-        } else if (encodingName.equals("chunked")) {
+        } else if (encodingName.equals("chunked"))
+        {
             inputBuffer.addActiveFilter
-                (inputFilters[Constants.CHUNKED_FILTER]);
+                    (inputFilters[Constants.CHUNKED_FILTER]);
             contentDelimitation = true;
-        } else {
-            for (int i = pluggableFilterIndex; i < inputFilters.length; i++) {
+        } else
+        {
+            for (int i = pluggableFilterIndex; i < inputFilters.length; i++)
+            {
                 if (inputFilters[i].getEncodingName()
-                    .toString().equals(encodingName)) {
+                        .toString().equals(encodingName))
+                {
                     inputBuffer.addActiveFilter(inputFilters[i]);
                     return true;
                 }
@@ -1839,27 +2034,30 @@ public class Http11NioProcessor implements ActionHook {
      * Specialized utility method: find a sequence of lower case bytes inside
      * a ByteChunk.
      */
-    protected int findBytes(ByteChunk bc, byte[] b) {
+    protected int findBytes(ByteChunk bc, byte[] b)
+    {
 
         byte first = b[0];
         byte[] buff = bc.getBuffer();
         int start = bc.getStart();
         int end = bc.getEnd();
 
-    // Look for first char
-    int srcEnd = b.length;
+        // Look for first char
+        int srcEnd = b.length;
 
-    for (int i = start; i <= (end - srcEnd); i++) {
-        if (Ascii.toLower(buff[i]) != first) continue;
-        // found first char, now look for a match
-            int myPos = i+1;
-        for (int srcPos = 1; srcPos < srcEnd; ) {
+        for (int i = start; i <= (end - srcEnd); i++)
+        {
+            if (Ascii.toLower(buff[i]) != first) continue;
+            // found first char, now look for a match
+            int myPos = i + 1;
+            for (int srcPos = 1; srcPos < srcEnd; )
+            {
                 if (Ascii.toLower(buff[myPos++]) != b[srcPos++])
-            break;
+                    break;
                 if (srcPos == srcEnd) return i - start; // found it
+            }
         }
-    }
-    return -1;
+        return -1;
 
     }
 
@@ -1867,15 +2065,16 @@ public class Http11NioProcessor implements ActionHook {
      * Determine if we must drop the connection because of the HTTP status
      * code.  Use the same list of codes as Apache/httpd.
      */
-    protected boolean statusDropsConnection(int status) {
+    protected boolean statusDropsConnection(int status)
+    {
         return status == 400 /* SC_BAD_REQUEST */ ||
-               status == 408 /* SC_REQUEST_TIMEOUT */ ||
-               status == 411 /* SC_LENGTH_REQUIRED */ ||
-               status == 413 /* SC_REQUEST_ENTITY_TOO_LARGE */ ||
-               status == 414 /* SC_REQUEST_URI_TOO_LARGE */ ||
-               status == 500 /* SC_INTERNAL_SERVER_ERROR */ ||
-               status == 503 /* SC_SERVICE_UNAVAILABLE */ ||
-               status == 501 /* SC_NOT_IMPLEMENTED */;
+                status == 408 /* SC_REQUEST_TIMEOUT */ ||
+                status == 411 /* SC_LENGTH_REQUIRED */ ||
+                status == 413 /* SC_REQUEST_ENTITY_TOO_LARGE */ ||
+                status == 414 /* SC_REQUEST_URI_TOO_LARGE */ ||
+                status == 500 /* SC_INTERNAL_SERVER_ERROR */ ||
+                status == 503 /* SC_SERVICE_UNAVAILABLE */ ||
+                status == 501 /* SC_NOT_IMPLEMENTED */;
     }
 
 }

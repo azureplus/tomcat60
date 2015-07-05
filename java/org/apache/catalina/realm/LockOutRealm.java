@@ -39,7 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * to grow) the size of the list of users that have failed authentication is
  * limited.
  */
-public class LockOutRealm extends CombinedRealm {
+public class LockOutRealm extends CombinedRealm
+{
 
     private static Log log = LogFactory.getLog(LockOutRealm.class);
 
@@ -48,10 +49,10 @@ public class LockOutRealm extends CombinedRealm {
      * locked out. Defaults to 5.
      */
     protected int failureCount = 5;
-    
+
     /**
      * The time (in seconds) a user is locked out for after too many
-     * authentication failures. Defaults to 300 (5 minutes). 
+     * authentication failures. Defaults to 300 (5 minutes).
      */
     protected int lockOutTime = 300;
 
@@ -73,7 +74,7 @@ public class LockOutRealm extends CombinedRealm {
      * Users whose last authentication attempt failed. Entries will be ordered
      * in access order from least recent to most recent.
      */
-    protected Map<String,LockRecord> failedUsers = null;
+    protected Map<String, LockRecord> failedUsers = null;
 
 
     /**
@@ -82,22 +83,27 @@ public class LockOutRealm extends CombinedRealm {
      * methods of this component are utilized.  It should also send a
      * LifecycleEvent of type START_EVENT to any registered listeners.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
-    public void start() throws LifecycleException {
+    public void start() throws LifecycleException
+    {
         // Configure the list of failed users to delete the oldest entry once it
         // exceeds the specified size
         failedUsers = new LinkedHashMap<String, LockRecord>(cacheSize, 0.75f,
-                true) {
+                true)
+        {
             protected boolean removeEldestEntry(
-                    Map.Entry<String, LockRecord> eldest) {
-                if (size() > cacheSize) {
+                    Map.Entry<String, LockRecord> eldest)
+            {
+                if (size() > cacheSize)
+                {
                     // Check to see if this element has been removed too quickly
                     long timeInCache = (System.currentTimeMillis() -
-                            eldest.getValue().getLastFailureTime())/1000;
-                    
-                    if (timeInCache < cacheRemovalWarningTime) {
+                            eldest.getValue().getLastFailureTime()) / 1000;
+
+                    if (timeInCache < cacheRemovalWarningTime)
+                    {
                         log.warn(sm.getString("lockOutRealm.removeWarning",
                                 eldest.getKey(), Long.valueOf(timeInCache)));
                     }
@@ -115,24 +121,28 @@ public class LockOutRealm extends CombinedRealm {
      * Return the Principal associated with the specified username and
      * credentials, if there is one; otherwise return <code>null</code>.
      *
-     * @param username Username of the Principal to look up
+     * @param username    Username of the Principal to look up
      * @param credentials Password or other credentials to use in
-     *  authenticating this username
+     *                    authenticating this username
      */
-    public Principal authenticate(String username, byte[] credentials) {
-        if (isLocked(username)) {
+    public Principal authenticate(String username, byte[] credentials)
+    {
+        if (isLocked(username))
+        {
             // Trying to authenticate a locked user is an automatic failure
             registerAuthFailure(username);
-            
+
             log.warn(sm.getString("lockOutRealm.authLockedUser", username));
             return null;
         }
 
         Principal authenticatedUser = super.authenticate(username, credentials);
-        
-        if (authenticatedUser == null) {
+
+        if (authenticatedUser == null)
+        {
             registerAuthFailure(username);
-        } else {
+        } else
+        {
             registerAuthSuccess(username);
         }
         return authenticatedUser;
@@ -144,32 +154,36 @@ public class LockOutRealm extends CombinedRealm {
      * matches the digest calculated using the given parameters using the
      * method described in RFC 2069; otherwise return <code>null</code>.
      *
-     * @param username Username of the Principal to look up
+     * @param username     Username of the Principal to look up
      * @param clientDigest Digest which has been submitted by the client
-     * @param once Unique (or supposedly unique) token which has been used
-     * for this request
-     * @param realmName Realm name
-     * @param md5a2 Second MD5 digest used to calculate the digest :
-     * MD5(Method + ":" + uri)
+     * @param once         Unique (or supposedly unique) token which has been used
+     *                     for this request
+     * @param realmName    Realm name
+     * @param md5a2        Second MD5 digest used to calculate the digest :
+     *                     MD5(Method + ":" + uri)
      */
     public Principal authenticate(String username, String clientDigest,
-            String once, String nc, String cnonce, String qop,
-            String realmName, String md5a2) {
+                                  String once, String nc, String cnonce, String qop,
+                                  String realmName, String md5a2)
+    {
 
-        if (isLocked(username)) {
+        if (isLocked(username))
+        {
             // Trying to authenticate a locked user is an automatic failure
             registerAuthFailure(username);
-            
+
             log.warn(sm.getString("lockOutRealm.authLockedUser", username));
             return null;
         }
 
         Principal authenticatedUser = super.authenticate(username, clientDigest,
                 once, nc, cnonce, qop, realmName, md5a2);
-        
-        if (authenticatedUser == null) {
+
+        if (authenticatedUser == null)
+        {
             registerAuthFailure(username);
-        } else {
+        } else
+        {
             registerAuthSuccess(username);
         }
         return authenticatedUser;
@@ -180,24 +194,28 @@ public class LockOutRealm extends CombinedRealm {
      * Return the Principal associated with the specified username and
      * credentials, if there is one; otherwise return <code>null</code>.
      *
-     * @param username Username of the Principal to look up
+     * @param username    Username of the Principal to look up
      * @param credentials Password or other credentials to use in
-     *  authenticating this username
+     *                    authenticating this username
      */
-    public Principal authenticate(String username, String credentials) {
-        if (isLocked(username)) {
+    public Principal authenticate(String username, String credentials)
+    {
+        if (isLocked(username))
+        {
             // Trying to authenticate a locked user is an automatic failure
             registerAuthFailure(username);
-            
+
             log.warn(sm.getString("lockOutRealm.authLockedUser", username));
             return null;
         }
 
         Principal authenticatedUser = super.authenticate(username, credentials);
-        
-        if (authenticatedUser == null) {
+
+        if (authenticatedUser == null)
+        {
             registerAuthFailure(username);
-        } else {
+        } else
+        {
             registerAuthSuccess(username);
         }
         return authenticatedUser;
@@ -209,27 +227,32 @@ public class LockOutRealm extends CombinedRealm {
      * client certificates.  If there is none, return <code>null</code>.
      *
      * @param certs Array of client certificates, with the first one in
-     *  the array being the certificate of the client itself.
+     *              the array being the certificate of the client itself.
      */
-    public Principal authenticate(X509Certificate[] certs) {
+    public Principal authenticate(X509Certificate[] certs)
+    {
         String username = null;
-        if (certs != null && certs.length >0) {
+        if (certs != null && certs.length > 0)
+        {
             username = certs[0].getSubjectDN().getName();
         }
 
-        if (isLocked(username)) {
+        if (isLocked(username))
+        {
             // Trying to authenticate a locked user is an automatic failure
             registerAuthFailure(username);
-            
+
             log.warn(sm.getString("lockOutRealm.authLockedUser", username));
             return null;
         }
 
         Principal authenticatedUser = super.authenticate(certs);
-        
-        if (authenticatedUser == null) {
+
+        if (authenticatedUser == null)
+        {
             registerAuthFailure(username);
-        } else {
+        } else
+        {
             registerAuthSuccess(username);
         }
         return authenticatedUser;
@@ -239,37 +262,42 @@ public class LockOutRealm extends CombinedRealm {
     /**
      * Unlock the specified username. This will remove all records of
      * authentication failures for this user.
-     * 
+     *
      * @param username The user to unlock
      */
-    public void unlock(String username) {
+    public void unlock(String username)
+    {
         // Auth success clears the lock record so... 
         registerAuthSuccess(username);
     }
-    
+
     /*
      * Checks to see if the current user is locked. If this is associated with
      * a login attempt, then the last access time will be recorded and any
      * attempt to authenticated a locked user will log a warning.
      */
-    private boolean isLocked(String username) {
+    private boolean isLocked(String username)
+    {
         LockRecord lockRecord = null;
-        synchronized (this) {
+        synchronized (this)
+        {
             lockRecord = failedUsers.get(username);
         }
-        
+
         // No lock record means user can't be locked
-        if (lockRecord == null) {
+        if (lockRecord == null)
+        {
             return false;
         }
-        
+
         // Check to see if user is locked
         if (lockRecord.getFailures() >= failureCount &&
                 (System.currentTimeMillis() -
-                        lockRecord.getLastFailureTime())/1000 < lockOutTime) {
+                        lockRecord.getLastFailureTime()) / 1000 < lockOutTime)
+        {
             return true;
         }
-        
+
         // User has not, yet, exceeded lock thresholds
         return false;
     }
@@ -279,7 +307,8 @@ public class LockOutRealm extends CombinedRealm {
      * After successful authentication, any record of previous authentication
      * failure is removed.
      */
-    private synchronized void registerAuthSuccess(String username) {
+    private synchronized void registerAuthSuccess(String username)
+    {
         // Successful authentication means removal from the list of failed users
         failedUsers.remove(username);
     }
@@ -289,18 +318,23 @@ public class LockOutRealm extends CombinedRealm {
      * After a failed authentication, add the record of the failed
      * authentication. 
      */
-    private void registerAuthFailure(String username) {
+    private void registerAuthFailure(String username)
+    {
         LockRecord lockRecord = null;
-        synchronized (this) {
-            if (!failedUsers.containsKey(username)) {
-                lockRecord = new LockRecord(); 
+        synchronized (this)
+        {
+            if (!failedUsers.containsKey(username))
+            {
+                lockRecord = new LockRecord();
                 failedUsers.put(username, lockRecord);
-            } else {
+            } else
+            {
                 lockRecord = failedUsers.get(username);
                 if (lockRecord.getFailures() >= failureCount &&
                         ((System.currentTimeMillis() -
-                                lockRecord.getLastFailureTime())/1000)
-                                > lockOutTime) {
+                                lockRecord.getLastFailureTime()) / 1000)
+                                > lockOutTime)
+                {
                     // User was previously locked out but lockout has now
                     // expired so reset failure count
                     lockRecord.setFailures(0);
@@ -310,13 +344,15 @@ public class LockOutRealm extends CombinedRealm {
         lockRecord.registerFailure();
     }
 
-    
+
     /**
      * Get the number of failed authentication attempts required to lock the
      * user account.
+     *
      * @return the failureCount
      */
-    public int getFailureCount() {
+    public int getFailureCount()
+    {
         return failureCount;
     }
 
@@ -324,27 +360,33 @@ public class LockOutRealm extends CombinedRealm {
     /**
      * Set the number of failed authentication attempts required to lock the
      * user account.
+     *
      * @param failureCount the failureCount to set
      */
-    public void setFailureCount(int failureCount) {
+    public void setFailureCount(int failureCount)
+    {
         this.failureCount = failureCount;
     }
 
 
     /**
      * Get the period for which an account will be locked.
+     *
      * @return the lockOutTime
      */
-    public int getLockOutTime() {
+    public int getLockOutTime()
+    {
         return lockOutTime;
     }
 
 
     /**
      * Set the period for which an account will be locked.
+     *
      * @param lockOutTime the lockOutTime to set
      */
-    public void setLockOutTime(int lockOutTime) {
+    public void setLockOutTime(int lockOutTime)
+    {
         this.lockOutTime = lockOutTime;
     }
 
@@ -352,9 +394,11 @@ public class LockOutRealm extends CombinedRealm {
     /**
      * Get the maximum number of users for which authentication failure will be
      * kept in the cache.
+     *
      * @return the cacheSize
      */
-    public int getCacheSize() {
+    public int getCacheSize()
+    {
         return cacheSize;
     }
 
@@ -362,9 +406,11 @@ public class LockOutRealm extends CombinedRealm {
     /**
      * Set the maximum number of users for which authentication failure will be
      * kept in the cache.
+     *
      * @param cacheSize the cacheSize to set
      */
-    public void setCacheSize(int cacheSize) {
+    public void setCacheSize(int cacheSize)
+    {
         this.cacheSize = cacheSize;
     }
 
@@ -373,9 +419,11 @@ public class LockOutRealm extends CombinedRealm {
      * Get the minimum period a failed authentication must remain in the cache
      * to avoid generating a warning if it is removed from the cache to make
      * space for a new entry.
+     *
      * @return the cacheRemovalWarningTime
      */
-    public int getCacheRemovalWarningTime() {
+    public int getCacheRemovalWarningTime()
+    {
         return cacheRemovalWarningTime;
     }
 
@@ -384,30 +432,37 @@ public class LockOutRealm extends CombinedRealm {
      * Set the minimum period a failed authentication must remain in the cache
      * to avoid generating a warning if it is removed from the cache to make
      * space for a new entry.
+     *
      * @param cacheRemovalWarningTime the cacheRemovalWarningTime to set
      */
-    public void setCacheRemovalWarningTime(int cacheRemovalWarningTime) {
+    public void setCacheRemovalWarningTime(int cacheRemovalWarningTime)
+    {
         this.cacheRemovalWarningTime = cacheRemovalWarningTime;
     }
 
 
-    protected class LockRecord {
+    protected class LockRecord
+    {
         private AtomicInteger failures = new AtomicInteger(0);
         private long lastFailureTime = 0;
-        
-        public int getFailures() {
+
+        public int getFailures()
+        {
             return failures.get();
         }
-        
-        public void setFailures(int theFailures) {
+
+        public void setFailures(int theFailures)
+        {
             failures.set(theFailures);
         }
 
-        public long getLastFailureTime() {
+        public long getLastFailureTime()
+        {
             return lastFailureTime;
         }
-        
-        public void registerFailure() {
+
+        public void registerFailure()
+        {
             failures.incrementAndGet();
             lastFailureTime = System.currentTimeMillis();
         }

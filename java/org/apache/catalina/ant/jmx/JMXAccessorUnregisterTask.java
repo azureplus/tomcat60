@@ -16,20 +16,20 @@
  */
 package org.apache.catalina.ant.jmx;
 
+import org.apache.tools.ant.BuildException;
+
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
-import org.apache.tools.ant.BuildException;
-
 /**
- * unregister a MBean at <em>JMX</em> JSR 160 MBeans Server. 
+ * unregister a MBean at <em>JMX</em> JSR 160 MBeans Server.
  * <ul>
  * <li>unregister Mbeans</li>
  * </ul>
  * <p>
  * Examples:
  * <br/>
- * unregister an existing Mbean at jmx.server connection 
+ * unregister an existing Mbean at jmx.server connection
  * <pre>
  *   &lt;jmx:unregister
  *           ref="jmx.server"
@@ -47,10 +47,10 @@ import org.apache.tools.ant.BuildException;
  * These tasks require Ant 1.6 or later interface.
  *
  * @author Peter Rossbach
- *
  * @since 5.5.12
  */
-public class JMXAccessorUnregisterTask extends JMXAccessorTask {
+public class JMXAccessorUnregisterTask extends JMXAccessorTask
+{
 
     // ----------------------------------------------------- Instance Info
 
@@ -63,44 +63,50 @@ public class JMXAccessorUnregisterTask extends JMXAccessorTask {
      * Return descriptive information about this implementation and the
      * corresponding version number, in the format
      * <code>&lt;description&gt;/&lt;version&gt;</code>.
+     *
      * @return Returns the class info.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
     }
     // ------------------------------------------------------ protected Methods
-    
+
     /**
      * Execute the specified command, based on the configured properties. The
      * input stream will be closed upon completion of this task, whether it was
      * executed successfully or not.
-     * 
-     * @exception Exception
-     *                if an error occurs
+     *
+     * @throws Exception if an error occurs
      */
     public String jmxExecute(MBeanServerConnection jmxServerConnection)
-        throws Exception {
+            throws Exception
+    {
 
-        if (getName() == null) {
+        if (getName() == null)
+        {
             throw new BuildException("Must specify a 'name'");
         }
-        return  jmxUuregister(jmxServerConnection, getName());
-     }
+        return jmxUuregister(jmxServerConnection, getName());
+    }
 
 
     /**
      * Unregister Mbean
+     *
      * @param jmxServerConnection
      * @param name
      * @return The value of the given named attribute
      * @throws Exception
      */
-    protected String jmxUuregister(MBeanServerConnection jmxServerConnection,String name) throws Exception {
+    protected String jmxUuregister(MBeanServerConnection jmxServerConnection, String name) throws Exception
+    {
         String error = null;
-        if(isEcho()) {
-            handleOutput("Unregister MBean " + name  );
+        if (isEcho())
+        {
+            handleOutput("Unregister MBean " + name);
         }
         jmxServerConnection.unregisterMBean(
                 new ObjectName(name));

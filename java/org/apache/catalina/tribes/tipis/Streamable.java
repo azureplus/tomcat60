@@ -29,33 +29,38 @@ import java.io.IOException;
  * &nbsp;&nbsp;System.out.println(s);
  * }
  * </pre></code>
+ *
  * @author Filip Hanik
  * @version 1.0
  */
-public interface Streamable {
-    
+public interface Streamable
+{
+
     /**
      * returns true if the stream has reached its end
+     *
      * @return boolean
      */
     public boolean eof();
-   
+
     /**
      * write data into the byte array starting at offset, maximum bytes read are (data.length-offset)
-     * @param data byte[] - the array to read data into
+     *
+     * @param data   byte[] - the array to read data into
      * @param offset int - start position for writing data
      * @return int - the number of bytes written into the data buffer
      */
     public int write(byte[] data, int offset, int length) throws IOException;
-    
+
     /**
      * read data into the byte array starting at offset
-     * @param data byte[] - the array to read data into
+     *
+     * @param data   byte[] - the array to read data into
      * @param offset int - start position for writing data
      * @param length - the desired read length
      * @return int - the number of bytes read from the data buffer
      */
     public int read(byte[] data, int offset, int length) throws IOException;
 
-   
+
 }

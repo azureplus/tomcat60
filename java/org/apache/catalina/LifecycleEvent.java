@@ -29,23 +29,41 @@ import java.util.EventObject;
  * Tomcat 3.x.
  *
  * @author Craig R. McClanahan
- *
  */
 
 public final class LifecycleEvent
-    extends EventObject {
+        extends EventObject
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
+     * The event data associated with this event.
+     */
+    private Object data = null;
+    /**
+     * The Lifecycle on which this event occurred.
+     */
+    private Lifecycle lifecycle = null;
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * The event type this instance represents.
+     */
+    private String type = null;
+
+
+    /**
      * Construct a new LifecycleEvent with the specified parameters.
      *
      * @param lifecycle Component on which this event occurred
-     * @param type Event type (required)
+     * @param type      Event type (required)
      */
-    public LifecycleEvent(Lifecycle lifecycle, String type) {
+    public LifecycleEvent(Lifecycle lifecycle, String type)
+    {
 
         this(lifecycle, type, null);
 
@@ -56,10 +74,11 @@ public final class LifecycleEvent
      * Construct a new LifecycleEvent with the specified parameters.
      *
      * @param lifecycle Component on which this event occurred
-     * @param type Event type (required)
-     * @param data Event data (if any)
+     * @param type      Event type (required)
+     * @param data      Event data (if any)
      */
-    public LifecycleEvent(Lifecycle lifecycle, String type, Object data) {
+    public LifecycleEvent(Lifecycle lifecycle, String type, Object data)
+    {
 
         super(lifecycle);
         this.lifecycle = lifecycle;
@@ -69,34 +88,13 @@ public final class LifecycleEvent
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The event data associated with this event.
-     */
-    private Object data = null;
-
-
-    /**
-     * The Lifecycle on which this event occurred.
-     */
-    private Lifecycle lifecycle = null;
-
-
-    /**
-     * The event type this instance represents.
-     */
-    private String type = null;
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return the event data of this event.
      */
-    public Object getData() {
+    public Object getData()
+    {
 
         return (this.data);
 
@@ -106,7 +104,8 @@ public final class LifecycleEvent
     /**
      * Return the Lifecycle on which this event occurred.
      */
-    public Lifecycle getLifecycle() {
+    public Lifecycle getLifecycle()
+    {
 
         return (this.lifecycle);
 
@@ -116,7 +115,8 @@ public final class LifecycleEvent
     /**
      * Return the event type of this event.
      */
-    public String getType() {
+    public String getType()
+    {
 
         return (this.type);
 

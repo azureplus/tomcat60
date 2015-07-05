@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.apache.juli.logging;
 
@@ -24,16 +24,23 @@ package org.apache.juli.logging;
  * factory methods.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class LogConfigurationException extends RuntimeException {
+public class LogConfigurationException extends RuntimeException
+{
+
+
+    /**
+     * The underlying cause of this exception.
+     */
+    protected Throwable cause = null;
 
 
     /**
      * Construct a new exception with <code>null</code> as its detail message.
      */
-    public LogConfigurationException() {
+    public LogConfigurationException()
+    {
         super();
     }
 
@@ -43,7 +50,8 @@ public class LogConfigurationException extends RuntimeException {
      *
      * @param message The detail message
      */
-    public LogConfigurationException(String message) {
+    public LogConfigurationException(String message)
+    {
         super(message);
     }
 
@@ -54,8 +62,9 @@ public class LogConfigurationException extends RuntimeException {
      *
      * @param cause The underlying cause
      */
-    public LogConfigurationException(Throwable cause) {
-        this( ((cause == null) ? null : cause.toString()), cause);
+    public LogConfigurationException(Throwable cause)
+    {
+        this(((cause == null) ? null : cause.toString()), cause);
     }
 
 
@@ -63,26 +72,21 @@ public class LogConfigurationException extends RuntimeException {
      * Construct a new exception with the specified detail message and cause.
      *
      * @param message The detail message
-     * @param cause The underlying cause
+     * @param cause   The underlying cause
      */
-    public LogConfigurationException(String message, Throwable cause) {
+    public LogConfigurationException(String message, Throwable cause)
+    {
 
         super(message);
         this.cause = cause; // Two-argument version requires JDK 1.4 or later
 
     }
 
-
-    /**
-     * The underlying cause of this exception.
-     */
-    protected Throwable cause = null;
-
-
     /**
      * Return the underlying cause of this exception (if any).
      */
-    public Throwable getCause() {
+    public Throwable getCause()
+    {
 
         return (this.cause);
 

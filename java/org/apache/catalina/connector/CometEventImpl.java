@@ -18,79 +18,66 @@
 
 package org.apache.catalina.connector;
 
-import java.io.IOException;
+import org.apache.catalina.CometEvent;
+import org.apache.catalina.util.StringManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-import org.apache.catalina.CometEvent;
-import org.apache.catalina.util.StringManager;
-import org.apache.coyote.ActionCode;
-
-public class CometEventImpl implements CometEvent {
+public class CometEventImpl implements CometEvent
+{
 
 
     /**
      * The string manager for this package.
      */
     protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-
-    public CometEventImpl(Request request, Response response) {
-        this.request = request;
-        this.response = response;
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
-
-    
+            StringManager.getManager(Constants.Package);
     /**
      * Associated request.
      */
     protected Request request = null;
 
 
+    // ----------------------------------------------------- Instance Variables
     /**
      * Associated response.
      */
     protected Response response = null;
-
-    
     /**
      * Event type.
      */
     protected EventType eventType = EventType.BEGIN;
-    
-
     /**
      * Event sub type.
      */
     protected EventSubType eventSubType = null;
-    
+
+
+    public CometEventImpl(Request request, Response response)
+    {
+        this.request = request;
+        this.response = response;
+    }
+
 
     // --------------------------------------------------------- Public Methods
 
     /**
      * Clear the event.
      */
-    public void clear() {
+    public void clear()
+    {
         request = null;
         response = null;
     }
 
-    public void setEventType(EventType eventType) {
-        this.eventType = eventType;
-    }
-    
-    public void setEventSubType(EventSubType eventSubType) {
-        this.eventSubType = eventSubType;
-    }
-    
-    public void close() throws IOException {
-        if (request == null) {
+    public void close() throws IOException
+    {
+        if (request == null)
+        {
             throw new IllegalStateException(sm.getString("cometEvent.nullRequest"));
         }
         boolean iscomet = request.isComet();
@@ -99,28 +86,45 @@ public class CometEventImpl implements CometEvent {
         if (iscomet) request.cometClose();
     }
 
-    public EventSubType getEventSubType() {
+    public EventSubType getEventSubType()
+    {
         return eventSubType;
     }
 
-    public EventType getEventType() {
+    public void setEventSubType(EventSubType eventSubType)
+    {
+        this.eventSubType = eventSubType;
+    }
+
+    public EventType getEventType()
+    {
         return eventType;
     }
 
-    public HttpServletRequest getHttpServletRequest() {
+    public void setEventType(EventType eventType)
+    {
+        this.eventType = eventType;
+    }
+
+    public HttpServletRequest getHttpServletRequest()
+    {
         return request.getRequest();
     }
 
-    public HttpServletResponse getHttpServletResponse() {
+    public HttpServletResponse getHttpServletResponse()
+    {
         return response.getResponse();
     }
 
     public void setTimeout(int timeout) throws IOException, ServletException,
-            UnsupportedOperationException {
-        if (request.getAttribute("org.apache.tomcat.comet.timeout.support") == Boolean.TRUE) {
+            UnsupportedOperationException
+    {
+        if (request.getAttribute("org.apache.tomcat.comet.timeout.support") == Boolean.TRUE)
+        {
             request.setAttribute("org.apache.tomcat.comet.timeout", new Integer(timeout));
-            if (request.isComet()) request.setCometTimeout((long)timeout);
-        } else {
+            if (request.isComet()) request.setCometTimeout((long) timeout);
+        } else
+        {
             throw new UnsupportedOperationException();
         }
     }

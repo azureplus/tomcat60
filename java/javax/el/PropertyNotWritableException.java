@@ -20,19 +20,22 @@ package javax.el;
 /**
  *
  */
-public class PropertyNotWritableException extends ELException {
+public class PropertyNotWritableException extends ELException
+{
 
     /**
-     * 
+     *
      */
-    public PropertyNotWritableException() {
+    public PropertyNotWritableException()
+    {
         super();
     }
 
     /**
      * @param message
      */
-    public PropertyNotWritableException(String message) {
+    public PropertyNotWritableException(String message)
+    {
         super(message);
     }
 
@@ -40,14 +43,16 @@ public class PropertyNotWritableException extends ELException {
      * @param message
      * @param cause
      */
-    public PropertyNotWritableException(String message, Throwable cause) {
+    public PropertyNotWritableException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
     /**
      * @param cause
      */
-    public PropertyNotWritableException(Throwable cause) {
+    public PropertyNotWritableException(Throwable cause)
+    {
         super(cause);
     }
 }

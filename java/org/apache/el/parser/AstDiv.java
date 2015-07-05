@@ -26,15 +26,17 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstDiv extends ArithmeticNode {
-    public AstDiv(int id) {
+public final class AstDiv extends ArithmeticNode
+{
+    public AstDiv(int id)
+    {
         super(id);
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         Object obj0 = this.children[0].getValue(ctx);
         Object obj1 = this.children[1].getValue(ctx);
         return ELArithmetic.divide(obj0, obj1);

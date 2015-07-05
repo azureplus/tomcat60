@@ -16,5 +16,6 @@
  */
 package javax.mail.internet;
 
-public interface MimePart {
+public interface MimePart
+{
 }

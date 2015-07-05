@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -28,11 +28,11 @@ import java.util.Enumeration;
  * Represents a reference address to a resource.
  *
  * @author Remy Maucherat
- *
  */
 
 public class ResourceRef
-    extends Reference {
+        extends Reference
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -41,8 +41,8 @@ public class ResourceRef
     /**
      * Default factory for this reference.
      */
-    public static final String DEFAULT_FACTORY = 
-        org.apache.naming.factory.Constants.DEFAULT_RESOURCE_FACTORY;
+    public static final String DEFAULT_FACTORY =
+            org.apache.naming.factory.Constants.DEFAULT_RESOURCE_FACTORY;
 
 
     /**
@@ -68,38 +68,43 @@ public class ResourceRef
 
     /**
      * Resource Reference.
-     * 
+     *
      * @param resourceClass Resource class
-     * @param scope Resource scope
-     * @param auth Resource authetication
+     * @param scope         Resource scope
+     * @param auth          Resource authetication
      */
-    public ResourceRef(String resourceClass, String description, 
-                       String scope, String auth) {
+    public ResourceRef(String resourceClass, String description,
+                       String scope, String auth)
+    {
         this(resourceClass, description, scope, auth, null, null);
     }
 
 
     /**
      * Resource Reference.
-     * 
+     *
      * @param resourceClass Resource class
-     * @param scope Resource scope
-     * @param auth Resource authetication
+     * @param scope         Resource scope
+     * @param auth          Resource authetication
      */
-    public ResourceRef(String resourceClass, String description, 
+    public ResourceRef(String resourceClass, String description,
                        String scope, String auth, String factory,
-                       String factoryLocation) {
+                       String factoryLocation)
+    {
         super(resourceClass, factory, factoryLocation);
         StringRefAddr refAddr = null;
-        if (description != null) {
+        if (description != null)
+        {
             refAddr = new StringRefAddr(DESCRIPTION, description);
             add(refAddr);
         }
-        if (scope != null) {
+        if (scope != null)
+        {
             refAddr = new StringRefAddr(SCOPE, scope);
             add(refAddr);
         }
-        if (auth != null) {
+        if (auth != null)
+        {
             refAddr = new StringRefAddr(AUTH, auth);
             add(refAddr);
         }
@@ -113,18 +118,23 @@ public class ResourceRef
 
 
     /**
-     * Retrieves the class name of the factory of the object to which this 
+     * Retrieves the class name of the factory of the object to which this
      * reference refers.
      */
-    public String getFactoryClassName() {
+    public String getFactoryClassName()
+    {
         String factory = super.getFactoryClassName();
-        if (factory != null) {
+        if (factory != null)
+        {
             return factory;
-        } else {
+        } else
+        {
             factory = System.getProperty(Context.OBJECT_FACTORIES);
-            if (factory != null) {
+            if (factory != null)
+            {
                 return null;
-            } else {
+            } else
+            {
                 return DEFAULT_FACTORY;
             }
         }
@@ -137,7 +147,8 @@ public class ResourceRef
     /**
      * Return a String rendering of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ResourceRef[");
         sb.append("className=");
@@ -147,7 +158,8 @@ public class ResourceRef
         sb.append(",factoryClassName=");
         sb.append(getFactoryClassName());
         Enumeration refAddrs = getAll();
-        while (refAddrs.hasMoreElements()) {
+        while (refAddrs.hasMoreElements())
+        {
             RefAddr refAddr = (RefAddr) refAddrs.nextElement();
             sb.append(",{type=");
             sb.append(refAddr.getType());

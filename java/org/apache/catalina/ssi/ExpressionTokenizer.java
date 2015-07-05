@@ -21,11 +21,11 @@ package org.apache.catalina.ssi;
  * Parses an expression string to return the individual tokens. This is
  * patterned similar to the StreamTokenizer in the JDK but customized for SSI
  * conditional expression parsing.
- * 
  *
  * @author Paul Speed
  */
-public class ExpressionTokenizer {
+public class ExpressionTokenizer
+{
     public static final int TOKEN_STRING = 0;
     public static final int TOKEN_AND = 1;
     public static final int TOKEN_OR = 2;
@@ -48,7 +48,8 @@ public class ExpressionTokenizer {
     /**
      * Creates a new parser for the specified expression.
      */
-    public ExpressionTokenizer(String expr) {
+    public ExpressionTokenizer(String expr)
+    {
         this.expr = expr.trim().toCharArray();
         this.length = this.expr.length;
     }
@@ -57,7 +58,8 @@ public class ExpressionTokenizer {
     /**
      * Returns true if there are more tokens.
      */
-    public boolean hasMoreTokens() {
+    public boolean hasMoreTokens()
+    {
         return index < length;
     }
 
@@ -65,12 +67,14 @@ public class ExpressionTokenizer {
     /**
      * Returns the current index for error reporting purposes.
      */
-    public int getIndex() {
+    public int getIndex()
+    {
         return index;
     }
 
 
-    protected boolean isMetaChar(char c) {
+    protected boolean isMetaChar(char c)
+    {
         return Character.isWhitespace(c) || c == '(' || c == ')' || c == '!'
                 || c == '<' || c == '>' || c == '|' || c == '&' || c == '=';
     }
@@ -80,7 +84,8 @@ public class ExpressionTokenizer {
      * Returns the next token type and initializes any state variables
      * accordingly.
      */
-    public int nextToken() {
+    public int nextToken()
+    {
         // Skip any leading white space
         while (index < length && Character.isWhitespace(expr[index]))
             index++;
@@ -89,62 +94,74 @@ public class ExpressionTokenizer {
         if (index == length) return TOKEN_END; // End of string
         int start = index;
         char currentChar = expr[index];
-        char nextChar = (char)0;
+        char nextChar = (char) 0;
         index++;
         if (index < length) nextChar = expr[index];
         // Check for a known token start
-        switch (currentChar) {
-            case '(' :
+        switch (currentChar)
+        {
+            case '(':
                 return TOKEN_LBRACE;
-            case ')' :
+            case ')':
                 return TOKEN_RBRACE;
-            case '=' :
+            case '=':
                 return TOKEN_EQ;
-            case '!' :
-                if (nextChar == '=') {
+            case '!':
+                if (nextChar == '=')
+                {
                     index++;
                     return TOKEN_NOT_EQ;
-                } else {
+                } else
+                {
                     return TOKEN_NOT;
                 }
-            case '|' :
-                if (nextChar == '|') {
+            case '|':
+                if (nextChar == '|')
+                {
                     index++;
                     return TOKEN_OR;
                 }
                 break;
-            case '&' :
-                if (nextChar == '&') {
+            case '&':
+                if (nextChar == '&')
+                {
                     index++;
                     return TOKEN_AND;
                 }
                 break;
-            case '>' :
-                if (nextChar == '=') {
+            case '>':
+                if (nextChar == '=')
+                {
                     index++;
                     return TOKEN_GE; // Greater than or equal
-                } else {
+                } else
+                {
                     return TOKEN_GT; // Greater than
                 }
-            case '<' :
-                if (nextChar == '=') {
+            case '<':
+                if (nextChar == '=')
+                {
                     index++;
                     return TOKEN_LE; // Less than or equal
-                } else {
+                } else
+                {
                     return TOKEN_LT; // Less than
                 }
-            default :
+            default:
                 // Otherwise it's a string
                 break;
         }
         int end = index;
         // If it's a quoted string then end is the next unescaped quote
-        if (currentChar == '"' || currentChar == '\'') {
+        if (currentChar == '"' || currentChar == '\'')
+        {
             char endChar = currentChar;
             boolean escaped = false;
             start++;
-            for (; index < length; index++) {
-                if (expr[index] == '\\' && !escaped) {
+            for (; index < length; index++)
+            {
+                if (expr[index] == '\\' && !escaped)
+                {
                     escaped = true;
                     continue;
                 }
@@ -153,9 +170,11 @@ public class ExpressionTokenizer {
             }
             end = index;
             index++; // Skip the end quote
-        } else {
+        } else
+        {
             // End is the next whitespace character
-            for (; index < length; index++) {
+            for (; index < length; index++)
+            {
                 if (isMetaChar(expr[index])) break;
             }
             end = index;
@@ -170,7 +189,8 @@ public class ExpressionTokenizer {
      * Returns the String value of the token if it was type TOKEN_STRING.
      * Otherwise null is returned.
      */
-    public String getTokenValue() {
+    public String getTokenValue()
+    {
         return tokenVal;
     }
 }

@@ -23,45 +23,46 @@ package javax.servlet.jsp;
  * in an error page.
  */
 
-public class JspTagException extends JspException {
+public class JspTagException extends JspException
+{
     /**
      * Constructs a new JspTagException with the specified message.
      * The message can be written to the server log and/or displayed
      * for the user.
-     * 
-     * @param msg a <code>String</code> specifying the text of 
-     *     the exception message
+     *
+     * @param msg a <code>String</code> specifying the text of
+     *            the exception message
      */
-    public JspTagException(String msg) {
-	super( msg );
+    public JspTagException(String msg)
+    {
+        super(msg);
     }
 
     /**
      * Constructs a new JspTagException with no message.
      */
-    public JspTagException() {
-	super();
+    public JspTagException()
+    {
+        super();
     }
 
     /**
      * Constructs a new JspTagException when the JSP Tag
-     * needs to throw an exception and include a message 
-     * about the "root cause" exception that interfered with its 
+     * needs to throw an exception and include a message
+     * about the "root cause" exception that interfered with its
      * normal operation, including a description message.
      *
-     *
-     * @param message 		a <code>String</code> containing 
-     *				the text of the exception message
-     *
-     * @param rootCause		the <code>Throwable</code> exception 
-     *				that interfered with the JSP Tag's
-     *				normal operation, making this JSP Tag
-     *				exception necessary
-     *
+     * @param message   a <code>String</code> containing
+     *                  the text of the exception message
+     * @param rootCause the <code>Throwable</code> exception
+     *                  that interfered with the JSP Tag's
+     *                  normal operation, making this JSP Tag
+     *                  exception necessary
      * @since 2.0
      */
-    public JspTagException(String message, Throwable rootCause) {
-	super( message, rootCause );
+    public JspTagException(String message, Throwable rootCause)
+    {
+        super(message, rootCause);
     }
 
 
@@ -71,23 +72,23 @@ public class JspTagException extends JspException {
      * about the "root cause" exception that interfered with its
      * normal operation.  The exception's message is based on the localized
      * message of the underlying exception.
-     *
+     * <p/>
      * <p>This method calls the <code>getLocalizedMessage</code> method
      * on the <code>Throwable</code> exception to get a localized exception
-     * message. When subclassing <code>JspTagException</code>, 
-     * this method can be overridden to create an exception message 
+     * message. When subclassing <code>JspTagException</code>,
+     * this method can be overridden to create an exception message
      * designed for a specific locale.
      *
-     * @param rootCause 	the <code>Throwable</code> exception
-     * 				that interfered with the JSP Tag's
-     *				normal operation, making the JSP Tag 
-     *                          exception necessary
-     *
+     * @param rootCause the <code>Throwable</code> exception
+     *                  that interfered with the JSP Tag's
+     *                  normal operation, making the JSP Tag
+     *                  exception necessary
      * @since 2.0
      */
 
-    public JspTagException(Throwable rootCause) {
-	super( rootCause );
+    public JspTagException(Throwable rootCause)
+    {
+        super(rootCause);
     }
 
 }

@@ -18,17 +18,12 @@
 package org.apache.catalina.mbeans;
 
 
-import javax.management.Attribute;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.ReflectionException;
-import javax.management.RuntimeOperationsException;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
-
 import org.apache.catalina.deploy.ContextEnvironment;
 import org.apache.catalina.deploy.NamingResources;
 import org.apache.tomcat.util.modeler.BaseModelMBean;
+
+import javax.management.*;
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
 
 
 /**
@@ -36,10 +31,10 @@ import org.apache.tomcat.util.modeler.BaseModelMBean;
  * <code>org.apache.catalina.deploy.ContextEnvironment</code> component.</p>
  *
  * @author Amy Roh
- *
  */
 
-public class ContextEnvironmentMBean extends BaseModelMBean {
+public class ContextEnvironmentMBean extends BaseModelMBean
+{
 
 
     // ----------------------------------------------------------- Constructors
@@ -49,13 +44,14 @@ public class ContextEnvironmentMBean extends BaseModelMBean {
      * Construct a <code>ModelMBean</code> with default
      * <code>ModelMBeanInfo</code> information.
      *
-     * @exception MBeanException if the initializer of an object
-     *  throws an exception
-     * @exception RuntimeOperationsException if an IllegalArgumentException
-     *  occurs
+     * @throws MBeanException             if the initializer of an object
+     *                                    throws an exception
+     * @throws RuntimeOperationsException if an IllegalArgumentException
+     *                                    occurs
      */
     public ContextEnvironmentMBean()
-        throws MBeanException, RuntimeOperationsException {
+            throws MBeanException, RuntimeOperationsException
+    {
 
         super();
 
@@ -67,40 +63,45 @@ public class ContextEnvironmentMBean extends BaseModelMBean {
 
     // ------------------------------------------------------------- Attributes
 
-    
+
     /**
      * Set the value of a specific attribute of this MBean.
      *
      * @param attribute The identification of the attribute to be set
-     *  and the new value
-     *
-     * @exception AttributeNotFoundException if this attribute is not
-     *  supported by this MBean
-     * @exception MBeanException if the initializer of an object
-     *  throws an exception
-     * @exception ReflectionException if a Java reflection exception
-     *  occurs when invoking the getter
+     *                  and the new value
+     * @throws AttributeNotFoundException if this attribute is not
+     *                                    supported by this MBean
+     * @throws MBeanException             if the initializer of an object
+     *                                    throws an exception
+     * @throws ReflectionException        if a Java reflection exception
+     *                                    occurs when invoking the getter
      */
-     public void setAttribute(Attribute attribute)
-        throws AttributeNotFoundException, MBeanException,
-        ReflectionException {
+    public void setAttribute(Attribute attribute)
+            throws AttributeNotFoundException, MBeanException,
+            ReflectionException
+    {
 
         super.setAttribute(attribute);
-        
+
         ContextEnvironment ce = null;
-        try {
+        try
+        {
             ce = (ContextEnvironment) getManagedResource();
-        } catch (InstanceNotFoundException e) {
-            throw new MBeanException(e);
-        } catch (InvalidTargetObjectTypeException e) {
-             throw new MBeanException(e);
         }
-        
+        catch (InstanceNotFoundException e)
+        {
+            throw new MBeanException(e);
+        }
+        catch (InvalidTargetObjectTypeException e)
+        {
+            throw new MBeanException(e);
+        }
+
         // cannot use side-efects.  It's removed and added back each time 
         // there is a modification in a resource.
         NamingResources nr = ce.getNamingResources();
         nr.removeEnvironment(ce.getName());
         nr.addEnvironment(ce);
     }
-    
+
 }

@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -23,7 +23,8 @@ package org.apache.naming;
  * Static constants for this package.
  */
 
-public final class Constants {
+public final class Constants
+{
 
     public static final String Package = "org.apache.naming";
 
@@ -31,5 +32,5 @@ public final class Constants {
      * Has security been turned on?
      */
     public static final boolean IS_SECURITY_ENABLED =
-        (System.getSecurityManager() != null);
+            (System.getSecurityManager() != null);
 }

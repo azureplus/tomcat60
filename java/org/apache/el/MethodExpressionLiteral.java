@@ -30,7 +30,8 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 
-public class MethodExpressionLiteral extends MethodExpression implements Externalizable {
+public class MethodExpressionLiteral extends MethodExpression implements Externalizable
+{
 
     private Class expectedType;
 
@@ -38,55 +39,68 @@ public class MethodExpressionLiteral extends MethodExpression implements Externa
 
     private Class[] paramTypes;
 
-    public MethodExpressionLiteral() {
+    public MethodExpressionLiteral()
+    {
         // do nothing
     }
 
-    public MethodExpressionLiteral(String expr, Class expectedType, Class[] paramTypes) {
+    public MethodExpressionLiteral(String expr, Class expectedType, Class[] paramTypes)
+    {
         this.expr = expr;
         this.expectedType = expectedType;
         this.paramTypes = paramTypes;
     }
 
-    public MethodInfo getMethodInfo(ELContext context) throws ELException {
+    public MethodInfo getMethodInfo(ELContext context) throws ELException
+    {
         return new MethodInfo(this.expr, this.expectedType, this.paramTypes);
     }
 
-    public Object invoke(ELContext context, Object[] params) throws ELException {
-        if (this.expectedType != null) {
+    public Object invoke(ELContext context, Object[] params) throws ELException
+    {
+        if (this.expectedType != null)
+        {
             return ELSupport.coerceToType(this.expr, this.expectedType);
-        } else {
+        } else
+        {
             return this.expr;
         }
     }
 
-    public String getExpressionString() {
+    public String getExpressionString()
+    {
         return this.expr;
     }
 
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         return (obj instanceof MethodExpressionLiteral && this.hashCode() == obj.hashCode());
     }
 
-    public int hashCode() {
+    public int hashCode()
+    {
         return this.expr.hashCode();
     }
 
-    public boolean isLiteralText() {
+    public boolean isLiteralText()
+    {
         return true;
     }
 
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
+    {
         this.expr = in.readUTF();
         String type = in.readUTF();
-        if (!"".equals(type)) {
+        if (!"".equals(type))
+        {
             this.expectedType = ReflectionUtil.forName(type);
         }
         this.paramTypes = ReflectionUtil.toTypeArray(((String[]) in
                 .readObject()));
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
         out.writeUTF(this.expr);
         out.writeUTF((this.expectedType != null) ? this.expectedType.getName()
                 : "");

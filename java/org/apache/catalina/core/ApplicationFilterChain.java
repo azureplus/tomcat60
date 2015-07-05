@@ -39,148 +39,160 @@ import java.security.PrivilegedActionException;
  * method itself.
  *
  * @author Craig R. McClanahan
- *
  */
 
-final class ApplicationFilterChain implements FilterChain, CometFilterChain {
+final class ApplicationFilterChain implements FilterChain, CometFilterChain
+{
 
+    public static final int INCREMENT = 10;
     // Used to enforce requirements of SRV.8.2 / SRV.14.2.5.1
     private final static ThreadLocal lastServicedRequest;
     private final static ThreadLocal lastServicedResponse;
 
-    static {
-        if (Globals.STRICT_SERVLET_COMPLIANCE) {
+    // -------------------------------------------------------------- Constants
+    /**
+     * The string manager for our package.
+     */
+    private static final StringManager sm =
+            StringManager.getManager(Constants.Package);
+
+
+    // ----------------------------------------------------------- Constructors
+    /**
+     * Static class array used when the SecurityManager is turned on and
+     * <code>doFilter</code> is invoked.
+     */
+    private static Class[] classType = new Class[]{ServletRequest.class,
+            ServletResponse.class,
+            FilterChain.class};
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * Static class array used when the SecurityManager is turned on and
+     * <code>service</code> is invoked.
+     */
+    private static Class[] classTypeUsedInService = new Class[]{
+            ServletRequest.class,
+            ServletResponse.class};
+    /**
+     * Static class array used when the SecurityManager is turned on and
+     * <code>doFilterEvent</code> is invoked.
+     */
+    private static Class[] cometClassType =
+            new Class[]{CometEvent.class, CometFilterChain.class};
+    /**
+     * Static class array used when the SecurityManager is turned on and
+     * <code>event</code> is invoked.
+     */
+    private static Class[] classTypeUsedInEvent =
+            new Class[]{CometEvent.class};
+
+    static
+    {
+        if (Globals.STRICT_SERVLET_COMPLIANCE)
+        {
             lastServicedRequest = new ThreadLocal();
             lastServicedResponse = new ThreadLocal();
-        } else {
+        } else
+        {
             lastServicedRequest = null;
             lastServicedResponse = null;
         }
     }
 
-    // -------------------------------------------------------------- Constants
-
-
-    public static final int INCREMENT = 10;
-
-
-    // ----------------------------------------------------------- Constructors
-
-
-    /**
-     * Construct a new chain instance with no defined filters.
-     */
-    public ApplicationFilterChain() {
-
-        super();
-
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
-
-
     /**
      * Filters.
      */
-    private ApplicationFilterConfig[] filters = 
-        new ApplicationFilterConfig[0];
-
-
+    private ApplicationFilterConfig[] filters =
+            new ApplicationFilterConfig[0];
     /**
-     * The int which is used to maintain the current position 
+     * The int which is used to maintain the current position
      * in the filter chain.
      */
     private int pos = 0;
-
-
     /**
      * The int which gives the current number of filters in the chain.
      */
     private int n = 0;
-
-
     /**
      * The servlet instance to be executed by this chain.
      */
     private Servlet servlet = null;
-
-
-    /**
-     * The string manager for our package.
-     */
-    private static final StringManager sm =
-      StringManager.getManager(Constants.Package);
-
-
     /**
      * The InstanceSupport instance associated with our Wrapper (used to
      * send "before filter" and "after filter" events.
      */
     private InstanceSupport support = null;
 
-    
     /**
-     * Static class array used when the SecurityManager is turned on and 
-     * <code>doFilter</code> is invoked.
+     * Construct a new chain instance with no defined filters.
      */
-    private static Class[] classType = new Class[]{ServletRequest.class, 
-                                                   ServletResponse.class,
-                                                   FilterChain.class};
-                                                   
-    /**
-     * Static class array used when the SecurityManager is turned on and 
-     * <code>service</code> is invoked.
-     */                                                 
-    private static Class[] classTypeUsedInService = new Class[]{
-                                                         ServletRequest.class,
-                                                         ServletResponse.class};
+    public ApplicationFilterChain()
+    {
 
-    /**
-     * Static class array used when the SecurityManager is turned on and 
-     * <code>doFilterEvent</code> is invoked.
-     */
-    private static Class[] cometClassType = 
-        new Class[]{ CometEvent.class, CometFilterChain.class};
-                                                   
-    /**
-     * Static class array used when the SecurityManager is turned on and 
-     * <code>event</code> is invoked.
-     */                                                 
-    private static Class[] classTypeUsedInEvent = 
-        new Class[] { CometEvent.class };
+        super();
+
+    }
 
     // ---------------------------------------------------- FilterChain Methods
 
+    /**
+     * The last request passed to a servlet for servicing from the current
+     * thread.
+     *
+     * @return The last request to be serviced.
+     */
+    public static ServletRequest getLastServicedRequest()
+    {
+        return (ServletRequest) lastServicedRequest.get();
+    }
+
+    /**
+     * The last response passed to a servlet for servicing from the current
+     * thread.
+     *
+     * @return The last response to be serviced.
+     */
+    public static ServletResponse getLastServicedResponse()
+    {
+        return (ServletResponse) lastServicedResponse.get();
+    }
 
     /**
      * Invoke the next filter in this chain, passing the specified request
      * and response.  If there are no more filters in this chain, invoke
      * the <code>service()</code> method of the servlet itself.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet exception occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet exception occurs
      */
     public void doFilter(ServletRequest request, ServletResponse response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
-        if( Globals.IS_SECURITY_ENABLED ) {
+        if (Globals.IS_SECURITY_ENABLED)
+        {
             final ServletRequest req = request;
             final ServletResponse res = response;
-            try {
+            try
+            {
                 java.security.AccessController.doPrivileged(
-                    new java.security.PrivilegedExceptionAction() {
-                        public Object run() 
-                            throws ServletException, IOException {
-                            internalDoFilter(req,res);
-                            return null;
+                        new java.security.PrivilegedExceptionAction()
+                        {
+                            public Object run()
+                                    throws ServletException, IOException
+                            {
+                                internalDoFilter(req, res);
+                                return null;
+                            }
                         }
-                    }
                 );
-            } catch( PrivilegedActionException pe) {
+            }
+            catch (PrivilegedActionException pe)
+            {
                 Exception e = pe.getException();
                 if (e instanceof ServletException)
                     throw (ServletException) e;
@@ -191,118 +203,149 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
                 else
                     throw new ServletException(e.getMessage(), e);
             }
-        } else {
-            internalDoFilter(request,response);
+        } else
+        {
+            internalDoFilter(request, response);
         }
     }
 
-    private void internalDoFilter(ServletRequest request, 
+    private void internalDoFilter(ServletRequest request,
                                   ServletResponse response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Call the next filter if there is one
-        if (pos < n) {
+        if (pos < n)
+        {
             ApplicationFilterConfig filterConfig = filters[pos++];
             Filter filter = null;
-            try {
+            try
+            {
                 filter = filterConfig.getFilter();
                 support.fireInstanceEvent(InstanceEvent.BEFORE_FILTER_EVENT,
-                                          filter, request, response);
-                
-                if( Globals.IS_SECURITY_ENABLED ) {
+                        filter, request, response);
+
+                if (Globals.IS_SECURITY_ENABLED)
+                {
                     final ServletRequest req = request;
                     final ServletResponse res = response;
-                    Principal principal = 
-                        ((HttpServletRequest) req).getUserPrincipal();
+                    Principal principal =
+                            ((HttpServletRequest) req).getUserPrincipal();
 
                     Object[] args = new Object[]{req, res, this};
                     SecurityUtil.doAsPrivilege
-                        ("doFilter", filter, classType, args, principal);
-                    
+                            ("doFilter", filter, classType, args, principal);
+
                     args = null;
-                } else {  
+                } else
+                {
                     filter.doFilter(request, response, this);
                 }
 
                 support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
-                                          filter, request, response);
-            } catch (IOException e) {
+                        filter, request, response);
+            }
+            catch (IOException e)
+            {
                 if (filter != null)
                     support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
-                                              filter, request, response, e);
+                            filter, request, response, e);
                 throw e;
-            } catch (ServletException e) {
+            }
+            catch (ServletException e)
+            {
                 if (filter != null)
                     support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
-                                              filter, request, response, e);
+                            filter, request, response, e);
                 throw e;
-            } catch (RuntimeException e) {
+            }
+            catch (RuntimeException e)
+            {
                 if (filter != null)
                     support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
-                                              filter, request, response, e);
+                            filter, request, response, e);
                 throw e;
-            } catch (Throwable e) {
+            }
+            catch (Throwable e)
+            {
                 if (filter != null)
                     support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
-                                              filter, request, response, e);
+                            filter, request, response, e);
                 throw new ServletException
-                  (sm.getString("filterChain.filter"), e);
+                        (sm.getString("filterChain.filter"), e);
             }
             return;
         }
 
         // We fell off the end of the chain -- call the servlet instance
-        try {
-            if (Globals.STRICT_SERVLET_COMPLIANCE) {
+        try
+        {
+            if (Globals.STRICT_SERVLET_COMPLIANCE)
+            {
                 lastServicedRequest.set(request);
                 lastServicedResponse.set(response);
             }
 
             support.fireInstanceEvent(InstanceEvent.BEFORE_SERVICE_EVENT,
-                                      servlet, request, response);
+                    servlet, request, response);
             if ((request instanceof HttpServletRequest) &&
-                (response instanceof HttpServletResponse)) {
-                    
-                if( Globals.IS_SECURITY_ENABLED ) {
+                    (response instanceof HttpServletResponse))
+            {
+
+                if (Globals.IS_SECURITY_ENABLED)
+                {
                     final ServletRequest req = request;
                     final ServletResponse res = response;
-                    Principal principal = 
-                        ((HttpServletRequest) req).getUserPrincipal();
+                    Principal principal =
+                            ((HttpServletRequest) req).getUserPrincipal();
                     Object[] args = new Object[]{req, res};
                     SecurityUtil.doAsPrivilege("service",
-                                               servlet,
-                                               classTypeUsedInService, 
-                                               args,
-                                               principal);   
+                            servlet,
+                            classTypeUsedInService,
+                            args,
+                            principal);
                     args = null;
-                } else {  
+                } else
+                {
                     servlet.service((HttpServletRequest) request,
-                                    (HttpServletResponse) response);
+                            (HttpServletResponse) response);
                 }
-            } else {
+            } else
+            {
                 servlet.service(request, response);
             }
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
-                                      servlet, request, response);
-        } catch (IOException e) {
+                    servlet, request, response);
+        }
+        catch (IOException e)
+        {
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
-                                      servlet, request, response, e);
+                    servlet, request, response, e);
             throw e;
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
-                                      servlet, request, response, e);
+                    servlet, request, response, e);
             throw e;
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e)
+        {
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
-                                      servlet, request, response, e);
+                    servlet, request, response, e);
             throw e;
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
-                                      servlet, request, response, e);
+                    servlet, request, response, e);
             throw new ServletException
-              (sm.getString("filterChain.servlet"), e);
-        } finally {
-            if (Globals.STRICT_SERVLET_COMPLIANCE) {
+                    (sm.getString("filterChain.servlet"), e);
+        }
+        finally
+        {
+            if (Globals.STRICT_SERVLET_COMPLIANCE)
+            {
                 lastServicedRequest.set(null);
                 lastServicedResponse.set(null);
             }
@@ -310,34 +353,39 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
 
     }
 
-
     /**
      * Invoke the next filter in this chain, passing the specified request
      * and response.  If there are no more filters in this chain, invoke
      * the <code>service()</code> method of the servlet itself.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet exception occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet exception occurs
      */
     public void doFilterEvent(CometEvent event)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
-        if( Globals.IS_SECURITY_ENABLED ) {
+        if (Globals.IS_SECURITY_ENABLED)
+        {
             final CometEvent ev = event;
-            try {
+            try
+            {
                 java.security.AccessController.doPrivileged(
-                    new java.security.PrivilegedExceptionAction() {
-                        public Object run() 
-                            throws ServletException, IOException {
-                            internalDoFilterEvent(ev);
-                            return null;
+                        new java.security.PrivilegedExceptionAction()
+                        {
+                            public Object run()
+                                    throws ServletException, IOException
+                            {
+                                internalDoFilterEvent(ev);
+                                return null;
+                            }
                         }
-                    }
                 );
-            } catch( PrivilegedActionException pe) {
+            }
+            catch (PrivilegedActionException pe)
+            {
                 Exception e = pe.getException();
                 if (e instanceof ServletException)
                     throw (ServletException) e;
@@ -348,42 +396,23 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
                 else
                     throw new ServletException(e.getMessage(), e);
             }
-        } else {
+        } else
+        {
             internalDoFilterEvent(event);
         }
     }
 
-    
-    /**
-     * The last request passed to a servlet for servicing from the current
-     * thread.
-     * 
-     * @return The last request to be serviced. 
-     */
-    public static ServletRequest getLastServicedRequest() {
-        return (ServletRequest) lastServicedRequest.get();
-    }
-
-    
-    /**
-     * The last response passed to a servlet for servicing from the current
-     * thread.
-     * 
-     * @return The last response to be serviced. 
-     */
-    public static ServletResponse getLastServicedResponse() {
-        return (ServletResponse) lastServicedResponse.get();
-    }
-    
-    
     private void internalDoFilterEvent(CometEvent event)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Call the next filter if there is one
-        if (pos < n) {
+        if (pos < n)
+        {
             ApplicationFilterConfig filterConfig = filters[pos++];
             CometFilter filter = null;
-            try {
+            try
+            {
                 filter = (CometFilter) filterConfig.getFilter();
                 // FIXME: No instance listener processing for events for now
                 /*
@@ -391,101 +420,122 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
                         filter, event);
                         */
 
-                if( Globals.IS_SECURITY_ENABLED ) {
+                if (Globals.IS_SECURITY_ENABLED)
+                {
                     final CometEvent ev = event;
-                    Principal principal = 
-                        ev.getHttpServletRequest().getUserPrincipal();
+                    Principal principal =
+                            ev.getHttpServletRequest().getUserPrincipal();
 
                     Object[] args = new Object[]{ev, this};
                     SecurityUtil.doAsPrivilege("doFilterEvent", filter,
                             cometClassType, args, principal);
 
                     args = null;
-                } else {  
+                } else
+                {
                     filter.doFilterEvent(event, this);
                 }
 
                 /*support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
                         filter, event);*/
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 /*
                 if (filter != null)
                     support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
                             filter, event, e);
                             */
                 throw e;
-            } catch (ServletException e) {
+            }
+            catch (ServletException e)
+            {
                 /*
                 if (filter != null)
                     support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
                             filter, event, e);
                             */
                 throw e;
-            } catch (RuntimeException e) {
+            }
+            catch (RuntimeException e)
+            {
                 /*
                 if (filter != null)
                     support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
                             filter, event, e);
                             */
                 throw e;
-            } catch (Throwable e) {
+            }
+            catch (Throwable e)
+            {
                 /*if (filter != null)
                     support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
                             filter, event, e);*/
                 throw new ServletException
-                    (sm.getString("filterChain.filter"), e);
+                        (sm.getString("filterChain.filter"), e);
             }
             return;
         }
 
         // We fell off the end of the chain -- call the servlet instance
-        try {
+        try
+        {
             /*
             support.fireInstanceEvent(InstanceEvent.BEFORE_SERVICE_EVENT,
                     servlet, request, response);
                     */
-            if( Globals.IS_SECURITY_ENABLED ) {
+            if (Globals.IS_SECURITY_ENABLED)
+            {
                 final CometEvent ev = event;
-                Principal principal = 
-                    ev.getHttpServletRequest().getUserPrincipal();
-                Object[] args = new Object[]{ ev };
+                Principal principal =
+                        ev.getHttpServletRequest().getUserPrincipal();
+                Object[] args = new Object[]{ev};
                 SecurityUtil.doAsPrivilege("event",
                         servlet,
-                        classTypeUsedInEvent, 
+                        classTypeUsedInEvent,
                         args,
                         principal);
                 args = null;
-            } else {  
+            } else
+            {
                 ((CometProcessor) servlet).event(event);
             }
             /*
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
                     servlet, request, response);*/
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             /*
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
                     servlet, request, response, e);
                     */
             throw e;
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             /*
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
                     servlet, request, response, e);
                     */
             throw e;
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e)
+        {
             /*
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
                     servlet, request, response, e);
                     */
             throw e;
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             /*
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
                     servlet, request, response, e);
                     */
             throw new ServletException
-                (sm.getString("filterChain.servlet"), e);
+                    (sm.getString("filterChain.servlet"), e);
         }
 
     }
@@ -494,17 +544,18 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
     // -------------------------------------------------------- Package Methods
 
 
-
     /**
      * Add a filter to the set of filters that will be executed in this chain.
      *
      * @param filterConfig The FilterConfig for the servlet to be executed
      */
-    void addFilter(ApplicationFilterConfig filterConfig) {
+    void addFilter(ApplicationFilterConfig filterConfig)
+    {
 
-        if (n == filters.length) {
+        if (n == filters.length)
+        {
             ApplicationFilterConfig[] newFilters =
-                new ApplicationFilterConfig[n + INCREMENT];
+                    new ApplicationFilterConfig[n + INCREMENT];
             System.arraycopy(filters, 0, newFilters, 0, n);
             filters = newFilters;
         }
@@ -516,9 +567,11 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
     /**
      * Release references to the filters and wrapper executed by this chain.
      */
-    void release() {
+    void release()
+    {
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++)
+        {
             filters[i] = null;
         }
         n = 0;
@@ -532,7 +585,8 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
     /**
      * Prepare for reuse of the filters and wrapper executed by this chain.
      */
-    void reuse() {
+    void reuse()
+    {
         pos = 0;
     }
 
@@ -542,7 +596,8 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
      *
      * @param servlet The Wrapper for the servlet to be executed
      */
-    void setServlet(Servlet servlet) {
+    void setServlet(Servlet servlet)
+    {
 
         this.servlet = servlet;
 
@@ -555,7 +610,8 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
      *
      * @param support The InstanceSupport object for our Wrapper
      */
-    void setSupport(InstanceSupport support) {
+    void setSupport(InstanceSupport support)
+    {
 
         this.support = support;
 

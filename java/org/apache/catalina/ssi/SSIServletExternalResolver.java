@@ -37,12 +37,12 @@ import java.util.Enumeration;
 
 /**
  * An implementation of SSIExternalResolver that is used with servlets.
- * 
+ *
  * @author Dan Sandberg
  * @author David Becker
- *
  */
-public class SSIServletExternalResolver implements SSIExternalResolver {
+public class SSIServletExternalResolver implements SSIExternalResolver
+{
     protected final String VARIABLE_NAMES[] = {"AUTH_TYPE", "CONTENT_LENGTH",
             "CONTENT_TYPE", "DOCUMENT_NAME", "DOCUMENT_URI",
             "GATEWAY_INTERFACE", "HTTP_ACCEPT", "HTTP_ACCEPT_ENCODING",
@@ -61,8 +61,9 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
     protected String inputEncoding;
 
     public SSIServletExternalResolver(ServletContext context,
-            HttpServletRequest req, HttpServletResponse res,
-            boolean isVirtualWebappRelative, int debug, String inputEncoding) {
+                                      HttpServletRequest req, HttpServletResponse res,
+                                      boolean isVirtualWebappRelative, int debug, String inputEncoding)
+    {
         this.context = context;
         this.req = req;
         this.res = res;
@@ -72,48 +73,62 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
     }
 
 
-    public void log(String message, Throwable throwable) {
+    public void log(String message, Throwable throwable)
+    {
         //We can't assume that Servlet.log( message, null )
         //is the same as Servlet.log( message ), since API
         //doesn't seem to say so.
-        if (throwable != null) {
+        if (throwable != null)
+        {
             context.log(message, throwable);
-        } else {
+        } else
+        {
             context.log(message);
         }
     }
 
 
-    public void addVariableNames(Collection variableNames) {
-        for (int i = 0; i < VARIABLE_NAMES.length; i++) {
+    public void addVariableNames(Collection variableNames)
+    {
+        for (int i = 0; i < VARIABLE_NAMES.length; i++)
+        {
             String variableName = VARIABLE_NAMES[i];
             String variableValue = getVariableValue(variableName);
-            if (variableValue != null) {
+            if (variableValue != null)
+            {
                 variableNames.add(variableName);
             }
         }
         Enumeration e = req.getAttributeNames();
-        while (e.hasMoreElements()) {
-            String name = (String)e.nextElement();
-            if (!isNameReserved(name)) {
+        while (e.hasMoreElements())
+        {
+            String name = (String) e.nextElement();
+            if (!isNameReserved(name))
+            {
                 variableNames.add(name);
             }
         }
     }
 
 
-    protected Object getReqAttributeIgnoreCase(String targetName) {
+    protected Object getReqAttributeIgnoreCase(String targetName)
+    {
         Object object = null;
-        if (!isNameReserved(targetName)) {
+        if (!isNameReserved(targetName))
+        {
             object = req.getAttribute(targetName);
-            if (object == null) {
+            if (object == null)
+            {
                 Enumeration e = req.getAttributeNames();
-                while (e.hasMoreElements()) {
-                    String name = (String)e.nextElement();
+                while (e.hasMoreElements())
+                {
+                    String name = (String) e.nextElement();
                     if (targetName.equalsIgnoreCase(name)
-                            && !isNameReserved(name)) {
+                            && !isNameReserved(name))
+                    {
                         object = req.getAttribute(name);
-                        if (object != null) {
+                        if (object != null)
+                        {
                             break;
                         }
                     }
@@ -124,196 +139,253 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
     }
 
 
-    protected boolean isNameReserved(String name) {
+    protected boolean isNameReserved(String name)
+    {
         return name.startsWith("java.") || name.startsWith("javax.")
                 || name.startsWith("sun.");
     }
 
 
-    public void setVariableValue(String name, String value) {
-        if (!isNameReserved(name)) {
+    public void setVariableValue(String name, String value)
+    {
+        if (!isNameReserved(name))
+        {
             req.setAttribute(name, value);
         }
     }
 
 
-    public String getVariableValue(String name) {
+    public String getVariableValue(String name)
+    {
         String retVal = null;
         Object object = getReqAttributeIgnoreCase(name);
-        if (object != null) {
+        if (object != null)
+        {
             retVal = object.toString();
-        } else {
+        } else
+        {
             retVal = getCGIVariable(name);
         }
         return retVal;
     }
 
 
-    protected String getCGIVariable(String name) {
+    protected String getCGIVariable(String name)
+    {
         String retVal = null;
         String[] nameParts = name.toUpperCase().split("_");
         int requiredParts = 2;
-        if (nameParts.length == 1) {
-            if (nameParts[0].equals("PATH")) {
+        if (nameParts.length == 1)
+        {
+            if (nameParts[0].equals("PATH"))
+            {
                 requiredParts = 1;
                 retVal = null; // Not implemented
             }
-        }
-        else if (nameParts[0].equals("AUTH")) {
-            if (nameParts[1].equals("TYPE")) {
+        } else if (nameParts[0].equals("AUTH"))
+        {
+            if (nameParts[1].equals("TYPE"))
+            {
                 retVal = req.getAuthType();
             }
-        } else if(nameParts[0].equals("CONTENT")) {
-            if (nameParts[1].equals("LENGTH")) {
+        } else if (nameParts[0].equals("CONTENT"))
+        {
+            if (nameParts[1].equals("LENGTH"))
+            {
                 int contentLength = req.getContentLength();
-                if (contentLength >= 0) {
+                if (contentLength >= 0)
+                {
                     retVal = Integer.toString(contentLength);
                 }
-            } else if (nameParts[1].equals("TYPE")) {
+            } else if (nameParts[1].equals("TYPE"))
+            {
                 retVal = req.getContentType();
             }
-        } else if (nameParts[0].equals("DOCUMENT")) {
-            if (nameParts[1].equals("NAME")) {
+        } else if (nameParts[0].equals("DOCUMENT"))
+        {
+            if (nameParts[1].equals("NAME"))
+            {
                 String requestURI = req.getRequestURI();
                 retVal = requestURI.substring(requestURI.lastIndexOf('/') + 1);
-            } else if (nameParts[1].equals("URI")) {
+            } else if (nameParts[1].equals("URI"))
+            {
                 retVal = req.getRequestURI();
             }
-        } else if (name.equalsIgnoreCase("GATEWAY_INTERFACE")) {
+        } else if (name.equalsIgnoreCase("GATEWAY_INTERFACE"))
+        {
             retVal = "CGI/1.1";
-        } else if (nameParts[0].equals("HTTP")) {
-            if (nameParts[1].equals("ACCEPT")) {
+        } else if (nameParts[0].equals("HTTP"))
+        {
+            if (nameParts[1].equals("ACCEPT"))
+            {
                 String accept = null;
-                if (nameParts.length == 2) {
+                if (nameParts.length == 2)
+                {
                     accept = "Accept";
-                } else if (nameParts[2].equals("ENCODING")) {
+                } else if (nameParts[2].equals("ENCODING"))
+                {
                     requiredParts = 3;
                     accept = "Accept-Encoding";
-                } else if (nameParts[2].equals("LANGUAGE")) {
+                } else if (nameParts[2].equals("LANGUAGE"))
+                {
                     requiredParts = 3;
                     accept = "Accept-Language";
                 }
-                if (accept != null) {
+                if (accept != null)
+                {
                     Enumeration acceptHeaders = req.getHeaders(accept);
                     if (acceptHeaders != null)
-                        if (acceptHeaders.hasMoreElements()) {
+                        if (acceptHeaders.hasMoreElements())
+                        {
                             StringBuffer rv = new StringBuffer(
                                     (String) acceptHeaders.nextElement());
-                            while (acceptHeaders.hasMoreElements()) {
+                            while (acceptHeaders.hasMoreElements())
+                            {
                                 rv.append(", ");
                                 rv.append((String) acceptHeaders.nextElement());
                             }
-                        retVal = rv.toString();
-                    }
+                            retVal = rv.toString();
+                        }
                 }
-            }
-            else if (nameParts[1].equals("CONNECTION")) {
+            } else if (nameParts[1].equals("CONNECTION"))
+            {
                 retVal = req.getHeader("Connection");
-            }
-            else if (nameParts[1].equals("HOST")) {
+            } else if (nameParts[1].equals("HOST"))
+            {
                 retVal = req.getHeader("Host");
-            }
-            else if (nameParts[1].equals("REFERER")) {
+            } else if (nameParts[1].equals("REFERER"))
+            {
                 retVal = req.getHeader("Referer");
-            }
-            else if (nameParts[1].equals("USER"))
+            } else if (nameParts[1].equals("USER"))
                 if (nameParts.length == 3)
-                    if (nameParts[2].equals("AGENT")) {
+                    if (nameParts[2].equals("AGENT"))
+                    {
                         requiredParts = 3;
                         retVal = req.getHeader("User-Agent");
                     }
 
-        } else if (nameParts[0].equals("PATH")) {
-            if (nameParts[1].equals("INFO")) {
+        } else if (nameParts[0].equals("PATH"))
+        {
+            if (nameParts[1].equals("INFO"))
+            {
                 retVal = req.getPathInfo();
-            } else if (nameParts[1].equals("TRANSLATED")) {
+            } else if (nameParts[1].equals("TRANSLATED"))
+            {
                 retVal = req.getPathTranslated();
             }
-        } else if (nameParts[0].equals("QUERY")) {
-            if (nameParts[1].equals("STRING")) {
+        } else if (nameParts[0].equals("QUERY"))
+        {
+            if (nameParts[1].equals("STRING"))
+            {
                 String queryString = req.getQueryString();
-                if (nameParts.length == 2) {
+                if (nameParts.length == 2)
+                {
                     //apache displays this as an empty string rather than (none)
                     retVal = nullToEmptyString(queryString);
-                } else if (nameParts[2].equals("UNESCAPED")) {
+                } else if (nameParts[2].equals("UNESCAPED"))
+                {
                     requiredParts = 3;
-                    if (queryString != null) {
+                    if (queryString != null)
+                    {
                         // Use default as a last resort
                         String queryStringEncoding =
-                            Constants.DEFAULT_CHARACTER_ENCODING;
-                
+                                Constants.DEFAULT_CHARACTER_ENCODING;
+
                         String uriEncoding = null;
                         boolean useBodyEncodingForURI = false;
-                
+
                         // Get encoding settings from request / connector if
                         // possible
                         String requestEncoding = req.getCharacterEncoding();
-                        if (req instanceof Request) {
+                        if (req instanceof Request)
+                        {
                             uriEncoding =
-                                ((Request)req).getConnector().getURIEncoding();
-                            useBodyEncodingForURI = ((Request)req)
+                                    ((Request) req).getConnector().getURIEncoding();
+                            useBodyEncodingForURI = ((Request) req)
                                     .getConnector().getUseBodyEncodingForURI();
                         }
-                
+
                         // If valid, apply settings from request / connector
-                        if (uriEncoding != null) {
+                        if (uriEncoding != null)
+                        {
                             queryStringEncoding = uriEncoding;
-                        } else if(useBodyEncodingForURI) {
-                            if (requestEncoding != null) {
+                        } else if (useBodyEncodingForURI)
+                        {
+                            if (requestEncoding != null)
+                            {
                                 queryStringEncoding = requestEncoding;
                             }
                         }
-                
-                        try {
+
+                        try
+                        {
                             retVal = URLDecoder.decode(queryString,
-                                    queryStringEncoding);                       
-                        } catch (UnsupportedEncodingException e) {
+                                    queryStringEncoding);
+                        }
+                        catch (UnsupportedEncodingException e)
+                        {
                             retVal = queryString;
                         }
                     }
                 }
             }
-        } else if(nameParts[0].equals("REMOTE")) {
-            if (nameParts[1].equals("ADDR")) {
+        } else if (nameParts[0].equals("REMOTE"))
+        {
+            if (nameParts[1].equals("ADDR"))
+            {
                 retVal = req.getRemoteAddr();
-            } else if (nameParts[1].equals("HOST")) {
+            } else if (nameParts[1].equals("HOST"))
+            {
                 retVal = req.getRemoteHost();
-            } else if (nameParts[1].equals("IDENT")) {
+            } else if (nameParts[1].equals("IDENT"))
+            {
                 retVal = null; // Not implemented
-            } else if (nameParts[1].equals("PORT")) {
-                retVal = Integer.toString( req.getRemotePort());
-            } else if (nameParts[1].equals("USER")) {
+            } else if (nameParts[1].equals("PORT"))
+            {
+                retVal = Integer.toString(req.getRemotePort());
+            } else if (nameParts[1].equals("USER"))
+            {
                 retVal = req.getRemoteUser();
             }
-        } else if(nameParts[0].equals("REQUEST")) {
-            if (nameParts[1].equals("METHOD")) {
+        } else if (nameParts[0].equals("REQUEST"))
+        {
+            if (nameParts[1].equals("METHOD"))
+            {
                 retVal = req.getMethod();
-            }
-            else if (nameParts[1].equals("URI")) {
+            } else if (nameParts[1].equals("URI"))
+            {
                 // If this is an error page, get the original URI
                 retVal = (String) req.getAttribute(
                         "javax.servlet.forward.request_uri");
-                if (retVal == null) retVal=req.getRequestURI();
+                if (retVal == null) retVal = req.getRequestURI();
             }
-        } else if (nameParts[0].equals("SCRIPT")) {
+        } else if (nameParts[0].equals("SCRIPT"))
+        {
             String scriptName = req.getServletPath();
-            if (nameParts[1].equals("FILENAME")) {
+            if (nameParts[1].equals("FILENAME"))
+            {
                 retVal = context.getRealPath(scriptName);
-            }
-            else if (nameParts[1].equals("NAME")) {
+            } else if (nameParts[1].equals("NAME"))
+            {
                 retVal = scriptName;
             }
-        } else if (nameParts[0].equals("SERVER")) {
-            if (nameParts[1].equals("ADDR")) {
+        } else if (nameParts[0].equals("SERVER"))
+        {
+            if (nameParts[1].equals("ADDR"))
+            {
                 retVal = req.getLocalAddr();
             }
-            if (nameParts[1].equals("NAME")) {
+            if (nameParts[1].equals("NAME"))
+            {
                 retVal = req.getServerName();
-            } else if (nameParts[1].equals("PORT")) {
+            } else if (nameParts[1].equals("PORT"))
+            {
                 retVal = Integer.toString(req.getServerPort());
-            } else if (nameParts[1].equals("PROTOCOL")) {
+            } else if (nameParts[1].equals("PROTOCOL"))
+            {
                 retVal = req.getProtocol();
-            } else if (nameParts[1].equals("SOFTWARE")) {
+            } else if (nameParts[1].equals("SOFTWARE"))
+            {
                 StringBuffer rv = new StringBuffer(context.getServerInfo());
                 rv.append(" ");
                 rv.append(System.getProperty("java.vm.name"));
@@ -323,31 +395,37 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
                 rv.append(System.getProperty("os.name"));
                 retVal = rv.toString();
             }
-        } else if (name.equalsIgnoreCase("UNIQUE_ID")) {
+        } else if (name.equalsIgnoreCase("UNIQUE_ID"))
+        {
             retVal = req.getRequestedSessionId();
         }
         if (requiredParts != nameParts.length) return null;
-            return retVal;
+        return retVal;
     }
 
-    public Date getCurrentDate() {
+    public Date getCurrentDate()
+    {
         return new Date();
     }
 
 
-    protected String nullToEmptyString(String string) {
+    protected String nullToEmptyString(String string)
+    {
         String retVal = string;
-        if (retVal == null) {
+        if (retVal == null)
+        {
             retVal = "";
         }
         return retVal;
     }
 
 
-    protected String getPathWithoutFileName(String servletPath) {
+    protected String getPathWithoutFileName(String servletPath)
+    {
         String retVal = null;
         int lastSlash = servletPath.lastIndexOf('/');
-        if (lastSlash >= 0) {
+        if (lastSlash >= 0)
+        {
             //cut off file namee
             retVal = servletPath.substring(0, lastSlash + 1);
         }
@@ -356,24 +434,29 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
 
 
     protected String getPathWithoutContext(final String contextPath,
-            final String servletPath) {
-        if (servletPath.startsWith(contextPath)) {
+                                           final String servletPath)
+    {
+        if (servletPath.startsWith(contextPath))
+        {
             return servletPath.substring(contextPath.length());
         }
         return servletPath;
     }
 
 
-    protected String getAbsolutePath(String path) throws IOException {
+    protected String getAbsolutePath(String path) throws IOException
+    {
         String pathWithoutContext = SSIServletRequestUtil.getRelativePath(req);
         String prefix = getPathWithoutFileName(pathWithoutContext);
-        if (prefix == null) {
+        if (prefix == null)
+        {
             throw new IOException("Couldn't remove filename from path: "
                     + pathWithoutContext);
         }
         String fullPath = prefix + path;
         String retVal = RequestUtil.normalize(fullPath);
-        if (retVal == null) {
+        if (retVal == null)
+        {
             throw new IOException("Normalization yielded null on path: "
                     + fullPath);
         }
@@ -382,12 +465,15 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
 
 
     protected ServletContextAndPath getServletContextAndPathFromNonVirtualPath(
-            String nonVirtualPath) throws IOException {
-        if (nonVirtualPath.startsWith("/") || nonVirtualPath.startsWith("\\")) {
+            String nonVirtualPath) throws IOException
+    {
+        if (nonVirtualPath.startsWith("/") || nonVirtualPath.startsWith("\\"))
+        {
             throw new IOException("A non-virtual path can't be absolute: "
                     + nonVirtualPath);
         }
-        if (nonVirtualPath.indexOf("../") >= 0) {
+        if (nonVirtualPath.indexOf("../") >= 0)
+        {
             throw new IOException("A non-virtual path can't contain '../' : "
                     + nonVirtualPath);
         }
@@ -399,18 +485,24 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
 
 
     protected ServletContextAndPath getServletContextAndPathFromVirtualPath(
-            String virtualPath) throws IOException {
+            String virtualPath) throws IOException
+    {
 
-        if (!virtualPath.startsWith("/") && !virtualPath.startsWith("\\")) {
+        if (!virtualPath.startsWith("/") && !virtualPath.startsWith("\\"))
+        {
             return new ServletContextAndPath(context,
                     getAbsolutePath(virtualPath));
-        } else {
+        } else
+        {
             String normalized = RequestUtil.normalize(virtualPath);
-            if (isVirtualWebappRelative) {
+            if (isVirtualWebappRelative)
+            {
                 return new ServletContextAndPath(context, normalized);
-            } else {
+            } else
+            {
                 ServletContext normContext = context.getContext(normalized);
-                if (normContext == null) {
+                if (normContext == null)
+                {
                     throw new IOException("Couldn't get context for path: "
                             + normalized);
                 }
@@ -418,16 +510,19 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
                 // to remove,
                 // ie:
                 // '/file1.shtml' vs '/appName1/file1.shtml'
-                if (!isRootContext(normContext)) {
+                if (!isRootContext(normContext))
+                {
                     String noContext = getPathWithoutContext(
                             normContext.getContextPath(), normalized);
-                    if (noContext == null) {
+                    if (noContext == null)
+                    {
                         throw new IOException(
                                 "Couldn't remove context from path: "
                                         + normalized);
                     }
                     return new ServletContextAndPath(normContext, noContext);
-                } else {
+                } else
+                {
                     return new ServletContextAndPath(normContext, normalized);
                 }
             }
@@ -443,21 +538,26 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
     //If it isn't, then servletContext can't be the root context anyway, hence
     // they will
     // not match.
-    protected boolean isRootContext(ServletContext servletContext) {
+    protected boolean isRootContext(ServletContext servletContext)
+    {
         return servletContext == servletContext.getContext("/");
     }
 
 
     protected ServletContextAndPath getServletContextAndPath(
-            String originalPath, boolean virtual) throws IOException {
+            String originalPath, boolean virtual) throws IOException
+    {
         ServletContextAndPath csAndP = null;
-        if (debug > 0) {
+        if (debug > 0)
+        {
             log("SSIServletExternalResolver.getServletContextAndPath( "
                     + originalPath + ", " + virtual + ")", null);
         }
-        if (virtual) {
+        if (virtual)
+        {
             csAndP = getServletContextAndPathFromVirtualPath(originalPath);
-        } else {
+        } else
+        {
             csAndP = getServletContextAndPathFromNonVirtualPath(originalPath);
         }
         return csAndP;
@@ -465,13 +565,15 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
 
 
     protected URLConnection getURLConnection(String originalPath,
-            boolean virtual) throws IOException {
+                                             boolean virtual) throws IOException
+    {
         ServletContextAndPath csAndP = getServletContextAndPath(originalPath,
                 virtual);
         ServletContext context = csAndP.getServletContext();
         String path = csAndP.getPath();
         URL url = context.getResource(path);
-        if (url == null) {
+        if (url == null)
+        {
             throw new IOException("Context did not contain resource: " + path);
         }
         URLConnection urlConnection = url.openConnection();
@@ -480,24 +582,32 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
 
 
     public long getFileLastModified(String path, boolean virtual)
-            throws IOException {
+            throws IOException
+    {
         long lastModified = 0;
-        try {
+        try
+        {
             URLConnection urlConnection = getURLConnection(path, virtual);
             lastModified = urlConnection.getLastModified();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             // Ignore this. It will always fail for non-file based includes
         }
         return lastModified;
     }
 
 
-    public long getFileSize(String path, boolean virtual) throws IOException {
+    public long getFileSize(String path, boolean virtual) throws IOException
+    {
         long fileSize = -1;
-        try {
+        try
+        {
             URLConnection urlConnection = getURLConnection(path, virtual);
             fileSize = urlConnection.getContentLength();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             // Ignore this. It will always fail for non-file based includes
         }
         return fileSize;
@@ -508,21 +618,24 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
     //someone ever complains that this is slow, we should connect the included
     // stream to the print writer that SSICommand uses.
     public String getFileText(String originalPath, boolean virtual)
-            throws IOException {
-        try {
+            throws IOException
+    {
+        try
+        {
             ServletContextAndPath csAndP = getServletContextAndPath(
                     originalPath, virtual);
             ServletContext context = csAndP.getServletContext();
             String path = csAndP.getPath();
             RequestDispatcher rd = context.getRequestDispatcher(path);
-            if (rd == null) {
+            if (rd == null)
+            {
                 throw new IOException(
                         "Couldn't get request dispatcher for path: " + path);
             }
             ByteArrayServletOutputStream basos =
-                new ByteArrayServletOutputStream();
+                    new ByteArrayServletOutputStream();
             ResponseIncludeWrapper responseIncludeWrapper =
-                new ResponseIncludeWrapper(context, req, res, basos);
+                    new ResponseIncludeWrapper(context, req, res, basos);
             rd.include(req, responseIncludeWrapper);
             //We can't assume the included servlet flushed its output
             responseIncludeWrapper.flushOutputStreamOrWriter();
@@ -530,10 +643,12 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
 
             //Assume platform default encoding unless otherwise specified
             String retVal;
-            if (inputEncoding == null) {
-                retVal = new String( bytes );
-            } else {
-                retVal = new String (bytes, inputEncoding);
+            if (inputEncoding == null)
+            {
+                retVal = new String(bytes);
+            } else
+            {
+                retVal = new String(bytes, inputEncoding);
             }
 
             //make an assumption that an empty response is a failure. This is
@@ -541,34 +656,41 @@ public class SSIServletExternalResolver implements SSIExternalResolver {
             // if a truly empty file
             //were included, but not sure how else to tell.
             if (retVal.equals("") && !req.getMethod().equalsIgnoreCase(
-                    org.apache.coyote.http11.Constants.HEAD)) {
+                    org.apache.coyote.http11.Constants.HEAD))
+            {
                 throw new IOException("Couldn't find file: " + path);
             }
             return retVal;
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             throw new IOException("Couldn't include file: " + originalPath
                     + " because of ServletException: " + e.getMessage());
         }
     }
 
-    protected class ServletContextAndPath {
+    protected class ServletContextAndPath
+    {
         protected ServletContext servletContext;
         protected String path;
 
 
         public ServletContextAndPath(ServletContext servletContext,
-                                     String path) {
+                                     String path)
+        {
             this.servletContext = servletContext;
             this.path = path;
         }
 
 
-        public ServletContext getServletContext() {
+        public ServletContext getServletContext()
+        {
             return servletContext;
         }
 
 
-        public String getPath() {
+        public String getPath()
+        {
             return path;
         }
     }

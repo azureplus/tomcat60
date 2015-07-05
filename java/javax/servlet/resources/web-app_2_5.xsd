@@ -15,12 +15,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<xsd:schema xmlns="http://www.w3.org/2001/XMLSchema"
-    targetNamespace="http://java.sun.com/xml/ns/javaee"
-    xmlns:javaee="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    elementFormDefault="qualified" attributeFormDefault="unqualified"
-    version="2.5">
+<xsd:schema xmlns:javaee="http://java.sun.com/xml/ns/javaee"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://java.sun.com/xml/ns/javaee"
+            elementFormDefault="qualified" attributeFormDefault="unqualified"
+            version="2.5">
     <xsd:annotation>
         <xsd:documentation>
             <![CDATA[
@@ -59,8 +59,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             for consistency with the Servlet API.
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:include schemaLocation="javaee_5.xsd" />
-    <xsd:include schemaLocation="jsp_2_1.xsd" />
+    <xsd:include schemaLocation="javaee_5.xsd"/>
+    <xsd:include schemaLocation="jsp_2_1.xsd"/>
     <!-- **************************************************** -->
     <xsd:element name="web-app" type="javaee:web-appType">
         <xsd:annotation>
@@ -90,8 +90,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     The name must be unique within the web application.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:servlet" />
-            <xsd:field xpath="javaee:servlet-name" />
+            <xsd:selector xpath="javaee:servlet"/>
+            <xsd:field xpath="javaee:servlet-name"/>
         </xsd:unique>
         <xsd:unique name="web-app-filter-name-uniqueness">
             <xsd:annotation>
@@ -100,8 +100,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     The name must be unique within the web application.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:filter" />
-            <xsd:field xpath="javaee:filter-name" />
+            <xsd:selector xpath="javaee:filter"/>
+            <xsd:field xpath="javaee:filter-name"/>
         </xsd:unique>
         <xsd:unique name="web-app-ejb-local-ref-name-uniqueness">
             <xsd:annotation>
@@ -114,8 +114,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     name is prefixed with "ejb/".
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:ejb-local-ref" />
-            <xsd:field xpath="javaee:ejb-ref-name" />
+            <xsd:selector xpath="javaee:ejb-local-ref"/>
+            <xsd:field xpath="javaee:ejb-ref-name"/>
         </xsd:unique>
         <xsd:unique name="web-app-ejb-ref-name-uniqueness">
             <xsd:annotation>
@@ -128,8 +128,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     name is prefixed with "ejb/".
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:ejb-ref" />
-            <xsd:field xpath="javaee:ejb-ref-name" />
+            <xsd:selector xpath="javaee:ejb-ref"/>
+            <xsd:field xpath="javaee:ejb-ref-name"/>
         </xsd:unique>
         <xsd:unique name="web-app-resource-env-ref-uniqueness">
             <xsd:annotation>
@@ -142,8 +142,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     within a web application.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:resource-env-ref" />
-            <xsd:field xpath="javaee:resource-env-ref-name" />
+            <xsd:selector xpath="javaee:resource-env-ref"/>
+            <xsd:field xpath="javaee:resource-env-ref-name"/>
         </xsd:unique>
         <xsd:unique name="web-app-message-destination-ref-uniqueness">
             <xsd:annotation>
@@ -156,8 +156,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     within a web application.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:message-destination-ref" />
-            <xsd:field xpath="javaee:message-destination-ref-name" />
+            <xsd:selector xpath="javaee:message-destination-ref"/>
+            <xsd:field xpath="javaee:message-destination-ref-name"/>
         </xsd:unique>
         <xsd:unique name="web-app-res-ref-name-uniqueness">
             <xsd:annotation>
@@ -169,8 +169,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     application.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:resource-ref" />
-            <xsd:field xpath="javaee:res-ref-name" />
+            <xsd:selector xpath="javaee:resource-ref"/>
+            <xsd:field xpath="javaee:res-ref-name"/>
         </xsd:unique>
         <xsd:unique name="web-app-env-entry-name-uniqueness">
             <xsd:annotation>
@@ -181,8 +181,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     name must be unique within a web application.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:env-entry" />
-            <xsd:field xpath="javaee:env-entry-name" />
+            <xsd:selector xpath="javaee:env-entry"/>
+            <xsd:field xpath="javaee:env-entry-name"/>
         </xsd:unique>
         <xsd:key name="web-app-role-name-key">
             <xsd:annotation>
@@ -191,11 +191,11 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     from the security-role-refs.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:selector xpath="javaee:security-role" />
-            <xsd:field xpath="javaee:role-name" />
+            <xsd:selector xpath="javaee:security-role"/>
+            <xsd:field xpath="javaee:role-name"/>
         </xsd:key>
         <xsd:keyref name="web-app-role-name-references"
-            refer="javaee:web-app-role-name-key">
+                    refer="javaee:web-app-role-name-key">
             <xsd:annotation>
                 <xsd:documentation>
                     The keyref indicates the references from
@@ -203,8 +203,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:selector
-                xpath="javaee:servlet/javaee:security-role-ref" />
-            <xsd:field xpath="javaee:role-link" />
+                    xpath="javaee:servlet/javaee:security-role-ref"/>
+            <xsd:field xpath="javaee:role-link"/>
         </xsd:keyref>
     </xsd:element>
     <!-- **************************************************** -->
@@ -228,12 +228,12 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="description"
-                type="javaee:descriptionType" minOccurs="0"
-                maxOccurs="unbounded" />
+                         type="javaee:descriptionType" minOccurs="0"
+                         maxOccurs="unbounded"/>
             <xsd:element name="role-name" type="javaee:role-nameType"
-                minOccurs="0" maxOccurs="unbounded" />
+                         minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="auth-methodType">
@@ -250,7 +250,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:simpleContent>
-            <xsd:restriction base="javaee:string" />
+            <xsd:restriction base="javaee:string"/>
         </xsd:simpleContent>
     </xsd:complexType>
     <!-- **************************************************** -->
@@ -272,10 +272,10 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:simpleContent>
             <xsd:restriction base="javaee:string">
-                <xsd:enumeration value="FORWARD" />
-                <xsd:enumeration value="INCLUDE" />
-                <xsd:enumeration value="REQUEST" />
-                <xsd:enumeration value="ERROR" />
+                <xsd:enumeration value="FORWARD"/>
+                <xsd:enumeration value="INCLUDE"/>
+                <xsd:enumeration value="REQUEST"/>
+                <xsd:enumeration value="ERROR"/>
             </xsd:restriction>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -287,7 +287,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
-            <xsd:pattern value="[^\s]+" />
+            <xsd:pattern value="[^\s]+"/>
         </xsd:restriction>
     </xsd:simpleType>
     <!-- **************************************************** -->
@@ -300,8 +300,8 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:simpleContent>
             <xsd:restriction base="javaee:xsdPositiveIntegerType">
-                <xsd:pattern value="\d{3}" />
-                <xsd:attribute name="id" type="xsd:ID" />
+                <xsd:pattern value="\d{3}"/>
+                <xsd:attribute name="id" type="xsd:ID"/>
             </xsd:restriction>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -317,9 +317,9 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         <xsd:sequence>
             <xsd:choice>
                 <xsd:element name="error-code"
-                    type="javaee:error-codeType" />
+                             type="javaee:error-codeType"/>
                 <xsd:element name="exception-type"
-                    type="javaee:fully-qualified-classType">
+                             type="javaee:fully-qualified-classType">
                     <xsd:annotation>
                         <xsd:documentation>
                             The exception-type contains a fully
@@ -340,7 +340,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="filter-mappingType">
@@ -365,17 +365,17 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="filter-name"
-                type="javaee:filter-nameType" />
+                         type="javaee:filter-nameType"/>
             <xsd:choice minOccurs="1" maxOccurs="unbounded">
                 <xsd:element name="url-pattern"
-                    type="javaee:url-patternType" />
+                             type="javaee:url-patternType"/>
                 <xsd:element name="servlet-name"
-                    type="javaee:servlet-nameType" />
+                             type="javaee:servlet-nameType"/>
             </xsd:choice>
             <xsd:element name="dispatcher" type="javaee:dispatcherType"
-                minOccurs="0" maxOccurs="4" />
+                         minOccurs="0" maxOccurs="4"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="filter-nameType">
@@ -388,7 +388,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:simpleContent>
-            <xsd:extension base="javaee:nonEmptyStringType" />
+            <xsd:extension base="javaee:nonEmptyStringType"/>
         </xsd:simpleContent>
     </xsd:complexType>
     <!-- **************************************************** -->
@@ -405,11 +405,11 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
-            <xsd:group ref="javaee:descriptionGroup" />
+            <xsd:group ref="javaee:descriptionGroup"/>
             <xsd:element name="filter-name"
-                type="javaee:filter-nameType" />
+                         type="javaee:filter-nameType"/>
             <xsd:element name="filter-class"
-                type="javaee:fully-qualified-classType">
+                         type="javaee:fully-qualified-classType">
                 <xsd:annotation>
                     <xsd:documentation>
                         The fully qualified classname of the filter.
@@ -417,7 +417,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="init-param" type="javaee:param-valueType"
-                minOccurs="0" maxOccurs="unbounded">
+                         minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
                         The init-param element contains a name/value
@@ -427,7 +427,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="form-login-configType">
@@ -441,7 +441,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="form-login-page"
-                type="javaee:war-pathType">
+                         type="javaee:war-pathType">
                 <xsd:annotation>
                     <xsd:documentation>
                         The form-login-page element defines the location
@@ -453,7 +453,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="form-error-page"
-                type="javaee:war-pathType">
+                         type="javaee:war-pathType">
                 <xsd:annotation>
                     <xsd:documentation>
                         The form-error-page element defines the location
@@ -465,7 +465,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:simpleType name="http-methodType">
@@ -481,7 +481,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
     </xsd:simpleType>
     <!-- **************************************************** -->
     <xsd:simpleType name="load-on-startupType">
-        <xsd:union memberTypes="javaee:null-charType xsd:integer" />
+        <xsd:union memberTypes="javaee:null-charType xsd:integer"/>
     </xsd:simpleType>
     <!-- **************************************************** -->
     <xsd:complexType name="locale-encoding-mapping-listType">
@@ -493,10 +493,10 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="locale-encoding-mapping"
-                type="javaee:locale-encoding-mappingType"
-                maxOccurs="unbounded" />
+                         type="javaee:locale-encoding-mappingType"
+                         maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="locale-encoding-mappingType">
@@ -510,10 +510,10 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
-            <xsd:element name="locale" type="javaee:localeType" />
-            <xsd:element name="encoding" type="javaee:encodingType" />
+            <xsd:element name="locale" type="javaee:localeType"/>
+            <xsd:element name="encoding" type="javaee:encodingType"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:simpleType name="localeType">
@@ -524,7 +524,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
-            <xsd:pattern value="[a-z]{2}(_|-)?([\p{L}\-\p{Nd}]{2})?" />
+            <xsd:pattern value="[a-z]{2}(_|-)?([\p{L}\-\p{Nd}]{2})?"/>
         </xsd:restriction>
     </xsd:simpleType>
     <!-- **************************************************** -->
@@ -540,9 +540,9 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="auth-method"
-                type="javaee:auth-methodType" minOccurs="0" />
+                         type="javaee:auth-methodType" minOccurs="0"/>
             <xsd:element name="realm-name" type="javaee:string"
-                minOccurs="0">
+                         minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
                         The realm name element specifies the realm name
@@ -551,9 +551,9 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="form-login-config"
-                type="javaee:form-login-configType" minOccurs="0" />
+                         type="javaee:form-login-configType" minOccurs="0"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="mime-mappingType">
@@ -570,10 +570,10 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     an extension. example: "txt"
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:element name="extension" type="javaee:string" />
-            <xsd:element name="mime-type" type="javaee:mime-typeType" />
+            <xsd:element name="extension" type="javaee:string"/>
+            <xsd:element name="mime-type" type="javaee:mime-typeType"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="mime-typeType">
@@ -585,7 +585,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:simpleContent>
             <xsd:restriction base="javaee:string">
-                <xsd:pattern value="[^\p{Cc}^\s]+/[^\p{Cc}^\s]+" />
+                <xsd:pattern value="[^\p{Cc}^\s]+/[^\p{Cc}^\s]+"/>
             </xsd:restriction>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -599,14 +599,14 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:simpleContent>
             <xsd:restriction base="javaee:string">
-                <xsd:minLength value="1" />
+                <xsd:minLength value="1"/>
             </xsd:restriction>
         </xsd:simpleContent>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:simpleType name="null-charType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="" />
+            <xsd:enumeration value=""/>
         </xsd:restriction>
     </xsd:simpleType>
     <!-- **************************************************** -->
@@ -620,17 +620,17 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="display-name"
-                type="javaee:display-nameType" minOccurs="0"
-                maxOccurs="unbounded" />
+                         type="javaee:display-nameType" minOccurs="0"
+                         maxOccurs="unbounded"/>
             <xsd:element name="web-resource-collection"
-                type="javaee:web-resource-collectionType"
-                maxOccurs="unbounded" />
+                         type="javaee:web-resource-collectionType"
+                         maxOccurs="unbounded"/>
             <xsd:element name="auth-constraint"
-                type="javaee:auth-constraintType" minOccurs="0" />
+                         type="javaee:auth-constraintType" minOccurs="0"/>
             <xsd:element name="user-data-constraint"
-                type="javaee:user-data-constraintType" minOccurs="0" />
+                         type="javaee:user-data-constraintType" minOccurs="0"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="servlet-mappingType">
@@ -642,12 +642,12 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="servlet-name"
-                type="javaee:servlet-nameType" />
+                         type="javaee:servlet-nameType"/>
             <xsd:element name="url-pattern"
-                type="javaee:url-patternType" minOccurs="1"
-                maxOccurs="unbounded" />
+                         type="javaee:url-patternType" minOccurs="1"
+                         maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="servlet-nameType">
@@ -659,7 +659,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:simpleContent>
-            <xsd:extension base="javaee:nonEmptyStringType" />
+            <xsd:extension base="javaee:nonEmptyStringType"/>
         </xsd:simpleContent>
     </xsd:complexType>
     <!-- **************************************************** -->
@@ -674,12 +674,12 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
-            <xsd:group ref="javaee:descriptionGroup" />
+            <xsd:group ref="javaee:descriptionGroup"/>
             <xsd:element name="servlet-name"
-                type="javaee:servlet-nameType" />
+                         type="javaee:servlet-nameType"/>
             <xsd:choice>
                 <xsd:element name="servlet-class"
-                    type="javaee:fully-qualified-classType">
+                             type="javaee:fully-qualified-classType">
                     <xsd:annotation>
                         <xsd:documentation>
                             The servlet-class element contains the fully
@@ -687,12 +687,12 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                         </xsd:documentation>
                     </xsd:annotation>
                 </xsd:element>
-                <xsd:element name="jsp-file" type="javaee:jsp-fileType" />
+                <xsd:element name="jsp-file" type="javaee:jsp-fileType"/>
             </xsd:choice>
             <xsd:element name="init-param" type="javaee:param-valueType"
-                minOccurs="0" maxOccurs="unbounded" />
+                         minOccurs="0" maxOccurs="unbounded"/>
             <xsd:element name="load-on-startup"
-                type="javaee:load-on-startupType" minOccurs="0">
+                         type="javaee:load-on-startupType" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
                         The load-on-startup element indicates that this
@@ -715,12 +715,12 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="run-as" type="javaee:run-asType"
-                minOccurs="0" />
+                         minOccurs="0"/>
             <xsd:element name="security-role-ref"
-                type="javaee:security-role-refType" minOccurs="0"
-                maxOccurs="unbounded" />
+                         type="javaee:security-role-refType" minOccurs="0"
+                         maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="session-configType">
@@ -734,7 +734,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="session-timeout"
-                type="javaee:xsdIntegerType" minOccurs="0">
+                         type="javaee:xsdIntegerType" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
                         The session-timeout element defines the default
@@ -750,7 +750,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="transport-guaranteeType">
@@ -773,9 +773,9 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:simpleContent>
             <xsd:restriction base="javaee:string">
-                <xsd:enumeration value="NONE" />
-                <xsd:enumeration value="INTEGRAL" />
-                <xsd:enumeration value="CONFIDENTIAL" />
+                <xsd:enumeration value="NONE"/>
+                <xsd:enumeration value="INTEGRAL"/>
+                <xsd:enumeration value="CONFIDENTIAL"/>
             </xsd:restriction>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -790,12 +790,12 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="description"
-                type="javaee:descriptionType" minOccurs="0"
-                maxOccurs="unbounded" />
+                         type="javaee:descriptionType" minOccurs="0"
+                         maxOccurs="unbounded"/>
             <xsd:element name="transport-guarantee"
-                type="javaee:transport-guaranteeType" />
+                         type="javaee:transport-guaranteeType"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="war-pathType">
@@ -808,7 +808,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:simpleContent>
             <xsd:restriction base="javaee:string">
-                <xsd:pattern value="/.*" />
+                <xsd:pattern value="/.*"/>
             </xsd:restriction>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -822,16 +822,16 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:token">
-            <xsd:enumeration value="2.5" />
+            <xsd:enumeration value="2.5"/>
         </xsd:restriction>
     </xsd:simpleType>
     <!-- **************************************************** -->
     <xsd:complexType name="web-appType">
         <xsd:choice minOccurs="0" maxOccurs="unbounded">
-            <xsd:group ref="javaee:descriptionGroup" />
-            <xsd:element name="distributable" type="javaee:emptyType" />
+            <xsd:group ref="javaee:descriptionGroup"/>
+            <xsd:element name="distributable" type="javaee:emptyType"/>
             <xsd:element name="context-param"
-                type="javaee:param-valueType">
+                         type="javaee:param-valueType">
                 <xsd:annotation>
                     <xsd:documentation>
                         The context-param element contains the
@@ -840,36 +840,36 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="filter" type="javaee:filterType" />
+            <xsd:element name="filter" type="javaee:filterType"/>
             <xsd:element name="filter-mapping"
-                type="javaee:filter-mappingType" />
-            <xsd:element name="listener" type="javaee:listenerType" />
-            <xsd:element name="servlet" type="javaee:servletType" />
+                         type="javaee:filter-mappingType"/>
+            <xsd:element name="listener" type="javaee:listenerType"/>
+            <xsd:element name="servlet" type="javaee:servletType"/>
             <xsd:element name="servlet-mapping"
-                type="javaee:servlet-mappingType" />
+                         type="javaee:servlet-mappingType"/>
             <xsd:element name="session-config"
-                type="javaee:session-configType" />
+                         type="javaee:session-configType"/>
             <xsd:element name="mime-mapping"
-                type="javaee:mime-mappingType" />
+                         type="javaee:mime-mappingType"/>
             <xsd:element name="welcome-file-list"
-                type="javaee:welcome-file-listType" />
-            <xsd:element name="error-page" type="javaee:error-pageType" />
-            <xsd:element name="jsp-config" type="javaee:jsp-configType" />
+                         type="javaee:welcome-file-listType"/>
+            <xsd:element name="error-page" type="javaee:error-pageType"/>
+            <xsd:element name="jsp-config" type="javaee:jsp-configType"/>
             <xsd:element name="security-constraint"
-                type="javaee:security-constraintType" />
+                         type="javaee:security-constraintType"/>
             <xsd:element name="login-config"
-                type="javaee:login-configType" />
+                         type="javaee:login-configType"/>
             <xsd:element name="security-role"
-                type="javaee:security-roleType" />
-            <xsd:group ref="javaee:jndiEnvironmentRefsGroup" />
+                         type="javaee:security-roleType"/>
+            <xsd:group ref="javaee:jndiEnvironmentRefsGroup"/>
             <xsd:element name="message-destination"
-                type="javaee:message-destinationType" />
+                         type="javaee:message-destinationType"/>
             <xsd:element name="locale-encoding-mapping-list"
-                type="javaee:locale-encoding-mapping-listType" />
+                         type="javaee:locale-encoding-mapping-listType"/>
         </xsd:choice>
         <xsd:attribute name="version" type="javaee:web-app-versionType"
-            use="required" />
-        <xsd:attribute name="id" type="xsd:ID" />
+                       use="required"/>
+        <xsd:attribute name="id" type="xsd:ID"/>
         <xsd:attribute name="metadata-complete" type="xsd:boolean">
             <xsd:annotation>
                 <xsd:documentation>
@@ -901,7 +901,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="web-resource-name"
-                type="javaee:string">
+                         type="javaee:string">
                 <xsd:annotation>
                     <xsd:documentation>
                         The web-resource-name contains the name of this
@@ -910,15 +910,15 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="description"
-                type="javaee:descriptionType" minOccurs="0"
-                maxOccurs="unbounded" />
+                         type="javaee:descriptionType" minOccurs="0"
+                         maxOccurs="unbounded"/>
             <xsd:element name="url-pattern"
-                type="javaee:url-patternType" maxOccurs="unbounded" />
+                         type="javaee:url-patternType" maxOccurs="unbounded"/>
             <xsd:element name="http-method"
-                type="javaee:http-methodType" minOccurs="0"
-                maxOccurs="unbounded" />
+                         type="javaee:http-methodType" minOccurs="0"
+                         maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
     <!-- **************************************************** -->
     <xsd:complexType name="welcome-file-listType">
@@ -930,7 +930,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="welcome-file" type="xsd:string"
-                maxOccurs="unbounded">
+                         maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
                         The welcome-file element contains file name to
@@ -940,6 +940,6 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd
                 </xsd:annotation>
             </xsd:element>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="id" type="xsd:ID"/>
     </xsd:complexType>
 </xsd:schema>

@@ -39,16 +39,16 @@ import java.io.IOException;
 /**
  * Valve that implements the default basic behavior for the
  * <code>StandardContext</code> container implementation.
- * <p>
+ * <p/>
  * <b>USAGE CONSTRAINT</b>:  This implementation is likely to be useful only
  * when processing HTTP requests.
  *
  * @author Craig R. McClanahan
- *
  */
 
 final class StandardContextValve
-    extends ValveBase {
+        extends ValveBase
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -58,18 +58,18 @@ final class StandardContextValve
      * The descriptive information related to this implementation.
      */
     private static final String info =
-        "org.apache.catalina.core.StandardContextValve/1.0";
+            "org.apache.catalina.core.StandardContextValve/1.0";
 
 
     /**
      * The string manager for this package.
      */
     private static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
 
 
     private StandardContext context = null;
-    
+
 
     // ------------------------------------------------------------- Properties
 
@@ -77,7 +77,8 @@ final class StandardContextValve
     /**
      * Return descriptive information about this Valve implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -89,47 +90,53 @@ final class StandardContextValve
 
     /**
      * Cast to a StandardContext right away, as it will be needed later.
-     * 
+     *
      * @see org.apache.catalina.Contained#setContainer(org.apache.catalina.Container)
      */
-    public void setContainer(Container container) {
+    public void setContainer(Container container)
+    {
         super.setContainer(container);
         context = (StandardContext) container;
     }
 
-    
+
     /**
      * Select the appropriate child Wrapper to process this request,
      * based on the specified request URI.  If no matching Wrapper can
      * be found, return an appropriate HTTP error.
      *
-     * @param request Request to be processed
-     * @param response Response to be produced
+     * @param request      Request to be processed
+     * @param response     Response to be produced
      * @param valveContext Valve context used to forward to the next Valve
-     *
-     * @exception IOException if an input/output error occurred
-     * @exception ServletException if a servlet error occurred
+     * @throws IOException      if an input/output error occurred
+     * @throws ServletException if a servlet error occurred
      */
     public final void invoke(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Disallow any direct access to resources under WEB-INF or META-INF
         MessageBytes requestPathMB = request.getRequestPathMB();
         if ((requestPathMB.startsWithIgnoreCase("/META-INF/", 0))
-            || (requestPathMB.equalsIgnoreCase("/META-INF"))
-            || (requestPathMB.startsWithIgnoreCase("/WEB-INF/", 0))
-            || (requestPathMB.equalsIgnoreCase("/WEB-INF"))) {
+                || (requestPathMB.equalsIgnoreCase("/META-INF"))
+                || (requestPathMB.startsWithIgnoreCase("/WEB-INF/", 0))
+                || (requestPathMB.equalsIgnoreCase("/WEB-INF")))
+        {
             notFound(response);
             return;
         }
 
         // Wait if we are reloading
         boolean reloaded = false;
-        while (context.getPaused()) {
+        while (context.getPaused())
+        {
             reloaded = true;
-            try {
+            try
+            {
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e)
+            {
                 ;
             }
         }
@@ -138,20 +145,24 @@ final class StandardContextValve
         // created a new one
         if (reloaded &&
                 context.getLoader() != null &&
-                context.getLoader().getClassLoader() != null) {
+                context.getLoader().getClassLoader() != null)
+        {
             Thread.currentThread().setContextClassLoader(
                     context.getLoader().getClassLoader());
         }
 
         // Select the Wrapper to be used for this Request
         Wrapper wrapper = request.getWrapper();
-        if (wrapper == null) {
+        if (wrapper == null)
+        {
             notFound(response);
             return;
-        } else if (wrapper.isUnavailable()) {
+        } else if (wrapper.isUnavailable())
+        {
             // May be as a result of a reload, try and find the new wrapper
             wrapper = (Wrapper) container.findChild(wrapper.getName());
-            if (wrapper == null) {
+            if (wrapper == null)
+            {
                 notFound(response);
                 return;
             }
@@ -162,26 +173,31 @@ final class StandardContextValve
 
         ServletRequestEvent event = null;
 
-        if ((instances != null) 
-                && (instances.length > 0)) {
+        if ((instances != null)
+                && (instances.length > 0))
+        {
             event = new ServletRequestEvent
-                (((StandardContext) container).getServletContext(), 
-                 request.getRequest());
+                    (((StandardContext) container).getServletContext(),
+                            request.getRequest());
             // create pre-service event
-            for (int i = 0; i < instances.length; i++) {
+            for (int i = 0; i < instances.length; i++)
+            {
                 if (instances[i] == null)
                     continue;
                 if (!(instances[i] instanceof ServletRequestListener))
                     continue;
                 ServletRequestListener listener =
-                    (ServletRequestListener) instances[i];
-                try {
+                        (ServletRequestListener) instances[i];
+                try
+                {
                     listener.requestInitialized(event);
-                } catch (Throwable t) {
+                }
+                catch (Throwable t)
+                {
                     container.getLogger().error(sm.getString("standardContext.requestListener.requestInit",
-                                     instances[i].getClass().getName()), t);
+                            instances[i].getClass().getName()), t);
                     ServletRequest sreq = request.getRequest();
-                    sreq.setAttribute(Globals.EXCEPTION_ATTR,t);
+                    sreq.setAttribute(Globals.EXCEPTION_ATTR, t);
                     return;
                 }
             }
@@ -189,27 +205,32 @@ final class StandardContextValve
 
         wrapper.getPipeline().getFirst().invoke(request, response);
 
-        if ((instances !=null ) &&
-                (instances.length > 0)) {
+        if ((instances != null) &&
+                (instances.length > 0))
+        {
             // create post-service event
-            for (int i = 0; i < instances.length; i++) {
+            for (int i = 0; i < instances.length; i++)
+            {
                 if (instances[i] == null)
                     continue;
                 if (!(instances[i] instanceof ServletRequestListener))
                     continue;
                 ServletRequestListener listener =
-                    (ServletRequestListener) instances[i];
-                try {
+                        (ServletRequestListener) instances[i];
+                try
+                {
                     listener.requestDestroyed(event);
-                } catch (Throwable t) {
+                }
+                catch (Throwable t)
+                {
                     container.getLogger().error(sm.getString("standardContext.requestListener.requestDestroy",
-                                     instances[i].getClass().getName()), t);
+                            instances[i].getClass().getName()), t);
                     ServletRequest sreq = request.getRequest();
-                    sreq.setAttribute(Globals.EXCEPTION_ATTR,t);
+                    sreq.setAttribute(Globals.EXCEPTION_ATTR, t);
                 }
             }
         }
-                
+
     }
 
 
@@ -218,15 +239,15 @@ final class StandardContextValve
      * based on the specified request URI.  If no matching Wrapper can
      * be found, return an appropriate HTTP error.
      *
-     * @param request Request to be processed
-     * @param response Response to be produced
+     * @param request      Request to be processed
+     * @param response     Response to be produced
      * @param valveContext Valve context used to forward to the next Valve
-     *
-     * @exception IOException if an input/output error occurred
-     * @exception ServletException if a servlet error occurred
+     * @throws IOException      if an input/output error occurred
+     * @throws ServletException if a servlet error occurred
      */
     public final void event(Request request, Response response, CometEvent event)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Select the Wrapper to be used for this Request
         Wrapper wrapper = request.getWrapper();
@@ -288,7 +309,7 @@ final class StandardContextValve
             }
         }
         */
-      
+
     }
 
 
@@ -303,13 +324,19 @@ final class StandardContextValve
      *
      * @param response The response we are creating
      */
-    private void notFound(HttpServletResponse response) {
+    private void notFound(HttpServletResponse response)
+    {
 
-        try {
+        try
+        {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
-        } catch (IllegalStateException e) {
+        }
+        catch (IllegalStateException e)
+        {
             ;
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             ;
         }
 

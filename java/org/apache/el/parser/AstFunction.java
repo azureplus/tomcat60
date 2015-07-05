@@ -29,45 +29,64 @@ import java.lang.reflect.Method;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstFunction extends SimpleNode {
+public final class AstFunction extends SimpleNode
+{
 
     protected String localName = "";
 
     protected String prefix = "";
 
-    public AstFunction(int id) {
+    public AstFunction(int id)
+    {
         super(id);
     }
 
-    public String getLocalName() {
+    public String getLocalName()
+    {
         return localName;
     }
 
-    public String getOutputName() {
-        if (this.prefix == null) {
+    public void setLocalName(String localName)
+    {
+        this.localName = localName;
+    }
+
+    public String getOutputName()
+    {
+        if (this.prefix == null)
+        {
             return this.localName;
-        } else {
+        } else
+        {
             return this.prefix + ":" + this.localName;
         }
     }
 
-    public String getPrefix() {
+    public String getPrefix()
+    {
         return prefix;
     }
 
+    public void setPrefix(String prefix)
+    {
+        this.prefix = prefix;
+    }
+
     public Class getType(EvaluationContext ctx)
-            throws ELException {
-        
+            throws ELException
+    {
+
         FunctionMapper fnMapper = ctx.getFunctionMapper();
-        
+
         // quickly validate again for this request
-        if (fnMapper == null) {
+        if (fnMapper == null)
+        {
             throw new ELException(MessageFactory.get("error.fnMapper.null"));
         }
         Method m = fnMapper.resolveFunction(this.prefix, this.localName);
-        if (m == null) {
+        if (m == null)
+        {
             throw new ELException(MessageFactory.get("error.fnMapper.method",
                     this.getOutputName()));
         }
@@ -75,16 +94,19 @@ public final class AstFunction extends SimpleNode {
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
-        
+            throws ELException
+    {
+
         FunctionMapper fnMapper = ctx.getFunctionMapper();
-        
+
         // quickly validate again for this request
-        if (fnMapper == null) {
+        if (fnMapper == null)
+        {
             throw new ELException(MessageFactory.get("error.fnMapper.null"));
         }
         Method m = fnMapper.resolveFunction(this.prefix, this.localName);
-        if (m == null) {
+        if (m == null)
+        {
             throw new ELException(MessageFactory.get("error.fnMapper.method",
                     this.getOutputName()));
         }
@@ -93,39 +115,40 @@ public final class AstFunction extends SimpleNode {
         Object[] params = null;
         Object result = null;
         int numParams = this.jjtGetNumChildren();
-        if (numParams > 0) {
+        if (numParams > 0)
+        {
             params = new Object[numParams];
-            try {
-                for (int i = 0; i < numParams; i++) {
+            try
+            {
+                for (int i = 0; i < numParams; i++)
+                {
                     params[i] = this.children[i].getValue(ctx);
                     params[i] = coerceToType(params[i], paramTypes[i]);
                 }
-            } catch (ELException ele) {
+            }
+            catch (ELException ele)
+            {
                 throw new ELException(MessageFactory.get("error.function", this
                         .getOutputName()), ele);
             }
         }
-        try {
+        try
+        {
             result = m.invoke(null, params);
-        } catch (IllegalAccessException iae) {
+        }
+        catch (IllegalAccessException iae)
+        {
             throw new ELException(MessageFactory.get("error.function", this
                     .getOutputName()), iae);
-        } catch (InvocationTargetException ite) {
+        }
+        catch (InvocationTargetException ite)
+        {
             throw new ELException(MessageFactory.get("error.function", this
                     .getOutputName()), ite.getCause());
         }
         return result;
     }
 
-    public void setLocalName(String localName) {
-        this.localName = localName;
-    }
-
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-    
-    
     public String toString()
     {
         return ELParserTreeConstants.jjtNodeName[id] + "[" + this.getOutputName() + "]";

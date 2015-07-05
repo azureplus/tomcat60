@@ -26,11 +26,11 @@ import java.util.EventObject;
  * General event for notifying listeners of significant changes on a Container.
  *
  * @author Craig R. McClanahan
- *
  */
 
 public final class ContainerEvent
-    extends EventObject {
+        extends EventObject
+{
 
 
     /**
@@ -55,10 +55,11 @@ public final class ContainerEvent
      * Construct a new ContainerEvent with the specified parameters.
      *
      * @param container Container on which this event occurred
-     * @param type Event type
-     * @param data Event data
+     * @param type      Event type
+     * @param data      Event data
      */
-    public ContainerEvent(Container container, String type, Object data) {
+    public ContainerEvent(Container container, String type, Object data)
+    {
 
         super(container);
         this.container = container;
@@ -71,7 +72,8 @@ public final class ContainerEvent
     /**
      * Return the event data of this event.
      */
-    public Object getData() {
+    public Object getData()
+    {
 
         return (this.data);
 
@@ -81,7 +83,8 @@ public final class ContainerEvent
     /**
      * Return the Container on which this event occurred.
      */
-    public Container getContainer() {
+    public Container getContainer()
+    {
 
         return (this.container);
 
@@ -91,7 +94,8 @@ public final class ContainerEvent
     /**
      * Return the event type of this event.
      */
-    public String getType() {
+    public String getType()
+    {
 
         return (this.type);
 
@@ -101,7 +105,8 @@ public final class ContainerEvent
     /**
      * Return a string representation of this event.
      */
-    public String toString() {
+    public String toString()
+    {
 
         return ("ContainerEvent['" + getContainer() + "','" +
                 getType() + "','" + getData() + "']");

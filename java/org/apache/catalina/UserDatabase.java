@@ -29,11 +29,11 @@ import java.util.Iterator;
  * referenced by a {@link Realm} for authentication and access control.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
-public interface UserDatabase {
+public interface UserDatabase
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -69,7 +69,7 @@ public interface UserDatabase {
     /**
      * Finalize access to this user database.
      *
-     * @exception Exception if any exception is thrown during closing
+     * @throws Exception if any exception is thrown during closing
      */
     public void close() throws Exception;
 
@@ -77,7 +77,7 @@ public interface UserDatabase {
     /**
      * Create and return a new {@link Group} defined in this user database.
      *
-     * @param groupname The group name of the new group (must be unique)
+     * @param groupname   The group name of the new group (must be unique)
      * @param description The description of this group
      */
     public Group createGroup(String groupname, String description);
@@ -86,7 +86,7 @@ public interface UserDatabase {
     /**
      * Create and return a new {@link Role} defined in this user database.
      *
-     * @param rolename The role name of the new role (must be unique)
+     * @param rolename    The role name of the new role (must be unique)
      * @param description The description of this role
      */
     public Role createRole(String rolename, String description);
@@ -133,7 +133,7 @@ public interface UserDatabase {
     /**
      * Initialize access to this user database.
      *
-     * @exception Exception if any exception is thrown during opening
+     * @throws Exception if any exception is thrown during opening
      */
     public void open() throws Exception;
 
@@ -166,7 +166,7 @@ public interface UserDatabase {
      * Save any updated information to the persistent storage location for
      * this user database.
      *
-     * @exception Exception if any exception is thrown during saving
+     * @throws Exception if any exception is thrown during saving
      */
     public void save() throws Exception;
 

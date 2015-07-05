@@ -26,24 +26,14 @@ import java.security.Principal;
  * is used to represent principals authenticated at the protocol handler level.
  *
  * @author Remy Maucherat
- *
  */
 
-public class CoyotePrincipal 
-    implements Principal, Serializable {
+public class CoyotePrincipal
+        implements Principal, Serializable
+{
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    public CoyotePrincipal(String name) {
-
-        this.name = name;
-
-    }
-
-
-    // ------------------------------------------------------------- Properties
 
 
     /**
@@ -51,7 +41,19 @@ public class CoyotePrincipal
      */
     protected String name = null;
 
-    public String getName() {
+
+    // ------------------------------------------------------------- Properties
+
+
+    public CoyotePrincipal(String name)
+    {
+
+        this.name = name;
+
+    }
+
+    public String getName()
+    {
         return (this.name);
     }
 
@@ -63,7 +65,8 @@ public class CoyotePrincipal
      * Return a String representation of this object, which exposes only
      * information that should be public.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("CoyotePrincipal[");
         sb.append(this.name);

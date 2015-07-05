@@ -24,8 +24,9 @@ import org.apache.jasper.JasperException;
  *
  * @author Jan Luehe
  */
-class DefaultErrorHandler implements ErrorHandler {
-    
+class DefaultErrorHandler implements ErrorHandler
+{
+
     /*
      * Processes the given JSP parse error.
      *
@@ -36,41 +37,47 @@ class DefaultErrorHandler implements ErrorHandler {
      * @param exception Parse exception
      */
     public void jspError(String fname, int line, int column, String errMsg,
-            Exception ex) throws JasperException {
+                         Exception ex) throws JasperException
+    {
         throw new JasperException(fname + "(" + line + "," + column + ")"
                 + " " + errMsg, ex);
     }
-    
+
     /*
      * Processes the given JSP parse error.
      *
      * @param errMsg Parse error message
      * @param exception Parse exception
      */
-    public void jspError(String errMsg, Exception ex) throws JasperException {
+    public void jspError(String errMsg, Exception ex) throws JasperException
+    {
         throw new JasperException(errMsg, ex);
     }
-    
+
     /*
      * Processes the given javac compilation errors.
      *
      * @param details Array of JavacErrorDetail instances corresponding to the
      * compilation errors
      */
-    public void javacError(JavacErrorDetail[] details) throws JasperException {
-        
-        if (details == null) {
+    public void javacError(JavacErrorDetail[] details) throws JasperException
+    {
+
+        if (details == null)
+        {
             return;
         }
-        
+
         Object[] args = null;
         StringBuffer buf = new StringBuffer();
-        
-        for (int i=0; i < details.length; i++) {
-            if (details[i].getJspBeginLineNumber() >= 0) {
-                args = new Object[] {
-                        new Integer(details[i].getJspBeginLineNumber()), 
-                        details[i].getJspFileName() };
+
+        for (int i = 0; i < details.length; i++)
+        {
+            if (details[i].getJspBeginLineNumber() >= 0)
+            {
+                args = new Object[]{
+                        new Integer(details[i].getJspBeginLineNumber()),
+                        details[i].getJspFileName()};
                 buf.append("\n\n");
                 buf.append(Localizer.getMessage("jsp.error.single.line.number",
                         args));
@@ -78,9 +85,10 @@ class DefaultErrorHandler implements ErrorHandler {
                 buf.append(details[i].getErrorMessage());
                 buf.append("\n");
                 buf.append(details[i].getJspExtract());
-            } else {
-                args = new Object[] {
-                        new Integer(details[i].getJavaLineNumber()) };
+            } else
+            {
+                args = new Object[]{
+                        new Integer(details[i].getJavaLineNumber())};
                 buf.append("\n\n");
                 buf.append(Localizer.getMessage("jsp.error.java.line.number",
                         args));
@@ -92,18 +100,19 @@ class DefaultErrorHandler implements ErrorHandler {
         throw new JasperException(
                 Localizer.getMessage("jsp.error.unable.compile") + ": " + buf);
     }
-    
+
     /**
      * Processes the given javac error report and exception.
      *
      * @param errorReport Compilation error report
-     * @param exception Compilation exception
+     * @param exception   Compilation exception
      */
     public void javacError(String errorReport, Exception exception)
-    throws JasperException {
-        
+            throws JasperException
+    {
+
         throw new JasperException(
                 Localizer.getMessage("jsp.error.unable.compile"), exception);
     }
-    
+
 }

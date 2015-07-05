@@ -19,10 +19,9 @@
 package org.apache.tomcat.util.modeler;
 
 
-import java.io.Serializable;
-
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
+import java.io.Serializable;
 
 
 /**
@@ -31,25 +30,24 @@ import javax.management.MBeanParameterInfo;
  *
  * @author Craig R. McClanahan
  */
-public class OperationInfo extends FeatureInfo implements Serializable {
+public class OperationInfo extends FeatureInfo implements Serializable
+{
     static final long serialVersionUID = 4418342922072614875L;
     // ----------------------------------------------------------- Constructors
+    protected String impact = "UNKNOWN";
 
-
+    // ----------------------------------------------------- Instance Variables
+    protected String role = "operation";
+    protected ParameterInfo parameters[] = new ParameterInfo[0];
     /**
      * Standard zero-arguments constructor.
      */
-    public OperationInfo() {
+    public OperationInfo()
+    {
 
         super();
 
     }
-   
-    // ----------------------------------------------------- Instance Variables
-
-    protected String impact = "UNKNOWN";
-    protected String role = "operation";
-    protected ParameterInfo parameters[] = new ParameterInfo[0];
 
 
     // ------------------------------------------------------------- Properties
@@ -58,11 +56,13 @@ public class OperationInfo extends FeatureInfo implements Serializable {
      * The "impact" of this operation, which should be a (case-insensitive)
      * string value "ACTION", "ACTION_INFO", "INFO", or "UNKNOWN".
      */
-    public String getImpact() {
+    public String getImpact()
+    {
         return (this.impact);
     }
 
-    public void setImpact(String impact) {
+    public void setImpact(String impact)
+    {
         if (impact == null)
             this.impact = null;
         else
@@ -74,11 +74,13 @@ public class OperationInfo extends FeatureInfo implements Serializable {
      * The role of this operation ("getter", "setter", "operation", or
      * "constructor").
      */
-    public String getRole() {
+    public String getRole()
+    {
         return (this.role);
     }
 
-    public void setRole(String role) {
+    public void setRole(String role)
+    {
         this.role = role;
     }
 
@@ -87,21 +89,25 @@ public class OperationInfo extends FeatureInfo implements Serializable {
      * The fully qualified Java class name of the return type for this
      * operation.
      */
-    public String getReturnType() {
-        if(type == null) {
+    public String getReturnType()
+    {
+        if (type == null)
+        {
             type = "void";
         }
         return type;
     }
 
-    public void setReturnType(String returnType) {
+    public void setReturnType(String returnType)
+    {
         this.type = returnType;
     }
 
     /**
      * The set of parameters for this operation.
      */
-    public ParameterInfo[] getSignature() {
+    public ParameterInfo[] getSignature()
+    {
         return (this.parameters);
     }
 
@@ -113,9 +119,11 @@ public class OperationInfo extends FeatureInfo implements Serializable {
      *
      * @param parameter The new parameter descriptor
      */
-    public void addParameter(ParameterInfo parameter) {
+    public void addParameter(ParameterInfo parameter)
+    {
 
-        synchronized (parameters) {
+        synchronized (parameters)
+        {
             ParameterInfo results[] = new ParameterInfo[parameters.length + 1];
             System.arraycopy(parameters, 0, results, 0, parameters.length);
             results[parameters.length] = parameter;
@@ -130,10 +138,12 @@ public class OperationInfo extends FeatureInfo implements Serializable {
      * Create and return a <code>ModelMBeanOperationInfo</code> object that
      * corresponds to the attribute described by this instance.
      */
-    MBeanOperationInfo createOperationInfo() {
+    MBeanOperationInfo createOperationInfo()
+    {
 
         // Return our cached information (if any)
-        if (info == null) {
+        if (info == null)
+        {
             // Create and return a new information object
             int impact = MBeanOperationInfo.UNKNOWN;
             if ("ACTION".equals(getImpact()))
@@ -142,18 +152,19 @@ public class OperationInfo extends FeatureInfo implements Serializable {
                 impact = MBeanOperationInfo.ACTION_INFO;
             else if ("INFO".equals(getImpact()))
                 impact = MBeanOperationInfo.INFO;
-    
-            info = new MBeanOperationInfo(getName(), getDescription(), 
-                                          getMBeanParameterInfo(),
-                                          getReturnType(), impact);
+
+            info = new MBeanOperationInfo(getName(), getDescription(),
+                    getMBeanParameterInfo(),
+                    getReturnType(), impact);
         }
-        return (MBeanOperationInfo)info;
+        return (MBeanOperationInfo) info;
     }
 
-    protected MBeanParameterInfo[] getMBeanParameterInfo() {
+    protected MBeanParameterInfo[] getMBeanParameterInfo()
+    {
         ParameterInfo params[] = getSignature();
         MBeanParameterInfo parameters[] =
-            new MBeanParameterInfo[params.length];
+                new MBeanParameterInfo[params.length];
         for (int i = 0; i < params.length; i++)
             parameters[i] = params[i].createParameterInfo();
         return parameters;

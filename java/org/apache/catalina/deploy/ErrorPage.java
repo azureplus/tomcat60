@@ -30,10 +30,10 @@ import java.io.Serializable;
  * deployment descriptor.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class ErrorPage implements Serializable {
+public class ErrorPage implements Serializable
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -63,45 +63,49 @@ public class ErrorPage implements Serializable {
     /**
      * Return the error code.
      */
-    public int getErrorCode() {
+    public int getErrorCode()
+    {
 
         return (this.errorCode);
 
     }
-
-
-    /**
-     * Set the error code.
-     *
-     * @param errorCode The new error code
-     */
-    public void setErrorCode(int errorCode) {
-
-        this.errorCode = errorCode;
-
-    }
-
 
     /**
      * Set the error code (hack for default XmlMapper data type).
      *
      * @param errorCode The new error code
      */
-    public void setErrorCode(String errorCode) {
+    public void setErrorCode(String errorCode)
+    {
 
-        try {
+        try
+        {
             this.errorCode = Integer.parseInt(errorCode);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             this.errorCode = 0;
         }
 
     }
 
+    /**
+     * Set the error code.
+     *
+     * @param errorCode The new error code
+     */
+    public void setErrorCode(int errorCode)
+    {
+
+        this.errorCode = errorCode;
+
+    }
 
     /**
      * Return the exception type.
      */
-    public String getExceptionType() {
+    public String getExceptionType()
+    {
 
         return (this.exceptionType);
 
@@ -113,7 +117,8 @@ public class ErrorPage implements Serializable {
      *
      * @param exceptionType The new exception type
      */
-    public void setExceptionType(String exceptionType) {
+    public void setExceptionType(String exceptionType)
+    {
 
         this.exceptionType = exceptionType;
 
@@ -123,7 +128,8 @@ public class ErrorPage implements Serializable {
     /**
      * Return the location.
      */
-    public String getLocation() {
+    public String getLocation()
+    {
 
         return (this.location);
 
@@ -135,7 +141,8 @@ public class ErrorPage implements Serializable {
      *
      * @param location The new location
      */
-    public void setLocation(String location) {
+    public void setLocation(String location)
+    {
 
         //        if ((location == null) || !location.startsWith("/"))
         //            throw new IllegalArgumentException
@@ -151,13 +158,16 @@ public class ErrorPage implements Serializable {
     /**
      * Render a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ErrorPage[");
-        if (exceptionType == null) {
+        if (exceptionType == null)
+        {
             sb.append("errorCode=");
             sb.append(errorCode);
-        } else {
+        } else
+        {
             sb.append("exceptionType=");
             sb.append(exceptionType);
         }

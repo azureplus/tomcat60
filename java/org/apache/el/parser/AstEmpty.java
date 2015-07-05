@@ -27,30 +27,38 @@ import java.util.Map;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstEmpty extends SimpleNode {
-    public AstEmpty(int id) {
+public final class AstEmpty extends SimpleNode
+{
+    public AstEmpty(int id)
+    {
         super(id);
     }
 
     public Class getType(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return Boolean.class;
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         Object obj = this.children[0].getValue(ctx);
-        if (obj == null) {
+        if (obj == null)
+        {
             return Boolean.TRUE;
-        } else if (obj instanceof String) {
+        } else if (obj instanceof String)
+        {
             return Boolean.valueOf(((String) obj).length() == 0);
-        } else if (obj instanceof Object[]) {
+        } else if (obj instanceof Object[])
+        {
             return Boolean.valueOf(((Object[]) obj).length == 0);
-        } else if (obj instanceof Collection) {
+        } else if (obj instanceof Collection)
+        {
             return Boolean.valueOf(((Collection) obj).isEmpty());
-        } else if (obj instanceof Map) {
+        } else if (obj instanceof Map)
+        {
             return Boolean.valueOf(((Map) obj).isEmpty());
         }
         return Boolean.FALSE;

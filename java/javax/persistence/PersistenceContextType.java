@@ -18,7 +18,8 @@
 
 package javax.persistence;
 
-public enum PersistenceContextType {
+public enum PersistenceContextType
+{
     TRANSACTION,
     EXTENDED
 }

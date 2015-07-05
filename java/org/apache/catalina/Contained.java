@@ -25,10 +25,10 @@ package org.apache.catalina;
  *
  * @author Craig R. McClanahan
  * @author Peter Donald
- *
  */
 
-public interface Contained {
+public interface Contained
+{
 
 
     //-------------------------------------------------------------- Properties
@@ -45,8 +45,8 @@ public interface Contained {
      * Set the <code>Container</code> with which this instance is associated.
      *
      * @param container The Container instance with which this instance is to
-     *  be associated, or <code>null</code> to disassociate this instance
-     *  from any Container
+     *                  be associated, or <code>null</code> to disassociate this instance
+     *                  from any Container
      */
     public void setContainer(Container container);
 

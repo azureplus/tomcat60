@@ -18,12 +18,15 @@ package org.apache.catalina.ha;
 
 import org.apache.catalina.tribes.Member;
 
-public class ClusterMessageBase implements ClusterMessage {
-    
+public class ClusterMessageBase implements ClusterMessage
+{
+
     protected transient Member address;
     private String uniqueId;
     private long timestamp;
-    public ClusterMessageBase() {
+
+    public ClusterMessageBase()
+    {
     }
 
     /**
@@ -31,16 +34,9 @@ public class ClusterMessageBase implements ClusterMessage {
      *
      * @return Member
      */
-    public Member getAddress() {
+    public Member getAddress()
+    {
         return address;
-    }
-
-    public String getUniqueId() {
-        return uniqueId;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
     }
 
     /**
@@ -48,15 +44,28 @@ public class ClusterMessageBase implements ClusterMessage {
      *
      * @param member Member
      */
-    public void setAddress(Member member) {
+    public void setAddress(Member member)
+    {
         this.address = member;
     }
 
-    public void setUniqueId(String uniqueId) {
+    public String getUniqueId()
+    {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId)
+    {
         this.uniqueId = uniqueId;
     }
 
-    public void setTimestamp(long timestamp) {
+    public long getTimestamp()
+    {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp)
+    {
         this.timestamp = timestamp;
     }
 }

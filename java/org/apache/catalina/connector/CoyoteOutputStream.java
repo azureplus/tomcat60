@@ -13,23 +13,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.catalina.connector;
 
-import java.io.IOException;
-
 import javax.servlet.ServletOutputStream;
+import java.io.IOException;
 
 /**
  * Coyote implementation of the servlet output stream.
- * 
+ *
  * @author Costin Manolache
  * @author Remy Maucherat
  */
-public class CoyoteOutputStream 
-    extends ServletOutputStream {
+public class CoyoteOutputStream
+        extends ServletOutputStream
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -41,7 +41,8 @@ public class CoyoteOutputStream
     // ----------------------------------------------------------- Constructors
 
 
-    protected CoyoteOutputStream(OutputBuffer ob) {
+    protected CoyoteOutputStream(OutputBuffer ob)
+    {
         this.ob = ob;
     }
 
@@ -53,7 +54,8 @@ public class CoyoteOutputStream
      * Prevent cloning the facade.
      */
     protected Object clone()
-        throws CloneNotSupportedException {
+            throws CloneNotSupportedException
+    {
         throw new CloneNotSupportedException();
     }
 
@@ -64,7 +66,8 @@ public class CoyoteOutputStream
     /**
      * Clear facade.
      */
-    void clear() {
+    void clear()
+    {
         ob = null;
     }
 
@@ -73,19 +76,22 @@ public class CoyoteOutputStream
 
 
     public void write(int i)
-        throws IOException {
+            throws IOException
+    {
         ob.writeByte(i);
     }
 
 
     public void write(byte[] b)
-        throws IOException {
+            throws IOException
+    {
         write(b, 0, b.length);
     }
 
 
     public void write(byte[] b, int off, int len)
-        throws IOException {
+            throws IOException
+    {
         ob.write(b, off, len);
     }
 
@@ -94,13 +100,15 @@ public class CoyoteOutputStream
      * Will send the buffer to the client.
      */
     public void flush()
-        throws IOException {
+            throws IOException
+    {
         ob.flush();
     }
 
 
     public void close()
-        throws IOException {
+            throws IOException
+    {
         ob.close();
     }
 

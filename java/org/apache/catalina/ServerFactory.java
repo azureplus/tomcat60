@@ -29,10 +29,10 @@ import org.apache.catalina.core.StandardServer;
  * that are built around the internal component implementation classes.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class ServerFactory {
+public class ServerFactory
+{
 
 
     // ------------------------------------------------------- Static Variables
@@ -50,9 +50,10 @@ public class ServerFactory {
     /**
      * Return the singleton <code>Server</code> instance for this JVM.
      */
-    public static Server getServer() {
-        if( server==null )
-            server=new StandardServer();
+    public static Server getServer()
+    {
+        if (server == null)
+            server = new StandardServer();
         return (server);
 
     }
@@ -66,7 +67,8 @@ public class ServerFactory {
      *
      * @param theServer The new singleton instance
      */
-    public static void setServer(Server theServer) {
+    public static void setServer(Server theServer)
+    {
 
         if (server == null)
             server = theServer;

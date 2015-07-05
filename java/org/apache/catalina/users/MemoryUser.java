@@ -32,14 +32,31 @@ import java.util.Iterator;
  * {@link MemoryUserDatabase} implementation of {@link UserDatabase}.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
-public class MemoryUser extends AbstractUser {
+public class MemoryUser extends AbstractUser
+{
 
 
     // ----------------------------------------------------------- Constructors
+
+
+    /**
+     * The {@link MemoryUserDatabase} that owns this user.
+     */
+    protected MemoryUserDatabase database = null;
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * The set of {@link Group}s that this user is a member of.
+     */
+    protected ArrayList groups = new ArrayList();
+    /**
+     * The set of {@link Role}s associated with this user.
+     */
+    protected ArrayList roles = new ArrayList();
 
 
     /**
@@ -52,7 +69,8 @@ public class MemoryUser extends AbstractUser {
      * @param fullName Full name of the new user
      */
     MemoryUser(MemoryUserDatabase database, String username,
-               String password, String fullName) {
+               String password, String fullName)
+    {
 
         super();
         this.database = database;
@@ -63,36 +81,16 @@ public class MemoryUser extends AbstractUser {
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The {@link MemoryUserDatabase} that owns this user.
-     */
-    protected MemoryUserDatabase database = null;
-
-
-    /**
-     * The set of {@link Group}s that this user is a member of.
-     */
-    protected ArrayList groups = new ArrayList();
-
-
-    /**
-     * The set of {@link Role}s associated with this user.
-     */
-    protected ArrayList roles = new ArrayList();
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return the set of {@link Group}s to which this user belongs.
      */
-    public Iterator getGroups() {
+    public Iterator getGroups()
+    {
 
-        synchronized (groups) {
+        synchronized (groups)
+        {
             return (groups.iterator());
         }
 
@@ -102,9 +100,11 @@ public class MemoryUser extends AbstractUser {
     /**
      * Return the set of {@link Role}s assigned specifically to this user.
      */
-    public Iterator getRoles() {
+    public Iterator getRoles()
+    {
 
-        synchronized (roles) {
+        synchronized (roles)
+        {
             return (roles.iterator());
         }
 
@@ -114,7 +114,8 @@ public class MemoryUser extends AbstractUser {
     /**
      * Return the {@link UserDatabase} within which this User is defined.
      */
-    public UserDatabase getUserDatabase() {
+    public UserDatabase getUserDatabase()
+    {
 
         return (this.database);
 
@@ -129,10 +130,13 @@ public class MemoryUser extends AbstractUser {
      *
      * @param group The new group
      */
-    public void addGroup(Group group) {
+    public void addGroup(Group group)
+    {
 
-        synchronized (groups) {
-            if (!groups.contains(group)) {
+        synchronized (groups)
+        {
+            if (!groups.contains(group))
+            {
                 groups.add(group);
             }
         }
@@ -145,10 +149,13 @@ public class MemoryUser extends AbstractUser {
      *
      * @param role The new role
      */
-    public void addRole(Role role) {
+    public void addRole(Role role)
+    {
 
-        synchronized (roles) {
-            if (!roles.contains(role)) {
+        synchronized (roles)
+        {
+            if (!roles.contains(role))
+            {
                 roles.add(role);
             }
         }
@@ -161,9 +168,11 @@ public class MemoryUser extends AbstractUser {
      *
      * @param group The group to check
      */
-    public boolean isInGroup(Group group) {
+    public boolean isInGroup(Group group)
+    {
 
-        synchronized (groups) {
+        synchronized (groups)
+        {
             return (groups.contains(group));
         }
 
@@ -177,9 +186,11 @@ public class MemoryUser extends AbstractUser {
      *
      * @param role The role to check
      */
-    public boolean isInRole(Role role) {
+    public boolean isInRole(Role role)
+    {
 
-        synchronized (roles) {
+        synchronized (roles)
+        {
             return (roles.contains(role));
         }
 
@@ -191,9 +202,11 @@ public class MemoryUser extends AbstractUser {
      *
      * @param group The old group
      */
-    public void removeGroup(Group group) {
+    public void removeGroup(Group group)
+    {
 
-        synchronized (groups) {
+        synchronized (groups)
+        {
             groups.remove(group);
         }
 
@@ -203,9 +216,11 @@ public class MemoryUser extends AbstractUser {
     /**
      * Remove all {@link Group}s from those this user belongs to.
      */
-    public void removeGroups() {
+    public void removeGroups()
+    {
 
-        synchronized (groups) {
+        synchronized (groups)
+        {
             groups.clear();
         }
 
@@ -217,9 +232,11 @@ public class MemoryUser extends AbstractUser {
      *
      * @param role The old role
      */
-    public void removeRole(Role role) {
+    public void removeRole(Role role)
+    {
 
-        synchronized (roles) {
+        synchronized (roles)
+        {
             roles.remove(role);
         }
 
@@ -229,9 +246,11 @@ public class MemoryUser extends AbstractUser {
     /**
      * Remove all {@link Role}s from those assigned to this user.
      */
-    public void removeRoles() {
+    public void removeRoles()
+    {
 
-        synchronized (roles) {
+        synchronized (roles)
+        {
             roles.clear();
         }
 
@@ -240,31 +259,37 @@ public class MemoryUser extends AbstractUser {
 
     /**
      * <p>Return a String representation of this user in XML format.</p>
-     *
+     * <p/>
      * <p><strong>IMPLEMENTATION NOTE</strong> - For backwards compatibility,
      * the reader that processes this entry will accept either
      * <code>username</code> or </code>name</code> for the username
      * property.</p>
      */
-    public String toXml() {
+    public String toXml()
+    {
 
         StringBuffer sb = new StringBuffer("<user username=\"");
         sb.append(RequestUtil.filter(username));
         sb.append("\" password=\"");
         sb.append(RequestUtil.filter(password));
         sb.append("\"");
-        if (fullName != null) {
+        if (fullName != null)
+        {
             sb.append(" fullName=\"");
             sb.append(RequestUtil.filter(fullName));
             sb.append("\"");
         }
-        synchronized (groups) {
-            if (groups.size() > 0) {
+        synchronized (groups)
+        {
+            if (groups.size() > 0)
+            {
                 sb.append(" groups=\"");
                 int n = 0;
                 Iterator values = groups.iterator();
-                while (values.hasNext()) {
-                    if (n > 0) {
+                while (values.hasNext())
+                {
+                    if (n > 0)
+                    {
                         sb.append(',');
                     }
                     n++;
@@ -273,13 +298,17 @@ public class MemoryUser extends AbstractUser {
                 sb.append("\"");
             }
         }
-        synchronized (roles) {
-            if (roles.size() > 0) {
+        synchronized (roles)
+        {
+            if (roles.size() > 0)
+            {
                 sb.append(" roles=\"");
                 int n = 0;
                 Iterator values = roles.iterator();
-                while (values.hasNext()) {
-                    if (n > 0) {
+                while (values.hasNext())
+                {
+                    if (n > 0)
+                    {
                         sb.append(',');
                     }
                     n++;
@@ -297,23 +326,29 @@ public class MemoryUser extends AbstractUser {
      * <p>Return a String representation of this user.</p>
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
 
         StringBuilder sb = new StringBuilder("User username=\"");
         sb.append(RequestUtil.filter(username));
         sb.append("\"");
-        if (fullName != null) {
+        if (fullName != null)
+        {
             sb.append(", fullName=\"");
             sb.append(RequestUtil.filter(fullName));
             sb.append("\"");
         }
-        synchronized (groups) {
-            if (groups.size() > 0) {
+        synchronized (groups)
+        {
+            if (groups.size() > 0)
+            {
                 sb.append(", groups=\"");
                 int n = 0;
                 Iterator<Group> values = groups.iterator();
-                while (values.hasNext()) {
-                    if (n > 0) {
+                while (values.hasNext())
+                {
+                    if (n > 0)
+                    {
                         sb.append(',');
                     }
                     n++;
@@ -322,13 +357,17 @@ public class MemoryUser extends AbstractUser {
                 sb.append("\"");
             }
         }
-        synchronized (roles) {
-            if (roles.size() > 0) {
+        synchronized (roles)
+        {
+            if (roles.size() > 0)
+            {
                 sb.append(", roles=\"");
                 int n = 0;
                 Iterator<Role> values = roles.iterator();
-                while (values.hasNext()) {
-                    if (n > 0) {
+                while (values.hasNext())
+                {
+                    if (n > 0)
+                    {
                         sb.append(',');
                     }
                     n++;

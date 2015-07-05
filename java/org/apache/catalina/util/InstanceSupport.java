@@ -34,13 +34,27 @@ import javax.servlet.ServletResponse;
  * registered InstanceListeners.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public final class InstanceSupport {
+public final class InstanceSupport
+{
 
 
     // ----------------------------------------------------------- Constructors
+
+
+    private final Object listenersLock = new Object(); // Lock object for changes to listeners
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * The set of registered InstanceListeners for event notifications.
+     */
+    private InstanceListener listeners[] = new InstanceListener[0];
+    /**
+     * The source component for instance events that we will fire.
+     */
+    private Wrapper wrapper = null;
 
 
     /**
@@ -48,9 +62,10 @@ public final class InstanceSupport {
      * Instance component.
      *
      * @param wrapper The component that will be the source
-     *  of events that we fire
+     *                of events that we fire
      */
-    public InstanceSupport(Wrapper wrapper) {
+    public InstanceSupport(Wrapper wrapper)
+    {
 
         super();
         this.wrapper = wrapper;
@@ -58,30 +73,13 @@ public final class InstanceSupport {
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The set of registered InstanceListeners for event notifications.
-     */
-    private InstanceListener listeners[] = new InstanceListener[0];
-    
-    private final Object listenersLock = new Object(); // Lock object for changes to listeners
-
-
-    /**
-     * The source component for instance events that we will fire.
-     */
-    private Wrapper wrapper = null;
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return the Wrapper with which we are associated.
      */
-    public Wrapper getWrapper() {
+    public Wrapper getWrapper()
+    {
 
         return (this.wrapper);
 
@@ -96,16 +94,18 @@ public final class InstanceSupport {
      *
      * @param listener The listener to add
      */
-    public void addInstanceListener(InstanceListener listener) {
+    public void addInstanceListener(InstanceListener listener)
+    {
 
-      synchronized (listenersLock) {
-          InstanceListener results[] =
-            new InstanceListener[listeners.length + 1];
-          for (int i = 0; i < listeners.length; i++)
-              results[i] = listeners[i];
-          results[listeners.length] = listener;
-          listeners = results;
-      }
+        synchronized (listenersLock)
+        {
+            InstanceListener results[] =
+                    new InstanceListener[listeners.length + 1];
+            for (int i = 0; i < listeners.length; i++)
+                results[i] = listeners[i];
+            results[listeners.length] = listener;
+            listeners = results;
+        }
 
     }
 
@@ -115,10 +115,11 @@ public final class InstanceSupport {
      * occurred for this Container.  The default implementation performs
      * this notification synchronously using the calling thread.
      *
-     * @param type Event type
+     * @param type   Event type
      * @param filter The relevant Filter for this event
      */
-    public void fireInstanceEvent(String type, Filter filter) {
+    public void fireInstanceEvent(String type, Filter filter)
+    {
 
         if (listeners.length == 0)
             return;
@@ -136,18 +137,19 @@ public final class InstanceSupport {
      * occurred for this Container.  The default implementation performs
      * this notification synchronously using the calling thread.
      *
-     * @param type Event type
-     * @param filter The relevant Filter for this event
+     * @param type      Event type
+     * @param filter    The relevant Filter for this event
      * @param exception Exception that occurred
      */
     public void fireInstanceEvent(String type, Filter filter,
-                                  Throwable exception) {
+                                  Throwable exception)
+    {
 
         if (listeners.length == 0)
             return;
 
         InstanceEvent event = new InstanceEvent(wrapper, filter, type,
-                                                exception);
+                exception);
         InstanceListener interested[] = listeners;
         for (int i = 0; i < interested.length; i++)
             interested[i].instanceEvent(event);
@@ -160,20 +162,21 @@ public final class InstanceSupport {
      * occurred for this Container.  The default implementation performs
      * this notification synchronously using the calling thread.
      *
-     * @param type Event type
-     * @param filter The relevant Filter for this event
-     * @param request The servlet request we are processing
+     * @param type     Event type
+     * @param filter   The relevant Filter for this event
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are processing
      */
     public void fireInstanceEvent(String type, Filter filter,
                                   ServletRequest request,
-                                  ServletResponse response) {
+                                  ServletResponse response)
+    {
 
         if (listeners.length == 0)
             return;
 
         InstanceEvent event = new InstanceEvent(wrapper, filter, type,
-                                                request, response);
+                request, response);
         InstanceListener interested[] = listeners;
         for (int i = 0; i < interested.length; i++)
             interested[i].instanceEvent(event);
@@ -186,22 +189,23 @@ public final class InstanceSupport {
      * occurred for this Container.  The default implementation performs
      * this notification synchronously using the calling thread.
      *
-     * @param type Event type
-     * @param filter The relevant Filter for this event
-     * @param request The servlet request we are processing
-     * @param response The servlet response we are processing
+     * @param type      Event type
+     * @param filter    The relevant Filter for this event
+     * @param request   The servlet request we are processing
+     * @param response  The servlet response we are processing
      * @param exception Exception that occurred
      */
     public void fireInstanceEvent(String type, Filter filter,
                                   ServletRequest request,
                                   ServletResponse response,
-                                  Throwable exception) {
+                                  Throwable exception)
+    {
 
         if (listeners.length == 0)
             return;
 
         InstanceEvent event = new InstanceEvent(wrapper, filter, type,
-                                                request, response, exception);
+                request, response, exception);
         InstanceListener interested[] = listeners;
         for (int i = 0; i < interested.length; i++)
             interested[i].instanceEvent(event);
@@ -214,10 +218,11 @@ public final class InstanceSupport {
      * occurred for this Container.  The default implementation performs
      * this notification synchronously using the calling thread.
      *
-     * @param type Event type
+     * @param type    Event type
      * @param servlet The relevant Servlet for this event
      */
-    public void fireInstanceEvent(String type, Servlet servlet) {
+    public void fireInstanceEvent(String type, Servlet servlet)
+    {
 
         if (listeners.length == 0)
             return;
@@ -235,18 +240,19 @@ public final class InstanceSupport {
      * occurred for this Container.  The default implementation performs
      * this notification synchronously using the calling thread.
      *
-     * @param type Event type
-     * @param servlet The relevant Servlet for this event
+     * @param type      Event type
+     * @param servlet   The relevant Servlet for this event
      * @param exception Exception that occurred
      */
     public void fireInstanceEvent(String type, Servlet servlet,
-                                  Throwable exception) {
+                                  Throwable exception)
+    {
 
         if (listeners.length == 0)
             return;
 
         InstanceEvent event = new InstanceEvent(wrapper, servlet, type,
-                                                exception);
+                exception);
         InstanceListener interested[] = listeners;
         for (int i = 0; i < interested.length; i++)
             interested[i].instanceEvent(event);
@@ -259,20 +265,21 @@ public final class InstanceSupport {
      * occurred for this Container.  The default implementation performs
      * this notification synchronously using the calling thread.
      *
-     * @param type Event type
-     * @param servlet The relevant Servlet for this event
-     * @param request The servlet request we are processing
+     * @param type     Event type
+     * @param servlet  The relevant Servlet for this event
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are processing
      */
     public void fireInstanceEvent(String type, Servlet servlet,
                                   ServletRequest request,
-                                  ServletResponse response) {
+                                  ServletResponse response)
+    {
 
         if (listeners.length == 0)
             return;
 
         InstanceEvent event = new InstanceEvent(wrapper, servlet, type,
-                                                request, response);
+                request, response);
         InstanceListener interested[] = listeners;
         for (int i = 0; i < interested.length; i++)
             interested[i].instanceEvent(event);
@@ -285,22 +292,23 @@ public final class InstanceSupport {
      * occurred for this Container.  The default implementation performs
      * this notification synchronously using the calling thread.
      *
-     * @param type Event type
-     * @param servlet The relevant Servlet for this event
-     * @param request The servlet request we are processing
-     * @param response The servlet response we are processing
+     * @param type      Event type
+     * @param servlet   The relevant Servlet for this event
+     * @param request   The servlet request we are processing
+     * @param response  The servlet response we are processing
      * @param exception Exception that occurred
      */
     public void fireInstanceEvent(String type, Servlet servlet,
                                   ServletRequest request,
                                   ServletResponse response,
-                                  Throwable exception) {
+                                  Throwable exception)
+    {
 
         if (listeners.length == 0)
             return;
 
         InstanceEvent event = new InstanceEvent(wrapper, servlet, type,
-                                                request, response, exception);
+                request, response, exception);
         InstanceListener interested[] = listeners;
         for (int i = 0; i < interested.length; i++)
             interested[i].instanceEvent(event);
@@ -313,12 +321,16 @@ public final class InstanceSupport {
      *
      * @param listener The listener to remove
      */
-    public void removeInstanceListener(InstanceListener listener) {
+    public void removeInstanceListener(InstanceListener listener)
+    {
 
-        synchronized (listenersLock) {
+        synchronized (listenersLock)
+        {
             int n = -1;
-            for (int i = 0; i < listeners.length; i++) {
-                if (listeners[i] == listener) {
+            for (int i = 0; i < listeners.length; i++)
+            {
+                if (listeners[i] == listener)
+                {
                     n = i;
                     break;
                 }
@@ -326,9 +338,10 @@ public final class InstanceSupport {
             if (n < 0)
                 return;
             InstanceListener results[] =
-              new InstanceListener[listeners.length - 1];
+                    new InstanceListener[listeners.length - 1];
             int j = 0;
-            for (int i = 0; i < listeners.length; i++) {
+            for (int i = 0; i < listeners.length; i++)
+            {
                 if (i != n)
                     results[j++] = listeners[i];
             }

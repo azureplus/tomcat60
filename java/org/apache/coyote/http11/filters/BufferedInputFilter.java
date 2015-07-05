@@ -17,17 +17,19 @@
 
 package org.apache.coyote.http11.filters;
 
-import java.io.IOException;
-import org.apache.coyote.Request;
 import org.apache.coyote.InputBuffer;
+import org.apache.coyote.Request;
 import org.apache.coyote.http11.InputFilter;
 import org.apache.tomcat.util.buf.ByteChunk;
+
+import java.io.IOException;
 
 /**
  * Input filter responsible for reading and buffering the request body, so that
  * it does not interfere with client SSL handshake messages.
  */
-public class BufferedInputFilter implements InputFilter {
+public class BufferedInputFilter implements InputFilter
+{
 
     // -------------------------------------------------------------- Constants
 
@@ -37,28 +39,30 @@ public class BufferedInputFilter implements InputFilter {
 
     // ----------------------------------------------------- Instance Variables
 
-    private ByteChunk buffered = null;
-    private ByteChunk tempRead = new ByteChunk(1024);
-    private InputBuffer buffer;
-    private boolean hasRead = false;
-
-
-    // ----------------------------------------------------- Static Initializer
-
-    static {
+    static
+    {
         ENCODING.setBytes(ENCODING_NAME.getBytes(), 0, ENCODING_NAME.length());
     }
 
+    private ByteChunk buffered = null;
+    private ByteChunk tempRead = new ByteChunk(1024);
+    private InputBuffer buffer;
+
+
+    // ----------------------------------------------------- Static Initializer
+    private boolean hasRead = false;
+
 
     // --------------------------------------------------------- Public Methods
-
 
     /**
      * Set the buffering limit. This should be reset every time the buffer is
      * used.
      */
-    public void setLimit(int limit) {
-        if (buffered == null) {
+    public void setLimit(int limit)
+    {
+        if (buffered == null)
+        {
             buffered = new ByteChunk(4048);
             buffered.setLimit(limit);
         }
@@ -71,14 +75,19 @@ public class BufferedInputFilter implements InputFilter {
     /**
      * Reads the request body and buffers it.
      */
-    public void setRequest(Request request) {
+    public void setRequest(Request request)
+    {
         // save off the Request body
-        try {
-            while (buffer.doRead(tempRead, request) >= 0) {
+        try
+        {
+            while (buffer.doRead(tempRead, request) >= 0)
+            {
                 buffered.append(tempRead);
                 tempRead.recycle();
             }
-        } catch(IOException iex) {
+        }
+        catch (IOException iex)
+        {
             // Ignore
         }
     }
@@ -86,26 +95,34 @@ public class BufferedInputFilter implements InputFilter {
     /**
      * Fills the given ByteChunk with the buffered request body.
      */
-    public int doRead(ByteChunk chunk, Request request) throws IOException {
-        if (hasRead || buffered.getLength() <= 0) {
+    public int doRead(ByteChunk chunk, Request request) throws IOException
+    {
+        if (hasRead || buffered.getLength() <= 0)
+        {
             return -1;
-        } else {
+        } else
+        {
             chunk.setBytes(buffered.getBytes(), buffered.getStart(),
-                           buffered.getLength());
+                    buffered.getLength());
             hasRead = true;
         }
         return chunk.getLength();
     }
 
-    public void setBuffer(InputBuffer buffer) {
+    public void setBuffer(InputBuffer buffer)
+    {
         this.buffer = buffer;
     }
 
-    public void recycle() {
-        if (buffered != null) {
-            if (buffered.getBuffer().length > 65536) {
+    public void recycle()
+    {
+        if (buffered != null)
+        {
+            if (buffered.getBuffer().length > 65536)
+            {
                 buffered = null;
-            } else {
+            } else
+            {
                 buffered.recycle();
             }
         }
@@ -114,16 +131,19 @@ public class BufferedInputFilter implements InputFilter {
         buffer = null;
     }
 
-    public ByteChunk getEncodingName() {
+    public ByteChunk getEncodingName()
+    {
         return ENCODING;
     }
 
-    public long end() throws IOException {
+    public long end() throws IOException
+    {
         return 0;
     }
 
-    public int available() {
+    public int available()
+    {
         return buffered.getLength();
     }
-    
+
 }

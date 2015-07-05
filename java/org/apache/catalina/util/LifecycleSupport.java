@@ -29,33 +29,19 @@ import org.apache.catalina.LifecycleListener;
  * registered LifecycleListeners.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public final class LifecycleSupport {
+public final class LifecycleSupport
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
-    /**
-     * Construct a new LifecycleSupport object associated with the specified
-     * Lifecycle component.
-     *
-     * @param lifecycle The Lifecycle component that will be the source
-     *  of events that we fire
-     */
-    public LifecycleSupport(Lifecycle lifecycle) {
-
-        super();
-        this.lifecycle = lifecycle;
-
-    }
+    private final Object listenersLock = new Object(); // Lock object for changes to listeners
 
 
     // ----------------------------------------------------- Instance Variables
-
-
     /**
      * The source component for lifecycle events that we will fire.
      */
@@ -66,43 +52,57 @@ public final class LifecycleSupport {
      * The set of registered LifecycleListeners for event notifications.
      */
     private LifecycleListener listeners[] = new LifecycleListener[0];
-    
-    private final Object listenersLock = new Object(); // Lock object for changes to listeners
-
     /**
      * Tracks the current state of lifecycle object based on the events that
      * are fired. As far as possible, matches the state names used in Tomcat 7
-     * for consistency. 
+     * for consistency.
      */
     private String state = "NEW";
-    
-    // --------------------------------------------------------- Public Methods
 
+    /**
+     * Construct a new LifecycleSupport object associated with the specified
+     * Lifecycle component.
+     *
+     * @param lifecycle The Lifecycle component that will be the source
+     *                  of events that we fire
+     */
+    public LifecycleSupport(Lifecycle lifecycle)
+    {
+
+        super();
+        this.lifecycle = lifecycle;
+
+    }
+
+    // --------------------------------------------------------- Public Methods
 
     /**
      * Add a lifecycle event listener to this component.
      *
      * @param listener The listener to add
      */
-    public void addLifecycleListener(LifecycleListener listener) {
+    public void addLifecycleListener(LifecycleListener listener)
+    {
 
-      synchronized (listenersLock) {
-          LifecycleListener results[] =
-            new LifecycleListener[listeners.length + 1];
-          for (int i = 0; i < listeners.length; i++)
-              results[i] = listeners[i];
-          results[listeners.length] = listener;
-          listeners = results;
-      }
+        synchronized (listenersLock)
+        {
+            LifecycleListener results[] =
+                    new LifecycleListener[listeners.length + 1];
+            for (int i = 0; i < listeners.length; i++)
+                results[i] = listeners[i];
+            results[listeners.length] = listener;
+            listeners = results;
+        }
 
     }
 
 
     /**
-     * Get the lifecycle listeners associated with this lifecycle. If this 
+     * Get the lifecycle listeners associated with this lifecycle. If this
      * Lifecycle has no listeners registered, a zero-length array is returned.
      */
-    public LifecycleListener[] findLifecycleListeners() {
+    public LifecycleListener[] findLifecycleListeners()
+    {
 
         return listeners;
 
@@ -117,23 +117,32 @@ public final class LifecycleSupport {
      * @param type Event type
      * @param data Event data
      */
-    public void fireLifecycleEvent(String type, Object data) {
+    public void fireLifecycleEvent(String type, Object data)
+    {
 
-        if (Lifecycle.INIT_EVENT.equals(type)) {
+        if (Lifecycle.INIT_EVENT.equals(type))
+        {
             state = "INITIALIZED";
-        } else if (Lifecycle.BEFORE_START_EVENT.equals(type)) {
+        } else if (Lifecycle.BEFORE_START_EVENT.equals(type))
+        {
             state = "STARTING_PREP";
-        } else if (Lifecycle.START_EVENT.equals(type)) {
+        } else if (Lifecycle.START_EVENT.equals(type))
+        {
             state = "STARTING";
-        } else if (Lifecycle.AFTER_START_EVENT.equals(type)) {
+        } else if (Lifecycle.AFTER_START_EVENT.equals(type))
+        {
             state = "STARTED";
-        } else if (Lifecycle.BEFORE_STOP_EVENT.equals(type)) {
+        } else if (Lifecycle.BEFORE_STOP_EVENT.equals(type))
+        {
             state = "STOPPING_PREP";
-        } else if (Lifecycle.STOP_EVENT.equals(type)) {
+        } else if (Lifecycle.STOP_EVENT.equals(type))
+        {
             state = "STOPPING";
-        } else if (Lifecycle.AFTER_STOP_EVENT.equals(type)) {
+        } else if (Lifecycle.AFTER_STOP_EVENT.equals(type))
+        {
             state = "STOPPED";
-        } else if (Lifecycle.DESTROY_EVENT.equals(type)) {
+        } else if (Lifecycle.DESTROY_EVENT.equals(type))
+        {
             state = "DESTROYED";
         }
         LifecycleEvent event = new LifecycleEvent(lifecycle, type, data);
@@ -149,12 +158,16 @@ public final class LifecycleSupport {
      *
      * @param listener The listener to remove
      */
-    public void removeLifecycleListener(LifecycleListener listener) {
+    public void removeLifecycleListener(LifecycleListener listener)
+    {
 
-        synchronized (listenersLock) {
+        synchronized (listenersLock)
+        {
             int n = -1;
-            for (int i = 0; i < listeners.length; i++) {
-                if (listeners[i] == listener) {
+            for (int i = 0; i < listeners.length; i++)
+            {
+                if (listeners[i] == listener)
+                {
                     n = i;
                     break;
                 }
@@ -162,9 +175,10 @@ public final class LifecycleSupport {
             if (n < 0)
                 return;
             LifecycleListener results[] =
-              new LifecycleListener[listeners.length - 1];
+                    new LifecycleListener[listeners.length - 1];
             int j = 0;
-            for (int i = 0; i < listeners.length; i++) {
+            for (int i = 0; i < listeners.length; i++)
+            {
                 if (i != n)
                     results[j++] = listeners[i];
             }
@@ -173,7 +187,8 @@ public final class LifecycleSupport {
 
     }
 
-    public String getState() {
+    public String getState()
+    {
         return state;
     }
 }

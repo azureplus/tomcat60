@@ -18,27 +18,27 @@
 
 package org.apache.tomcat.util.net;
 
+import org.apache.tomcat.util.MutableInteger;
+import org.apache.tomcat.util.net.NioEndpoint.Poller;
+import org.apache.tomcat.util.net.SecureNioChannel.ApplicationBufferHandler;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import org.apache.tomcat.util.net.NioEndpoint.Poller;
-import org.apache.tomcat.util.net.SecureNioChannel.ApplicationBufferHandler;
-import java.nio.channels.Selector;
-import java.nio.channels.SelectionKey;
-import org.apache.tomcat.util.MutableInteger;
-
 /**
- * 
  * Base class for a SocketChannel wrapper used by the endpoint.
  * This way, logic for a SSL socket channel remains the same as for
  * a non SSL, making sure we don't need to code for any exception cases.
- * 
+ *
  * @author Filip Hanik
  * @version 1.0
  */
-public class NioChannel implements ByteChannel{
+public class NioChannel implements ByteChannel
+{
 
     protected static ByteBuffer emptyBuf = ByteBuffer.allocate(0);
 
@@ -47,35 +47,40 @@ public class NioChannel implements ByteChannel{
     protected ApplicationBufferHandler bufHandler;
 
     protected Poller poller;
-    
+
     protected boolean sendFile = false;
 
-    public NioChannel(SocketChannel channel, ApplicationBufferHandler bufHandler) throws IOException {
+    public NioChannel(SocketChannel channel, ApplicationBufferHandler bufHandler) throws IOException
+    {
         this.sc = channel;
         this.bufHandler = bufHandler;
     }
 
-    public void reset() throws IOException {
+    public void reset() throws IOException
+    {
         bufHandler.getReadBuffer().clear();
         bufHandler.getWriteBuffer().clear();
         this.sendFile = false;
     }
-    
-    public int getBufferSize() {
-        if ( bufHandler == null ) return 0;
+
+    public int getBufferSize()
+    {
+        if (bufHandler == null) return 0;
         int size = 0;
-        size += bufHandler.getReadBuffer()!=null?bufHandler.getReadBuffer().capacity():0;
-        size += bufHandler.getWriteBuffer()!=null?bufHandler.getWriteBuffer().capacity():0;
+        size += bufHandler.getReadBuffer() != null ? bufHandler.getReadBuffer().capacity() : 0;
+        size += bufHandler.getWriteBuffer() != null ? bufHandler.getWriteBuffer().capacity() : 0;
         return size;
     }
 
     /**
-     * returns true if the network buffer has 
+     * returns true if the network buffer has
      * been flushed out and is empty
+     *
      * @return boolean
      */
-    public boolean flush(boolean block, Selector s, long timeout,MutableInteger lastWrite) throws IOException {
-        if (lastWrite!=null) lastWrite.set(1);
+    public boolean flush(boolean block, Selector s, long timeout, MutableInteger lastWrite) throws IOException
+    {
+        if (lastWrite != null) lastWrite.set(1);
         return true; //no network buffer in the regular channel
     }
 
@@ -85,20 +90,24 @@ public class NioChannel implements ByteChannel{
      *
      * @throws IOException If an I/O error occurs
      */
-    public void close() throws IOException {
+    public void close() throws IOException
+    {
         getIOChannel().socket().close();
         getIOChannel().close();
     }
 
-    public void close(boolean force) throws IOException {
-        if (isOpen() || force ) close();
+    public void close(boolean force) throws IOException
+    {
+        if (isOpen() || force) close();
     }
+
     /**
      * Tells whether or not this channel is open.
      *
      * @return <tt>true</tt> if, and only if, this channel is open
      */
-    public boolean isOpen() {
+    public boolean isOpen()
+    {
         return sc.isOpen();
     }
 
@@ -109,7 +118,8 @@ public class NioChannel implements ByteChannel{
      * @return The number of bytes written, possibly zero
      * @throws IOException If some other I/O error occurs
      */
-    public int write(ByteBuffer src) throws IOException {
+    public int write(ByteBuffer src) throws IOException
+    {
         return sc.write(src);
     }
 
@@ -120,73 +130,88 @@ public class NioChannel implements ByteChannel{
      * @return The number of bytes read, possibly zero, or <tt>-1</tt> if the channel has reached end-of-stream
      * @throws IOException If some other I/O error occurs
      */
-    public int read(ByteBuffer dst) throws IOException {
+    public int read(ByteBuffer dst) throws IOException
+    {
         return sc.read(dst);
     }
 
-    public Object getAttachment(boolean remove) {
+    public Object getAttachment(boolean remove)
+    {
         Poller pol = getPoller();
-        Selector sel = pol!=null?pol.getSelector():null;
-        SelectionKey key = sel!=null?getIOChannel().keyFor(sel):null;
-        Object att = key!=null?key.attachment():null;
-        if (key != null && att != null && remove ) key.attach(null);
+        Selector sel = pol != null ? pol.getSelector() : null;
+        SelectionKey key = sel != null ? getIOChannel().keyFor(sel) : null;
+        Object att = key != null ? key.attachment() : null;
+        if (key != null && att != null && remove) key.attach(null);
         return att;
     }
 
-    public ApplicationBufferHandler getBufHandler() {
+    public ApplicationBufferHandler getBufHandler()
+    {
         return bufHandler;
     }
 
-    public Poller getPoller() {
+    public Poller getPoller()
+    {
         return poller;
     }
 
-    public SocketChannel getIOChannel() {
-        return sc;
-    }
-
-    public boolean isClosing() {
-        return false;
-    }
-
-
-    public boolean isInitHandshakeComplete() {
-        return true;
-    }
-
-    public int handshake(boolean read, boolean write) throws IOException {
-        return 0;
-    }
-
-    public void setPoller(Poller poller) {
+    public void setPoller(Poller poller)
+    {
         this.poller = poller;
     }
 
-    public void setIOChannel(SocketChannel IOChannel) {
+    public SocketChannel getIOChannel()
+    {
+        return sc;
+    }
+
+    public void setIOChannel(SocketChannel IOChannel)
+    {
         this.sc = IOChannel;
     }
 
-    public String toString() {
-        return super.toString()+":"+this.sc.toString();
-    }
-    
-    public int getOutboundRemaining() {
-        return 0;
-    }
-    
-    /**
-     * Return true if the buffer wrote data.
-     * @throws IOException
-     */
-    public boolean flushOutbound() throws IOException {
+    public boolean isClosing()
+    {
         return false;
     }
-    
-    public boolean isSendFile() {
+
+    public boolean isInitHandshakeComplete()
+    {
+        return true;
+    }
+
+    public int handshake(boolean read, boolean write) throws IOException
+    {
+        return 0;
+    }
+
+    public String toString()
+    {
+        return super.toString() + ":" + this.sc.toString();
+    }
+
+    public int getOutboundRemaining()
+    {
+        return 0;
+    }
+
+    /**
+     * Return true if the buffer wrote data.
+     *
+     * @throws IOException
+     */
+    public boolean flushOutbound() throws IOException
+    {
+        return false;
+    }
+
+    public boolean isSendFile()
+    {
         return sendFile;
     }
-    
-    public void setSendFile(boolean s) {
+
+    public void setSendFile(boolean s)
+    {
         this.sendFile = s;
     }
 }

@@ -25,7 +25,7 @@ package org.apache.catalina;
  * required that a Valve somewhere in the pipeline (usually the last one)
  * must process the request and create the corresponding response, rather
  * than trying to pass the request on.</p>
- *
+ * <p/>
  * <p>There is generally a single Pipeline instance associated with each
  * Container.  The container's normal request processing functionality is
  * generally encapsulated in a container-specific Valve, which should always
@@ -36,10 +36,10 @@ package org.apache.catalina;
  *
  * @author Craig R. McClanahan
  * @author Peter Donald
- *
  */
 
-public interface Pipeline {
+public interface Pipeline
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -81,13 +81,12 @@ public interface Pipeline {
      * if it is already associated with a different Container.</p>
      *
      * @param valve Valve to be added
-     *
-     * @exception IllegalArgumentException if this Container refused to
-     *  accept the specified Valve
-     * @exception IllegalArgumentException if the specifie Valve refuses to be
-     *  associated with this Container
-     * @exception IllegalStateException if the specified Valve is already
-     *  associated with a different Container
+     * @throws IllegalArgumentException if this Container refused to
+     *                                  accept the specified Valve
+     * @throws IllegalArgumentException if the specifie Valve refuses to be
+     *                                  associated with this Container
+     * @throws IllegalStateException    if the specified Valve is already
+     *                                  associated with a different Container
      */
     public void addValve(Valve valve);
 

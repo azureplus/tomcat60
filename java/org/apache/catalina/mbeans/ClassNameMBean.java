@@ -18,10 +18,10 @@
 package org.apache.catalina.mbeans;
 
 
+import org.apache.tomcat.util.modeler.BaseModelMBean;
+
 import javax.management.MBeanException;
 import javax.management.RuntimeOperationsException;
-
-import org.apache.tomcat.util.modeler.BaseModelMBean;
 
 
 /**
@@ -34,44 +34,46 @@ import org.apache.tomcat.util.modeler.BaseModelMBean;
  * qualified class name of the managed object as its value.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class ClassNameMBean extends BaseModelMBean {
+public class ClassNameMBean extends BaseModelMBean
+{
 
 
-     // ---------------------------------------------------------- Constructors
+    // ---------------------------------------------------------- Constructors
 
 
-     /**
-      * Construct a <code>ModelMBean</code> with default
-      * <code>ModelMBeanInfo</code> information.
-      *
-      * @exception MBeanException if the initialize of an object
-      *  throws an exception
-      * @exception RuntimeOperationsException if an IllegalArgumentException
-      *  occurs
-      */
-     public ClassNameMBean()
-         throws MBeanException, RuntimeOperationsException {
+    /**
+     * Construct a <code>ModelMBean</code> with default
+     * <code>ModelMBeanInfo</code> information.
+     *
+     * @throws MBeanException             if the initialize of an object
+     *                                    throws an exception
+     * @throws RuntimeOperationsException if an IllegalArgumentException
+     *                                    occurs
+     */
+    public ClassNameMBean()
+            throws MBeanException, RuntimeOperationsException
+    {
 
-         super();
+        super();
 
-     }
-
-
-     // ------------------------------------------------------------ Properties
+    }
 
 
-     /**
-      * Return the fully qualified Java class name of the managed object
-      * for this MBean.
-      */
-     public String getClassName() {
-
-         return (this.resource.getClass().getName());
-
-     }
+    // ------------------------------------------------------------ Properties
 
 
- }
+    /**
+     * Return the fully qualified Java class name of the managed object
+     * for this MBean.
+     */
+    public String getClassName()
+    {
+
+        return (this.resource.getClass().getName());
+
+    }
+
+
+}

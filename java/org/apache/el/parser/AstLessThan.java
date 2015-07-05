@@ -25,21 +25,25 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstLessThan extends BooleanNode {
-    public AstLessThan(int id) {
+public final class AstLessThan extends BooleanNode
+{
+    public AstLessThan(int id)
+    {
         super(id);
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         Object obj0 = this.children[0].getValue(ctx);
-        if (obj0 == null) {
+        if (obj0 == null)
+        {
             return Boolean.FALSE;
         }
         Object obj1 = this.children[1].getValue(ctx);
-        if (obj1 == null) {
+        if (obj1 == null)
+        {
             return Boolean.FALSE;
         }
         return (compare(obj0, obj1) < 0) ? Boolean.TRUE : Boolean.FALSE;

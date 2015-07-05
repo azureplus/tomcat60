@@ -30,7 +30,8 @@ import java.util.logging.LogRecord;
 /*
  * Date processing based on AccessLogValve.
  */
-public class OneLineFormatter extends Formatter {
+public class OneLineFormatter extends Formatter
+{
 
     private static final String LINE_SEP = System.getProperty("line.separator");
     private static final String ST_SEP = LINE_SEP + " ";
@@ -58,15 +59,18 @@ public class OneLineFormatter extends Formatter {
      * Thread local date format cache.
      */
     private static final ThreadLocal<DateFormatCache> localDateCache =
-            new ThreadLocal<DateFormatCache>() {
-        @Override
-        protected DateFormatCache initialValue() {
-            return new DateFormatCache(localCacheSize, timeFormat, globalDateCache);
-        }
-    };
+            new ThreadLocal<DateFormatCache>()
+            {
+                @Override
+                protected DateFormatCache initialValue()
+                {
+                    return new DateFormatCache(localCacheSize, timeFormat, globalDateCache);
+                }
+            };
 
     @Override
-    public String format(LogRecord record) {
+    public String format(LogRecord record)
+    {
         StringBuilder sb = new StringBuilder();
 
         // Timestamp
@@ -93,7 +97,8 @@ public class OneLineFormatter extends Formatter {
         sb.append(formatMessage(record));
 
         // Stack trace
-        if (record.getThrown() != null) {
+        if (record.getThrown() != null)
+        {
             sb.append(ST_SEP);
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
@@ -108,15 +113,19 @@ public class OneLineFormatter extends Formatter {
         return sb.toString();
     }
 
-    protected void addTimestamp(StringBuilder buf, long timestamp) {
+    protected void addTimestamp(StringBuilder buf, long timestamp)
+    {
         buf.append(localDateCache.get().getFormat(timestamp));
         long frac = timestamp % 1000;
         buf.append('.');
-        if (frac < 100) {
-            if (frac < 10) {
+        if (frac < 100)
+        {
+            if (frac < 10)
+            {
                 buf.append('0');
                 buf.append('0');
-            } else {
+            } else
+            {
                 buf.append('0');
             }
         }

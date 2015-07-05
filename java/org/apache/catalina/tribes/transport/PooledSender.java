@@ -16,79 +16,93 @@
  */
 package org.apache.catalina.tribes.transport;
 
+import org.apache.catalina.tribes.Member;
+
 import java.io.IOException;
 import java.util.List;
-import org.apache.catalina.tribes.Member;
 
 /**
  * <p>Title: </p>
- *
+ * <p/>
  * <p>Description: </p>
- *
+ * <p/>
  * <p>Company: </p>
  *
  * @author not attributable
  * @version 1.0
  */
-public abstract class PooledSender extends AbstractSender implements MultiPointSender {
-    
+public abstract class PooledSender extends AbstractSender implements MultiPointSender
+{
+
     private SenderQueue queue = null;
     private int poolSize = 25;
-    public PooledSender() {
-        queue = new SenderQueue(this,poolSize);
+
+    public PooledSender()
+    {
+        queue = new SenderQueue(this, poolSize);
     }
-    
+
     public abstract DataSender getNewDataSender();
-    
-    public DataSender getSender() {
+
+    public DataSender getSender()
+    {
         return queue.getSender(getTimeout());
     }
-    
-    public void returnSender(DataSender sender) {
+
+    public void returnSender(DataSender sender)
+    {
         sender.keepalive();
         queue.returnSender(sender);
     }
-    
-    public synchronized void connect() throws IOException {
+
+    public synchronized void connect() throws IOException
+    {
         //do nothing, happens in the socket sender itself
         queue.open();
         setConnected(true);
     }
-    
-    public synchronized void disconnect() {
+
+    public synchronized void disconnect()
+    {
         queue.close();
         setConnected(false);
     }
-    
-    
-    public int getInPoolSize() {
+
+
+    public int getInPoolSize()
+    {
         return queue.getInPoolSize();
     }
 
-    public int getInUsePoolSize() {
+    public int getInUsePoolSize()
+    {
         return queue.getInUsePoolSize();
     }
 
+    public int getPoolSize()
+    {
+        return poolSize;
+    }
 
-    public void setPoolSize(int poolSize) {
+    public void setPoolSize(int poolSize)
+    {
         this.poolSize = poolSize;
         queue.setLimit(poolSize);
     }
 
-    public int getPoolSize() {
-        return poolSize;
-    }
-
-    public boolean keepalive() {
+    public boolean keepalive()
+    {
         //do nothing, the pool checks on every return
-        return (queue==null)?false:queue.checkIdleKeepAlive();
+        return (queue == null) ? false : queue.checkIdleKeepAlive();
     }
 
-    public void add(Member member) {
+    public void add(Member member)
+    {
         // no op, senders created upon demans
     }
 
-    public void remove(Member member) {
+    public void remove(Member member)
+    {
         //no op for now, should not cancel out any keys
         //can create serious sync issues
         //all TCP connections are cleared out through keepalive
@@ -96,18 +110,18 @@ public abstract class PooledSender extends AbstractSender implements MultiPointS
     }
     //  ----------------------------------------------------- Inner Class
 
-    private class SenderQueue {
-        private int limit = 25;
-
+    private class SenderQueue
+    {
         PooledSender parent = null;
-
+        private int limit = 25;
         private List notinuse = null;
 
         private List inuse = null;
 
         private boolean isOpen = true;
 
-        public SenderQueue(PooledSender parent, int limit) {
+        public SenderQueue(PooledSender parent, int limit)
+        {
             this.limit = limit;
             this.parent = parent;
             notinuse = new java.util.LinkedList();
@@ -117,97 +131,126 @@ public abstract class PooledSender extends AbstractSender implements MultiPointS
         /**
          * @return Returns the limit.
          */
-        public int getLimit() {
+        public int getLimit()
+        {
             return limit;
         }
+
         /**
          * @param limit The limit to set.
          */
-        public void setLimit(int limit) {
+        public void setLimit(int limit)
+        {
             this.limit = limit;
         }
+
         /**
          * @return
          */
-        public int getInUsePoolSize() {
+        public int getInUsePoolSize()
+        {
             return inuse.size();
         }
 
         /**
          * @return
          */
-        public int getInPoolSize() {
+        public int getInPoolSize()
+        {
             return notinuse.size();
         }
-        
-        public synchronized boolean checkIdleKeepAlive() {
+
+        public synchronized boolean checkIdleKeepAlive()
+        {
             DataSender[] list = new DataSender[notinuse.size()];
             notinuse.toArray(list);
             boolean result = false;
-            for (int i=0; i<list.length; i++) {
+            for (int i = 0; i < list.length; i++)
+            {
                 result = result | list[i].keepalive();
             }
             return result;
         }
 
-        public synchronized DataSender getSender(long timeout) {
+        public synchronized DataSender getSender(long timeout)
+        {
             long start = System.currentTimeMillis();
-            while ( true ) {
-                if (!isOpen)throw new IllegalStateException("Queue is closed");
+            while (true)
+            {
+                if (!isOpen) throw new IllegalStateException("Queue is closed");
                 DataSender sender = null;
-                if (notinuse.size() == 0 && inuse.size() < limit) {
+                if (notinuse.size() == 0 && inuse.size() < limit)
+                {
                     sender = parent.getNewDataSender();
-                } else if (notinuse.size() > 0) {
+                } else if (notinuse.size() > 0)
+                {
                     sender = (DataSender) notinuse.remove(0);
                 }
-                if (sender != null) {
+                if (sender != null)
+                {
                     inuse.add(sender);
                     return sender;
                 }//end if
                 long delta = System.currentTimeMillis() - start;
-                if ( delta > timeout && timeout>0) return null;
-                else {
-                    try {
-                        wait(Math.max(timeout - delta,1));
-                    }catch (InterruptedException x){}
+                if (delta > timeout && timeout > 0) return null;
+                else
+                {
+                    try
+                    {
+                        wait(Math.max(timeout - delta, 1));
+                    }
+                    catch (InterruptedException x)
+                    {
+                    }
                 }//end if
             }
         }
 
-        public synchronized void returnSender(DataSender sender) {
-            if ( !isOpen) {
+        public synchronized void returnSender(DataSender sender)
+        {
+            if (!isOpen)
+            {
                 sender.disconnect();
                 return;
             }
             //to do
             inuse.remove(sender);
             //just in case the limit has changed
-            if ( notinuse.size() < this.getLimit() ) notinuse.add(sender);
-            else try {sender.disconnect(); } catch ( Exception ignore){}
+            if (notinuse.size() < this.getLimit()) notinuse.add(sender);
+            else try
+            {
+                sender.disconnect();
+            }
+            catch (Exception ignore)
+            {
+            }
             notify();
         }
 
-        public synchronized void close() {
+        public synchronized void close()
+        {
             isOpen = false;
             Object[] unused = notinuse.toArray();
             Object[] used = inuse.toArray();
-            for (int i = 0; i < unused.length; i++) {
+            for (int i = 0; i < unused.length; i++)
+            {
                 DataSender sender = (DataSender) unused[i];
                 sender.disconnect();
             }//for
-            for (int i = 0; i < used.length; i++) {
+            for (int i = 0; i < used.length; i++)
+            {
                 DataSender sender = (DataSender) used[i];
                 sender.disconnect();
             }//for
             notinuse.clear();
             inuse.clear();
             notify();
-            
 
 
         }
 
-        public synchronized void open() {
+        public synchronized void open()
+        {
             isOpen = true;
             notify();
         }

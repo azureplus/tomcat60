@@ -34,16 +34,16 @@ import java.io.IOException;
 /**
  * Valve that implements the default basic behavior for the
  * <code>StandardEngine</code> container implementation.
- * <p>
+ * <p/>
  * <b>USAGE CONSTRAINT</b>:  This implementation is likely to be useful only
  * when processing HTTP requests.
  *
  * @author Craig R. McClanahan
- *
  */
 
 final class StandardEngineValve
-    extends ValveBase {
+        extends ValveBase
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -53,14 +53,14 @@ final class StandardEngineValve
      * The descriptive information related to this implementation.
      */
     private static final String info =
-        "org.apache.catalina.core.StandardEngineValve/1.0";
+            "org.apache.catalina.core.StandardEngineValve/1.0";
 
 
     /**
      * The string manager for this package.
      */
     private static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
 
 
     // ------------------------------------------------------------- Properties
@@ -69,7 +69,8 @@ final class StandardEngineValve
     /**
      * Return descriptive information about this Valve implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -84,23 +85,24 @@ final class StandardEngineValve
      * based on the requested server name.  If no matching Host can
      * be found, return an appropriate HTTP error.
      *
-     * @param request Request to be processed
-     * @param response Response to be produced
+     * @param request      Request to be processed
+     * @param response     Response to be produced
      * @param valveContext Valve context used to forward to the next Valve
-     *
-     * @exception IOException if an input/output error occurred
-     * @exception ServletException if a servlet error occurred
+     * @throws IOException      if an input/output error occurred
+     * @throws ServletException if a servlet error occurred
      */
     public final void invoke(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Select the Host to be used for this Request
         Host host = request.getHost();
-        if (host == null) {
+        if (host == null)
+        {
             response.sendError
-                (HttpServletResponse.SC_BAD_REQUEST,
-                 sm.getString("standardEngine.noHost", 
-                              request.getServerName()));
+                    (HttpServletResponse.SC_BAD_REQUEST,
+                            sm.getString("standardEngine.noHost",
+                                    request.getServerName()));
             return;
         }
 
@@ -113,15 +115,15 @@ final class StandardEngineValve
     /**
      * Process Comet event.
      *
-     * @param request Request to be processed
-     * @param response Response to be produced
+     * @param request      Request to be processed
+     * @param response     Response to be produced
      * @param valveContext Valve context used to forward to the next Valve
-     *
-     * @exception IOException if an input/output error occurred
-     * @exception ServletException if a servlet error occurred
+     * @throws IOException      if an input/output error occurred
+     * @throws ServletException if a servlet error occurred
      */
     public final void event(Request request, Response response, CometEvent event)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Ask this Host to process this request
         request.getHost().getPipeline().getFirst().event(request, response, event);

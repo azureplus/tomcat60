@@ -37,11 +37,11 @@ import java.io.InputStream;
  * schema validation.
  *
  * @author Remy Maucherat
- *
  * @since 5.0
  */
 
-public class ValidatorTask extends BaseRedirectorHelperTask {
+public class ValidatorTask extends BaseRedirectorHelperTask
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -55,11 +55,13 @@ public class ValidatorTask extends BaseRedirectorHelperTask {
      */
     protected String path = null;
 
-    public String getPath() {
+    public String getPath()
+    {
         return (this.path);
     }
 
-    public void setPath(String path) {
+    public void setPath(String path)
+    {
         this.path = path;
     }
 
@@ -72,43 +74,53 @@ public class ValidatorTask extends BaseRedirectorHelperTask {
      * attribute validation required by all subclasses; it does not perform
      * any functional logic directly.
      *
-     * @exception BuildException if a validation error occurs
+     * @throws BuildException if a validation error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
 
-        if (path == null) {
+        if (path == null)
+        {
             throw new BuildException("Must specify 'path'");
         }
 
         File file = new File(path, Constants.ApplicationWebXml);
-        if ((!file.exists()) || (!file.canRead())) {
+        if ((!file.exists()) || (!file.canRead()))
+        {
             throw new BuildException("Cannot find web.xml");
         }
 
         // Commons-logging likes having the context classloader set
         ClassLoader oldCL = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader
-            (ValidatorTask.class.getClassLoader());
+                (ValidatorTask.class.getClassLoader());
 
         // Called through trusted manager interface. If running under a
         // SecurityManager assume that untrusted applications may be deployed.
         Digester digester = DigesterFactory.newDigester(
                 true, true, null, Globals.IS_SECURITY_ENABLED);
-        try {
+        try
+        {
             file = file.getCanonicalFile();
             InputStream stream =
-                new BufferedInputStream(new FileInputStream(file));
+                    new BufferedInputStream(new FileInputStream(file));
             InputSource is = new InputSource(file.toURL().toExternalForm());
             is.setByteStream(stream);
             digester.parse(is);
             handleOutput("web.xml validated");
-        } catch (Throwable t) {
-            if (isFailOnError()) {
+        }
+        catch (Throwable t)
+        {
+            if (isFailOnError())
+            {
                 throw new BuildException("Validation failure", t);
-            } else {
+            } else
+            {
                 handleErrorOutput("Validation failure: " + t);
             }
-        } finally {
+        }
+        finally
+        {
             Thread.currentThread().setContextClassLoader(oldCL);
             closeRedirector();
         }

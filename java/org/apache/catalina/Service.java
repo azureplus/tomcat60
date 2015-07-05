@@ -25,16 +25,16 @@ import org.apache.catalina.connector.Connector;
  * <strong>Connectors</strong> that share a single <strong>Container</strong>
  * to process their incoming requests.  This arrangement allows, for example,
  * a non-SSL and SSL connector to share the same population of web apps.
- * <p>
+ * <p/>
  * A given JVM can contain any number of Service instances; however, they are
  * completely independent of each other and share only the basic JVM facilities
  * and classes on the system class path.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface Service {
+public interface Service
+{
 
     // ------------------------------------------------------------- Properties
 
@@ -113,31 +113,35 @@ public interface Service {
      * Invoke a pre-startup initialization. This is used to allow connectors
      * to bind to restricted ports under Unix operating environments.
      *
-     * @exception LifecycleException If this server was already initialized.
+     * @throws LifecycleException If this server was already initialized.
      */
     public void initialize() throws LifecycleException;
 
     /**
      * Adds a named executor to the service
+     *
      * @param ex Executor
      */
     public void addExecutor(Executor ex);
 
     /**
      * Retrieves all executors
+     *
      * @return Executor[]
      */
     public Executor[] findExecutors();
 
     /**
      * Retrieves executor by name, null if not found
+     *
      * @param name String
      * @return Executor
      */
     public Executor getExecutor(String name);
-    
+
     /**
      * Removes an executor from the service
+     *
      * @param ex Executor
      */
     public void removeExecutor(Executor ex);

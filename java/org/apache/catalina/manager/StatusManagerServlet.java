@@ -19,6 +19,15 @@
 package org.apache.catalina.manager;
 
 
+import org.apache.catalina.util.ServerInfo;
+import org.apache.catalina.util.StringManager;
+import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
@@ -26,41 +35,25 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerNotification;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.util.ServerInfo;
-import org.apache.catalina.util.StringManager;
-import org.apache.tomcat.util.modeler.Registry;
-
 /**
  * This servlet will display a complete status of the HTTP/1.1 connector.
  *
  * @author Remy Maucherat
- *
  */
 
 public class StatusManagerServlet
-    extends HttpServlet implements NotificationListener {
+        extends HttpServlet implements NotificationListener
+{
 
 
     // ----------------------------------------------------- Instance Variables
 
 
     /**
-     * The debugging detail level for this servlet.
+     * The string manager for this package.
      */
-    private int debug = 0;
-
-
+    protected static StringManager sm =
+            StringManager.getManager(Constants.Package);
     /**
      * MBean server.
      */
@@ -89,43 +82,45 @@ public class StatusManagerServlet
      * Vector of global request processors object names.
      */
     protected Vector globalRequestProcessors = new Vector();
-
-
     /**
-     * The string manager for this package.
+     * The debugging detail level for this servlet.
      */
-    protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
+    private int debug = 0;
 
 
     // --------------------------------------------------------- Public Methods
 
-
     /**
      * Initialize this servlet.
      */
-    public void init() throws ServletException {
+    public void init() throws ServletException
+    {
 
         // Retrieve the MBean server
         mBeanServer = Registry.getRegistry(null, null).getMBeanServer();
 
         // Set our properties from the initialization parameters
         String value = null;
-        try {
+        try
+        {
             value = getServletConfig().getInitParameter("debug");
             debug = Integer.parseInt(value);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             ;
         }
 
-        try {
+        try
+        {
 
             // Query protocol handlers
             String onStr = "*:type=ProtocolHandler,*";
             ObjectName objectName = new ObjectName(onStr);
             Set set = mBeanServer.queryMBeans(objectName, null);
             Iterator iterator = set.iterator();
-            while (iterator.hasNext()) {
+            while (iterator.hasNext())
+            {
                 ObjectInstance oi = (ObjectInstance) iterator.next();
                 protocolHandlers.addElement(oi.getObjectName());
             }
@@ -135,7 +130,8 @@ public class StatusManagerServlet
             objectName = new ObjectName(onStr);
             set = mBeanServer.queryMBeans(objectName, null);
             iterator = set.iterator();
-            while (iterator.hasNext()) {
+            while (iterator.hasNext())
+            {
                 ObjectInstance oi = (ObjectInstance) iterator.next();
                 threadPools.addElement(oi.getObjectName());
             }
@@ -145,7 +141,8 @@ public class StatusManagerServlet
             objectName = new ObjectName(onStr);
             set = mBeanServer.queryMBeans(objectName, null);
             iterator = set.iterator();
-            while (iterator.hasNext()) {
+            while (iterator.hasNext())
+            {
                 ObjectInstance oi = (ObjectInstance) iterator.next();
                 globalRequestProcessors.addElement(oi.getObjectName());
             }
@@ -155,7 +152,8 @@ public class StatusManagerServlet
             objectName = new ObjectName(onStr);
             set = mBeanServer.queryMBeans(objectName, null);
             iterator = set.iterator();
-            while (iterator.hasNext()) {
+            while (iterator.hasNext())
+            {
                 ObjectInstance oi = (ObjectInstance) iterator.next();
                 requestProcessors.addElement(oi.getObjectName());
             }
@@ -165,7 +163,9 @@ public class StatusManagerServlet
             objectName = new ObjectName(onStr);
             mBeanServer.addNotificationListener(objectName, this, null, null);
 
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
 
@@ -175,7 +175,8 @@ public class StatusManagerServlet
     /**
      * Finalize this servlet.
      */
-    public void destroy() {
+    public void destroy()
+    {
 
         ;       // No actions necessary
 
@@ -185,21 +186,22 @@ public class StatusManagerServlet
     /**
      * Process a GET request for the specified resource.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet-specified error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet-specified error occurs
      */
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // mode is flag for HTML or XML output
         int mode = 0;
         // if ?XML=true, set the mode to XML
-        if (request.getParameter("XML") != null 
-            && request.getParameter("XML").equals("true")) {
+        if (request.getParameter("XML") != null
+                && request.getParameter("XML").equals("true"))
+        {
             mode = 1;
         }
         StatusTransformer.setContentType(response, mode);
@@ -207,23 +209,26 @@ public class StatusManagerServlet
         PrintWriter writer = response.getWriter();
 
         boolean completeStatus = false;
-        if ((request.getPathInfo() != null) 
-            && (request.getPathInfo().equals("/all"))) {
+        if ((request.getPathInfo() != null)
+                && (request.getPathInfo().equals("/all")))
+        {
             completeStatus = true;
         }
         // use StatusTransformer to output status
-        StatusTransformer.writeHeader(writer,mode);
+        StatusTransformer.writeHeader(writer, mode);
 
         // Body Header Section
         Object[] args = new Object[2];
         args[0] = request.getContextPath();
-        if (completeStatus) {
+        if (completeStatus)
+        {
             args[1] = sm.getString("statusServlet.complete");
-        } else {
+        } else
+        {
             args[1] = sm.getString("statusServlet.title");
         }
         // use StatusTransformer to output status
-        StatusTransformer.writeBody(writer,args,mode);
+        StatusTransformer.writeBody(writer, args, mode);
 
         // Manager Section
         args = new Object[9];
@@ -231,24 +236,26 @@ public class StatusManagerServlet
         args[1] = response.encodeURL(request.getContextPath() + "/html/list");
         args[2] = sm.getString("htmlManagerServlet.list");
         args[3] = response.encodeURL
-            (request.getContextPath() + "/" +
-             sm.getString("htmlManagerServlet.helpHtmlManagerFile"));
+                (request.getContextPath() + "/" +
+                        sm.getString("htmlManagerServlet.helpHtmlManagerFile"));
         args[4] = sm.getString("htmlManagerServlet.helpHtmlManager");
         args[5] = response.encodeURL
-            (request.getContextPath() + "/" +
-             sm.getString("htmlManagerServlet.helpManagerFile"));
+                (request.getContextPath() + "/" +
+                        sm.getString("htmlManagerServlet.helpManagerFile"));
         args[6] = sm.getString("htmlManagerServlet.helpManager");
-        if (completeStatus) {
+        if (completeStatus)
+        {
             args[7] = response.encodeURL
-                (request.getContextPath() + "/status");
+                    (request.getContextPath() + "/status");
             args[8] = sm.getString("statusServlet.title");
-        } else {
+        } else
+        {
             args[7] = response.encodeURL
-                (request.getContextPath() + "/status/all");
+                    (request.getContextPath() + "/status/all");
             args[8] = sm.getString("statusServlet.complete");
         }
         // use StatusTransformer to output status
-        StatusTransformer.writeManager(writer,args,mode);
+        StatusTransformer.writeManager(writer, args, mode);
 
         // Server Header Section
         args = new Object[7];
@@ -260,7 +267,7 @@ public class StatusManagerServlet
         args[5] = sm.getString("htmlManagerServlet.serverOSVersion");
         args[6] = sm.getString("htmlManagerServlet.serverOSArch");
         // use StatusTransformer to output status
-        StatusTransformer.writePageHeading(writer,args,mode);
+        StatusTransformer.writePageHeading(writer, args, mode);
 
         // Server Row Section
         args = new Object[6];
@@ -273,34 +280,39 @@ public class StatusManagerServlet
         // use StatusTransformer to output status
         StatusTransformer.writeServerInfo(writer, args, mode);
 
-        try {
+        try
+        {
 
             // Display operating system statistics using APR if available
-            StatusTransformer.writeOSState(writer,mode);
+            StatusTransformer.writeOSState(writer, mode);
 
             // Display virtual machine statistics
-            StatusTransformer.writeVMState(writer,mode);
+            StatusTransformer.writeVMState(writer, mode);
 
             Enumeration enumeration = threadPools.elements();
-            while (enumeration.hasMoreElements()) {
+            while (enumeration.hasMoreElements())
+            {
                 ObjectName objectName = (ObjectName) enumeration.nextElement();
                 String name = objectName.getKeyProperty("name");
                 // use StatusTransformer to output status
                 StatusTransformer.writeConnectorState
-                    (writer, objectName,
-                     name, mBeanServer, globalRequestProcessors,
-                     requestProcessors, mode);
+                        (writer, objectName,
+                                name, mBeanServer, globalRequestProcessors,
+                                requestProcessors, mode);
             }
 
-            if ((request.getPathInfo() != null) 
-                && (request.getPathInfo().equals("/all"))) {
+            if ((request.getPathInfo() != null)
+                    && (request.getPathInfo().equals("/all")))
+            {
                 // Note: Retrieving the full status is much slower
                 // use StatusTransformer to output status
                 StatusTransformer.writeDetailedState
-                    (writer, mBeanServer, mode);
+                        (writer, mBeanServer, mode);
             }
 
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new ServletException(e);
         }
 
@@ -313,42 +325,57 @@ public class StatusManagerServlet
 
 
     public void handleNotification(Notification notification,
-                                   java.lang.Object handback) {
+                                   java.lang.Object handback)
+    {
 
-        if (notification instanceof MBeanServerNotification) {
-            ObjectName objectName = 
-                ((MBeanServerNotification) notification).getMBeanName();
+        if (notification instanceof MBeanServerNotification)
+        {
+            ObjectName objectName =
+                    ((MBeanServerNotification) notification).getMBeanName();
             if (notification.getType().equals
-                (MBeanServerNotification.REGISTRATION_NOTIFICATION)) {
+                    (MBeanServerNotification.REGISTRATION_NOTIFICATION))
+            {
                 String type = objectName.getKeyProperty("type");
-                if (type != null) {
-                    if (type.equals("ProtocolHandler")) {
+                if (type != null)
+                {
+                    if (type.equals("ProtocolHandler"))
+                    {
                         protocolHandlers.addElement(objectName);
-                    } else if (type.equals("ThreadPool")) {
+                    } else if (type.equals("ThreadPool"))
+                    {
                         threadPools.addElement(objectName);
-                    } else if (type.equals("GlobalRequestProcessor")) {
+                    } else if (type.equals("GlobalRequestProcessor"))
+                    {
                         globalRequestProcessors.addElement(objectName);
-                    } else if (type.equals("RequestProcessor")) {
+                    } else if (type.equals("RequestProcessor"))
+                    {
                         requestProcessors.addElement(objectName);
                     }
                 }
             } else if (notification.getType().equals
-                       (MBeanServerNotification.UNREGISTRATION_NOTIFICATION)) {
+                    (MBeanServerNotification.UNREGISTRATION_NOTIFICATION))
+            {
                 String type = objectName.getKeyProperty("type");
-                if (type != null) {
-                    if (type.equals("ProtocolHandler")) {
+                if (type != null)
+                {
+                    if (type.equals("ProtocolHandler"))
+                    {
                         protocolHandlers.removeElement(objectName);
-                    } else if (type.equals("ThreadPool")) {
+                    } else if (type.equals("ThreadPool"))
+                    {
                         threadPools.removeElement(objectName);
-                    } else if (type.equals("GlobalRequestProcessor")) {
+                    } else if (type.equals("GlobalRequestProcessor"))
+                    {
                         globalRequestProcessors.removeElement(objectName);
-                    } else if (type.equals("RequestProcessor")) {
+                    } else if (type.equals("RequestProcessor"))
+                    {
                         requestProcessors.removeElement(objectName);
                     }
                 }
                 String j2eeType = objectName.getKeyProperty("j2eeType");
-                if (j2eeType != null) {
-                    
+                if (j2eeType != null)
+                {
+
                 }
             }
         }

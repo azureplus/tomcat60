@@ -29,10 +29,10 @@ package org.apache.catalina;
  * @author Bip Thelin
  * @author Remy Maucherat
  * @author Filip Hanik
- *
  */
 
-public interface Cluster {
+public interface Cluster
+{
 
     // ------------------------------------------------------------- Properties
 
@@ -60,13 +60,6 @@ public interface Cluster {
     public void setClusterName(String clusterName);
 
     /**
-     * Set the Container associated with our Cluster
-     *
-     * @param container The Container to use
-     */
-    public void setContainer(Container container);
-
-    /**
      * Get the Container associated with our Cluster
      *
      * @return The Container associated with our Cluster
@@ -74,12 +67,11 @@ public interface Cluster {
     public Container getContainer();
 
     /**
-     * Set the protocol parameters.
+     * Set the Container associated with our Cluster
      *
-     * @param protocol The protocol used by the cluster
-     * @deprecated
+     * @param container The Container to use
      */
-    public void setProtocol(String protocol);
+    public void setContainer(Container container);
 
     /**
      * Get the protocol used by the cluster.
@@ -89,6 +81,14 @@ public interface Cluster {
      */
     public String getProtocol();
 
+    /**
+     * Set the protocol parameters.
+     *
+     * @param protocol The protocol used by the cluster
+     * @deprecated
+     */
+    public void setProtocol(String protocol);
+
     // --------------------------------------------------------- Public Methods
 
     /**
@@ -96,27 +96,29 @@ public interface Cluster {
      * sessions.
      *
      * @param name Name (key) of the application with which the manager is
-     * associated
+     *             associated
      */
     public Manager createManager(String name);
-    
+
     /**
-     * Register a manager with the cluster. If the cluster is not responsible 
-     * for creating a manager, then the container will at least notify the 
+     * Register a manager with the cluster. If the cluster is not responsible
+     * for creating a manager, then the container will at least notify the
      * cluster that this mananger is participating in the cluster.
+     *
      * @param manager Manager
      */
     public void registerManager(Manager manager);
-    
+
     /**
      * Removes a manager from the cluster
+     *
      * @param manager Manager
      */
     public void removeManager(Manager manager);
 
     // --------------------------------------------------------- Cluster Wide Deployments
-    
-    
+
+
     /**
      * Execute a periodic task, such as reloading, etc. This method will be
      * invoked inside the classloading context of this container. Unexpected

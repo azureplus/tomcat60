@@ -26,25 +26,29 @@ import java.io.PrintStream;
  * @author Glenn L. Nielsen
  */
 
-class CaptureLog {
+class CaptureLog
+{
 
-    protected CaptureLog() {
+    private ByteArrayOutputStream baos;
+    private PrintStream ps;
+    protected CaptureLog()
+    {
         baos = new ByteArrayOutputStream();
         ps = new PrintStream(baos);
     }
 
-    private ByteArrayOutputStream baos;
-    private PrintStream ps;
-
-    protected PrintStream getStream() {
+    protected PrintStream getStream()
+    {
         return ps;
     }
 
-    protected void reset() {
+    protected void reset()
+    {
         baos.reset();
     }
 
-    protected String getCapture() {
+    protected String getCapture()
+    {
         return baos.toString();
     }
 }

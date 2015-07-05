@@ -18,14 +18,18 @@ package org.apache.coyote;
 
 import org.apache.tomcat.util.net.AbstractEndpoint;
 
-public abstract class AbstractProtocol implements ProtocolHandler {
+public abstract class AbstractProtocol implements ProtocolHandler
+{
 
     protected abstract AbstractEndpoint getEndpoint();
 
-    public int getMaxHeaderCount() {
+    public int getMaxHeaderCount()
+    {
         return getEndpoint().getMaxHeaderCount();
     }
-    public void setMaxHeaderCount(int maxHeaderCount) {
+
+    public void setMaxHeaderCount(int maxHeaderCount)
+    {
         getEndpoint().setMaxHeaderCount(maxHeaderCount);
     }
 }

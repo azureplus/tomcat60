@@ -19,69 +19,108 @@
 package org.apache.catalina.authenticator;
 
 
+import org.apache.tomcat.util.buf.ByteChunk;
+
+import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
-
-import javax.servlet.http.Cookie;
-
-import org.apache.tomcat.util.buf.ByteChunk;
 
 
 /**
  * Object that saves the critical information from a request so that
  * form-based authentication can reproduce it once the user has been
  * authenticated.
- * <p>
+ * <p/>
  * <b>IMPLEMENTATION NOTE</b> - It is assumed that this object is accessed
  * only from the context of a single thread, so no synchronization around
  * internal collection classes is performed.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public final class SavedRequest {
+public final class SavedRequest
+{
 
 
     /**
      * The set of Cookies associated with this Request.
      */
     private ArrayList<Cookie> cookies = new ArrayList<Cookie>();
-
-    public void addCookie(Cookie cookie) {
-        cookies.add(cookie);
-    }
-
-    public Iterator getCookies() {
-        return (cookies.iterator());
-    }
-
-
     /**
      * The set of Headers associated with this Request.  Each key is a header
      * name, while the value is a ArrayList containing one or more actual
      * values for this header.  The values are returned as an Iterator when
      * you ask for them.
      */
-    private HashMap<String,ArrayList<String>> headers =
-        new HashMap<String,ArrayList<String>>();
+    private HashMap<String, ArrayList<String>> headers =
+            new HashMap<String, ArrayList<String>>();
+    /**
+     * The set of Locales associated with this Request.
+     */
+    private ArrayList<Locale> locales = new ArrayList<Locale>();
+    /**
+     * The request method used on this Request.
+     */
+    private String method = null;
+    /**
+     * The set of request parameters associated with this Request.  Each
+     * entry is keyed by the parameter name, pointing at a String array of
+     * the corresponding values.
+     */
+    private HashMap<String, String[]> parameters =
+            new HashMap<String, String[]>();
+    /**
+     * The query string associated with this Request.
+     */
+    private String queryString = null;
+    /**
+     * The request URI associated with this Request.
+     */
+    private String requestURI = null;
+    /**
+     * The decode request URI associated with this Request. Path parameters are
+     * also excluded
+     */
+    private String decodedRequestURI = null;
+    /**
+     * The body of this request.
+     */
+    private ByteChunk body = null;
+    /**
+     * The content type of the request, used if this is a POST.
+     */
+    private String contentType = null;
 
-    public void addHeader(String name, String value) {
+    public void addCookie(Cookie cookie)
+    {
+        cookies.add(cookie);
+    }
+
+    public Iterator getCookies()
+    {
+        return (cookies.iterator());
+    }
+
+    public void addHeader(String name, String value)
+    {
         ArrayList<String> values = (ArrayList<String>) headers.get(name);
-        if (values == null) {
+        if (values == null)
+        {
             values = new ArrayList<String>();
             headers.put(name, values);
         }
         values.add(value);
     }
 
-    public Iterator getHeaderNames() {
+    public Iterator getHeaderNames()
+    {
         return (headers.keySet().iterator());
     }
 
-    public Iterator getHeaderValues(String name) {
+    public Iterator getHeaderValues(String name)
+    {
         ArrayList values = (ArrayList) headers.get(name);
         if (values == null)
             return ((new ArrayList()).iterator());
@@ -89,123 +128,88 @@ public final class SavedRequest {
             return (values.iterator());
     }
 
-
-    /**
-     * The set of Locales associated with this Request.
-     */
-    private ArrayList<Locale> locales = new ArrayList<Locale>();
-
-    public void addLocale(Locale locale) {
+    public void addLocale(Locale locale)
+    {
         locales.add(locale);
     }
 
-    public Iterator getLocales() {
+    public Iterator getLocales()
+    {
         return (locales.iterator());
     }
 
-
-    /**
-     * The request method used on this Request.
-     */
-    private String method = null;
-
-    public String getMethod() {
+    public String getMethod()
+    {
         return (this.method);
     }
 
-    public void setMethod(String method) {
+    public void setMethod(String method)
+    {
         this.method = method;
     }
 
-
-
-    /**
-     * The set of request parameters associated with this Request.  Each
-     * entry is keyed by the parameter name, pointing at a String array of
-     * the corresponding values.
-     */
-    private HashMap<String,String[]> parameters =
-        new HashMap<String,String[]>();
-
-    public void addParameter(String name, String values[]) {
+    public void addParameter(String name, String values[])
+    {
         parameters.put(name, values);
     }
 
-    public Iterator getParameterNames() {
+    public Iterator getParameterNames()
+    {
         return (parameters.keySet().iterator());
     }
 
-    public String[] getParameterValues(String name) {
+    public String[] getParameterValues(String name)
+    {
         return ((String[]) parameters.get(name));
     }
 
-
-    /**
-     * The query string associated with this Request.
-     */
-    private String queryString = null;
-
-    public String getQueryString() {
+    public String getQueryString()
+    {
         return (this.queryString);
     }
 
-    public void setQueryString(String queryString) {
+    public void setQueryString(String queryString)
+    {
         this.queryString = queryString;
     }
 
-
-    /**
-     * The request URI associated with this Request.
-     */
-    private String requestURI = null;
-
-    public String getRequestURI() {
+    public String getRequestURI()
+    {
         return (this.requestURI);
     }
 
-    public void setRequestURI(String requestURI) {
+    public void setRequestURI(String requestURI)
+    {
         this.requestURI = requestURI;
     }
 
-    
-    /**
-     * The decode request URI associated with this Request. Path parameters are
-     * also excluded
-     */
-    private String decodedRequestURI = null;
-
-    public String getDecodedRequestURI() {
+    public String getDecodedRequestURI()
+    {
         return (this.decodedRequestURI);
     }
 
-    public void setDecodedRequestURI(String decodedRequestURI) {
+    public void setDecodedRequestURI(String decodedRequestURI)
+    {
         this.decodedRequestURI = decodedRequestURI;
     }
 
-
-    /**
-     * The body of this request.
-     */
-    private ByteChunk body = null;
-    
-    public ByteChunk getBody() {
+    public ByteChunk getBody()
+    {
         return (this.body);
     }
 
-    public void setBody(ByteChunk body) {
+    public void setBody(ByteChunk body)
+    {
         this.body = body;
     }
-    
-    /**
-     * The content type of the request, used if this is a POST.
-     */
-    private String contentType = null;
-    
-    public String getContentType() {
+
+    public String getContentType()
+    {
         return (this.contentType);
     }
-    
-    public void setContentType(String contentType) {
+
+    public void setContentType(String contentType)
+    {
         this.contentType = contentType;
     }
 }

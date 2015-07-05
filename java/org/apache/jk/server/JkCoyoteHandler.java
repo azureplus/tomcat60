@@ -28,165 +28,201 @@ import javax.management.ObjectName;
 import java.io.IOException;
 import java.util.Iterator;
 
-/** Plugs Jk into Coyote. Must be named "type=JkHandler,name=container"
- *
+/**
+ * Plugs Jk into Coyote. Must be named "type=JkHandler,name=container"
+ * <p/>
  * jmx:notification-handler name="org.apache.jk.SEND_PACKET
  * jmx:notification-handler name="org.apache.coyote.ACTION_COMMIT
  */
-public class JkCoyoteHandler extends JkHandler implements ProtocolHandler {
-    protected static org.apache.juli.logging.Log log 
-        = org.apache.juli.logging.LogFactory.getLog(JkCoyoteHandler.class);
+public class JkCoyoteHandler extends JkHandler implements ProtocolHandler
+{
+    protected static org.apache.juli.logging.Log log
+            = org.apache.juli.logging.LogFactory.getLog(JkCoyoteHandler.class);
     // Set debug on this logger to see the container request time
-
-    // ----------------------------------------------------------- DoPrivileged
-    private boolean paused = false;
+    protected JkMain jkMain = null;
     int epNote;
     Adapter adapter;
-    protected JkMain jkMain=null;
+    boolean started = false;
+    // ----------------------------------------------------------- DoPrivileged
+    private boolean paused = false;
 
-    /** Set a property. Name is a "component.property". JMX should
+    /**
+     * Set a property. Name is a "component.property". JMX should
      * be used instead.
      */
-    public void setProperty( String name, String value ) {
-        if( log.isTraceEnabled())
-            log.trace("setProperty " + name + " " + value );
-        getJkMain().setProperty( name, value );
-        properties.put( name, value );
+    public void setProperty(String name, String value)
+    {
+        if (log.isTraceEnabled())
+            log.trace("setProperty " + name + " " + value);
+        getJkMain().setProperty(name, value);
+        properties.put(name, value);
     }
 
-    public String getProperty( String name ) {
-        return properties.getProperty(name) ;
+    public String getProperty(String name)
+    {
+        return properties.getProperty(name);
     }
 
-    public Iterator getAttributeNames() {
-       return properties.keySet().iterator();
+    public Iterator getAttributeNames()
+    {
+        return properties.keySet().iterator();
     }
 
-    /** Pass config info
+    /**
+     * Pass config info
      */
-    public void setAttribute( String name, Object value ) {
-        if( log.isDebugEnabled())
-            log.debug("setAttribute " + name + " " + value );
-        if( value instanceof String )
-            this.setProperty( name, (String)value );
+    public void setAttribute(String name, Object value)
+    {
+        if (log.isDebugEnabled())
+            log.debug("setAttribute " + name + " " + value);
+        if (value instanceof String)
+            this.setProperty(name, (String) value);
     }
 
     /**
      * Retrieve config info.
      * Primarily for use with the admin webapp.
-     */   
-    public Object getAttribute( String name ) {
+     */
+    public Object getAttribute(String name)
+    {
         return getJkMain().getProperty(name);
     }
 
-    /** The adapter, used to call the connector 
-     */
-    public void setAdapter(Adapter adapter) {
-        this.adapter=adapter;
-    }
-
-    public Adapter getAdapter() {
+    public Adapter getAdapter()
+    {
         return adapter;
     }
 
-    public JkMain getJkMain() {
-        if( jkMain == null ) {
-            jkMain=new JkMain();
+    /**
+     * The adapter, used to call the connector
+     */
+    public void setAdapter(Adapter adapter)
+    {
+        this.adapter = adapter;
+    }
+
+    public JkMain getJkMain()
+    {
+        if (jkMain == null)
+        {
+            jkMain = new JkMain();
             jkMain.setWorkerEnv(wEnv);
-            
+
         }
         return jkMain;
     }
 
-    boolean started=false;
-    
-    /** Start the protocol
+    /**
+     * Start the protocol
      */
-    public void init() {
-        if( started ) return;
+    public void init()
+    {
+        if (started) return;
 
-        started=true;
-        
-        if( wEnv==null ) {
+        started = true;
+
+        if (wEnv == null)
+        {
             // we are probably not registered - not very good.
-            wEnv=getJkMain().getWorkerEnv();
-            wEnv.addHandler("container", this );
+            wEnv = getJkMain().getWorkerEnv();
+            wEnv.addHandler("container", this);
         }
 
-        try {
+        try
+        {
             // jkMain.setJkHome() XXX;
-            
+
             getJkMain().init();
 
-        } catch( Exception ex ) {
-            log.error("Error during init",ex);
+        }
+        catch (Exception ex)
+        {
+            log.error("Error during init", ex);
         }
     }
 
-    public void start() {
-        try {
-            if( oname != null && getJkMain().getDomain() == null) {
-                try {
-                    ObjectName jkmainOname = 
-                        new ObjectName(oname.getDomain() + ":type=JkMain");
+    public void start()
+    {
+        try
+        {
+            if (oname != null && getJkMain().getDomain() == null)
+            {
+                try
+                {
+                    ObjectName jkmainOname =
+                            new ObjectName(oname.getDomain() + ":type=JkMain");
                     Registry.getRegistry(null, null)
-                        .registerComponent(getJkMain(), jkmainOname, "JkMain");
-                } catch (Exception e) {
-                    log.error( "Error registering jkmain " + e );
+                            .registerComponent(getJkMain(), jkmainOname, "JkMain");
+                }
+                catch (Exception e)
+                {
+                    log.error("Error registering jkmain " + e);
                 }
             }
             getJkMain().start();
-        } catch( Exception ex ) {
-            log.error("Error during startup",ex);
+        }
+        catch (Exception ex)
+        {
+            log.error("Error during startup", ex);
         }
     }
 
-    public void pause() throws Exception {
-        if(!paused) {
+    public void pause() throws Exception
+    {
+        if (!paused)
+        {
             paused = true;
             getJkMain().pause();
         }
     }
 
-    public void resume() throws Exception {
-        if(paused) {
+    public void resume() throws Exception
+    {
+        if (paused)
+        {
             paused = false;
             getJkMain().resume();
         }
     }
 
-    public void destroy() {
-        if( !started ) return;
+    public void destroy()
+    {
+        if (!started) return;
 
         started = false;
         getJkMain().stop();
     }
 
-    
+
     // -------------------- Jk handler implementation --------------------
     // Jk Handler mehod
-    public int invoke( Msg msg, MsgContext ep ) 
-        throws IOException {
-        if( ep.isLogTimeEnabled() ) 
-            ep.setLong( MsgContext.TIMER_PRE_REQUEST, System.currentTimeMillis());
-        
-        Request req=ep.getRequest();
-        Response res=req.getResponse();
+    public int invoke(Msg msg, MsgContext ep)
+            throws IOException
+    {
+        if (ep.isLogTimeEnabled())
+            ep.setLong(MsgContext.TIMER_PRE_REQUEST, System.currentTimeMillis());
 
-        if( log.isDebugEnabled() )
-            log.debug( "Invoke " + req + " " + res + " " + req.requestURI().toString());
-        
-        res.setNote( epNote, ep );
-        ep.setStatus( MsgContext.JK_STATUS_HEAD );
+        Request req = ep.getRequest();
+        Response res = req.getResponse();
+
+        if (log.isDebugEnabled())
+            log.debug("Invoke " + req + " " + res + " " + req.requestURI().toString());
+
+        res.setNote(epNote, ep);
+        ep.setStatus(MsgContext.JK_STATUS_HEAD);
         RequestInfo rp = req.getRequestProcessor();
         rp.setStage(Constants.STAGE_SERVICE);
-        try {
-            adapter.service( req, res );
-        } catch( Throwable t ) {
-            ep.setStatus(MsgContext.JK_STATUS_ERROR);
-            log.info("Error servicing request " + req,t);
+        try
+        {
+            adapter.service(req, res);
         }
-        if(ep.getStatus() != MsgContext.JK_STATUS_CLOSED) {
+        catch (Throwable t)
+        {
+            ep.setStatus(MsgContext.JK_STATUS_ERROR);
+            log.info("Error servicing request " + req, t);
+        }
+        if (ep.getStatus() != MsgContext.JK_STATUS_CLOSED)
+        {
             res.finish();
         }
 
@@ -194,10 +230,11 @@ public class JkCoyoteHandler extends JkHandler implements ProtocolHandler {
         req.recycle();
         res.recycle();
         ep.recycle();
-        if( ep.getStatus() == MsgContext.JK_STATUS_ERROR ) {
+        if (ep.getStatus() == MsgContext.JK_STATUS_ERROR)
+        {
             return ERROR;
         }
-        ep.setStatus( MsgContext.JK_STATUS_NEW );
+        ep.setStatus(MsgContext.JK_STATUS_NEW);
         rp.setStage(Constants.STAGE_KEEPALIVE);
         return OK;
     }
@@ -207,7 +244,7 @@ public class JkCoyoteHandler extends JkHandler implements ProtocolHandler {
                                   ObjectName oname) throws Exception
     {
         // override - we must be registered as "container"
-        this.name="container";        
+        this.name = "container";
         return super.preRegister(server, oname);
     }
 }

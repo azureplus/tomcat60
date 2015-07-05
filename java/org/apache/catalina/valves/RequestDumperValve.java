@@ -19,16 +19,15 @@
 package org.apache.catalina.valves;
 
 
-import java.io.IOException;
-import java.util.Enumeration;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.util.StringManager;
 import org.apache.juli.logging.Log;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import java.io.IOException;
+import java.util.Enumeration;
 
 
 /**
@@ -36,21 +35,21 @@ import org.apache.juli.logging.Log;
  * specified Request (before processing) and the corresponding Response
  * (after processing).  It is especially useful in debugging problems
  * related to headers and cookies.</p>
- *
- * <p><b>WARNING: Using this valve has side-effects.</b> The output from this 
+ * <p/>
+ * <p><b>WARNING: Using this valve has side-effects.</b> The output from this
  * valve includes any parameters associated with the request. Therefore, the
  * InputStream is consumed for requests made with the method POST and
  * content-type application/x-www-form-urlencoded.</p>
- *
+ * <p/>
  * <p>This Valve may be attached to any Container, depending on the granularity
  * of the logging you wish to perform.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
 public class RequestDumperValve
-    extends ValveBase {
+        extends ValveBase
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -60,14 +59,14 @@ public class RequestDumperValve
      * The descriptive information related to this implementation.
      */
     private static final String info =
-        "org.apache.catalina.valves.RequestDumperValve/1.0";
+            "org.apache.catalina.valves.RequestDumperValve/1.0";
 
 
     /**
      * The StringManager for this package.
      */
     protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
 
 
     // ------------------------------------------------------------- Properties
@@ -76,7 +75,8 @@ public class RequestDumperValve
     /**
      * Return descriptive information about this Valve implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -90,17 +90,17 @@ public class RequestDumperValve
      * Log the interesting request parameters, invoke the next Valve in the
      * sequence, and log the interesting response parameters.
      *
-     * @param request The servlet request to be processed
+     * @param request  The servlet request to be processed
      * @param response The servlet response to be created
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet error occurs
      */
     public void invoke(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         Log log = container.getLogger();
-        
+
         // Log pre-service information
         log.info("REQUEST URI       =" + request.getRequestURI());
         log.info("          authType=" + request.getAuthType());
@@ -109,16 +109,19 @@ public class RequestDumperValve
         log.info("       contentType=" + request.getContentType());
         log.info("       contextPath=" + request.getContextPath());
         Cookie cookies[] = request.getCookies();
-        if (cookies != null) {
+        if (cookies != null)
+        {
             for (int i = 0; i < cookies.length; i++)
                 log.info("            cookie=" + cookies[i].getName() + "=" +
-                    cookies[i].getValue());
+                        cookies[i].getValue());
         }
         Enumeration hnames = request.getHeaderNames();
-        while (hnames.hasMoreElements()) {
+        while (hnames.hasMoreElements())
+        {
             String hname = (String) hnames.nextElement();
             Enumeration hvalues = request.getHeaders(hname);
-            while (hvalues.hasMoreElements()) {
+            while (hvalues.hasMoreElements())
+            {
                 String hvalue = (String) hvalues.nextElement();
                 log.info("            header=" + hname + "=" + hvalue);
             }
@@ -126,12 +129,14 @@ public class RequestDumperValve
         log.info("            locale=" + request.getLocale());
         log.info("            method=" + request.getMethod());
         Enumeration pnames = request.getParameterNames();
-        while (pnames.hasMoreElements()) {
+        while (pnames.hasMoreElements())
+        {
             String pname = (String) pnames.nextElement();
             String pvalues[] = request.getParameterValues(pname);
             StringBuffer result = new StringBuffer(pname);
             result.append('=');
-            for (int i = 0; i < pvalues.length; i++) {
+            for (int i = 0; i < pvalues.length; i++)
+            {
                 if (i > 0)
                     result.append(", ");
                 result.append(pvalues[i]);
@@ -161,13 +166,15 @@ public class RequestDumperValve
         log.info("     contentLength=" + response.getContentLength());
         log.info("       contentType=" + response.getContentType());
         Cookie rcookies[] = response.getCookies();
-        for (int i = 0; i < rcookies.length; i++) {
+        for (int i = 0; i < rcookies.length; i++)
+        {
             log.info("            cookie=" + rcookies[i].getName() + "=" +
-                rcookies[i].getValue() + "; domain=" +
-                rcookies[i].getDomain() + "; path=" + rcookies[i].getPath());
+                    rcookies[i].getValue() + "; domain=" +
+                    rcookies[i].getDomain() + "; path=" + rcookies[i].getPath());
         }
         String rhnames[] = response.getHeaderNames();
-        for (int i = 0; i < rhnames.length; i++) {
+        for (int i = 0; i < rhnames.length; i++)
+        {
             String rhvalues[] = response.getHeaderValues(rhnames[i]);
             for (int j = 0; j < rhvalues.length; j++)
                 log.info("            header=" + rhnames[i] + "=" + rhvalues[j]);
@@ -183,7 +190,8 @@ public class RequestDumperValve
     /**
      * Return a String rendering of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("RequestDumperValve[");
         if (container != null)

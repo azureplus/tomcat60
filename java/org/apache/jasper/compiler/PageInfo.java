@@ -30,7 +30,8 @@ import java.util.*;
  * @author Kin-man Chung
  */
 
-class PageInfo {
+class PageInfo
+{
 
     private Vector imports;
     private Vector dependants;
@@ -50,7 +51,7 @@ class PageInfo {
     private String session;
     private boolean isSession = true;
     private String bufferValue;
-    private int buffer = 8*1024;    // XXX confirm
+    private int buffer = 8 * 1024;    // XXX confirm
     private String autoFlush;
     private boolean isAutoFlush = true;
     private String isThreadSafeValue;
@@ -62,17 +63,17 @@ class PageInfo {
 
     private boolean scriptless = false;
     private boolean scriptingInvalid = false;
-    
+
     private String isELIgnoredValue;
     private boolean isELIgnored = false;
-    
+
     // JSP 2.1
     private String deferredSyntaxAllowedAsLiteralValue;
     private boolean deferredSyntaxAllowedAsLiteral = false;
     private ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
     private String trimDirectiveWhitespacesValue;
     private boolean trimDirectiveWhitespaces = false;
-    
+
     private String omitXmlDecl = null;
     private String doctypeName = null;
     private String doctypePublic = null;
@@ -89,7 +90,8 @@ class PageInfo {
     private Vector pluginDcls;      // Id's for tagplugin declarations
 
 
-    PageInfo(BeanRepository beanRepository, String jspFile) {
+    PageInfo(BeanRepository beanRepository, String jspFile)
+    {
 
         this.jspFile = jspFile;
         this.beanRepository = beanRepository;
@@ -106,130 +108,159 @@ class PageInfo {
         this.prefixes = new HashSet();
 
         // Enter standard imports
-        for(int i = 0; i < Constants.STANDARD_IMPORTS.length; i++)
+        for (int i = 0; i < Constants.STANDARD_IMPORTS.length; i++)
             imports.add(Constants.STANDARD_IMPORTS[i]);
     }
 
     /**
      * Check if the plugin ID has been previously declared.  Make a not
      * that this Id is now declared.
+     *
      * @return true if Id has been declared.
      */
-    public boolean isPluginDeclared(String id) {
+    public boolean isPluginDeclared(String id)
+    {
         if (pluginDcls.contains(id))
             return true;
         pluginDcls.add(id);
         return false;
     }
 
-    public void addImports(List imports) {
+    public void addImports(List imports)
+    {
         this.imports.addAll(imports);
     }
 
-    public void addImport(String imp) {
+    public void addImport(String imp)
+    {
         this.imports.add(imp);
     }
 
-    public List getImports() {
+    public List getImports()
+    {
         return imports;
     }
 
-    public String getJspFile() {
+    public String getJspFile()
+    {
         return jspFile;
     }
 
-    public void addDependant(String d) {
+    public void addDependant(String d)
+    {
         if (!dependants.contains(d) && !jspFile.equals(d))
-                dependants.add(d);
+            dependants.add(d);
     }
 
-    public List getDependants() {
+    public List getDependants()
+    {
         return dependants;
     }
 
-    public BeanRepository getBeanRepository() {
+    public BeanRepository getBeanRepository()
+    {
         return beanRepository;
     }
 
-    public void setScriptless(boolean s) {
-        scriptless = s;
-    }
-
-    public boolean isScriptless() {
+    public boolean isScriptless()
+    {
         return scriptless;
     }
 
-    public void setScriptingInvalid(boolean s) {
-        scriptingInvalid = s;
+    public void setScriptless(boolean s)
+    {
+        scriptless = s;
     }
 
-    public boolean isScriptingInvalid() {
+    public boolean isScriptingInvalid()
+    {
         return scriptingInvalid;
     }
 
-    public List getIncludePrelude() {
+    public void setScriptingInvalid(boolean s)
+    {
+        scriptingInvalid = s;
+    }
+
+    public List getIncludePrelude()
+    {
         return includePrelude;
     }
 
-    public void setIncludePrelude(Vector prelude) {
+    public void setIncludePrelude(Vector prelude)
+    {
         includePrelude = prelude;
     }
 
-    public List getIncludeCoda() {
+    public List getIncludeCoda()
+    {
         return includeCoda;
     }
 
-    public void setIncludeCoda(Vector coda) {
+    public void setIncludeCoda(Vector coda)
+    {
         includeCoda = coda;
     }
 
-    public void setHasJspRoot(boolean s) {
+    public void setHasJspRoot(boolean s)
+    {
         hasJspRoot = s;
     }
 
-    public boolean hasJspRoot() {
+    public boolean hasJspRoot()
+    {
         return hasJspRoot;
     }
 
-    public String getOmitXmlDecl() {
+    public String getOmitXmlDecl()
+    {
         return omitXmlDecl;
     }
 
-    public void setOmitXmlDecl(String omit) {
+    public void setOmitXmlDecl(String omit)
+    {
         omitXmlDecl = omit;
     }
 
-    public String getDoctypeName() {
+    public String getDoctypeName()
+    {
         return doctypeName;
     }
 
-    public void setDoctypeName(String doctypeName) {
+    public void setDoctypeName(String doctypeName)
+    {
         this.doctypeName = doctypeName;
     }
 
-    public String getDoctypeSystem() {
+    public String getDoctypeSystem()
+    {
         return doctypeSystem;
     }
 
-    public void setDoctypeSystem(String doctypeSystem) {
+    public void setDoctypeSystem(String doctypeSystem)
+    {
         this.doctypeSystem = doctypeSystem;
     }
 
-    public String getDoctypePublic() {
+    public String getDoctypePublic()
+    {
         return doctypePublic;
     }
 
-    public void setDoctypePublic(String doctypePublic) {
+    public void setDoctypePublic(String doctypePublic)
+    {
         this.doctypePublic = doctypePublic;
     }
 
     /* Tag library and XML namespace management methods */
 
-    public void setIsJspPrefixHijacked(boolean isHijacked) {
+    public void setIsJspPrefixHijacked(boolean isHijacked)
+    {
         isJspPrefixHijacked = isHijacked;
     }
 
-    public boolean isJspPrefixHijacked() {
+    public boolean isJspPrefixHijacked()
+    {
         return isJspPrefixHijacked;
     }
 
@@ -238,7 +269,8 @@ class PageInfo {
      *
      * @param prefix The prefix to add
      */
-    public void addPrefix(String prefix) {
+    public void addPrefix(String prefix)
+    {
         prefixes.add(prefix);
     }
 
@@ -250,7 +282,8 @@ class PageInfo {
      * @return true if this translation unit contains the given prefix, false
      * otherwise
      */
-    public boolean containsPrefix(String prefix) {
+    public boolean containsPrefix(String prefix)
+    {
         return prefixes.contains(prefix);
     }
 
@@ -260,7 +293,8 @@ class PageInfo {
      * @param uri The URI to map
      * @param info The tag library to be associated with the given URI
      */
-    public void addTaglib(String uri, TagLibraryInfo info) {
+    public void addTaglib(String uri, TagLibraryInfo info)
+    {
         taglibsMap.put(uri, info);
     }
 
@@ -269,7 +303,8 @@ class PageInfo {
      *
      * @return Tag library corresponding to the given URI
      */
-    public TagLibraryInfo getTaglib(String uri) {
+    public TagLibraryInfo getTaglib(String uri)
+    {
         return (TagLibraryInfo) taglibsMap.get(uri);
     }
 
@@ -278,7 +313,8 @@ class PageInfo {
      *
      * @return Collection of tag libraries that are associated with a URI
      */
-    public Collection getTaglibs() {
+    public Collection getTaglibs()
+    {
         return taglibsMap.values();
     }
 
@@ -290,7 +326,8 @@ class PageInfo {
      * @return true if the given URI is mapped to a tag library, false
      * otherwise
      */
-    public boolean hasTaglib(String uri) {
+    public boolean hasTaglib(String uri)
+    {
         return taglibsMap.containsKey(uri);
     }
 
@@ -300,7 +337,8 @@ class PageInfo {
      * @param prefix The prefix to map
      * @param uri The URI to be associated with the given prefix
      */
-    public void addPrefixMapping(String prefix, String uri) {
+    public void addPrefixMapping(String prefix, String uri)
+    {
         jspPrefixMapper.put(prefix, uri);
     }
 
@@ -311,9 +349,11 @@ class PageInfo {
      * @param prefix The prefix whose stack of URIs is to be pushed
      * @param uri The URI to be pushed onto the stack
      */
-    public void pushPrefixMapping(String prefix, String uri) {
+    public void pushPrefixMapping(String prefix, String uri)
+    {
         LinkedList stack = (LinkedList) xmlPrefixMapper.get(prefix);
-        if (stack == null) {
+        if (stack == null)
+        {
             stack = new LinkedList();
             xmlPrefixMapper.put(prefix, stack);
         }
@@ -326,9 +366,11 @@ class PageInfo {
      *
      * @param prefix The prefix whose stack of URIs is to be popped
      */
-    public void popPrefixMapping(String prefix) {
+    public void popPrefixMapping(String prefix)
+    {
         LinkedList stack = (LinkedList) xmlPrefixMapper.get(prefix);
-        if (stack == null || stack.size() == 0) {
+        if (stack == null || stack.size() == 0)
+        {
             // XXX throw new Exception("XXX");
         }
         stack.removeFirst();
@@ -341,14 +383,17 @@ class PageInfo {
      *
      * @return The URI to which the given prefix maps
      */
-    public String getURI(String prefix) {
+    public String getURI(String prefix)
+    {
 
         String uri = null;
 
         LinkedList stack = (LinkedList) xmlPrefixMapper.get(prefix);
-        if (stack == null || stack.size() == 0) {
+        if (stack == null || stack.size() == 0)
+        {
             uri = (String) jspPrefixMapper.get(prefix);
-        } else {
+        } else
+        {
             uri = (String) stack.getFirst();
         }
 
@@ -362,10 +407,12 @@ class PageInfo {
      * language
      */
     public void setLanguage(String value, Node n, ErrorDispatcher err,
-                boolean pagedir)
-        throws JasperException {
+                            boolean pagedir)
+            throws JasperException
+    {
 
-        if (!"java".equalsIgnoreCase(value)) {
+        if (!"java".equalsIgnoreCase(value))
+        {
             if (pagedir)
                 err.jspError(n, "jsp.error.page.language.nonjava");
             else
@@ -375,11 +422,13 @@ class PageInfo {
         language = value;
     }
 
-    public String getLanguage(boolean useDefault) {
+    public String getLanguage(boolean useDefault)
+    {
         return (language == null && useDefault ? defaultLanguage : language);
     }
 
-    public String getLanguage() {
+    public String getLanguage()
+    {
         return getLanguage(true);
     }
 
@@ -387,7 +436,8 @@ class PageInfo {
     /*
      * extends
      */
-    public void setExtends(String value, Node.PageDirective n) {
+    public void setExtends(String value, Node.PageDirective n)
+    {
 
         xtends = value;
 
@@ -404,14 +454,14 @@ class PageInfo {
      * Gets the value of the 'extends' page directive attribute.
      *
      * @param useDefault TRUE if the default
-     * (org.apache.jasper.runtime.HttpJspBase) should be returned if this
-     * attribute has not been set, FALSE otherwise
-     *
+     *                   (org.apache.jasper.runtime.HttpJspBase) should be returned if this
+     *                   attribute has not been set, FALSE otherwise
      * @return The value of the 'extends' page directive attribute, or the
      * default (org.apache.jasper.runtime.HttpJspBase) if this attribute has
      * not been set and useDefault is TRUE
      */
-    public String getExtends(boolean useDefault) {
+    public String getExtends(boolean useDefault)
+    {
         return (xtends == null && useDefault ? defaultExtends : xtends);
     }
 
@@ -422,38 +472,44 @@ class PageInfo {
      * default (org.apache.jasper.runtime.HttpJspBase) if this attribute has
      * not been set
      */
-    public String getExtends() {
+    public String getExtends()
+    {
         return getExtends(true);
     }
 
+    public String getContentType()
+    {
+        return contentType;
+    }
 
     /*
      * contentType
      */
-    public void setContentType(String value) {
+    public void setContentType(String value)
+    {
         contentType = value;
     }
-
-    public String getContentType() {
-        return contentType;
-    }
-
 
     /*
      * buffer
      */
     public void setBufferValue(String value, Node n, ErrorDispatcher err)
-        throws JasperException {
+            throws JasperException
+    {
 
         if ("none".equalsIgnoreCase(value))
             buffer = 0;
-        else {
+        else
+        {
             if (value == null || !value.endsWith("kb"))
                 err.jspError(n, "jsp.error.page.invalid.buffer");
-            try {
-                Integer k = new Integer(value.substring(0, value.length()-2));
+            try
+            {
+                Integer k = new Integer(value.substring(0, value.length() - 2));
                 buffer = k.intValue() * 1024;
-            } catch (NumberFormatException e) {
+            }
+            catch (NumberFormatException e)
+            {
                 err.jspError(n, "jsp.error.page.invalid.buffer");
             }
         }
@@ -461,11 +517,13 @@ class PageInfo {
         bufferValue = value;
     }
 
-    public String getBufferValue() {
+    public String getBufferValue()
+    {
         return bufferValue;
     }
 
-    public int getBuffer() {
+    public int getBuffer()
+    {
         return buffer;
     }
 
@@ -474,7 +532,8 @@ class PageInfo {
      * session
      */
     public void setSession(String value, Node n, ErrorDispatcher err)
-        throws JasperException {
+            throws JasperException
+    {
 
         if ("true".equalsIgnoreCase(value))
             isSession = true;
@@ -486,11 +545,13 @@ class PageInfo {
         session = value;
     }
 
-    public String getSession() {
+    public String getSession()
+    {
         return session;
     }
 
-    public boolean isSession() {
+    public boolean isSession()
+    {
         return isSession;
     }
 
@@ -499,7 +560,8 @@ class PageInfo {
      * autoFlush
      */
     public void setAutoFlush(String value, Node n, ErrorDispatcher err)
-        throws JasperException {
+            throws JasperException
+    {
 
         if ("true".equalsIgnoreCase(value))
             isAutoFlush = true;
@@ -511,11 +573,13 @@ class PageInfo {
         autoFlush = value;
     }
 
-    public String getAutoFlush() {
+    public String getAutoFlush()
+    {
         return autoFlush;
     }
 
-    public boolean isAutoFlush() {
+    public boolean isAutoFlush()
+    {
         return isAutoFlush;
     }
 
@@ -524,7 +588,8 @@ class PageInfo {
      * isThreadSafe
      */
     public void setIsThreadSafe(String value, Node n, ErrorDispatcher err)
-        throws JasperException {
+            throws JasperException
+    {
 
         if ("true".equalsIgnoreCase(value))
             isThreadSafe = true;
@@ -536,44 +601,40 @@ class PageInfo {
         isThreadSafeValue = value;
     }
 
-    public String getIsThreadSafe() {
+    public String getIsThreadSafe()
+    {
         return isThreadSafeValue;
     }
 
-    public boolean isThreadSafe() {
+    public boolean isThreadSafe()
+    {
         return isThreadSafe;
     }
 
+    public String getInfo()
+    {
+        return info;
+    }
 
     /*
      * info
      */
-    public void setInfo(String value) {
+    public void setInfo(String value)
+    {
         info = value;
     }
 
-    public String getInfo() {
-        return info;
-    }
-
-
-    /*
-     * errorPage
-     */
-    public void setErrorPage(String value) {
-        errorPage = value;
-    }
-
-    public String getErrorPage() {
+    public String getErrorPage()
+    {
         return errorPage;
     }
-
 
     /*
      * isErrorPage
      */
     public void setIsErrorPage(String value, Node n, ErrorDispatcher err)
-        throws JasperException {
+            throws JasperException
+    {
 
         if ("true".equalsIgnoreCase(value))
             isErrorPage = true;
@@ -585,27 +646,38 @@ class PageInfo {
         isErrorPageValue = value;
     }
 
-    public String getIsErrorPage() {
+    public String getIsErrorPage()
+    {
         return isErrorPageValue;
     }
 
-    public boolean isErrorPage() {
+    public boolean isErrorPage()
+    {
         return isErrorPage;
     }
 
+    /*
+     * errorPage
+     */
+    public void setErrorPage(String value)
+    {
+        errorPage = value;
+    }
 
     /*
      * isELIgnored
      */
     public void setIsELIgnored(String value, Node n, ErrorDispatcher err,
-                   boolean pagedir)
-        throws JasperException {
+                               boolean pagedir)
+            throws JasperException
+    {
 
         if ("true".equalsIgnoreCase(value))
             isELIgnored = true;
         else if ("false".equalsIgnoreCase(value))
             isELIgnored = false;
-        else {
+        else
+        {
             if (pagedir)
                 err.jspError(n, "jsp.error.page.invalid.iselignored");
             else
@@ -614,19 +686,21 @@ class PageInfo {
 
         isELIgnoredValue = value;
     }
-    
+
     /*
      * deferredSyntaxAllowedAsLiteral
      */
     public void setDeferredSyntaxAllowedAsLiteral(String value, Node n, ErrorDispatcher err,
-                   boolean pagedir)
-        throws JasperException {
+                                                  boolean pagedir)
+            throws JasperException
+    {
 
         if ("true".equalsIgnoreCase(value))
             deferredSyntaxAllowedAsLiteral = true;
         else if ("false".equalsIgnoreCase(value))
             deferredSyntaxAllowedAsLiteral = false;
-        else {
+        else
+        {
             if (pagedir)
                 err.jspError(n, "jsp.error.page.invalid.deferredsyntaxallowedasliteral");
             else
@@ -635,19 +709,21 @@ class PageInfo {
 
         deferredSyntaxAllowedAsLiteralValue = value;
     }
-    
+
     /*
      * trimDirectiveWhitespaces
      */
     public void setTrimDirectiveWhitespaces(String value, Node n, ErrorDispatcher err,
-                   boolean pagedir)
-        throws JasperException {
+                                            boolean pagedir)
+            throws JasperException
+    {
 
         if ("true".equalsIgnoreCase(value))
             trimDirectiveWhitespaces = true;
         else if ("false".equalsIgnoreCase(value))
             trimDirectiveWhitespaces = false;
-        else {
+        else
+        {
             if (pagedir)
                 err.jspError(n, "jsp.error.page.invalid.trimdirectivewhitespaces");
             else
@@ -657,55 +733,68 @@ class PageInfo {
         trimDirectiveWhitespacesValue = value;
     }
 
-    public void setELIgnored(boolean s) {
-        isELIgnored = s;
-    }
-
-    public String getIsELIgnored() {
+    public String getIsELIgnored()
+    {
         return isELIgnoredValue;
     }
 
-    public boolean isELIgnored() {
+    public boolean isELIgnored()
+    {
         return isELIgnored;
     }
 
-    public void putNonCustomTagPrefix(String prefix, Mark where) {
+    public void setELIgnored(boolean s)
+    {
+        isELIgnored = s;
+    }
+
+    public void putNonCustomTagPrefix(String prefix, Mark where)
+    {
         nonCustomTagPrefixMap.put(prefix, where);
     }
 
-    public Mark getNonCustomTagPrefix(String prefix) {
+    public Mark getNonCustomTagPrefix(String prefix)
+    {
         return (Mark) nonCustomTagPrefixMap.get(prefix);
     }
-    
-    public String getDeferredSyntaxAllowedAsLiteral() {
+
+    public String getDeferredSyntaxAllowedAsLiteral()
+    {
         return deferredSyntaxAllowedAsLiteralValue;
     }
 
-    public boolean isDeferredSyntaxAllowedAsLiteral() {
+    public boolean isDeferredSyntaxAllowedAsLiteral()
+    {
         return deferredSyntaxAllowedAsLiteral;
     }
 
-    public void setDeferredSyntaxAllowedAsLiteral(boolean isELDeferred) {
+    public void setDeferredSyntaxAllowedAsLiteral(boolean isELDeferred)
+    {
         this.deferredSyntaxAllowedAsLiteral = isELDeferred;
     }
 
-    public ExpressionFactory getExpressionFactory() {
+    public ExpressionFactory getExpressionFactory()
+    {
         return expressionFactory;
     }
 
-    public String getTrimDirectiveWhitespaces() {
+    public String getTrimDirectiveWhitespaces()
+    {
         return trimDirectiveWhitespacesValue;
     }
 
-    public boolean isTrimDirectiveWhitespaces() {
+    public boolean isTrimDirectiveWhitespaces()
+    {
         return trimDirectiveWhitespaces;
     }
 
-    public void setTrimDirectiveWhitespaces(boolean trimDirectiveWhitespaces) {
+    public void setTrimDirectiveWhitespaces(boolean trimDirectiveWhitespaces)
+    {
         this.trimDirectiveWhitespaces = trimDirectiveWhitespaces;
     }
 
-    public Set<String> getVarInfoNames() {
+    public Set<String> getVarInfoNames()
+    {
         return varInfoNames;
     }
 }

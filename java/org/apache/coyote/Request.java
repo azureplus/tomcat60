@@ -29,28 +29,28 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * This is a low-level, efficient representation of a server request. Most 
- * fields are GC-free, expensive operations are delayed until the  user code 
+ * This is a low-level, efficient representation of a server request. Most
+ * fields are GC-free, expensive operations are delayed until the  user code
  * needs the information.
- *
+ * <p/>
  * Processing is delegated to modules, using a hook mechanism.
- * 
+ * <p/>
  * This class is not intended for user code - it is used internally by tomcat
  * for processing the request in the most efficient way. Users ( servlets ) can
  * access the information using a facade, which provides the high-level view
  * of the request.
- *
+ * <p/>
  * For lazy evaluation, the request uses the getInfo() hook. The following ids
  * are defined:
  * <ul>
- *  <li>req.encoding - returns the request encoding
- *  <li>req.attribute - returns a module-specific attribute ( like SSL keys, etc ).
+ * <li>req.encoding - returns the request encoding
+ * <li>req.attribute - returns a module-specific attribute ( like SSL keys, etc ).
  * </ul>
- *
+ * <p/>
  * Tomcat defines a number of attributes:
  * <ul>
- *   <li>"org.apache.tomcat.request" - allows access to the low-level
- *       request object in trusted applications 
+ * <li>"org.apache.tomcat.request" - allows access to the low-level
+ * request object in trusted applications
  * </ul>
  *
  * @author James Duncan Davidson [duncan@eng.sun.com]
@@ -62,66 +62,46 @@ import java.util.HashMap;
  * @author Costin Manolache
  * @author Remy Maucherat
  */
-public final class Request {
+public final class Request
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
-    public Request() {
-
-        parameters.setQuery(queryMB);
-        parameters.setURLDecoder(urlDecoder);
-
-    }
+    private int serverPort = -1;
 
 
     // ----------------------------------------------------- Instance Variables
-
-
-    private int serverPort = -1;
     private MessageBytes serverNameMB = MessageBytes.newInstance();
-
     private int remotePort;
     private int localPort;
-
     private MessageBytes schemeMB = MessageBytes.newInstance();
-
     private MessageBytes methodMB = MessageBytes.newInstance();
     private MessageBytes unparsedURIMB = MessageBytes.newInstance();
     private MessageBytes uriMB = MessageBytes.newInstance();
     private MessageBytes decodedUriMB = MessageBytes.newInstance();
     private MessageBytes queryMB = MessageBytes.newInstance();
     private MessageBytes protoMB = MessageBytes.newInstance();
-
     // remote address/host
     private MessageBytes remoteAddrMB = MessageBytes.newInstance();
     private MessageBytes localNameMB = MessageBytes.newInstance();
     private MessageBytes remoteHostMB = MessageBytes.newInstance();
     private MessageBytes localAddrMB = MessageBytes.newInstance();
-     
     private MimeHeaders headers = new MimeHeaders();
-
     private MessageBytes instanceId = MessageBytes.newInstance();
-
     /**
      * Notes.
      */
     private Object notes[] = new Object[Constants.MAX_NOTES];
-
-
     /**
      * Associated input buffer.
      */
     private InputBuffer inputBuffer = null;
-
-
     /**
      * URL decoder.
      */
     private UDecoder urlDecoder = new UDecoder();
-
-
     /**
      * HTTP specific fields. (remove them ?)
      */
@@ -130,127 +110,152 @@ public final class Request {
     private String charEncoding = null;
     private Cookies cookies = new Cookies(headers);
     private Parameters parameters = new Parameters();
-
-    private MessageBytes remoteUser=MessageBytes.newInstance();
-    private MessageBytes authType=MessageBytes.newInstance();
-    private HashMap attributes=new HashMap();
-
+    private MessageBytes remoteUser = MessageBytes.newInstance();
+    private MessageBytes authType = MessageBytes.newInstance();
+    private HashMap attributes = new HashMap();
     private Response response;
     private ActionHook hook;
-
-    private long bytesRead=0;
+    private long bytesRead = 0;
     // Time of the request - usefull to avoid repeated calls to System.currentTime
     private long startTime = 0L;
     private int available = 0;
+    private RequestInfo reqProcessorMX = new RequestInfo(this);
 
-    private RequestInfo reqProcessorMX=new RequestInfo(this);
+    public Request()
+    {
+
+        parameters.setQuery(queryMB);
+        parameters.setURLDecoder(urlDecoder);
+
+    }
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Get the instance id (or JVM route). Curently Ajp is sending it with each
      * request. In future this should be fixed, and sent only once ( or
      * 'negociated' at config time so both tomcat and apache share the same name.
-     * 
+     *
      * @return the instance id
      */
-    public MessageBytes instanceId() {
+    public MessageBytes instanceId()
+    {
         return instanceId;
     }
 
 
-    public MimeHeaders getMimeHeaders() {
+    public MimeHeaders getMimeHeaders()
+    {
         return headers;
     }
 
 
-    public UDecoder getURLDecoder() {
+    public UDecoder getURLDecoder()
+    {
         return urlDecoder;
     }
 
     // -------------------- Request data --------------------
 
 
-    public MessageBytes scheme() {
+    public MessageBytes scheme()
+    {
         return schemeMB;
     }
-    
-    public MessageBytes method() {
+
+    public MessageBytes method()
+    {
         return methodMB;
     }
-    
-    public MessageBytes unparsedURI() {
+
+    public MessageBytes unparsedURI()
+    {
         return unparsedURIMB;
     }
 
-    public MessageBytes requestURI() {
+    public MessageBytes requestURI()
+    {
         return uriMB;
     }
 
-    public MessageBytes decodedURI() {
+    public MessageBytes decodedURI()
+    {
         return decodedUriMB;
     }
 
-    public MessageBytes query() {
+    public MessageBytes query()
+    {
         return queryMB;
     }
 
-    public MessageBytes queryString() {
+    public MessageBytes queryString()
+    {
         return queryMB;
     }
 
-    public MessageBytes protocol() {
+    public MessageBytes protocol()
+    {
         return protoMB;
     }
-    
-    /** 
+
+    /**
      * Return the buffer holding the server name, if
      * any. Use isNull() to check if there is no value
      * set.
      * This is the "virtual host", derived from the
      * Host: header.
      */
-    public MessageBytes serverName() {
+    public MessageBytes serverName()
+    {
         return serverNameMB;
     }
 
-    public int getServerPort() {
+    public int getServerPort()
+    {
         return serverPort;
     }
-    
-    public void setServerPort(int serverPort ) {
-        this.serverPort=serverPort;
+
+    public void setServerPort(int serverPort)
+    {
+        this.serverPort = serverPort;
     }
 
-    public MessageBytes remoteAddr() {
+    public MessageBytes remoteAddr()
+    {
         return remoteAddrMB;
     }
 
-    public MessageBytes remoteHost() {
+    public MessageBytes remoteHost()
+    {
         return remoteHostMB;
     }
 
-    public MessageBytes localName() {
+    public MessageBytes localName()
+    {
         return localNameMB;
-    }    
+    }
 
-    public MessageBytes localAddr() {
+    public MessageBytes localAddr()
+    {
         return localAddrMB;
     }
-    
-    public int getRemotePort(){
+
+    public int getRemotePort()
+    {
         return remotePort;
     }
-        
-    public void setRemotePort(int port){
+
+    public void setRemotePort(int port)
+    {
         this.remotePort = port;
     }
-    
-    public int getLocalPort(){
+
+    public int getLocalPort()
+    {
         return localPort;
     }
-        
-    public void setLocalPort(int port){
+
+    public void setLocalPort(int port)
+    {
         this.localPort = port;
     }
 
@@ -260,7 +265,8 @@ public final class Request {
     /**
      * Get the character encoding used for this request.
      */
-    public String getCharacterEncoding() {
+    public String getCharacterEncoding()
+    {
 
         if (charEncoding != null)
             return charEncoding;
@@ -271,27 +277,30 @@ public final class Request {
     }
 
 
-    public void setCharacterEncoding(String enc) {
+    public void setCharacterEncoding(String enc)
+    {
         this.charEncoding = enc;
     }
 
-
-    public void setContentLength(int len) {
-        this.contentLength = len;
-    }
-
-
-    public int getContentLength() {
+    public int getContentLength()
+    {
         long length = getContentLengthLong();
 
-        if (length < Integer.MAX_VALUE) {
+        if (length < Integer.MAX_VALUE)
+        {
             return (int) length;
         }
         return -1;
     }
 
-    public long getContentLengthLong() {
-        if( contentLength > -1 ) return contentLength;
+    public void setContentLength(int len)
+    {
+        this.contentLength = len;
+    }
+
+    public long getContentLengthLong()
+    {
+        if (contentLength > -1) return contentLength;
 
         MessageBytes clB = headers.getUniqueValue("content-length");
         contentLength = (clB == null || clB.isNull()) ? -1 : clB.getLong();
@@ -299,52 +308,57 @@ public final class Request {
         return contentLength;
     }
 
-    public String getContentType() {
+    public String getContentType()
+    {
         contentType();
-        if ((contentTypeMB == null) || contentTypeMB.isNull()) 
+        if ((contentTypeMB == null) || contentTypeMB.isNull())
             return null;
         return contentTypeMB.toString();
     }
 
+    public void setContentType(MessageBytes mb)
+    {
+        contentTypeMB = mb;
+    }
 
-    public void setContentType(String type) {
+    public void setContentType(String type)
+    {
         contentTypeMB.setString(type);
     }
 
-
-    public MessageBytes contentType() {
+    public MessageBytes contentType()
+    {
         if (contentTypeMB == null)
             contentTypeMB = headers.getValue("content-type");
         return contentTypeMB;
     }
 
-
-    public void setContentType(MessageBytes mb) {
-        contentTypeMB=mb;
-    }
-
-
-    public String getHeader(String name) {
+    public String getHeader(String name)
+    {
         return headers.getHeader(name);
     }
 
     // -------------------- Associated response --------------------
 
-    public Response getResponse() {
+    public Response getResponse()
+    {
         return response;
     }
 
-    public void setResponse( Response response ) {
-        this.response=response;
-        response.setRequest( this );
+    public void setResponse(Response response)
+    {
+        this.response = response;
+        response.setRequest(this);
     }
-    
-    public void action(ActionCode actionCode, Object param) {
-        if( hook==null && response!=null )
-            hook=response.getHook();
-        
-        if (hook != null) {
-            if( param==null ) 
+
+    public void action(ActionCode actionCode, Object param)
+    {
+        if (hook == null && response != null)
+            hook = response.getHook();
+
+        if (hook != null)
+        {
+            if (param == null)
                 hook.action(actionCode, this);
             else
                 hook.action(actionCode, param);
@@ -355,7 +369,8 @@ public final class Request {
     // -------------------- Cookies --------------------
 
 
-    public Cookies getCookies() {
+    public Cookies getCookies()
+    {
         return cookies;
     }
 
@@ -363,69 +378,80 @@ public final class Request {
     // -------------------- Parameters --------------------
 
 
-    public Parameters getParameters() {
+    public Parameters getParameters()
+    {
         return parameters;
     }
 
 
     // -------------------- Other attributes --------------------
     // We can use notes for most - need to discuss what is of general interest
-    
-    public void setAttribute( String name, Object o ) {
-        attributes.put( name, o );
+
+    public void setAttribute(String name, Object o)
+    {
+        attributes.put(name, o);
     }
 
-    public HashMap getAttributes() {
+    public HashMap getAttributes()
+    {
         return attributes;
     }
 
-    public Object getAttribute(String name ) {
+    public Object getAttribute(String name)
+    {
         return attributes.get(name);
     }
-    
-    public MessageBytes getRemoteUser() {
+
+    public MessageBytes getRemoteUser()
+    {
         return remoteUser;
     }
 
-    public MessageBytes getAuthType() {
+    public MessageBytes getAuthType()
+    {
         return authType;
     }
 
-    public int getAvailable() {
+    public int getAvailable()
+    {
         return available;
     }
 
-    public void setAvailable(int available) {
+    public void setAvailable(int available)
+    {
         this.available = available;
     }
 
     // -------------------- Input Buffer --------------------
 
 
-    public InputBuffer getInputBuffer() {
+    public InputBuffer getInputBuffer()
+    {
         return inputBuffer;
     }
 
 
-    public void setInputBuffer(InputBuffer inputBuffer) {
+    public void setInputBuffer(InputBuffer inputBuffer)
+    {
         this.inputBuffer = inputBuffer;
     }
 
 
     /**
      * Read data from the input buffer and put it into a byte chunk.
-     *
+     * <p/>
      * The buffer is owned by the protocol implementation - it will be reused on the next read.
      * The Adapter must either process the data in place or copy it to a separate buffer if it needs
      * to hold it. In most cases this is done during byte->char conversions or via InputStream. Unlike
      * InputStream, this interface allows the app to process data in place, without copy.
-     *
      */
-    public int doRead(ByteChunk chunk) 
-        throws IOException {
+    public int doRead(ByteChunk chunk)
+            throws IOException
+    {
         int n = inputBuffer.doRead(chunk, this);
-        if (n > 0) {
-            bytesRead+=n;
+        if (n > 0)
+        {
+            bytesRead += n;
         }
         return n;
     }
@@ -433,46 +459,51 @@ public final class Request {
 
     // -------------------- debug --------------------
 
-    public String toString() {
+    public String toString()
+    {
         return "R( " + requestURI().toString() + ")";
     }
 
-    public long getStartTime() {
+    public long getStartTime()
+    {
         return startTime;
     }
 
-    public void setStartTime(long startTime) {
+    public void setStartTime(long startTime)
+    {
         this.startTime = startTime;
     }
 
     // -------------------- Per-Request "notes" --------------------
 
 
-    /** 
-     * Used to store private data. Thread data could be used instead - but 
+    /**
+     * Used to store private data. Thread data could be used instead - but
      * if you have the req, getting/setting a note is just a array access, may
      * be faster than ThreadLocal for very frequent operations.
-     * 
-     *  Example use: 
-     *   Jk:
-     *     HandlerRequest.HOSTBUFFER = 10 CharChunk, buffer for Host decoding
-     *     WorkerEnv: SSL_CERT_NOTE=16 - MessageBytes containing the cert
-     *                
-     *   Catalina CoyoteAdapter:
-     *      ADAPTER_NOTES = 1 - stores the HttpServletRequest object ( req/res)             
-     *      
-     *   To avoid conflicts, note in the range 0 - 8 are reserved for the 
-     *   servlet container ( catalina connector, etc ), and values in 9 - 16 
-     *   for connector use. 
-     *   
-     *   17-31 range is not allocated or used.
+     * <p/>
+     * Example use:
+     * Jk:
+     * HandlerRequest.HOSTBUFFER = 10 CharChunk, buffer for Host decoding
+     * WorkerEnv: SSL_CERT_NOTE=16 - MessageBytes containing the cert
+     * <p/>
+     * Catalina CoyoteAdapter:
+     * ADAPTER_NOTES = 1 - stores the HttpServletRequest object ( req/res)
+     * <p/>
+     * To avoid conflicts, note in the range 0 - 8 are reserved for the
+     * servlet container ( catalina connector, etc ), and values in 9 - 16
+     * for connector use.
+     * <p/>
+     * 17-31 range is not allocated or used.
      */
-    public final void setNote(int pos, Object value) {
+    public final void setNote(int pos, Object value)
+    {
         notes[pos] = value;
     }
 
 
-    public final Object getNote(int pos) {
+    public final Object getNote(int pos)
+    {
         return notes[pos];
     }
 
@@ -480,15 +511,16 @@ public final class Request {
     // -------------------- Recycling -------------------- 
 
 
-    public void recycle() {
-        bytesRead=0;
+    public void recycle()
+    {
+        bytesRead = 0;
 
         contentLength = -1;
         contentTypeMB = null;
         charEncoding = null;
         headers.recycle();
         serverNameMB.recycle();
-        serverPort=-1;
+        serverPort = -1;
         localPort = -1;
         remotePort = -1;
         available = 0;
@@ -497,7 +529,7 @@ public final class Request {
         parameters.recycle();
 
         unparsedURIMB.recycle();
-        uriMB.recycle(); 
+        uriMB.recycle();
         decodedUriMB.recycle();
         queryMB.recycle();
         methodMB.recycle();
@@ -512,19 +544,23 @@ public final class Request {
     }
 
     // -------------------- Info  --------------------
-    public void updateCounters() {
+    public void updateCounters()
+    {
         reqProcessorMX.updateCounters();
     }
 
-    public RequestInfo getRequestProcessor() {
+    public RequestInfo getRequestProcessor()
+    {
         return reqProcessorMX;
     }
 
-    public long getBytesRead() {
+    public long getBytesRead()
+    {
         return bytesRead;
     }
 
-    public void setBytesRead(long bytesRead) {
+    public void setBytesRead(long bytesRead)
+    {
         this.bytesRead = bytesRead;
     }
 }

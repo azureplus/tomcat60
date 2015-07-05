@@ -28,85 +28,93 @@ import java.io.Serializable;
  *
  * @author Craig R. McClanahan
  * @author Peter Rossbach (pero@apache.org)
- *
  */
 
-public class ContextEjb extends ResourceBase implements Serializable {
+public class ContextEjb extends ResourceBase implements Serializable
+{
 
 
     // ------------------------------------------------------------- Properties
-
 
 
     /**
      * The name of the EJB home implementation class.
      */
     private String home = null;
-
-    public String getHome() {
-        return (this.home);
-    }
-
-    public void setHome(String home) {
-        this.home = home;
-    }
-
-
     /**
      * The link to a J2EE EJB definition.
      */
     private String link = null;
-
-    public String getLink() {
-        return (this.link);
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
-
     /**
      * The name of the EJB remote implementation class.
      */
     private String remote = null;
 
-    public String getRemote() {
+    public String getHome()
+    {
+        return (this.home);
+    }
+
+    public void setHome(String home)
+    {
+        this.home = home;
+    }
+
+    public String getLink()
+    {
+        return (this.link);
+    }
+
+    public void setLink(String link)
+    {
+        this.link = link;
+    }
+
+    public String getRemote()
+    {
         return (this.remote);
     }
 
-    public void setRemote(String remote) {
+    public void setRemote(String remote)
+    {
         this.remote = remote;
     }
 
-    
+
     // --------------------------------------------------------- Public Methods
 
 
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ContextEjb[");
         sb.append("name=");
         sb.append(getName());
-        if (getDescription() != null) {
+        if (getDescription() != null)
+        {
             sb.append(", description=");
             sb.append(getDescription());
         }
-        if (getType() != null) {
+        if (getType() != null)
+        {
             sb.append(", type=");
             sb.append(getType());
         }
-        if (home != null) {
+        if (home != null)
+        {
             sb.append(", home=");
             sb.append(home);
         }
-        if (remote != null) {
+        if (remote != null)
+        {
             sb.append(", remote=");
             sb.append(remote);
         }
-        if (link != null) {
+        if (link != null)
+        {
             sb.append(", link=");
             sb.append(link);
         }

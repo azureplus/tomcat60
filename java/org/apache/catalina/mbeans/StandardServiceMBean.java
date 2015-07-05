@@ -18,11 +18,11 @@
 package org.apache.catalina.mbeans;
 
 
+import org.apache.tomcat.util.modeler.BaseModelMBean;
+
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.RuntimeOperationsException;
-
-import org.apache.tomcat.util.modeler.BaseModelMBean;
 
 
 /**
@@ -30,16 +30,16 @@ import org.apache.tomcat.util.modeler.BaseModelMBean;
  * <code>org.apache.catalina.core.StandardService</code> component.</p>
  *
  * @author Amy Roh
- *
  */
 
-public class StandardServiceMBean extends BaseModelMBean {
+public class StandardServiceMBean extends BaseModelMBean
+{
 
     /**
      * The <code>MBeanServer</code> for this application.
      */
     private static MBeanServer mserver = MBeanUtils.createServer();
-    
+
     // ----------------------------------------------------------- Constructors
 
 
@@ -47,13 +47,14 @@ public class StandardServiceMBean extends BaseModelMBean {
      * Construct a <code>ModelMBean</code> with default
      * <code>ModelMBeanInfo</code> information.
      *
-     * @exception MBeanException if the initializer of an object
-     *  throws an exception
-     * @exception RuntimeOperationsException if an IllegalArgumentException
-     *  occurs
+     * @throws MBeanException             if the initializer of an object
+     *                                    throws an exception
+     * @throws RuntimeOperationsException if an IllegalArgumentException
+     *                                    occurs
      */
     public StandardServiceMBean()
-        throws MBeanException, RuntimeOperationsException {
+            throws MBeanException, RuntimeOperationsException
+    {
 
         super();
 
@@ -61,7 +62,6 @@ public class StandardServiceMBean extends BaseModelMBean {
 
 
     // ------------------------------------------------------------- Attributes
-
 
 
     // ------------------------------------------------------------- Operations

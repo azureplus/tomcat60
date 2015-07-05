@@ -18,55 +18,31 @@
 
 package org.apache.catalina.servlets;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Locale;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.apache.catalina.Globals;
 import org.apache.catalina.util.IOTools;
 
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+import java.net.URLDecoder;
+import java.util.*;
+
 
 /**
- *  CGI-invoking servlet for web applications, used to execute scripts which
- *  comply to the Common Gateway Interface (CGI) specification and are named
- *  in the path-info used to invoke this servlet.
- *
+ * CGI-invoking servlet for web applications, used to execute scripts which
+ * comply to the Common Gateway Interface (CGI) specification and are named
+ * in the path-info used to invoke this servlet.
+ * <p/>
  * <p>
  * <i>Note: This code compiles and even works for simple CGI cases.
- *          Exhaustive testing has not been done.  Please consider it beta
- *          quality.  Feedback is appreciated to the author (see below).</i>
+ * Exhaustive testing has not been done.  Please consider it beta
+ * quality.  Feedback is appreciated to the author (see below).</i>
  * </p>
  * <p>
- *
+ * <p/>
  * <b>Example</b>:<br>
  * If an instance of this servlet was mapped (using
- *       <code>&lt;web-app&gt;/WEB-INF/web.xml</code>) to:
+ * <code>&lt;web-app&gt;/WEB-INF/web.xml</code>) to:
  * </p>
  * <p>
  * <code>
@@ -104,18 +80,18 @@ import org.apache.catalina.util.IOTools;
  * put CGIs wherever you want, however:
  * </p>
  * <p>
- *   The CGI search path will start at
- *   webAppRootDir + File.separator + cgiPathPrefix
- *   (or webAppRootDir alone if cgiPathPrefix is
- *   null).
+ * The CGI search path will start at
+ * webAppRootDir + File.separator + cgiPathPrefix
+ * (or webAppRootDir alone if cgiPathPrefix is
+ * null).
  * </p>
  * <p>
- *   cgiPathPrefix is defined by setting
- *   this servlet's cgiPathPrefix init parameter
+ * cgiPathPrefix is defined by setting
+ * this servlet's cgiPathPrefix init parameter
  * </p>
- *
+ * <p/>
  * <p>
- *
+ * <p/>
  * <B>CGI Specification</B>:<br> derived from
  * <a href="http://cgi-spec.golux.com">http://cgi-spec.golux.com</a>.
  * A work-in-progress & expired Internet Draft.  Note no actual RFC describing
@@ -126,32 +102,32 @@ import org.apache.catalina.util.IOTools;
  * Such instances should be well-documented here.  Please email the
  * <a href="http://tomcat.apache.org/lists.html">Tomcat group</a>
  * with amendments.
- *
+ * <p/>
  * </p>
  * <p>
- *
+ * <p/>
  * <b>Canonical metavariables</b>:<br>
  * The CGI specification defines the following canonical metavariables:
  * <br>
  * [excerpt from CGI specification]
  * <PRE>
- *  AUTH_TYPE
- *  CONTENT_LENGTH
- *  CONTENT_TYPE
- *  GATEWAY_INTERFACE
- *  PATH_INFO
- *  PATH_TRANSLATED
- *  QUERY_STRING
- *  REMOTE_ADDR
- *  REMOTE_HOST
- *  REMOTE_IDENT
- *  REMOTE_USER
- *  REQUEST_METHOD
- *  SCRIPT_NAME
- *  SERVER_NAME
- *  SERVER_PORT
- *  SERVER_PROTOCOL
- *  SERVER_SOFTWARE
+ * AUTH_TYPE
+ * CONTENT_LENGTH
+ * CONTENT_TYPE
+ * GATEWAY_INTERFACE
+ * PATH_INFO
+ * PATH_TRANSLATED
+ * QUERY_STRING
+ * REMOTE_ADDR
+ * REMOTE_HOST
+ * REMOTE_IDENT
+ * REMOTE_USER
+ * REQUEST_METHOD
+ * SCRIPT_NAME
+ * SERVER_NAME
+ * SERVER_PORT
+ * SERVER_PROTOCOL
+ * SERVER_SOFTWARE
  * </PRE>
  * <p>
  * Metavariables with names beginning with the protocol name (<EM>e.g.</EM>,
@@ -160,11 +136,11 @@ import org.apache.catalina.util.IOTools;
  * of this specification.  (See also section 6.1.5 [of the CGI specification].)
  * </p>
  * [end excerpt]
- *
+ * <p/>
  * </p>
  * <h2> Implementation notes</h2>
  * <p>
- *
+ * <p/>
  * <b>standard input handling</b>: If your script accepts standard input,
  * then the client must start sending input within a certain timeout period,
  * otherwise the servlet will assume no input is coming and carry on running
@@ -179,7 +155,7 @@ import org.apache.catalina.util.IOTools;
  * to be
  * </p>
  * <p>
- *
+ * <p/>
  * <b>Metavariable Values</b>: According to the CGI specificion,
  * implementations may choose to represent both null or missing values in an
  * implementation-specific manner, but must define that manner.  This
@@ -187,10 +163,10 @@ import org.apache.catalina.util.IOTools;
  * set the value to "" for all metavariables whose value is either null or
  * undefined.  PATH_TRANSLATED is the sole exception to this rule, as per the
  * CGI Specification.
- *
+ * <p/>
  * </p>
  * <p>
- *
+ * <p/>
  * <b>NPH --  Non-parsed-header implementation</b>:  This implementation does
  * not support the CGI NPH concept, whereby server ensures that the data
  * supplied to the script are preceisely as supplied by the client and
@@ -208,10 +184,10 @@ import org.apache.catalina.util.IOTools;
  * with the specification though NPH support is not present.
  * </p>
  * <p>
- *
+ * <p/>
  * The CGI specification is located at
  * <a href="http://cgi-spec.golux.com">http://cgi-spec.golux.com</a>.
- *
+ * <p/>
  * </p>
  * <p>
  * <h3>TODO:</h3>
@@ -227,74 +203,86 @@ import org.apache.catalina.util.IOTools;
  * <li> Revisit IOException handling in CGIRunner.run()
  * <li> Better documentation
  * <li> Confirm use of ServletInputStream.available() in CGIRunner.run() is
- *      not needed
+ * not needed
  * <li> Make checking for "." and ".." in servlet & cgi PATH_INFO less
- *      draconian
+ * draconian
  * <li> [add more to this TODO list]
  * </ul>
  * </p>
  *
  * @author Martin T Dengler [root@martindengler.com]
  * @author Amy Roh
- *
  * @since Tomcat 4.0
- *
  */
 
 
-public final class CGIServlet extends HttpServlet {
+public final class CGIServlet extends HttpServlet
+{
 
     /* some vars below copied from Craig R. McClanahan's InvokerServlet */
 
-    /** the debugging detail level for this servlet. */
-    private int debug = 0;
-
     /**
-     *  The CGI search path will start at
-     *    webAppRootDir + File.separator + cgiPathPrefix
-     *    (or webAppRootDir alone if cgiPathPrefix is
-     *    null)
+     * object used to ensure multiple threads don't try to expand same file
+     */
+    static Object expandFileLock = new Object();
+    /**
+     * the shell environment variables to be passed to the CGI script
+     */
+    Hashtable<String, String> shellEnv = new Hashtable<String, String>();
+    /**
+     * the debugging detail level for this servlet.
+     */
+    private int debug = 0;
+    /**
+     * The CGI search path will start at
+     * webAppRootDir + File.separator + cgiPathPrefix
+     * (or webAppRootDir alone if cgiPathPrefix is
+     * null)
      */
     private String cgiPathPrefix = null;
-
-    /** the executable to use with the script */
+    /**
+     * the executable to use with the script
+     */
     private String cgiExecutable = "perl";
-
-    /** additional arguments for the executable */
+    /**
+     * additional arguments for the executable
+     */
     private List<String> cgiExecutableArgs = null;
-
-    /** the encoding to use for parameters */
+    /**
+     * the encoding to use for parameters
+     */
     private String parameterEncoding =
-        System.getProperty("file.encoding", "UTF-8");
-
+            System.getProperty("file.encoding", "UTF-8");
     /**
      * The time (in milliseconds) to wait for the reading of stderr to complete
      * before terminating the CGI process.
      */
     private long stderrTimeout = 2000;
 
-    /** object used to ensure multiple threads don't try to expand same file */
-    static Object expandFileLock = new Object();
-
-    /** the shell environment variables to be passed to the CGI script */
-    Hashtable<String,String> shellEnv = new Hashtable<String,String>();
+    /**
+     * For future testing use only; does nothing right now
+     */
+    public static void main(String[] args)
+    {
+        System.out.println("$Header$");
+    }
 
     /**
      * Sets instance variables.
-     * <P>
+     * <p/>
      * Modified from Craig R. McClanahan's InvokerServlet
      * </P>
      *
-     * @param config                    a <code>ServletConfig</code> object
-     *                                  containing the servlet's
-     *                                  configuration and initialization
-     *                                  parameters
-     *
-     * @exception ServletException      if an exception has occurred that
-     *                                  interferes with the servlet's normal
-     *                                  operation
+     * @param config a <code>ServletConfig</code> object
+     *               containing the servlet's
+     *               configuration and initialization
+     *               parameters
+     * @throws ServletException if an exception has occurred that
+     *                          interferes with the servlet's normal
+     *                          operation
      */
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) throws ServletException
+    {
 
         super.init(config);
 
@@ -304,29 +292,34 @@ public final class CGIServlet extends HttpServlet {
             servletName = "";
         if (servletName.startsWith("org.apache.catalina.INVOKER."))
             throw new UnavailableException
-                ("Cannot invoke CGIServlet through the invoker");
-        
+                    ("Cannot invoke CGIServlet through the invoker");
+
         // Set our properties from the initialization parameters
         if (getServletConfig().getInitParameter("debug") != null)
             debug = Integer.parseInt(getServletConfig().getInitParameter("debug"));
         cgiPathPrefix = getServletConfig().getInitParameter("cgiPathPrefix");
-        boolean passShellEnvironment = 
-            Boolean.valueOf(getServletConfig().getInitParameter("passShellEnvironment")).booleanValue();
+        boolean passShellEnvironment =
+                Boolean.valueOf(getServletConfig().getInitParameter("passShellEnvironment")).booleanValue();
 
-        if (passShellEnvironment) {
+        if (passShellEnvironment)
+        {
             shellEnv.putAll(System.getenv());
         }
 
-        if (getServletConfig().getInitParameter("executable") != null) {
+        if (getServletConfig().getInitParameter("executable") != null)
+        {
             cgiExecutable = getServletConfig().getInitParameter("executable");
         }
 
-        if (getServletConfig().getInitParameter("executable-arg-1") != null) {
+        if (getServletConfig().getInitParameter("executable-arg-1") != null)
+        {
             List<String> args = new ArrayList<String>();
-            for (int i = 1;; i++) {
+            for (int i = 1; ; i++)
+            {
                 String arg = getServletConfig().getInitParameter(
                         "executable-arg-" + i);
-                if (arg == null) {
+                if (arg == null)
+                {
                     break;
                 }
                 args.add(arg);
@@ -334,64 +327,66 @@ public final class CGIServlet extends HttpServlet {
             cgiExecutableArgs = args;
         }
 
-        if (getServletConfig().getInitParameter("parameterEncoding") != null) {
+        if (getServletConfig().getInitParameter("parameterEncoding") != null)
+        {
             parameterEncoding = getServletConfig().getInitParameter("parameterEncoding");
         }
 
-        if (getServletConfig().getInitParameter("stderrTimeout") != null) {
+        if (getServletConfig().getInitParameter("stderrTimeout") != null)
+        {
             stderrTimeout = Long.parseLong(getServletConfig().getInitParameter(
                     "stderrTimeout"));
         }
 
     }
 
-
-
     /**
      * Prints out important Servlet API and container information
-     *
+     * <p/>
      * <p>
      * Copied from SnoopAllServlet by Craig R. McClanahan
      * </p>
      *
-     * @param  out    ServletOutputStream as target of the information
-     * @param  req    HttpServletRequest object used as source of information
-     * @param  res    HttpServletResponse object currently not used but could
-     *                provide future information
-     *
-     * @exception  IOException  if a write operation exception occurs
-     *
+     * @param out ServletOutputStream as target of the information
+     * @param req HttpServletRequest object used as source of information
+     * @param res HttpServletResponse object currently not used but could
+     *            provide future information
+     * @throws IOException if a write operation exception occurs
      */
     protected void printServletEnvironment(ServletOutputStream out,
-        HttpServletRequest req, HttpServletResponse res) throws IOException {
+                                           HttpServletRequest req, HttpServletResponse res) throws IOException
+    {
 
         // Document the properties from ServletRequest
         out.println("<h1>ServletRequest Properties</h1>");
         out.println("<ul>");
         Enumeration attrs = req.getAttributeNames();
-        while (attrs.hasMoreElements()) {
+        while (attrs.hasMoreElements())
+        {
             String attr = (String) attrs.nextElement();
             out.println("<li><b>attribute</b> " + attr + " = " +
-                           req.getAttribute(attr));
+                    req.getAttribute(attr));
         }
         out.println("<li><b>characterEncoding</b> = " +
-                       req.getCharacterEncoding());
+                req.getCharacterEncoding());
         out.println("<li><b>contentLength</b> = " +
-                       req.getContentLength());
+                req.getContentLength());
         out.println("<li><b>contentType</b> = " +
-                       req.getContentType());
+                req.getContentType());
         Enumeration locales = req.getLocales();
-        while (locales.hasMoreElements()) {
+        while (locales.hasMoreElements())
+        {
             Locale locale = (Locale) locales.nextElement();
             out.println("<li><b>locale</b> = " + locale);
         }
         Enumeration params = req.getParameterNames();
-        while (params.hasMoreElements()) {
+        while (params.hasMoreElements())
+        {
             String param = (String) params.nextElement();
             String values[] = req.getParameterValues(param);
             for (int i = 0; i < values.length; i++)
                 out.println("<li><b>parameter</b> " + param + " = " +
-                               values[i]);
+                        values[i]);
         }
         out.println("<li><b>protocol</b> = " + req.getProtocol());
         out.println("<li><b>remoteAddr</b> = " + req.getRemoteAddr());
@@ -408,41 +403,43 @@ public final class CGIServlet extends HttpServlet {
         out.println("<ul>");
         out.println("<li><b>authType</b> = " + req.getAuthType());
         out.println("<li><b>contextPath</b> = " +
-                       req.getContextPath());
+                req.getContextPath());
         Cookie cookies[] = req.getCookies();
-        if (cookies!=null) {
+        if (cookies != null)
+        {
             for (int i = 0; i < cookies.length; i++)
-                out.println("<li><b>cookie</b> " + cookies[i].getName() +" = " +cookies[i].getValue());
+                out.println("<li><b>cookie</b> " + cookies[i].getName() + " = " + cookies[i].getValue());
         }
         Enumeration headers = req.getHeaderNames();
-        while (headers.hasMoreElements()) {
+        while (headers.hasMoreElements())
+        {
             String header = (String) headers.nextElement();
             out.println("<li><b>header</b> " + header + " = " +
-                           req.getHeader(header));
+                    req.getHeader(header));
         }
         out.println("<li><b>method</b> = " + req.getMethod());
         out.println("<li><a name=\"pathInfo\"><b>pathInfo</b></a> = "
-                    + req.getPathInfo());
+                + req.getPathInfo());
         out.println("<li><b>pathTranslated</b> = " +
-                       req.getPathTranslated());
+                req.getPathTranslated());
         out.println("<li><b>queryString</b> = " +
-                       req.getQueryString());
+                req.getQueryString());
         out.println("<li><b>remoteUser</b> = " +
-                       req.getRemoteUser());
+                req.getRemoteUser());
         out.println("<li><b>requestedSessionId</b> = " +
-                       req.getRequestedSessionId());
+                req.getRequestedSessionId());
         out.println("<li><b>requestedSessionIdFromCookie</b> = " +
-                       req.isRequestedSessionIdFromCookie());
+                req.isRequestedSessionIdFromCookie());
         out.println("<li><b>requestedSessionIdFromURL</b> = " +
-                       req.isRequestedSessionIdFromURL());
+                req.isRequestedSessionIdFromURL());
         out.println("<li><b>requestedSessionIdValid</b> = " +
-                       req.isRequestedSessionIdValid());
+                req.isRequestedSessionIdValid());
         out.println("<li><b>requestURI</b> = " +
-                       req.getRequestURI());
+                req.getRequestURI());
         out.println("<li><b>servletPath</b> = " +
-                       req.getServletPath());
+                req.getServletPath());
         out.println("<li><b>userPrincipal</b> = " +
-                       req.getUserPrincipal());
+                req.getUserPrincipal());
         out.println("</ul>");
         out.println("<hr>");
 
@@ -450,29 +447,31 @@ public final class CGIServlet extends HttpServlet {
         out.println("<h1>ServletRequest Attributes</h1>");
         out.println("<ul>");
         attrs = req.getAttributeNames();
-        while (attrs.hasMoreElements()) {
+        while (attrs.hasMoreElements())
+        {
             String attr = (String) attrs.nextElement();
             out.println("<li><b>" + attr + "</b> = " +
-                           req.getAttribute(attr));
+                    req.getAttribute(attr));
         }
         out.println("</ul>");
         out.println("<hr>");
 
         // Process the current session (if there is one)
         HttpSession session = req.getSession(false);
-        if (session != null) {
+        if (session != null)
+        {
 
             // Document the session properties
             out.println("<h1>HttpSession Properties</h1>");
             out.println("<ul>");
             out.println("<li><b>id</b> = " +
-                           session.getId());
+                    session.getId());
             out.println("<li><b>creationTime</b> = " +
-                           new Date(session.getCreationTime()));
+                    new Date(session.getCreationTime()));
             out.println("<li><b>lastAccessedTime</b> = " +
-                           new Date(session.getLastAccessedTime()));
+                    new Date(session.getLastAccessedTime()));
             out.println("<li><b>maxInactiveInterval</b> = " +
-                           session.getMaxInactiveInterval());
+                    session.getMaxInactiveInterval());
             out.println("</ul>");
             out.println("<hr>");
 
@@ -480,10 +479,11 @@ public final class CGIServlet extends HttpServlet {
             out.println("<h1>HttpSession Attributes</h1>");
             out.println("<ul>");
             attrs = session.getAttributeNames();
-            while (attrs.hasMoreElements()) {
+            while (attrs.hasMoreElements())
+            {
                 String attr = (String) attrs.nextElement();
                 out.println("<li><b>" + attr + "</b> = " +
-                               session.getAttribute(attr));
+                        session.getAttribute(attr));
             }
             out.println("</ul>");
             out.println("<hr>");
@@ -494,7 +494,7 @@ public final class CGIServlet extends HttpServlet {
         out.println("<h1>ServletConfig Properties</h1>");
         out.println("<ul>");
         out.println("<li><b>servletName</b> = " +
-                       getServletConfig().getServletName());
+                getServletConfig().getServletName());
         out.println("</ul>");
         out.println("<hr>");
 
@@ -502,7 +502,8 @@ public final class CGIServlet extends HttpServlet {
         out.println("<h1>ServletConfig Initialization Parameters</h1>");
         out.println("<ul>");
         params = getServletConfig().getInitParameterNames();
-        while (params.hasMoreElements()) {
+        while (params.hasMoreElements())
+        {
             String param = (String) params.nextElement();
             String value = getServletConfig().getInitParameter(param);
             out.println("<li><b>" + param + "</b> = " + value);
@@ -514,13 +515,13 @@ public final class CGIServlet extends HttpServlet {
         out.println("<h1>ServletContext Properties</h1>");
         out.println("<ul>");
         out.println("<li><b>majorVersion</b> = " +
-                       getServletContext().getMajorVersion());
+                getServletContext().getMajorVersion());
         out.println("<li><b>minorVersion</b> = " +
-                       getServletContext().getMinorVersion());
+                getServletContext().getMinorVersion());
         out.println("<li><b>realPath('/')</b> = " +
-                       getServletContext().getRealPath("/"));
+                getServletContext().getRealPath("/"));
         out.println("<li><b>serverInfo</b> = " +
-                       getServletContext().getServerInfo());
+                getServletContext().getServerInfo());
         out.println("</ul>");
         out.println("<hr>");
 
@@ -528,7 +529,8 @@ public final class CGIServlet extends HttpServlet {
         out.println("<h1>ServletContext Initialization Parameters</h1>");
         out.println("<ul>");
         params = getServletContext().getInitParameterNames();
-        while (params.hasMoreElements()) {
+        while (params.hasMoreElements())
+        {
             String param = (String) params.nextElement();
             String value = getServletContext().getInitParameter(param);
             out.println("<li><b>" + param + "</b> = " + value);
@@ -540,88 +542,86 @@ public final class CGIServlet extends HttpServlet {
         out.println("<h1>ServletContext Attributes</h1>");
         out.println("<ul>");
         attrs = getServletContext().getAttributeNames();
-        while (attrs.hasMoreElements()) {
+        while (attrs.hasMoreElements())
+        {
             String attr = (String) attrs.nextElement();
             out.println("<li><b>" + attr + "</b> = " +
-                           getServletContext().getAttribute(attr));
+                    getServletContext().getAttribute(attr));
         }
         out.println("</ul>");
         out.println("<hr>");
 
 
-
     }
-
-
 
     /**
      * Provides CGI Gateway service -- delegates to <code>doGet</code>
      *
-     * @param  req   HttpServletRequest passed in by servlet container
-     * @param  res   HttpServletResponse passed in by servlet container
-     *
-     * @exception  ServletException  if a servlet-specific exception occurs
-     * @exception  IOException  if a read/write exception occurs
-     *
+     * @param req HttpServletRequest passed in by servlet container
+     * @param res HttpServletResponse passed in by servlet container
+     * @throws ServletException if a servlet-specific exception occurs
+     * @throws IOException      if a read/write exception occurs
      * @see javax.servlet.http.HttpServlet
-     *
      */
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
         doGet(req, res);
     }
-
-
 
     /**
      * Provides CGI Gateway service
      *
-     * @param  req   HttpServletRequest passed in by servlet container
-     * @param  res   HttpServletResponse passed in by servlet container
-     *
-     * @exception  ServletException  if a servlet-specific exception occurs
-     * @exception  IOException  if a read/write exception occurs
-     *
+     * @param req HttpServletRequest passed in by servlet container
+     * @param res HttpServletResponse passed in by servlet container
+     * @throws ServletException if a servlet-specific exception occurs
+     * @throws IOException      if a read/write exception occurs
      * @see javax.servlet.http.HttpServlet
-     *
      */
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
-        throws ServletException, IOException {
+            throws ServletException, IOException
+    {
 
         // Verify that we were not accessed using the invoker servlet
         if (req.getAttribute(Globals.INVOKED_ATTR) != null)
             throw new UnavailableException
-                ("Cannot invoke CGIServlet through the invoker");
+                    ("Cannot invoke CGIServlet through the invoker");
 
         CGIEnvironment cgiEnv = new CGIEnvironment(req, getServletContext());
 
-        if (cgiEnv.isValid()) {
+        if (cgiEnv.isValid())
+        {
             CGIRunner cgi = new CGIRunner(cgiEnv.getCommand(),
-                                          cgiEnv.getEnvironment(),
-                                          cgiEnv.getWorkingDirectory(),
-                                          cgiEnv.getParameters());
+                    cgiEnv.getEnvironment(),
+                    cgiEnv.getWorkingDirectory(),
+                    cgiEnv.getParameters());
             //if POST, we need to cgi.setInput
             //REMIND: how does this interact with Servlet API 2.3's Filters?!
-            if ("POST".equals(req.getMethod())) {
+            if ("POST".equals(req.getMethod()))
+            {
                 cgi.setInput(req.getInputStream());
             }
             cgi.setResponse(res);
             cgi.run();
         }
 
-        if (!cgiEnv.isValid()) {
+        if (!cgiEnv.isValid())
+        {
             res.setStatus(404);
         }
- 
-        if (debug >= 10) {
+
+        if (debug >= 10)
+        {
 
             ServletOutputStream out = res.getOutputStream();
             out.println("<HTML><HEAD><TITLE>$Name$</TITLE></HEAD>");
             out.println("<BODY>$Header$<p>");
 
-            if (cgiEnv.isValid()) {
+            if (cgiEnv.isValid())
+            {
                 out.println(cgiEnv.toString());
-            } else {
+            } else
+            {
                 out.println("<H3>");
                 out.println("CGI script not found or not specified.");
                 out.println("</H3>");
@@ -652,59 +652,72 @@ public final class CGIServlet extends HttpServlet {
 
     } //doGet
 
-
-
-    /** For future testing use only; does nothing right now */
-    public static void main(String[] args) {
-        System.out.println("$Header$");
-    }
-
-
     /**
      * Encapsulates the CGI environment and rules to derive
      * that environment from the servlet container and request information.
-     *
+     * <p/>
      * <p>
      * </p>
      *
-     *
-     * @since    Tomcat 4.0
-     *
+     * @since Tomcat 4.0
      */
-    protected class CGIEnvironment {
+    protected class CGIEnvironment
+    {
 
 
-        /** context of the enclosing servlet */
+        /**
+         * context of the enclosing servlet
+         */
         private ServletContext context = null;
 
-        /** context path of enclosing servlet */
+        /**
+         * context path of enclosing servlet
+         */
         private String contextPath = null;
 
-        /** servlet URI of the enclosing servlet */
+        /**
+         * servlet URI of the enclosing servlet
+         */
         private String servletPath = null;
 
-        /** pathInfo for the current request */
+        /**
+         * pathInfo for the current request
+         */
         private String pathInfo = null;
 
-        /** real file system directory of the enclosing servlet's web app */
+        /**
+         * real file system directory of the enclosing servlet's web app
+         */
         private String webAppRootDir = null;
 
-        /** tempdir for context - used to expand scripts in unexpanded wars */
+        /**
+         * tempdir for context - used to expand scripts in unexpanded wars
+         */
         private File tmpDir = null;
 
-        /** derived cgi environment */
+        /**
+         * derived cgi environment
+         */
         private Hashtable env = null;
 
-        /** cgi command to be invoked */
+        /**
+         * cgi command to be invoked
+         */
         private String command = null;
 
-        /** cgi command's desired working directory */
+        /**
+         * cgi command's desired working directory
+         */
         private File workingDirectory = null;
 
-        /** cgi command's command line parameters */
+        /**
+         * cgi command's command line parameters
+         */
         private ArrayList<String> cmdLineParameters = new ArrayList<String>();
 
-        /** whether or not this object is valid or not */
+        /**
+         * whether or not this object is valid or not
+         */
         private boolean valid = false;
 
 
@@ -712,73 +725,78 @@ public final class CGIServlet extends HttpServlet {
          * Creates a CGIEnvironment and derives the necessary environment,
          * query parameters, working directory, cgi command, etc.
          *
-         * @param  req       HttpServletRequest for information provided by
-         *                   the Servlet API
-         * @param  context   ServletContext for information provided by the
-         *                   Servlet API
-         *
+         * @param req     HttpServletRequest for information provided by
+         *                the Servlet API
+         * @param context ServletContext for information provided by the
+         *                Servlet API
          */
         protected CGIEnvironment(HttpServletRequest req,
-                                 ServletContext context) throws IOException {
+                                 ServletContext context) throws IOException
+        {
             setupFromContext(context);
             setupFromRequest(req);
 
             this.valid = setCGIEnvironment(req);
 
-            if (this.valid) {
+            if (this.valid)
+            {
                 workingDirectory = new File(command.substring(0,
-                      command.lastIndexOf(File.separator)));
+                        command.lastIndexOf(File.separator)));
             }
 
         }
 
 
-
         /**
          * Uses the ServletContext to set some CGI variables
          *
-         * @param  context   ServletContext for information provided by the
-         *                   Servlet API
+         * @param context ServletContext for information provided by the
+         *                Servlet API
          */
-        protected void setupFromContext(ServletContext context) {
+        protected void setupFromContext(ServletContext context)
+        {
             this.context = context;
             this.webAppRootDir = context.getRealPath("/");
             this.tmpDir = (File) context.getAttribute(Globals.WORK_DIR_ATTR);
         }
 
 
-
         /**
          * Uses the HttpServletRequest to set most CGI variables
          *
-         * @param  req   HttpServletRequest for information provided by
-         *               the Servlet API
-         * @throws UnsupportedEncodingException 
+         * @param req HttpServletRequest for information provided by
+         *            the Servlet API
+         * @throws UnsupportedEncodingException
          */
         protected void setupFromRequest(HttpServletRequest req)
-                throws UnsupportedEncodingException {
+                throws UnsupportedEncodingException
+        {
 
             boolean isIncluded = false;
 
             // Look to see if this request is an include
-            if (req.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR) != null) {
+            if (req.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR) != null)
+            {
                 isIncluded = true;
             }
-            if (isIncluded) {
+            if (isIncluded)
+            {
                 this.contextPath = (String) req.getAttribute(
                         Globals.INCLUDE_CONTEXT_PATH_ATTR);
                 this.servletPath = (String) req.getAttribute(
                         Globals.INCLUDE_SERVLET_PATH_ATTR);
                 this.pathInfo = (String) req.getAttribute(
                         Globals.INCLUDE_PATH_INFO_ATTR);
-            } else {
+            } else
+            {
                 this.contextPath = req.getContextPath();
                 this.servletPath = req.getServletPath();
                 this.pathInfo = req.getPathInfo();
             }
             // If getPathInfo() returns null, must be using extension mapping
             // In this case, pathInfo should be same as servletPath
-            if (this.pathInfo == null) {
+            if (this.pathInfo == null)
+            {
                 this.pathInfo = this.servletPath;
             }
 
@@ -787,20 +805,25 @@ public final class CGIServlet extends HttpServlet {
             // The parsed query string becomes the command line parameters
             // for the cgi command.
             if (req.getMethod().equals("GET")
-                || req.getMethod().equals("POST")
-                || req.getMethod().equals("HEAD")) {
+                    || req.getMethod().equals("POST")
+                    || req.getMethod().equals("HEAD"))
+            {
                 String qs;
-                if (isIncluded) {
+                if (isIncluded)
+                {
                     qs = (String) req.getAttribute(
                             Globals.INCLUDE_QUERY_STRING_ATTR);
-                } else {
+                } else
+                {
                     qs = req.getQueryString();
                 }
-                if (qs != null && qs.indexOf("=") == -1) {
+                if (qs != null && qs.indexOf("=") == -1)
+                {
                     StringTokenizer qsTokens = new StringTokenizer(qs, "+");
-                    while ( qsTokens.hasMoreTokens() ) {
+                    while (qsTokens.hasMoreTokens())
+                    {
                         cmdLineParameters.add(URLDecoder.decode(qsTokens.nextToken(),
-                                              parameterEncoding));
+                                parameterEncoding));
                     }
                 }
             }
@@ -809,7 +832,7 @@ public final class CGIServlet extends HttpServlet {
 
         /**
          * Resolves core information about the cgi script.
-         *
+         * <p/>
          * <p>
          * Example URI:
          * <PRE> /servlet/cgigateway/dir1/realCGIscript/pathinfo1 </PRE>
@@ -822,132 +845,142 @@ public final class CGIServlet extends HttpServlet {
          * </p>
          * <p>
          * CGI search algorithm: search the real path below
-         *    &lt;my-webapp-root&gt; and find the first non-directory in
-         *    the getPathTranslated("/"), reading/searching from left-to-right.
-         *</p>
-         *<p>
-         *   The CGI search path will start at
-         *   webAppRootDir + File.separator + cgiPathPrefix
-         *   (or webAppRootDir alone if cgiPathPrefix is
-         *   null).
-         *</p>
-         *<p>
-         *   cgiPathPrefix is defined by setting
-         *   this servlet's cgiPathPrefix init parameter
+         * &lt;my-webapp-root&gt; and find the first non-directory in
+         * the getPathTranslated("/"), reading/searching from left-to-right.
+         * </p>
+         * <p>
+         * The CGI search path will start at
+         * webAppRootDir + File.separator + cgiPathPrefix
+         * (or webAppRootDir alone if cgiPathPrefix is
+         * null).
+         * </p>
+         * <p>
+         * cgiPathPrefix is defined by setting
+         * this servlet's cgiPathPrefix init parameter
+         * <p/>
+         * </p>
          *
-         *</p>
-         *
-         * @param pathInfo       String from HttpServletRequest.getPathInfo()
-         * @param webAppRootDir  String from context.getRealPath("/")
-         * @param contextPath    String as from
-         *                       HttpServletRequest.getContextPath()
-         * @param servletPath    String as from
-         *                       HttpServletRequest.getServletPath()
-         * @param cgiPathPrefix  subdirectory of webAppRootDir below which
-         *                       the web app's CGIs may be stored; can be null.
-         *                       The CGI search path will start at
-         *                       webAppRootDir + File.separator + cgiPathPrefix
-         *                       (or webAppRootDir alone if cgiPathPrefix is
-         *                       null).  cgiPathPrefix is defined by setting
-         *                       the servlet's cgiPathPrefix init parameter.
-         *
-         *
-         * @return
-         * <ul>
+         * @param pathInfo      String from HttpServletRequest.getPathInfo()
+         * @param webAppRootDir String from context.getRealPath("/")
+         * @param contextPath   String as from
+         *                      HttpServletRequest.getContextPath()
+         * @param servletPath   String as from
+         *                      HttpServletRequest.getServletPath()
+         * @param cgiPathPrefix subdirectory of webAppRootDir below which
+         *                      the web app's CGIs may be stored; can be null.
+         *                      The CGI search path will start at
+         *                      webAppRootDir + File.separator + cgiPathPrefix
+         *                      (or webAppRootDir alone if cgiPathPrefix is
+         *                      null).  cgiPathPrefix is defined by setting
+         *                      the servlet's cgiPathPrefix init parameter.
+         * @return <ul>
          * <li>
          * <code>path</code> -    full file-system path to valid cgi script,
-         *                        or null if no cgi was found
+         * or null if no cgi was found
          * <li>
          * <code>scriptName</code> -
-         *                        CGI variable SCRIPT_NAME; the full URL path
-         *                        to valid cgi script or null if no cgi was
-         *                        found
+         * CGI variable SCRIPT_NAME; the full URL path
+         * to valid cgi script or null if no cgi was
+         * found
          * <li>
          * <code>cgiName</code> - servlet pathInfo fragment corresponding to
-         *                        the cgi script itself, or null if not found
+         * the cgi script itself, or null if not found
          * <li>
          * <code>name</code> -    simple name (no directories) of the
-         *                        cgi script, or null if no cgi was found
+         * cgi script, or null if no cgi was found
          * </ul>
-         *
          * @since Tomcat 4.0
          */
         protected String[] findCGI(String pathInfo, String webAppRootDir,
                                    String contextPath, String servletPath,
-                                   String cgiPathPrefix) {
+                                   String cgiPathPrefix)
+        {
             String path = null;
             String name = null;
             String scriptname = null;
             String cginame = "";
 
             if ((webAppRootDir != null)
-                && (webAppRootDir.lastIndexOf(File.separator) ==
-                    (webAppRootDir.length() - 1))) {
-                    //strip the trailing "/" from the webAppRootDir
-                    webAppRootDir =
-                    webAppRootDir.substring(0, (webAppRootDir.length() - 1));
+                    && (webAppRootDir.lastIndexOf(File.separator) ==
+                    (webAppRootDir.length() - 1)))
+            {
+                //strip the trailing "/" from the webAppRootDir
+                webAppRootDir =
+                        webAppRootDir.substring(0, (webAppRootDir.length() - 1));
             }
 
-            if (cgiPathPrefix != null) {
+            if (cgiPathPrefix != null)
+            {
                 webAppRootDir = webAppRootDir + File.separator
-                    + cgiPathPrefix;
+                        + cgiPathPrefix;
             }
 
-            if (debug >= 2) {
+            if (debug >= 2)
+            {
                 log("findCGI: path=" + pathInfo + ", " + webAppRootDir);
             }
 
             File currentLocation = new File(webAppRootDir);
             StringTokenizer dirWalker =
-            new StringTokenizer(pathInfo, "/");
-            if (debug >= 3) {
+                    new StringTokenizer(pathInfo, "/");
+            if (debug >= 3)
+            {
                 log("findCGI: currentLoc=" + currentLocation);
             }
-            while (!currentLocation.isFile() && dirWalker.hasMoreElements()) {
-                if (debug >= 3) {
+            while (!currentLocation.isFile() && dirWalker.hasMoreElements())
+            {
+                if (debug >= 3)
+                {
                     log("findCGI: currentLoc=" + currentLocation);
                 }
                 String nextElement = (String) dirWalker.nextElement();
                 currentLocation = new File(currentLocation, nextElement);
                 cginame = cginame + "/" + nextElement;
             }
-            if (!currentLocation.isFile()) {
-                return new String[] { null, null, null, null };
-            } else {
-                if (debug >= 2) {
+            if (!currentLocation.isFile())
+            {
+                return new String[]{null, null, null, null};
+            } else
+            {
+                if (debug >= 2)
+                {
                     log("findCGI: FOUND cgi at " + currentLocation);
                 }
                 path = currentLocation.getAbsolutePath();
                 name = currentLocation.getName();
 
-                if (".".equals(contextPath)) {
+                if (".".equals(contextPath))
+                {
                     scriptname = servletPath;
-                } else {
+                } else
+                {
                     scriptname = contextPath + servletPath;
                 }
-                if (!servletPath.equals(cginame)) {
+                if (!servletPath.equals(cginame))
+                {
                     scriptname = scriptname + cginame;
                 }
             }
 
-            if (debug >= 1) {
+            if (debug >= 1)
+            {
                 log("findCGI calc: name=" + name + ", path=" + path
-                    + ", scriptname=" + scriptname + ", cginame=" + cginame);
+                        + ", scriptname=" + scriptname + ", cginame=" + cginame);
             }
-            return new String[] { path, scriptname, cginame, name };
+            return new String[]{path, scriptname, cginame, name};
         }
 
         /**
          * Constructs the CGI environment to be supplied to the invoked CGI
          * script; relies heavliy on Servlet API methods and findCGI
          *
-         * @param    req request associated with the CGI
-         *           invokation
-         *
-         * @return   true if environment was set OK, false if there
-         *           was a problem and no environment was set
+         * @param req request associated with the CGI
+         *            invokation
+         * @return true if environment was set OK, false if there
+         * was a problem and no environment was set
          */
-        protected boolean setCGIEnvironment(HttpServletRequest req) throws IOException {
+        protected boolean setCGIEnvironment(HttpServletRequest req) throws IOException
+        {
 
             /*
              * This method is slightly ugly; c'est la vie.
@@ -955,7 +988,7 @@ public final class CGIServlet extends HttpServlet {
              * (apologies to Marv Albert regarding MJ)
              */
 
-            Hashtable<String,String> envp = new Hashtable<String,String>();
+            Hashtable<String, String> envp = new Hashtable<String, String>();
 
             // Add the shell environment variables (if any)
             envp.putAll(shellEnv);
@@ -977,19 +1010,20 @@ public final class CGIServlet extends HttpServlet {
 
             sPathTranslatedOrig = req.getPathTranslated();
             sPathTranslatedOrig =
-                sPathTranslatedOrig == null ? "" : sPathTranslatedOrig;
+                    sPathTranslatedOrig == null ? "" : sPathTranslatedOrig;
 
-            if (webAppRootDir == null ) {
+            if (webAppRootDir == null)
+            {
                 // The app has not been deployed in exploded form
                 webAppRootDir = tmpDir.toString();
                 expandCGIScript();
-            } 
-            
+            }
+
             sCGINames = findCGI(sPathInfoOrig,
-                                webAppRootDir,
-                                contextPath,
-                                servletPath,
-                                cgiPathPrefix);
+                    webAppRootDir,
+                    contextPath,
+                    servletPath,
+                    cgiPathPrefix);
 
             sCGIFullPath = sCGINames[0];
             sCGIScriptName = sCGINames[1];
@@ -997,9 +1031,10 @@ public final class CGIServlet extends HttpServlet {
             sCGIName = sCGINames[3];
 
             if (sCGIFullPath == null
-                || sCGIScriptName == null
-                || sCGIFullName == null
-                || sCGIName == null) {
+                    || sCGIScriptName == null
+                    || sCGIFullName == null
+                    || sCGIName == null)
+            {
                 return false;
             }
 
@@ -1032,9 +1067,11 @@ public final class CGIServlet extends HttpServlet {
              *
              */
             if (pathInfo == null
-                || (pathInfo.substring(sCGIFullName.length()).length() <= 0)) {
+                    || (pathInfo.substring(sCGIFullName.length()).length() <= 0))
+            {
                 sPathInfoCGI = "";
-            } else {
+            } else
+            {
                 sPathInfoCGI = pathInfo.substring(sCGIFullName.length());
             }
             envp.put("PATH_INFO", sPathInfoCGI);
@@ -1059,14 +1096,18 @@ public final class CGIServlet extends HttpServlet {
              * SHOULD NOT be defined.
              *
              */
-            if (sPathInfoCGI != null && !("".equals(sPathInfoCGI))) {
+            if (sPathInfoCGI != null && !("".equals(sPathInfoCGI)))
+            {
                 sPathTranslatedCGI = context.getRealPath(sPathInfoCGI);
-            } else {
+            } else
+            {
                 sPathTranslatedCGI = null;
             }
-            if (sPathTranslatedCGI == null || "".equals(sPathTranslatedCGI)) {
+            if (sPathTranslatedCGI == null || "".equals(sPathTranslatedCGI))
+            {
                 //NOOP
-            } else {
+            } else
+            {
                 envp.put("PATH_TRANSLATED", nullsToBlanks(sPathTranslatedCGI));
             }
 
@@ -1094,24 +1135,27 @@ public final class CGIServlet extends HttpServlet {
              */
             int contentLength = req.getContentLength();
             String sContentLength = (contentLength <= 0 ? "" :
-                                     (new Integer(contentLength)).toString());
+                    (new Integer(contentLength)).toString());
             envp.put("CONTENT_LENGTH", sContentLength);
 
 
             Enumeration headers = req.getHeaderNames();
             String header = null;
-            while (headers.hasMoreElements()) {
+            while (headers.hasMoreElements())
+            {
                 header = null;
                 header = ((String) headers.nextElement()).toUpperCase();
                 //REMIND: rewrite multiple headers as if received as single
                 //REMIND: change character set
                 //REMIND: I forgot what the previous REMIND means
                 if ("AUTHORIZATION".equalsIgnoreCase(header) ||
-                    "PROXY_AUTHORIZATION".equalsIgnoreCase(header)) {
+                        "PROXY_AUTHORIZATION".equalsIgnoreCase(header))
+                {
                     //NOOP per CGI specification section 11.2
-                } else {
+                } else
+                {
                     envp.put("HTTP_" + header.replace('-', '_'),
-                             req.getHeader(header));
+                            req.getHeader(header));
                 }
             }
 
@@ -1129,27 +1173,31 @@ public final class CGIServlet extends HttpServlet {
         }
 
         /**
-         * Extracts requested resource from web app archive to context work 
+         * Extracts requested resource from web app archive to context work
          * directory to enable CGI script to be executed.
          */
-        protected void expandCGIScript() {
+        protected void expandCGIScript()
+        {
             StringBuffer srcPath = new StringBuffer();
             StringBuffer destPath = new StringBuffer();
             InputStream is = null;
 
             // paths depend on mapping
-            if (cgiPathPrefix == null ) {
+            if (cgiPathPrefix == null)
+            {
                 srcPath.append(pathInfo);
                 is = context.getResourceAsStream(srcPath.toString());
                 destPath.append(tmpDir);
                 destPath.append(pathInfo);
-            } else {
+            } else
+            {
                 // essentially same search algorithm as findCGI()
                 srcPath.append(cgiPathPrefix);
                 StringTokenizer pathWalker =
-                        new StringTokenizer (pathInfo, "/");
+                        new StringTokenizer(pathInfo, "/");
                 // start with first element
-                while (pathWalker.hasMoreElements() && (is == null)) {
+                while (pathWalker.hasMoreElements() && (is == null))
+                {
                     srcPath.append("/");
                     srcPath.append(pathWalker.nextElement());
                     is = context.getResourceAsStream(srcPath.toString());
@@ -1159,35 +1207,42 @@ public final class CGIServlet extends HttpServlet {
                 destPath.append(srcPath);
             }
 
-            if (is == null) {
+            if (is == null)
+            {
                 // didn't find anything, give up now
-                if (debug >= 2) {
+                if (debug >= 2)
+                {
                     log("expandCGIScript: source '" + srcPath + "' not found");
                 }
-                 return;
+                return;
             }
 
             File f = new File(destPath.toString());
-            if (f.exists()) {
+            if (f.exists())
+            {
                 // Don't need to expand if it already exists
                 return;
-            } 
+            }
 
             // create directories
-            String dirPath = new String (destPath.toString().substring(
-                    0,destPath.toString().lastIndexOf("/")));
+            String dirPath = new String(destPath.toString().substring(
+                    0, destPath.toString().lastIndexOf("/")));
             File dir = new File(dirPath);
             dir.mkdirs();
 
-            try {
-                synchronized (expandFileLock) {
+            try
+            {
+                synchronized (expandFileLock)
+                {
                     // make sure file doesn't exist
-                    if (f.exists()) {
+                    if (f.exists())
+                    {
                         return;
                     }
 
                     // create file
-                    if (!f.createNewFile()) {
+                    if (!f.createNewFile())
+                    {
                         return;
                     }
                     FileOutputStream fos = new FileOutputStream(f);
@@ -1196,13 +1251,17 @@ public final class CGIServlet extends HttpServlet {
                     IOTools.flow(is, fos);
                     is.close();
                     fos.close();
-                    if (debug >= 2) {
+                    if (debug >= 2)
+                    {
                         log("expandCGIScript: expanded '" + srcPath + "' to '" + destPath + "'");
                     }
                 }
-            } catch (IOException ioe) {
+            }
+            catch (IOException ioe)
+            {
                 // delete in case file is corrupted 
-                if (f.exists()) {
+                if (f.exists())
+                {
                     f.delete();
                 }
             }
@@ -1213,10 +1272,10 @@ public final class CGIServlet extends HttpServlet {
          * Print important CGI environment information in a easy-to-read HTML
          * table
          *
-         * @return  HTML string containing CGI environment info
-         *
+         * @return HTML string containing CGI environment info
          */
-        public String toString() {
+        public String toString()
+        {
 
             StringBuffer sb = new StringBuffer();
 
@@ -1233,15 +1292,17 @@ public final class CGIServlet extends HttpServlet {
             sb.append(isValid());
             sb.append("</td></tr>");
 
-            if (isValid()) {
+            if (isValid())
+            {
                 Enumeration envk = env.keys();
-                while (envk.hasMoreElements()) {
+                while (envk.hasMoreElements())
+                {
                     String s = (String) envk.nextElement();
                     sb.append("<tr><td>");
                     sb.append(s);
                     sb.append("</td><td>");
                     sb.append(blanksToString((String) env.get(s),
-                                             "[will be set to blank]"));
+                            "[will be set to blank]"));
                     sb.append("</td></tr>");
                 }
             }
@@ -1253,13 +1314,15 @@ public final class CGIServlet extends HttpServlet {
             sb.append("</td></tr>");
 
             sb.append("<tr><td>Working Directory</td><td>");
-            if (workingDirectory != null) {
+            if (workingDirectory != null)
+            {
                 sb.append(workingDirectory.toString());
             }
             sb.append("</td></tr>");
 
             sb.append("<tr><td>Command Line Params</td><td>");
-            for (int i=0; i < cmdLineParameters.size(); i++) {
+            for (int i = 0; i < cmdLineParameters.size(); i++)
+            {
                 String param = (String) cmdLineParameters.get(i);
                 sb.append("<p>");
                 sb.append(param);
@@ -1273,187 +1336,189 @@ public final class CGIServlet extends HttpServlet {
         }
 
 
-
         /**
          * Gets derived command string
          *
-         * @return  command string
-         *
+         * @return command string
          */
-        protected String getCommand() {
+        protected String getCommand()
+        {
             return command;
         }
-
 
 
         /**
          * Gets derived CGI working directory
          *
-         * @return  working directory
-         *
+         * @return working directory
          */
-        protected File getWorkingDirectory() {
+        protected File getWorkingDirectory()
+        {
             return workingDirectory;
         }
-
 
 
         /**
          * Gets derived CGI environment
          *
-         * @return   CGI environment
-         *
+         * @return CGI environment
          */
-        protected Hashtable getEnvironment() {
+        protected Hashtable getEnvironment()
+        {
             return env;
         }
-
 
 
         /**
          * Gets derived CGI query parameters
          *
-         * @return   CGI query parameters
-         *
+         * @return CGI query parameters
          */
-        protected ArrayList getParameters() {
+        protected ArrayList getParameters()
+        {
             return cmdLineParameters;
         }
-
 
 
         /**
          * Gets validity status
          *
-         * @return   true if this environment is valid, false
-         *           otherwise
-         *
+         * @return true if this environment is valid, false
+         * otherwise
          */
-        protected boolean isValid() {
+        protected boolean isValid()
+        {
             return valid;
         }
-
 
 
         /**
          * Converts null strings to blank strings ("")
          *
-         * @param    s string to be converted if necessary
-         * @return   a non-null string, either the original or the empty string
-         *           ("") if the original was <code>null</code>
+         * @param s string to be converted if necessary
+         * @return a non-null string, either the original or the empty string
+         * ("") if the original was <code>null</code>
          */
-        protected String nullsToBlanks(String s) {
+        protected String nullsToBlanks(String s)
+        {
             return nullsToString(s, "");
         }
-
 
 
         /**
          * Converts null strings to another string
          *
-         * @param    couldBeNull string to be converted if necessary
-         * @param    subForNulls string to return instead of a null string
-         * @return   a non-null string, either the original or the substitute
-         *           string if the original was <code>null</code>
+         * @param couldBeNull string to be converted if necessary
+         * @param subForNulls string to return instead of a null string
+         * @return a non-null string, either the original or the substitute
+         * string if the original was <code>null</code>
          */
         protected String nullsToString(String couldBeNull,
-                                       String subForNulls) {
+                                       String subForNulls)
+        {
             return (couldBeNull == null ? subForNulls : couldBeNull);
         }
-
 
 
         /**
          * Converts blank strings to another string
          *
-         * @param    couldBeBlank string to be converted if necessary
-         * @param    subForBlanks string to return instead of a blank string
-         * @return   a non-null string, either the original or the substitute
-         *           string if the original was <code>null</code> or empty ("")
+         * @param couldBeBlank string to be converted if necessary
+         * @param subForBlanks string to return instead of a blank string
+         * @return a non-null string, either the original or the substitute
+         * string if the original was <code>null</code> or empty ("")
          */
         protected String blanksToString(String couldBeBlank,
-                                      String subForBlanks) {
+                                        String subForBlanks)
+        {
             return (("".equals(couldBeBlank) || couldBeBlank == null)
                     ? subForBlanks
                     : couldBeBlank);
         }
 
 
-
     } //class CGIEnvironment
-
-
-
-
 
 
     /**
      * Encapsulates the knowledge of how to run a CGI script, given the
      * script's desired environment and (optionally) input/output streams
-     *
+     * <p/>
      * <p>
-     *
+     * <p/>
      * Exposes a <code>run</code> method used to actually invoke the
      * CGI.
-     *
+     * <p/>
      * </p>
      * <p>
-     *
+     * <p/>
      * The CGI environment and settings are derived from the information
      * passed to the constuctor.
-     *
+     * <p/>
      * </p>
      * <p>
-     *
+     * <p/>
      * The input and output streams can be set by the <code>setInput</code>
      * and <code>setResponse</code> methods, respectively.
      * </p>
-     *
-     *
      */
 
-    protected class CGIRunner {
+    protected class CGIRunner
+    {
 
-        /** script/command to be executed */
+        /**
+         * script/command to be executed
+         */
         private String command = null;
 
-        /** environment used when invoking the cgi script */
+        /**
+         * environment used when invoking the cgi script
+         */
         private Hashtable env = null;
 
-        /** working directory used when invoking the cgi script */
+        /**
+         * working directory used when invoking the cgi script
+         */
         private File wd = null;
 
-        /** command line parameters to be passed to the invoked script */
+        /**
+         * command line parameters to be passed to the invoked script
+         */
         private ArrayList params = null;
 
-        /** stdin to be passed to cgi script */
+        /**
+         * stdin to be passed to cgi script
+         */
         private InputStream stdin = null;
 
-        /** response object used to set headers & get output stream */
+        /**
+         * response object used to set headers & get output stream
+         */
         private HttpServletResponse response = null;
 
-        /** boolean tracking whether this object has enough info to run() */
+        /**
+         * boolean tracking whether this object has enough info to run()
+         */
         private boolean readyToRun = false;
 
 
-
-
         /**
-         *  Creates a CGIRunner and initializes its environment, working
-         *  directory, and query parameters.
-         *  <BR>
-         *  Input/output streams (optional) are set using the
-         *  <code>setInput</code> and <code>setResponse</code> methods,
-         *  respectively.
+         * Creates a CGIRunner and initializes its environment, working
+         * directory, and query parameters.
+         * <BR>
+         * Input/output streams (optional) are set using the
+         * <code>setInput</code> and <code>setResponse</code> methods,
+         * respectively.
          *
-         * @param  command  string full path to command to be executed
-         * @param  env      Hashtable with the desired script environment
-         * @param  wd       File with the script's desired working directory
-         * @param  params   ArrayList with the script's query command line
-         *                  paramters as strings
+         * @param command string full path to command to be executed
+         * @param env     Hashtable with the desired script environment
+         * @param wd      File with the script's desired working directory
+         * @param params  ArrayList with the script's query command line
+         *                paramters as strings
          */
         protected CGIRunner(String command, Hashtable env, File wd,
-                            ArrayList params) {
+                            ArrayList params)
+        {
             this.command = command;
             this.env = env;
             this.wd = wd;
@@ -1462,61 +1527,60 @@ public final class CGIServlet extends HttpServlet {
         }
 
 
-
         /**
          * Checks & sets ready status
          */
-        protected void updateReadyStatus() {
+        protected void updateReadyStatus()
+        {
             if (command != null
-                && env != null
-                && wd != null
-                && params != null
-                && response != null) {
+                    && env != null
+                    && wd != null
+                    && params != null
+                    && response != null)
+            {
                 readyToRun = true;
-            } else {
+            } else
+            {
                 readyToRun = false;
             }
         }
 
 
-
         /**
          * Gets ready status
          *
-         * @return   false if not ready (<code>run</code> will throw
-         *           an exception), true if ready
+         * @return false if not ready (<code>run</code> will throw
+         * an exception), true if ready
          */
-        protected boolean isReady() {
+        protected boolean isReady()
+        {
             return readyToRun;
         }
-
 
 
         /**
          * Sets HttpServletResponse object used to set headers and send
          * output to
          *
-         * @param  response   HttpServletResponse to be used
-         *
+         * @param response HttpServletResponse to be used
          */
-        protected void setResponse(HttpServletResponse response) {
+        protected void setResponse(HttpServletResponse response)
+        {
             this.response = response;
             updateReadyStatus();
         }
 
 
-
         /**
          * Sets standard input to be passed on to the invoked cgi script
          *
-         * @param  stdin   InputStream to be used
-         *
+         * @param stdin InputStream to be used
          */
-        protected void setInput(InputStream stdin) {
+        protected void setInput(InputStream stdin)
+        {
             this.stdin = stdin;
             updateReadyStatus();
         }
-
 
 
         /**
@@ -1524,18 +1588,17 @@ public final class CGIServlet extends HttpServlet {
          * key/value pair in the Hashtable to a String in the form
          * "key=value" (hashkey + "=" + hash.get(hashkey).toString())
          *
-         * @param  h   Hashtable to convert
-         *
-         * @return     converted string array
-         *
-         * @exception  NullPointerException   if a hash key has a null value
-         *
+         * @param h Hashtable to convert
+         * @return converted string array
+         * @throws NullPointerException if a hash key has a null value
          */
         protected String[] hashToStringArray(Hashtable h)
-            throws NullPointerException {
+                throws NullPointerException
+        {
             Vector<String> v = new Vector<String>();
             Enumeration e = h.keys();
-            while (e.hasMoreElements()) {
+            while (e.hasMoreElements())
+            {
                 String k = e.nextElement().toString();
                 v.add(k + "=" + h.get(k));
             }
@@ -1545,78 +1608,80 @@ public final class CGIServlet extends HttpServlet {
         }
 
 
-
         /**
          * Executes a CGI script with the desired environment, current working
          * directory, and input/output streams
-         *
+         * <p/>
          * <p>
          * This implements the following CGI specification recommedations:
          * <UL>
          * <LI> Servers SHOULD provide the "<code>query</code>" component of
-         *      the script-URI as command-line arguments to scripts if it
-         *      does not contain any unencoded "=" characters and the
-         *      command-line arguments can be generated in an unambiguous
-         *      manner.
+         * the script-URI as command-line arguments to scripts if it
+         * does not contain any unencoded "=" characters and the
+         * command-line arguments can be generated in an unambiguous
+         * manner.
          * <LI> Servers SHOULD set the AUTH_TYPE metavariable to the value
-         *      of the "<code>auth-scheme</code>" token of the
-         *      "<code>Authorization</code>" if it was supplied as part of the
-         *      request header.  See <code>getCGIEnvironment</code> method.
+         * of the "<code>auth-scheme</code>" token of the
+         * "<code>Authorization</code>" if it was supplied as part of the
+         * request header.  See <code>getCGIEnvironment</code> method.
          * <LI> Where applicable, servers SHOULD set the current working
-         *      directory to the directory in which the script is located
-         *      before invoking it.
+         * directory to the directory in which the script is located
+         * before invoking it.
          * <LI> Server implementations SHOULD define their behavior for the
-         *      following cases:
-         *     <ul>
-         *     <LI> <u>Allowed characters in pathInfo</u>:  This implementation
-         *             does not allow ASCII NUL nor any character which cannot
-         *             be URL-encoded according to internet standards;
-         *     <LI> <u>Allowed characters in path segments</u>: This
-         *             implementation does not allow non-terminal NULL
-         *             segments in the the path -- IOExceptions may be thrown;
-         *     <LI> <u>"<code>.</code>" and "<code>..</code>" path
-         *             segments</u>:
-         *             This implementation does not allow "<code>.</code>" and
-         *             "<code>..</code>" in the the path, and such characters
-         *             will result in an IOException being thrown;
-         *     <LI> <u>Implementation limitations</u>: This implementation
-         *             does not impose any limitations except as documented
-         *             above.  This implementation may be limited by the
-         *             servlet container used to house this implementation.
-         *             In particular, all the primary CGI variable values
-         *             are derived either directly or indirectly from the
-         *             container's implementation of the Servlet API methods.
-         *     </ul>
+         * following cases:
+         * <ul>
+         * <LI> <u>Allowed characters in pathInfo</u>:  This implementation
+         * does not allow ASCII NUL nor any character which cannot
+         * be URL-encoded according to internet standards;
+         * <LI> <u>Allowed characters in path segments</u>: This
+         * implementation does not allow non-terminal NULL
+         * segments in the the path -- IOExceptions may be thrown;
+         * <LI> <u>"<code>.</code>" and "<code>..</code>" path
+         * segments</u>:
+         * This implementation does not allow "<code>.</code>" and
+         * "<code>..</code>" in the the path, and such characters
+         * will result in an IOException being thrown;
+         * <LI> <u>Implementation limitations</u>: This implementation
+         * does not impose any limitations except as documented
+         * above.  This implementation may be limited by the
+         * servlet container used to house this implementation.
+         * In particular, all the primary CGI variable values
+         * are derived either directly or indirectly from the
+         * container's implementation of the Servlet API methods.
+         * </ul>
          * </UL>
          * </p>
          *
-         * @exception IOException if problems during reading/writing occur
-         *
-         * @see    java.lang.Runtime#exec(String command, String[] envp,
-         *                                File dir)
+         * @throws IOException if problems during reading/writing occur
+         * @see java.lang.Runtime#exec(String command, String[] envp,
+         * File dir)
          */
-        protected void run() throws IOException {
+        protected void run() throws IOException
+        {
 
             /*
              * REMIND:  this method feels too big; should it be re-written?
              */
 
-            if (!isReady()) {
+            if (!isReady())
+            {
                 throw new IOException(this.getClass().getName()
-                                      + ": not ready to run.");
+                        + ": not ready to run.");
             }
 
-            if (debug >= 1 ) {
+            if (debug >= 1)
+            {
                 log("runCGI(envp=[" + env + "], command=" + command + ")");
             }
 
             if ((command.indexOf(File.separator + "." + File.separator) >= 0)
-                || (command.indexOf(File.separator + "..") >= 0)
-                || (command.indexOf(".." + File.separator) >= 0)) {
+                    || (command.indexOf(File.separator + "..") >= 0)
+                    || (command.indexOf(".." + File.separator) >= 0))
+            {
                 throw new IOException(this.getClass().getName()
-                                      + "Illegal Character in CGI command "
-                                      + "path ('.' or '..') detected.  Not "
-                                      + "running CGI [" + command + "].");
+                        + "Illegal Character in CGI command "
+                        + "path ('.' or '..') detected.  Not "
+                        + "running CGI [" + command + "].");
             }
 
             /* original content/structure of this section taken from
@@ -1633,24 +1698,28 @@ public final class CGIServlet extends HttpServlet {
             int bufRead = -1;
 
             List<String> cmdAndArgs = new ArrayList<String>();
-            if (cgiExecutable.length() != 0) {
+            if (cgiExecutable.length() != 0)
+            {
                 cmdAndArgs.add(cgiExecutable);
             }
-            if (cgiExecutableArgs != null) {
+            if (cgiExecutableArgs != null)
+            {
                 cmdAndArgs.addAll(cgiExecutableArgs);
             }
             cmdAndArgs.add(command);
             cmdAndArgs.addAll(params);
 
-            try {
+            try
+            {
                 rt = Runtime.getRuntime();
                 proc = rt.exec(
                         cmdAndArgs.toArray(new String[cmdAndArgs.size()]),
                         hashToStringArray(env), wd);
-    
+
                 String sContentLength = (String) env.get("CONTENT_LENGTH");
 
-                if(!"".equals(sContentLength)) {
+                if (!"".equals(sContentLength))
+                {
                     commandsStdIn = new BufferedOutputStream(proc.getOutputStream());
                     IOTools.flow(stdin, commandsStdIn);
                     commandsStdIn.flush();
@@ -1665,107 +1734,145 @@ public final class CGIServlet extends HttpServlet {
 
                 boolean isRunning = true;
                 commandsStdErr = new BufferedReader
-                    (new InputStreamReader(proc.getErrorStream()));
-                final BufferedReader stdErrRdr = commandsStdErr ;
+                        (new InputStreamReader(proc.getErrorStream()));
+                final BufferedReader stdErrRdr = commandsStdErr;
 
-                errReaderThread = new Thread() {
-                    public void run () {
-                        sendToLog(stdErrRdr) ;
-                    } ;
+                errReaderThread = new Thread()
+                {
+                    public void run()
+                    {
+                        sendToLog(stdErrRdr);
+                    }
+
+                    ;
                 };
                 errReaderThread.start();
 
                 InputStream cgiHeaderStream =
-                    new HTTPHeaderInputStream(proc.getInputStream());
+                        new HTTPHeaderInputStream(proc.getInputStream());
                 BufferedReader cgiHeaderReader =
-                    new BufferedReader(new InputStreamReader(cgiHeaderStream));
-            
-                while (isRunning) {
-                    try {
+                        new BufferedReader(new InputStreamReader(cgiHeaderStream));
+
+                while (isRunning)
+                {
+                    try
+                    {
                         //set headers
                         String line = null;
                         while (((line = cgiHeaderReader.readLine()) != null)
-                               && !("".equals(line))) {
-                            if (debug >= 2) {
+                                && !("".equals(line)))
+                        {
+                            if (debug >= 2)
+                            {
                                 log("runCGI: addHeader(\"" + line + "\")");
                             }
-                            if (line.startsWith("HTTP")) {
+                            if (line.startsWith("HTTP"))
+                            {
                                 response.setStatus(getSCFromHttpStatusLine(line));
-                            } else if (line.indexOf(":") >= 0) {
+                            } else if (line.indexOf(":") >= 0)
+                            {
                                 String header =
-                                    line.substring(0, line.indexOf(":")).trim();
+                                        line.substring(0, line.indexOf(":")).trim();
                                 String value =
-                                    line.substring(line.indexOf(":") + 1).trim(); 
-                                if (header.equalsIgnoreCase("status")) {
+                                        line.substring(line.indexOf(":") + 1).trim();
+                                if (header.equalsIgnoreCase("status"))
+                                {
                                     response.setStatus(getSCFromCGIStatusHeader(value));
-                                } else {
-                                    response.addHeader(header , value);
+                                } else
+                                {
+                                    response.addHeader(header, value);
                                 }
-                            } else {
+                            } else
+                            {
                                 log("runCGI: bad header line \"" + line + "\"");
                             }
                         }
-    
+
                         //write output
                         byte[] bBuf = new byte[2048];
-    
+
                         OutputStream out = response.getOutputStream();
                         cgiOutput = proc.getInputStream();
-    
-                        try {
-                            while ((bufRead = cgiOutput.read(bBuf)) != -1) {
-                                if (debug >= 4) {
+
+                        try
+                        {
+                            while ((bufRead = cgiOutput.read(bBuf)) != -1)
+                            {
+                                if (debug >= 4)
+                                {
                                     log("runCGI: output " + bufRead +
-                                        " bytes of data");
+                                            " bytes of data");
                                 }
                                 out.write(bBuf, 0, bufRead);
                             }
-                        } finally {
+                        }
+                        finally
+                        {
                             // Attempt to consume any leftover byte if something bad happens,
                             // such as a socket disconnect on the servlet side; otherwise, the
                             // external process could hang
-                            if (bufRead != -1) {
-                                while ((bufRead = cgiOutput.read(bBuf)) != -1) {}
+                            if (bufRead != -1)
+                            {
+                                while ((bufRead = cgiOutput.read(bBuf)) != -1)
+                                {
+                                }
                             }
                         }
-        
+
                         proc.exitValue(); // Throws exception if alive
-    
+
                         isRunning = false;
-    
-                    } catch (IllegalThreadStateException e) {
-                        try {
+
+                    }
+                    catch (IllegalThreadStateException e)
+                    {
+                        try
+                        {
                             Thread.sleep(500);
-                        } catch (InterruptedException ignored) {
+                        }
+                        catch (InterruptedException ignored)
+                        {
                         }
                     }
                 } //replacement for Process.waitFor()
             }
-            catch (IOException e){
-                log ("Caught exception " + e);
+            catch (IOException e)
+            {
+                log("Caught exception " + e);
                 throw e;
             }
-            finally{
+            finally
+            {
                 // Close the output stream if used
-                if (cgiOutput != null) {
-                    try {
+                if (cgiOutput != null)
+                {
+                    try
+                    {
                         cgiOutput.close();
-                    } catch (IOException ioe) {
-                        log ("Exception closing output stream " + ioe);
+                    }
+                    catch (IOException ioe)
+                    {
+                        log("Exception closing output stream " + ioe);
                     }
                 }
                 // Make sure the error stream reader has finished
-                if (errReaderThread != null) {
-                    try {
+                if (errReaderThread != null)
+                {
+                    try
+                    {
                         errReaderThread.join(stderrTimeout);
-                    } catch (InterruptedException e) {
-                        log ("Interupted waiting for stderr reader thread");
+                    }
+                    catch (InterruptedException e)
+                    {
+                        log("Interupted waiting for stderr reader thread");
                     }
                 }
-                if (debug > 4) {
-                    log ("Running finally block");
+                if (debug > 4)
+                {
+                    log("Running finally block");
                 }
-                if (proc != null){
+                if (proc != null)
+                {
                     proc.destroy();
                     proc = null;
                 }
@@ -1774,83 +1881,107 @@ public final class CGIServlet extends HttpServlet {
 
         /**
          * Parses the Status-Line and extracts the status code.
-         * 
+         *
          * @param line The HTTP Status-Line (RFC2616, section 6.1)
          * @return The extracted status code or the code representing an
-         * internal error if a valid status code cannot be extracted. 
+         * internal error if a valid status code cannot be extracted.
          */
-        private int getSCFromHttpStatusLine(String line) {
+        private int getSCFromHttpStatusLine(String line)
+        {
             int statusStart = line.indexOf(' ') + 1;
-            
-            if (statusStart < 1 || line.length() < statusStart + 3) {
+
+            if (statusStart < 1 || line.length() < statusStart + 3)
+            {
                 // Not a valid HTTP Status-Line
-                log ("runCGI: invalid HTTP Status-Line:" + line);
+                log("runCGI: invalid HTTP Status-Line:" + line);
                 return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
             }
-            
+
             String status = line.substring(statusStart, statusStart + 3);
-            
+
             int statusCode;
-            try {
+            try
+            {
                 statusCode = Integer.parseInt(status);
-            } catch (NumberFormatException nfe) {
+            }
+            catch (NumberFormatException nfe)
+            {
                 // Not a valid status code
-                log ("runCGI: invalid status code:" + status);
+                log("runCGI: invalid status code:" + status);
                 return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
             }
-            
+
             return statusCode;
         }
 
         /**
          * Parses the CGI Status Header value and extracts the status code.
-         * 
+         *
          * @param value The CGI Status value of the form <code>
-         *             digit digit digit SP reason-phrase</code>
+         *              digit digit digit SP reason-phrase</code>
          * @return The extracted status code or the code representing an
-         * internal error if a valid status code cannot be extracted. 
+         * internal error if a valid status code cannot be extracted.
          */
-        private int getSCFromCGIStatusHeader(String value) {
-            if (value.length() < 3) {
+        private int getSCFromCGIStatusHeader(String value)
+        {
+            if (value.length() < 3)
+            {
                 // Not a valid status value
-                log ("runCGI: invalid status value:" + value);
+                log("runCGI: invalid status value:" + value);
                 return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
             }
-            
+
             String status = value.substring(0, 3);
-            
+
             int statusCode;
-            try {
+            try
+            {
                 statusCode = Integer.parseInt(status);
-            } catch (NumberFormatException nfe) {
+            }
+            catch (NumberFormatException nfe)
+            {
                 // Not a valid status code
-                log ("runCGI: invalid status code:" + status);
+                log("runCGI: invalid status code:" + status);
                 return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
             }
-            
+
             return statusCode;
         }
-        
-        private void sendToLog(BufferedReader rdr) {
+
+        private void sendToLog(BufferedReader rdr)
+        {
             String line = null;
-            int lineCount = 0 ;
-            try {
-                while ((line = rdr.readLine()) != null) {
-                    log("runCGI (stderr):" +  line) ;
-                    lineCount++ ;
+            int lineCount = 0;
+            try
+            {
+                while ((line = rdr.readLine()) != null)
+                {
+                    log("runCGI (stderr):" + line);
+                    lineCount++;
                 }
-            } catch (IOException e) {
-                log("sendToLog error", e) ;
-            } finally {
-                try {
-                    rdr.close() ;
-                } catch (IOException ce) {
-                    log("sendToLog error", ce) ;
-                } ;
-            } ;
-            if ( lineCount > 0 && debug > 2) {
-                log("runCGI: " + lineCount + " lines received on stderr") ;
-            } ;
+            }
+            catch (IOException e)
+            {
+                log("sendToLog error", e);
+            }
+            finally
+            {
+                try
+                {
+                    rdr.close();
+                }
+                catch (IOException ce)
+                {
+                    log("sendToLog error", ce);
+                }
+                ;
+            }
+            ;
+            if (lineCount > 0 && debug > 2)
+            {
+                log("runCGI: " + lineCount + " lines received on stderr");
+            }
+            ;
         }
     } //class CGIRunner
 
@@ -1859,17 +1990,19 @@ public final class CGIServlet extends HttpServlet {
      * upto and including the two blank lines terminating the headers. It
      * allows the content to be read using bytes or characters as appropriate.
      */
-    protected class HTTPHeaderInputStream extends InputStream {
+    protected class HTTPHeaderInputStream extends InputStream
+    {
         private static final int STATE_CHARACTER = 0;
         private static final int STATE_FIRST_CR = 1;
         private static final int STATE_FIRST_LF = 2;
         private static final int STATE_SECOND_CR = 3;
         private static final int STATE_HEADER_END = 4;
-        
+
         private InputStream input;
         private int state;
-        
-        HTTPHeaderInputStream(InputStream theInput) {
+
+        HTTPHeaderInputStream(InputStream theInput)
+        {
             input = theInput;
             state = STATE_CHARACTER;
         }
@@ -1877,8 +2010,10 @@ public final class CGIServlet extends HttpServlet {
         /**
          * @see java.io.InputStream#read()
          */
-        public int read() throws IOException {
-            if (state == STATE_HEADER_END) {
+        public int read() throws IOException
+        {
+            if (state == STATE_HEADER_END)
+            {
                 return -1;
             }
 
@@ -1899,10 +2034,12 @@ public final class CGIServlet extends HttpServlet {
             //            |(CR)    ^(LF)
             //            |        |
             //          (CR2)-->---
-            
-            if (i == 10) {
+
+            if (i == 10)
+            {
                 // LF
-                switch(state) {
+                switch (state)
+                {
                     case STATE_CHARACTER:
                         state = STATE_FIRST_LF;
                         break;
@@ -1915,9 +2052,11 @@ public final class CGIServlet extends HttpServlet {
                         break;
                 }
 
-            } else if (i == 13) {
+            } else if (i == 13)
+            {
                 // CR
-                switch(state) {
+                switch (state)
+                {
                     case STATE_CHARACTER:
                         state = STATE_FIRST_CR;
                         break;
@@ -1929,11 +2068,12 @@ public final class CGIServlet extends HttpServlet {
                         break;
                 }
 
-            } else {
+            } else
+            {
                 state = STATE_CHARACTER;
             }
-            
-            return i;            
+
+            return i;
         }
     }  // class HTTPHeaderInputStream
 

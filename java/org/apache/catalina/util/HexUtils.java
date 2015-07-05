@@ -27,7 +27,8 @@ import java.io.ByteArrayOutputStream;
  * @author Craig R. McClanahan
  */
 
-public final class HexUtils {
+public final class HexUtils
+{
     // Code from Ajp11, from Apache's JServ
 
 
@@ -35,7 +36,7 @@ public final class HexUtils {
      * The string manager for this package.
      */
     private static StringManager sm =
-        StringManager.getManager("org.apache.catalina.util");
+            StringManager.getManager("org.apache.catalina.util");
 
 
     /**
@@ -43,19 +44,20 @@ public final class HexUtils {
      * byte array by encoding each two hexadecimal digits as a byte.
      *
      * @param digits Hexadecimal digits representation
-     *
-     * @exception IllegalArgumentException if an invalid hexadecimal digit
-     *  is found, or the input string contains an odd number of hexadecimal
-     *  digits
+     * @throws IllegalArgumentException if an invalid hexadecimal digit
+     *                                  is found, or the input string contains an odd number of hexadecimal
+     *                                  digits
      */
-    public static byte[] convert(String digits) {
+    public static byte[] convert(String digits)
+    {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (int i = 0; i < digits.length(); i += 2) {
+        for (int i = 0; i < digits.length(); i += 2)
+        {
             char c1 = digits.charAt(i);
-            if ((i+1) >= digits.length())
+            if ((i + 1) >= digits.length())
                 throw new IllegalArgumentException
-                    (sm.getString("hexUtil.odd"));
+                        (sm.getString("hexUtil.odd"));
             char c2 = digits.charAt(i + 1);
             byte b = 0;
             if ((c1 >= '0') && (c1 <= '9'))
@@ -66,7 +68,7 @@ public final class HexUtils {
                 b += ((c1 - 'A' + 10) * 16);
             else
                 throw new IllegalArgumentException
-                    (sm.getString("hexUtil.bad"));
+                        (sm.getString("hexUtil.bad"));
             if ((c2 >= '0') && (c2 <= '9'))
                 b += (c2 - '0');
             else if ((c2 >= 'a') && (c2 <= 'f'))
@@ -75,7 +77,7 @@ public final class HexUtils {
                 b += (c2 - 'A' + 10);
             else
                 throw new IllegalArgumentException
-                    (sm.getString("hexUtil.bad"));
+                        (sm.getString("hexUtil.bad"));
             baos.write(b);
         }
         return (baos.toByteArray());
@@ -89,10 +91,12 @@ public final class HexUtils {
      *
      * @param bytes Byte array representation
      */
-    public static String convert(byte bytes[]) {
+    public static String convert(byte bytes[])
+    {
 
         StringBuffer sb = new StringBuffer(bytes.length * 2);
-        for (int i = 0; i < bytes.length; i++) {
+        for (int i = 0; i < bytes.length; i++)
+        {
             sb.append(convertDigit((int) (bytes[i] >> 4)));
             sb.append(convertDigit((int) (bytes[i] & 0x0f)));
         }
@@ -107,7 +111,8 @@ public final class HexUtils {
      *
      * @param value Value to be converted
      */
-    private static char convertDigit(int value) {
+    private static char convertDigit(int value)
+    {
 
         value &= 0x0f;
         if (value >= 10)

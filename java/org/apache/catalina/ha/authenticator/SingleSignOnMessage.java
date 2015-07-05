@@ -17,18 +17,20 @@
 
 package org.apache.catalina.ha.authenticator;
 
-import java.io.Serializable;
-
 import org.apache.catalina.ha.ClusterMessage;
 import org.apache.catalina.ha.session.SerializablePrincipal;
 import org.apache.catalina.tribes.Member;
 
+import java.io.Serializable;
+
 /**
  * Contains the SingleSignOn data, read and written by the ClusterSingleSignOn
+ *
  * @author Fabien Carrion
  */
 
-public class SingleSignOnMessage implements ClusterMessage, Serializable {
+public class SingleSignOnMessage implements ClusterMessage, Serializable
+{
 
     public static final int ADD_SESSION = 1;
     public static final int DEREGISTER_SESSION = 2;
@@ -51,20 +53,22 @@ public class SingleSignOnMessage implements ClusterMessage, Serializable {
     private String uniqueId = null;
 
     public SingleSignOnMessage(Member source,
-			       String ssoId,
-			       String sessionId) {
+                               String ssoId,
+                               String sessionId)
+    {
         this.address = source;
-	this.ssoId = ssoId;
-	this.sessionId = sessionId;
+        this.ssoId = ssoId;
+        this.sessionId = sessionId;
     }
-    
+
     /**
      * Get the address that this message originated from.  This would be set
      * if the message was being relayed from a host other than the one
      * that originally sent it.
      */
-    public Member getAddress() {
-	return address;
+    public Member getAddress()
+    {
+        return address;
     }
 
     /**
@@ -73,8 +77,9 @@ public class SingleSignOnMessage implements ClusterMessage, Serializable {
      *
      * @param member Member
      */
-    public void setAddress(Member member) {
-	this.address = member;
+    public void setAddress(Member member)
+    {
+        this.address = member;
     }
 
     /**
@@ -82,7 +87,8 @@ public class SingleSignOnMessage implements ClusterMessage, Serializable {
      *
      * @return long
      */
-    public long getTimestamp() {
+    public long getTimestamp()
+    {
         return timestamp;
     }
 
@@ -92,7 +98,8 @@ public class SingleSignOnMessage implements ClusterMessage, Serializable {
      *
      * @param timestamp The timestamp
      */
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(long timestamp)
+    {
         this.timestamp = timestamp;
     }
 
@@ -102,80 +109,98 @@ public class SingleSignOnMessage implements ClusterMessage, Serializable {
      *
      * @return String
      */
-    public String getUniqueId() {
-	if (this.uniqueId != null)
-	    return this.uniqueId;
-	StringBuffer result = new StringBuffer(getSsoId());
-	result.append("#-#");
-	result.append(System.currentTimeMillis());
-	return result.toString();
+    public String getUniqueId()
+    {
+        if (this.uniqueId != null)
+            return this.uniqueId;
+        StringBuffer result = new StringBuffer(getSsoId());
+        result.append("#-#");
+        result.append(System.currentTimeMillis());
+        return result.toString();
     }
 
-    public void setUniqueId(String uniqueId) {
+    public void setUniqueId(String uniqueId)
+    {
         this.uniqueId = uniqueId;
     }
 
-    public int getAction() {
-	return action;
+    public int getAction()
+    {
+        return action;
     }
 
-    public void setAction(int action) {
-	this.action = action;
+    public void setAction(int action)
+    {
+        this.action = action;
     }
 
-    public String getSsoId() {
-	return ssoId;
+    public String getSsoId()
+    {
+        return ssoId;
     }
 
-    public void setSsoId(String ssoId) {
-	this.ssoId = ssoId;
+    public void setSsoId(String ssoId)
+    {
+        this.ssoId = ssoId;
     }
 
-    public String getContextName() {
-	return ctxname;
+    public String getContextName()
+    {
+        return ctxname;
     }
 
-    public void setContextName(String ctxname) {
-	this.ctxname = ctxname;
+    public void setContextName(String ctxname)
+    {
+        this.ctxname = ctxname;
     }
 
-    public String getSessionId() {
-	return sessionId;
+    public String getSessionId()
+    {
+        return sessionId;
     }
 
-    public void setSessionId(String sessionId) {
-	this.sessionId = sessionId;
+    public void setSessionId(String sessionId)
+    {
+        this.sessionId = sessionId;
     }
 
-    public String getAuthType() {
-	return authType;
+    public String getAuthType()
+    {
+        return authType;
     }
 
-    public void setAuthType(String authType) {
-	this.authType = authType;
+    public void setAuthType(String authType)
+    {
+        this.authType = authType;
     }
 
-    public String getPassword() {
-	return password;
+    public String getPassword()
+    {
+        return password;
     }
 
-    public void setPassword(String password) {
-	this.password = password;
+    public void setPassword(String password)
+    {
+        this.password = password;
     }
 
-    public String getUsername() {
-	return username;
+    public String getUsername()
+    {
+        return username;
     }
 
-    public void setUsername(String username) {
-	this.username = username;
+    public void setUsername(String username)
+    {
+        this.username = username;
     }
 
-    public SerializablePrincipal getPrincipal() {
+    public SerializablePrincipal getPrincipal()
+    {
         return principal;
     }
 
-    public void setPrincipal(SerializablePrincipal principal) {
+    public void setPrincipal(SerializablePrincipal principal)
+    {
         this.principal = principal;
     }
 
@@ -184,12 +209,13 @@ public class SingleSignOnMessage implements ClusterMessage, Serializable {
     /**
      * Return a String rendering of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("SingleSignOnMessage[action=");
-	sb.append(getAction()).append(", ssoId=").append(getSsoId());
-	sb.append(", sessionId=").append(getSessionId()).append(", username=");
-	sb.append(getUsername()).append("]");
+        sb.append(getAction()).append(", ssoId=").append(getSsoId());
+        sb.append(", sessionId=").append(getSessionId()).append(", username=");
+        sb.append(getUsername()).append("]");
         return (sb.toString());
 
     }

@@ -24,22 +24,25 @@ import org.apache.jasper.Constants;
  * @author Jean-Francois Arcand
  */
 
-public final class SecurityUtil{
-    
-    private static boolean packageDefinitionEnabled =  
-         System.getProperty("package.definition") == null ? false : true;
-    
+public final class SecurityUtil
+{
+
+    private static boolean packageDefinitionEnabled =
+            System.getProperty("package.definition") == null ? false : true;
+
     /**
      * Return the <code>SecurityManager</code> only if Security is enabled AND
      * package protection mechanism is enabled.
      */
-    public static boolean isPackageProtectionEnabled(){
-        if (packageDefinitionEnabled && Constants.IS_SECURITY_ENABLED){
+    public static boolean isPackageProtectionEnabled()
+    {
+        if (packageDefinitionEnabled && Constants.IS_SECURITY_ENABLED)
+        {
             return true;
         }
         return false;
     }
-    
+
 
     /**
      * Filter the specified message string for characters that are sensitive
@@ -48,7 +51,8 @@ public final class SecurityUtil{
      *
      * @param message The message string to be filtered
      */
-    public static String filter(String message) {
+    public static String filter(String message)
+    {
 
         if (message == null)
             return (null);
@@ -56,22 +60,24 @@ public final class SecurityUtil{
         char content[] = new char[message.length()];
         message.getChars(0, message.length(), content, 0);
         StringBuffer result = new StringBuffer(content.length + 50);
-        for (int i = 0; i < content.length; i++) {
-            switch (content[i]) {
-            case '<':
-                result.append("&lt;");
-                break;
-            case '>':
-                result.append("&gt;");
-                break;
-            case '&':
-                result.append("&amp;");
-                break;
-            case '"':
-                result.append("&quot;");
-                break;
-            default:
-                result.append(content[i]);
+        for (int i = 0; i < content.length; i++)
+        {
+            switch (content[i])
+            {
+                case '<':
+                    result.append("&lt;");
+                    break;
+                case '>':
+                    result.append("&gt;");
+                    break;
+                case '&':
+                    result.append("&amp;");
+                    break;
+                case '"':
+                    result.append("&quot;");
+                    break;
+                default:
+                    result.append(content[i]);
             }
         }
         return (result.toString());

@@ -47,547 +47,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Http11NioProtocol extends AbstractProtocol implements MBeanRegistration
 {
-    protected JSSEImplementation sslImplementation = null;
-
-    public Http11NioProtocol() {
-        cHandler = new Http11ConnectionHandler( this );
-        setSoLinger(Constants.DEFAULT_CONNECTION_LINGER);
-        setSoTimeout(Constants.DEFAULT_CONNECTION_TIMEOUT);
-        //setServerSoTimeout(Constants.DEFAULT_SERVER_SOCKET_TIMEOUT);
-        setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
-    }
-
     /**
      * The string manager for this package.
      */
     protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-    /** Pass config info
-     */
-    public void setAttribute( String name, Object value ) {
-        if( log.isTraceEnabled())
-            log.trace(sm.getString("http11protocol.setattribute", name, value));
-
-        attributes.put(name, value);
-    }
-
-    public Object getAttribute( String key ) {
-        if( log.isTraceEnabled())
-            log.trace(sm.getString("http11protocol.getattribute", key));
-        return attributes.get(key);
-    }
-
-    public Iterator getAttributeNames() {
-        return attributes.keySet().iterator();
-    }
-
-    /**
-     * Set a property.
-     */
-    public boolean setProperty(String name, String value) {
-        setAttribute(name, value); //store all settings
-        if ( name!=null && (name.startsWith("socket.") ||name.startsWith("selectorPool.")) ){
-            return ep.setProperty(name, value);
-        } else {
-            return ep.setProperty(name,value); //make sure we at least try to set all properties
-        }
-
-    }
-
-    /**
-     * Get a property
-     */
-    public String getProperty(String name) {
-        return (String)getAttribute(name);
-    }
-
-    /** The adapter, used to call the connector
-     */
-    public void setAdapter(Adapter adapter) {
-        this.adapter=adapter;
-    }
-
-    public Adapter getAdapter() {
-        return adapter;
-    }
-
-
-    /** Start the protocol
-     */
-    public void init() throws Exception {
-        ep.setName(getName());
-        ep.setHandler(cHandler);
-
-        //todo, determine if we even need these
-        ep.getSocketProperties().setRxBufSize(Math.max(ep.getSocketProperties().getRxBufSize(),getMaxHttpHeaderSize()));
-        ep.getSocketProperties().setTxBufSize(Math.max(ep.getSocketProperties().getTxBufSize(),getMaxHttpHeaderSize()));
-
-        try {
-            ep.init();
-            sslImplementation = new JSSEImplementation();
-        } catch (Exception ex) {
-            log.error(sm.getString("http11protocol.endpoint.initerror"), ex);
-            throw ex;
-        }
-        if(log.isInfoEnabled())
-            log.info(sm.getString("http11protocol.init", getName()));
-
-    }
-
-    ObjectName tpOname;
-    ObjectName rgOname;
-
-    public void start() throws Exception {
-        if( this.domain != null ) {
-            try {
-                tpOname=new ObjectName
-                    (domain + ":" + "type=ThreadPool,name=" + getName());
-                Registry.getRegistry(null, null)
-                .registerComponent(ep, tpOname, null );
-            } catch (Exception e) {
-                log.error("Can't register threadpool" );
-            }
-            rgOname=new ObjectName
-                (domain + ":type=GlobalRequestProcessor,name=" + getName());
-            Registry.getRegistry(null, null).registerComponent
-                ( cHandler.global, rgOname, null );
-        }
-
-        try {
-            ep.start();
-        } catch (Exception ex) {
-            log.error(sm.getString("http11protocol.endpoint.starterror"), ex);
-            throw ex;
-        }
-        if(log.isInfoEnabled())
-            log.info(sm.getString("http11protocol.start", getName()));
-    }
-
-    public void pause() throws Exception {
-        try {
-            ep.pause();
-        } catch (Exception ex) {
-            log.error(sm.getString("http11protocol.endpoint.pauseerror"), ex);
-            throw ex;
-        }
-        if(log.isInfoEnabled())
-            log.info(sm.getString("http11protocol.pause", getName()));
-    }
-
-    public void resume() throws Exception {
-        try {
-            ep.resume();
-        } catch (Exception ex) {
-            log.error(sm.getString("http11protocol.endpoint.resumeerror"), ex);
-            throw ex;
-        }
-        if(log.isInfoEnabled())
-            log.info(sm.getString("http11protocol.resume", getName()));
-    }
-
-    public void destroy() throws Exception {
-        if(log.isInfoEnabled())
-            log.info(sm.getString("http11protocol.stop", getName()));
-        ep.destroy();
-        if( tpOname!=null )
-            Registry.getRegistry(null, null).unregisterComponent(tpOname);
-        if( rgOname != null )
-            Registry.getRegistry(null, null).unregisterComponent(rgOname);
-    }
-
+            StringManager.getManager(Constants.Package);
+    protected static org.apache.juli.logging.Log log
+            = org.apache.juli.logging.LogFactory.getLog(Http11NioProtocol.class);
+    protected JSSEImplementation sslImplementation = null;
     // -------------------- Properties--------------------
-    protected NioEndpoint ep=new NioEndpoint();
-
-    protected final AbstractEndpoint getEndpoint() {
-        return ep;
-    }
-
+    protected NioEndpoint ep = new NioEndpoint();
     protected boolean secure = false;
-
     protected Hashtable attributes = new Hashtable();
-
-    private int maxKeepAliveRequests=100; // as in Apache HTTPD server
-    private int timeout = 300000;   // 5 minutes as in Apache HTTPD server
-    private int maxSavePostSize = 4 * 1024;
-    private int maxHttpHeaderSize = 8 * 1024;
     protected int processorCache = 200; //max number of Http11NioProcessor objects cached
-    private int socketCloseDelay=-1;
-    private boolean disableUploadTimeout = true;
-    private int socketBuffer = 9000;
-
-    private Adapter adapter;
-    private Http11ConnectionHandler cHandler;
-
-    /**
-     * Compression value.
-     */
-    private String compression = "off";
-    private String noCompressionUserAgents = null;
-    private String restrictedUserAgents = null;
-    private String compressableMimeTypes = "text/html,text/xml,text/plain";
-    private int compressionMinSize    = 2048;
-
-    private String server;
-
-    // -------------------- Pool setup --------------------
-
-    public void setPollerThreadCount(int count) {
-        ep.setPollerThreadCount(count);
-    }
-
-    public int getPollerThreadCount() {
-        return ep.getPollerThreadCount();
-    }
-
-    public void setSelectorTimeout(long timeout) {
-        ep.setSelectorTimeout(timeout);
-    }
-
-    public long getSelectorTimeout() {
-        return ep.getSelectorTimeout();
-    }
-    // *
-    public Executor getExecutor() {
-        return ep.getExecutor();
-    }
-
-    // *
-    public void setExecutor(Executor executor) {
-        ep.setExecutor(executor);
-    }
-
-    public void setUseExecutor(boolean useexec) {
-        ep.setUseExecutor(useexec);
-    }
-
-    public int getMaxThreads() {
-        return ep.getMaxThreads();
-    }
-
-    public void setMaxThreads( int maxThreads ) {
-        ep.setMaxThreads(maxThreads);
-        setAttribute("maxThreads", "" + maxThreads);
-    }
-
-    public void setThreadPriority(int threadPriority) {
-      ep.setThreadPriority(threadPriority);
-      setAttribute("threadPriority", "" + threadPriority);
-    }
-
-    public void setAcceptorThreadPriority(int threadPriority) {
-      ep.setAcceptorThreadPriority(threadPriority);
-      setAttribute("acceptorThreadPriority", "" + threadPriority);
-    }
-
-    public void setPollerThreadPriority(int threadPriority) {
-      ep.setPollerThreadPriority(threadPriority);
-      setAttribute("pollerThreadPriority", "" + threadPriority);
-    }
-
-    public int getThreadPriority() {
-      return ep.getThreadPriority();
-    }
-
-    public int getAcceptorThreadPriority() {
-      return ep.getAcceptorThreadPriority();
-    }
-
-    public int getPollerThreadPriority() {
-      return ep.getThreadPriority();
-    }
-
-
-    public boolean getUseSendfile() {
-        return ep.getUseSendfile();
-    }
-
-    public void setUseSendfile(boolean useSendfile) {
-        ep.setUseSendfile(useSendfile);
-    }
-
-    // -------------------- Tcp setup --------------------
-
-    public int getBacklog() {
-        return ep.getBacklog();
-    }
-
-    public void setBacklog( int i ) {
-        ep.setBacklog(i);
-        setAttribute("backlog", "" + i);
-    }
-
-    public int getPort() {
-        return ep.getPort();
-    }
-
-    public void setPort( int port ) {
-        ep.setPort(port);
-        setAttribute("port", "" + port);
-    }
-
-    public InetAddress getAddress() {
-        return ep.getAddress();
-    }
-
-    public void setAddress(InetAddress ia) {
-        ep.setAddress( ia );
-        setAttribute("address", "" + ia);
-    }
-
-    public String getName() {
-        String encodedAddr = "";
-        if (getAddress() != null) {
-            encodedAddr = "" + getAddress();
-            if (encodedAddr.startsWith("/"))
-                encodedAddr = encodedAddr.substring(1);
-            encodedAddr = URLEncoder.encode(encodedAddr) + "-";
-        }
-        return ("http-" + encodedAddr + ep.getPort());
-    }
-
-    public boolean getTcpNoDelay() {
-        return ep.getTcpNoDelay();
-    }
-
-    public void setTcpNoDelay( boolean b ) {
-        ep.setTcpNoDelay( b );
-        setAttribute("tcpNoDelay", "" + b);
-    }
-
-    public boolean getDisableUploadTimeout() {
-        return disableUploadTimeout;
-    }
-
-    public void setDisableUploadTimeout(boolean isDisabled) {
-        disableUploadTimeout = isDisabled;
-    }
-
-    public int getSocketBuffer() {
-        return socketBuffer;
-    }
-
-    public void setSocketBuffer(int valueI) {
-        socketBuffer = valueI;
-    }
-
-    public String getCompression() {
-        return compression;
-    }
-
-    public void setCompression(String valueS) {
-        compression = valueS;
-        setAttribute("compression", valueS);
-    }
-
-    public int getMaxSavePostSize() {
-        return maxSavePostSize;
-    }
-
-    public void setMaxSavePostSize(int valueI) {
-        maxSavePostSize = valueI;
-        setAttribute("maxSavePostSize", "" + valueI);
-    }
-
-    public int getMaxHttpHeaderSize() {
-        return maxHttpHeaderSize;
-    }
-
-    public void setMaxHttpHeaderSize(int valueI) {
-        maxHttpHeaderSize = valueI;
-        setAttribute("maxHttpHeaderSize", "" + valueI);
-    }
-
-    public String getRestrictedUserAgents() {
-        return restrictedUserAgents;
-    }
-
-    public void setRestrictedUserAgents(String valueS) {
-        restrictedUserAgents = valueS;
-        setAttribute("restrictedUserAgents", valueS);
-    }
-
-    public String getNoCompressionUserAgents() {
-        return noCompressionUserAgents;
-    }
-
-    public void setNoCompressionUserAgents(String valueS) {
-        noCompressionUserAgents = valueS;
-        setAttribute("noCompressionUserAgents", valueS);
-    }
-
-    public String getCompressableMimeType() {
-        return compressableMimeTypes;
-    }
-
-    public void setCompressableMimeType(String valueS) {
-        compressableMimeTypes = valueS;
-        setAttribute("compressableMimeTypes", valueS);
-    }
-
-    public int getCompressionMinSize() {
-        return compressionMinSize;
-    }
-
-    public void setCompressionMinSize(int valueI) {
-        compressionMinSize = valueI;
-        setAttribute("compressionMinSize", "" + valueI);
-    }
-
-    public int getSoLinger() {
-        return ep.getSoLinger();
-    }
-
-    public void setSoLinger( int i ) {
-        ep.setSoLinger( i );
-        setAttribute("soLinger", "" + i);
-    }
-
-    public int getSoTimeout() {
-        return ep.getSoTimeout();
-    }
-
-    public void setSoTimeout( int i ) {
-        ep.setSoTimeout(i);
-        setAttribute("soTimeout", "" + i);
-    }
-
-    public String getProtocol() {
-        return getProperty("protocol");
-    }
-
-    public void setProtocol( String k ) {
-        setSecure(true);
-        setAttribute("protocol", k);
-    }
-
-    public boolean getSecure() {
-        return secure;
-    }
-
-    public void setSecure( boolean b ) {
-        ep.setSecure(b);
-        secure=b;
-        setAttribute("secure", "" + b);
-    }
-
-    public int getMaxKeepAliveRequests() {
-        return maxKeepAliveRequests;
-    }
-
-    /** Set the maximum number of Keep-Alive requests that we will honor.
-     */
-    public void setMaxKeepAliveRequests(int mkar) {
-        maxKeepAliveRequests = mkar;
-        setAttribute("maxKeepAliveRequests", "" + mkar);
-    }
-
-    /**
-     * Return the Keep-Alive policy for the connection.
-     */
-    public boolean getKeepAlive() {
-        return ((maxKeepAliveRequests != 0) && (maxKeepAliveRequests != 1));
-    }
-
-    /**
-     * Set the keep-alive policy for this connection.
-     */
-    public void setKeepAlive(boolean keepAlive) {
-        if (!keepAlive) {
-            setMaxKeepAliveRequests(1);
-        }
-    }
-
-    public int getSocketCloseDelay() {
-        return socketCloseDelay;
-    }
-
-    public void setSocketCloseDelay( int d ) {
-        socketCloseDelay=d;
-        setAttribute("socketCloseDelay", "" + d);
-    }
-
-    public void setServer( String server ) {
-        this.server = server;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout( int timeouts ) {
-        timeout = timeouts;
-        setAttribute("timeout", "" + timeouts);
-    }
-
-    public void setProcessorCache(int processorCache) {
-        this.processorCache = processorCache;
-    }
-
-    public void setOomParachute(int oomParachute) {
-        ep.setOomParachute(oomParachute);
-        setAttribute("oomParachute",oomParachute);
-    }
-
-    // --------------------  SSL related properties --------------------
-
-    public String getKeystoreFile() { return ep.getKeystoreFile();}
-    public void setKeystoreFile(String s ) { ep.setKeystoreFile(s);}
-    public void setKeystore(String s) { setKeystoreFile(s);}
-    public String getKeystore(){ return getKeystoreFile();}
-
-    public String getKeyAlias() { return ep.getKeyAlias();}
-    public void setKeyAlias(String s ) { ep.setKeyAlias(s);}
-
-
-    public String getAlgorithm() { return ep.getAlgorithm();}
-    public void setAlgorithm(String s ) { ep.setAlgorithm(s);}
-
-    public void setClientauth(String s) {setClientAuth(s);}
-    public String getClientauth(){ return getClientAuth();}
-    public String getClientAuth() { return ep.getClientAuth();}
-    public void setClientAuth(String s ) { ep.setClientAuth(s);}
-
-    public String getKeystorePass() { return ep.getKeystorePass();}
-    public void setKeystorePass(String s ) { ep.setKeystorePass(s);}
-    public void setKeypass(String s) { setKeystorePass(s);}
-    public String getKeypass() { return getKeystorePass();}
-    public String getKeystoreType() { return ep.getKeystoreType();}
-    public void setKeystoreType(String s ) { ep.setKeystoreType(s);}
-    public String getKeytype() { return getKeystoreType();}
-    public void setKeytype(String s ) { setKeystoreType(s);}
-
-    public void setTruststoreFile(String f){ep.setTruststoreFile(f);}
-    public String getTruststoreFile(){return ep.getTruststoreFile();}
-    public void setTruststorePass(String p){ep.setTruststorePass(p);}
-    public String getTruststorePass(){return ep.getTruststorePass();}
-    public void setTruststoreType(String t){ep.setTruststoreType(t);}
-    public String getTruststoreType(){ return ep.getTruststoreType();}
-
-
-    public String getSslProtocol() { return ep.getSslProtocol();}
-    public void setSslProtocol(String s) { ep.setSslProtocol(s);}
-
-    public String getCiphers() { return ep.getCiphers();}
-    public void setCiphers(String s) { ep.setCiphers(s);}
-
-    public boolean getSSLEnabled() { return ep.isSSLEnabled(); }
-    public void setSSLEnabled(boolean SSLEnabled) { ep.setSSLEnabled(SSLEnabled); }
-
-    // Alias for sslEnabledProtocols
-    public void setProtocols(String k) {
-        setSslEnabledProtocols(k);
-    }
-
-    public void setSslEnabledProtocols(String k) {
-        ep.setSslEnabledProtocols(k);
-    }
-
-
     /**
      * When client certificate information is presented in a form other than
      * instances of {@link java.security.cert.X509Certificate} it needs to be
@@ -598,29 +70,828 @@ public class Http11NioProtocol extends AbstractProtocol implements MBeanRegistra
      * default provider will be used.
      */
     protected String clientCertProvider = null;
-    public String getClientCertProvider() { return clientCertProvider; }
-    public void setClientCertProvider(String s) { this.clientCertProvider = s; }
+    protected String domain;
+    protected ObjectName oname;
+    protected MBeanServer mserver;
+    ObjectName tpOname;
+    ObjectName rgOname;
+    private int maxKeepAliveRequests = 100; // as in Apache HTTPD server
+    private int timeout = 300000;   // 5 minutes as in Apache HTTPD server
+    private int maxSavePostSize = 4 * 1024;
+    private int maxHttpHeaderSize = 8 * 1024;
+    private int socketCloseDelay = -1;
+    private boolean disableUploadTimeout = true;
+    private int socketBuffer = 9000;
+    private Adapter adapter;
+    private Http11ConnectionHandler cHandler;
+    /**
+     * Compression value.
+     */
+    private String compression = "off";
+    private String noCompressionUserAgents = null;
+    private String restrictedUserAgents = null;
+    private String compressableMimeTypes = "text/html,text/xml,text/plain";
+    private int compressionMinSize = 2048;
+    private String server;
+    public Http11NioProtocol()
+    {
+        cHandler = new Http11ConnectionHandler(this);
+        setSoLinger(Constants.DEFAULT_CONNECTION_LINGER);
+        setSoTimeout(Constants.DEFAULT_CONNECTION_TIMEOUT);
+        //setServerSoTimeout(Constants.DEFAULT_SERVER_SOCKET_TIMEOUT);
+        setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
+    }
+
+    /**
+     * Pass config info
+     */
+    public void setAttribute(String name, Object value)
+    {
+        if (log.isTraceEnabled())
+            log.trace(sm.getString("http11protocol.setattribute", name, value));
+
+        attributes.put(name, value);
+    }
+
+    public Object getAttribute(String key)
+    {
+        if (log.isTraceEnabled())
+            log.trace(sm.getString("http11protocol.getattribute", key));
+        return attributes.get(key);
+    }
+
+    public Iterator getAttributeNames()
+    {
+        return attributes.keySet().iterator();
+    }
+
+    /**
+     * Set a property.
+     */
+    public boolean setProperty(String name, String value)
+    {
+        setAttribute(name, value); //store all settings
+        if (name != null && (name.startsWith("socket.") || name.startsWith("selectorPool.")))
+        {
+            return ep.setProperty(name, value);
+        } else
+        {
+            return ep.setProperty(name, value); //make sure we at least try to set all properties
+        }
+
+    }
+
+    /**
+     * Get a property
+     */
+    public String getProperty(String name)
+    {
+        return (String) getAttribute(name);
+    }
+
+    public Adapter getAdapter()
+    {
+        return adapter;
+    }
+
+    /**
+     * The adapter, used to call the connector
+     */
+    public void setAdapter(Adapter adapter)
+    {
+        this.adapter = adapter;
+    }
+
+    /**
+     * Start the protocol
+     */
+    public void init() throws Exception
+    {
+        ep.setName(getName());
+        ep.setHandler(cHandler);
+
+        //todo, determine if we even need these
+        ep.getSocketProperties().setRxBufSize(Math.max(ep.getSocketProperties().getRxBufSize(), getMaxHttpHeaderSize()));
+        ep.getSocketProperties().setTxBufSize(Math.max(ep.getSocketProperties().getTxBufSize(), getMaxHttpHeaderSize()));
+
+        try
+        {
+            ep.init();
+            sslImplementation = new JSSEImplementation();
+        }
+        catch (Exception ex)
+        {
+            log.error(sm.getString("http11protocol.endpoint.initerror"), ex);
+            throw ex;
+        }
+        if (log.isInfoEnabled())
+            log.info(sm.getString("http11protocol.init", getName()));
+
+    }
+
+    // -------------------- Pool setup --------------------
+
+    public void start() throws Exception
+    {
+        if (this.domain != null)
+        {
+            try
+            {
+                tpOname = new ObjectName
+                        (domain + ":" + "type=ThreadPool,name=" + getName());
+                Registry.getRegistry(null, null)
+                        .registerComponent(ep, tpOname, null);
+            }
+            catch (Exception e)
+            {
+                log.error("Can't register threadpool");
+            }
+            rgOname = new ObjectName
+                    (domain + ":type=GlobalRequestProcessor,name=" + getName());
+            Registry.getRegistry(null, null).registerComponent
+                    (cHandler.global, rgOname, null);
+        }
+
+        try
+        {
+            ep.start();
+        }
+        catch (Exception ex)
+        {
+            log.error(sm.getString("http11protocol.endpoint.starterror"), ex);
+            throw ex;
+        }
+        if (log.isInfoEnabled())
+            log.info(sm.getString("http11protocol.start", getName()));
+    }
+
+    public void pause() throws Exception
+    {
+        try
+        {
+            ep.pause();
+        }
+        catch (Exception ex)
+        {
+            log.error(sm.getString("http11protocol.endpoint.pauseerror"), ex);
+            throw ex;
+        }
+        if (log.isInfoEnabled())
+            log.info(sm.getString("http11protocol.pause", getName()));
+    }
+
+    public void resume() throws Exception
+    {
+        try
+        {
+            ep.resume();
+        }
+        catch (Exception ex)
+        {
+            log.error(sm.getString("http11protocol.endpoint.resumeerror"), ex);
+            throw ex;
+        }
+        if (log.isInfoEnabled())
+            log.info(sm.getString("http11protocol.resume", getName()));
+    }
+
+    public void destroy() throws Exception
+    {
+        if (log.isInfoEnabled())
+            log.info(sm.getString("http11protocol.stop", getName()));
+        ep.destroy();
+        if (tpOname != null)
+            Registry.getRegistry(null, null).unregisterComponent(tpOname);
+        if (rgOname != null)
+            Registry.getRegistry(null, null).unregisterComponent(rgOname);
+    }
+
+    protected final AbstractEndpoint getEndpoint()
+    {
+        return ep;
+    }
+
+    public int getPollerThreadCount()
+    {
+        return ep.getPollerThreadCount();
+    }
+
+    public void setPollerThreadCount(int count)
+    {
+        ep.setPollerThreadCount(count);
+    }
+
+    public long getSelectorTimeout()
+    {
+        return ep.getSelectorTimeout();
+    }
+
+    public void setSelectorTimeout(long timeout)
+    {
+        ep.setSelectorTimeout(timeout);
+    }
+
+    // *
+    public Executor getExecutor()
+    {
+        return ep.getExecutor();
+    }
+
+    // *
+    public void setExecutor(Executor executor)
+    {
+        ep.setExecutor(executor);
+    }
+
+    public void setUseExecutor(boolean useexec)
+    {
+        ep.setUseExecutor(useexec);
+    }
+
+    public int getMaxThreads()
+    {
+        return ep.getMaxThreads();
+    }
+
+    public void setMaxThreads(int maxThreads)
+    {
+        ep.setMaxThreads(maxThreads);
+        setAttribute("maxThreads", "" + maxThreads);
+    }
+
+    public int getThreadPriority()
+    {
+        return ep.getThreadPriority();
+    }
+
+    public void setThreadPriority(int threadPriority)
+    {
+        ep.setThreadPriority(threadPriority);
+        setAttribute("threadPriority", "" + threadPriority);
+    }
+
+    public int getAcceptorThreadPriority()
+    {
+        return ep.getAcceptorThreadPriority();
+    }
+
+    // -------------------- Tcp setup --------------------
+
+    public void setAcceptorThreadPriority(int threadPriority)
+    {
+        ep.setAcceptorThreadPriority(threadPriority);
+        setAttribute("acceptorThreadPriority", "" + threadPriority);
+    }
+
+    public int getPollerThreadPriority()
+    {
+        return ep.getThreadPriority();
+    }
+
+    public void setPollerThreadPriority(int threadPriority)
+    {
+        ep.setPollerThreadPriority(threadPriority);
+        setAttribute("pollerThreadPriority", "" + threadPriority);
+    }
+
+    public boolean getUseSendfile()
+    {
+        return ep.getUseSendfile();
+    }
+
+    public void setUseSendfile(boolean useSendfile)
+    {
+        ep.setUseSendfile(useSendfile);
+    }
+
+    public int getBacklog()
+    {
+        return ep.getBacklog();
+    }
+
+    public void setBacklog(int i)
+    {
+        ep.setBacklog(i);
+        setAttribute("backlog", "" + i);
+    }
+
+    public int getPort()
+    {
+        return ep.getPort();
+    }
+
+    public void setPort(int port)
+    {
+        ep.setPort(port);
+        setAttribute("port", "" + port);
+    }
+
+    public InetAddress getAddress()
+    {
+        return ep.getAddress();
+    }
+
+    public void setAddress(InetAddress ia)
+    {
+        ep.setAddress(ia);
+        setAttribute("address", "" + ia);
+    }
+
+    public String getName()
+    {
+        String encodedAddr = "";
+        if (getAddress() != null)
+        {
+            encodedAddr = "" + getAddress();
+            if (encodedAddr.startsWith("/"))
+                encodedAddr = encodedAddr.substring(1);
+            encodedAddr = URLEncoder.encode(encodedAddr) + "-";
+        }
+        return ("http-" + encodedAddr + ep.getPort());
+    }
+
+    public boolean getTcpNoDelay()
+    {
+        return ep.getTcpNoDelay();
+    }
+
+    public void setTcpNoDelay(boolean b)
+    {
+        ep.setTcpNoDelay(b);
+        setAttribute("tcpNoDelay", "" + b);
+    }
+
+    public boolean getDisableUploadTimeout()
+    {
+        return disableUploadTimeout;
+    }
+
+    public void setDisableUploadTimeout(boolean isDisabled)
+    {
+        disableUploadTimeout = isDisabled;
+    }
+
+    public int getSocketBuffer()
+    {
+        return socketBuffer;
+    }
+
+    public void setSocketBuffer(int valueI)
+    {
+        socketBuffer = valueI;
+    }
+
+    public String getCompression()
+    {
+        return compression;
+    }
+
+    public void setCompression(String valueS)
+    {
+        compression = valueS;
+        setAttribute("compression", valueS);
+    }
+
+    public int getMaxSavePostSize()
+    {
+        return maxSavePostSize;
+    }
+
+    public void setMaxSavePostSize(int valueI)
+    {
+        maxSavePostSize = valueI;
+        setAttribute("maxSavePostSize", "" + valueI);
+    }
+
+    public int getMaxHttpHeaderSize()
+    {
+        return maxHttpHeaderSize;
+    }
+
+    public void setMaxHttpHeaderSize(int valueI)
+    {
+        maxHttpHeaderSize = valueI;
+        setAttribute("maxHttpHeaderSize", "" + valueI);
+    }
+
+    public String getRestrictedUserAgents()
+    {
+        return restrictedUserAgents;
+    }
+
+    public void setRestrictedUserAgents(String valueS)
+    {
+        restrictedUserAgents = valueS;
+        setAttribute("restrictedUserAgents", valueS);
+    }
+
+    public String getNoCompressionUserAgents()
+    {
+        return noCompressionUserAgents;
+    }
+
+    public void setNoCompressionUserAgents(String valueS)
+    {
+        noCompressionUserAgents = valueS;
+        setAttribute("noCompressionUserAgents", valueS);
+    }
+
+    public String getCompressableMimeType()
+    {
+        return compressableMimeTypes;
+    }
+
+    public void setCompressableMimeType(String valueS)
+    {
+        compressableMimeTypes = valueS;
+        setAttribute("compressableMimeTypes", valueS);
+    }
+
+    public int getCompressionMinSize()
+    {
+        return compressionMinSize;
+    }
+
+    public void setCompressionMinSize(int valueI)
+    {
+        compressionMinSize = valueI;
+        setAttribute("compressionMinSize", "" + valueI);
+    }
+
+    public int getSoLinger()
+    {
+        return ep.getSoLinger();
+    }
+
+    public void setSoLinger(int i)
+    {
+        ep.setSoLinger(i);
+        setAttribute("soLinger", "" + i);
+    }
+
+    public int getSoTimeout()
+    {
+        return ep.getSoTimeout();
+    }
+
+    public void setSoTimeout(int i)
+    {
+        ep.setSoTimeout(i);
+        setAttribute("soTimeout", "" + i);
+    }
+
+    public String getProtocol()
+    {
+        return getProperty("protocol");
+    }
+
+    public void setProtocol(String k)
+    {
+        setSecure(true);
+        setAttribute("protocol", k);
+    }
+
+    public boolean getSecure()
+    {
+        return secure;
+    }
+
+    public void setSecure(boolean b)
+    {
+        ep.setSecure(b);
+        secure = b;
+        setAttribute("secure", "" + b);
+    }
+
+    public int getMaxKeepAliveRequests()
+    {
+        return maxKeepAliveRequests;
+    }
+
+    /**
+     * Set the maximum number of Keep-Alive requests that we will honor.
+     */
+    public void setMaxKeepAliveRequests(int mkar)
+    {
+        maxKeepAliveRequests = mkar;
+        setAttribute("maxKeepAliveRequests", "" + mkar);
+    }
+
+    /**
+     * Return the Keep-Alive policy for the connection.
+     */
+    public boolean getKeepAlive()
+    {
+        return ((maxKeepAliveRequests != 0) && (maxKeepAliveRequests != 1));
+    }
+
+    /**
+     * Set the keep-alive policy for this connection.
+     */
+    public void setKeepAlive(boolean keepAlive)
+    {
+        if (!keepAlive)
+        {
+            setMaxKeepAliveRequests(1);
+        }
+    }
+
+    public int getSocketCloseDelay()
+    {
+        return socketCloseDelay;
+    }
+
+    public void setSocketCloseDelay(int d)
+    {
+        socketCloseDelay = d;
+        setAttribute("socketCloseDelay", "" + d);
+    }
+
+    public String getServer()
+    {
+        return server;
+    }
+
+    // --------------------  SSL related properties --------------------
+
+    public void setServer(String server)
+    {
+        this.server = server;
+    }
+
+    public int getTimeout()
+    {
+        return timeout;
+    }
+
+    public void setTimeout(int timeouts)
+    {
+        timeout = timeouts;
+        setAttribute("timeout", "" + timeouts);
+    }
+
+    public String getKeystoreFile()
+    {
+        return ep.getKeystoreFile();
+    }
+
+    public void setKeystoreFile(String s)
+    {
+        ep.setKeystoreFile(s);
+    }
+
+    public String getKeystore()
+    {
+        return getKeystoreFile();
+    }
+
+    public void setKeystore(String s)
+    {
+        setKeystoreFile(s);
+    }
+
+    public String getKeyAlias()
+    {
+        return ep.getKeyAlias();
+    }
+
+    public void setKeyAlias(String s)
+    {
+        ep.setKeyAlias(s);
+    }
+
+    public String getAlgorithm()
+    {
+        return ep.getAlgorithm();
+    }
+
+    public void setAlgorithm(String s)
+    {
+        ep.setAlgorithm(s);
+    }
+
+    public String getClientauth()
+    {
+        return getClientAuth();
+    }
+
+    public void setClientauth(String s)
+    {
+        setClientAuth(s);
+    }
+
+    public String getClientAuth()
+    {
+        return ep.getClientAuth();
+    }
+
+    public void setClientAuth(String s)
+    {
+        ep.setClientAuth(s);
+    }
+
+    public String getKeystorePass()
+    {
+        return ep.getKeystorePass();
+    }
+
+    public void setKeystorePass(String s)
+    {
+        ep.setKeystorePass(s);
+    }
+
+    public String getKeypass()
+    {
+        return getKeystorePass();
+    }
+
+    public void setKeypass(String s)
+    {
+        setKeystorePass(s);
+    }
+
+    public String getKeystoreType()
+    {
+        return ep.getKeystoreType();
+    }
+
+    public void setKeystoreType(String s)
+    {
+        ep.setKeystoreType(s);
+    }
+
+    public String getKeytype()
+    {
+        return getKeystoreType();
+    }
+
+    public void setKeytype(String s)
+    {
+        setKeystoreType(s);
+    }
+
+    public String getTruststoreFile()
+    {
+        return ep.getTruststoreFile();
+    }
+
+    public void setTruststoreFile(String f)
+    {
+        ep.setTruststoreFile(f);
+    }
+
+    public String getTruststorePass()
+    {
+        return ep.getTruststorePass();
+    }
+
+    public void setTruststorePass(String p)
+    {
+        ep.setTruststorePass(p);
+    }
+
+    public String getTruststoreType()
+    {
+        return ep.getTruststoreType();
+    }
+
+    public void setTruststoreType(String t)
+    {
+        ep.setTruststoreType(t);
+    }
+
+    public String getSslProtocol()
+    {
+        return ep.getSslProtocol();
+    }
+
+    public void setSslProtocol(String s)
+    {
+        ep.setSslProtocol(s);
+    }
+
+    public String getCiphers()
+    {
+        return ep.getCiphers();
+    }
+
+    public void setCiphers(String s)
+    {
+        ep.setCiphers(s);
+    }
+
+    public boolean getSSLEnabled()
+    {
+        return ep.isSSLEnabled();
+    }
+
+    public void setSSLEnabled(boolean SSLEnabled)
+    {
+        ep.setSSLEnabled(SSLEnabled);
+    }
+
+    // Alias for sslEnabledProtocols
+    public void setProtocols(String k)
+    {
+        setSslEnabledProtocols(k);
+    }
+
+    public void setSslEnabledProtocols(String k)
+    {
+        ep.setSslEnabledProtocols(k);
+    }
 
 
     // --------------------  Connection handler --------------------
 
-    static class Http11ConnectionHandler implements Handler {
+    public String getClientCertProvider()
+    {
+        return clientCertProvider;
+    }
 
-        protected Http11NioProtocol proto;
+    public void setClientCertProvider(String s)
+    {
+        this.clientCertProvider = s;
+    }
+
+    // -------------------- Various implementation classes --------------------
+
+    public ObjectName getObjectName()
+    {
+        return oname;
+    }
+
+    public String getDomain()
+    {
+        return domain;
+    }
+
+    public int getProcessorCache()
+    {
+        return processorCache;
+    }
+
+    public void setProcessorCache(int processorCache)
+    {
+        this.processorCache = processorCache;
+    }
+
+    public int getOomParachute()
+    {
+        return ep.getOomParachute();
+    }
+
+    public void setOomParachute(int oomParachute)
+    {
+        ep.setOomParachute(oomParachute);
+        setAttribute("oomParachute", oomParachute);
+    }
+
+    public ObjectName preRegister(MBeanServer server,
+                                  ObjectName name) throws Exception
+    {
+        oname = name;
+        mserver = server;
+        domain = name.getDomain();
+        return name;
+    }
+
+    public void postRegister(Boolean registrationDone)
+    {
+    }
+
+    public void preDeregister() throws Exception
+    {
+    }
+
+    public void postDeregister()
+    {
+    }
+
+    static class Http11ConnectionHandler implements Handler
+    {
+
         protected static int count = 0;
+        protected Http11NioProtocol proto;
         protected RequestGroupInfo global = new RequestGroupInfo();
 
         protected ConcurrentHashMap<NioChannel, Http11NioProcessor> connections =
-            new ConcurrentHashMap<NioChannel, Http11NioProcessor>();
-        protected ConcurrentLinkedQueue<Http11NioProcessor> recycledProcessors = new ConcurrentLinkedQueue<Http11NioProcessor>() {
+                new ConcurrentHashMap<NioChannel, Http11NioProcessor>();
+        AtomicInteger registerCount = new AtomicInteger(0);
+        protected ConcurrentLinkedQueue<Http11NioProcessor> recycledProcessors = new ConcurrentLinkedQueue<Http11NioProcessor>()
+        {
             protected AtomicInteger size = new AtomicInteger(0);
-            public boolean offer(Http11NioProcessor processor) {
-                boolean offer = proto.processorCache==-1?true:size.get() < proto.processorCache;
+
+            public boolean offer(Http11NioProcessor processor)
+            {
+                boolean offer = proto.processorCache == -1 ? true : size.get() < proto.processorCache;
                 //avoid over growing our cache or add after we have stopped
                 boolean result = false;
-                if ( offer ) {
+                if (offer)
+                {
                     result = super.offer(processor);
-                    if ( result ) {
+                    if (result)
+                    {
                         size.incrementAndGet();
                     }
                 }
@@ -628,17 +899,21 @@ public class Http11NioProtocol extends AbstractProtocol implements MBeanRegistra
                 return result;
             }
 
-            public Http11NioProcessor poll() {
+            public Http11NioProcessor poll()
+            {
                 Http11NioProcessor result = super.poll();
-                if ( result != null ) {
+                if (result != null)
+                {
                     size.decrementAndGet();
                 }
                 return result;
             }
 
-            public void clear() {
+            public void clear()
+            {
                 Http11NioProcessor next = poll();
-                while ( next != null ) {
+                while (next != null)
+                {
                     deregister(next);
                     next = poll();
                 }
@@ -647,11 +922,13 @@ public class Http11NioProtocol extends AbstractProtocol implements MBeanRegistra
             }
         };
 
-        Http11ConnectionHandler(Http11NioProtocol proto) {
+        Http11ConnectionHandler(Http11NioProtocol proto)
+        {
             this.proto = proto;
         }
 
-        public void releaseCaches() {
+        public void releaseCaches()
+        {
             recycledProcessors.clear();
         }
 
@@ -659,142 +936,173 @@ public class Http11NioProtocol extends AbstractProtocol implements MBeanRegistra
          * Use this only if the processor is not available, otherwise use
          * {@link #release(NioChannel, Http11NioProcessor).
          */
-        public void release(NioChannel socket) {
+        public void release(NioChannel socket)
+        {
             Http11NioProcessor result = connections.remove(socket);
-            if ( result != null ) {
+            if (result != null)
+            {
                 result.recycle();
                 recycledProcessors.offer(result);
             }
         }
 
-
-        public void release(NioChannel socket, Http11NioProcessor processor) {
+        public void release(NioChannel socket, Http11NioProcessor processor)
+        {
             connections.remove(socket);
             processor.recycle();
             recycledProcessors.offer(processor);
         }
 
-
-        public SocketState event(NioChannel socket, SocketStatus status) {
+        public SocketState event(NioChannel socket, SocketStatus status)
+        {
             Http11NioProcessor result = connections.get(socket);
 
             SocketState state = SocketState.CLOSED;
-            if (result != null) {
-                if (log.isDebugEnabled()) log.debug("Http11NioProcessor.error="+result.error);
+            if (result != null)
+            {
+                if (log.isDebugEnabled()) log.debug("Http11NioProcessor.error=" + result.error);
                 // Call the appropriate event
-                try {
+                try
+                {
                     state = result.event(status);
-                } catch (java.net.SocketException e) {
+                }
+                catch (java.net.SocketException e)
+                {
                     // SocketExceptions are normal
                     Http11NioProtocol.log.debug
-                        (sm.getString
-                            ("http11protocol.proto.socketexception.debug"), e);
-                } catch (java.io.IOException e) {
+                            (sm.getString
+                                    ("http11protocol.proto.socketexception.debug"), e);
+                }
+                catch (java.io.IOException e)
+                {
                     // IOExceptions are normal
                     Http11NioProtocol.log.debug
-                        (sm.getString
-                            ("http11protocol.proto.ioexception.debug"), e);
+                            (sm.getString
+                                    ("http11protocol.proto.ioexception.debug"), e);
                 }
                 // Future developers: if you discover any other
                 // rare-but-nonfatal exceptions, catch them here, and log as
                 // above.
-                catch (Throwable e) {
+                catch (Throwable e)
+                {
                     // any other exception or error is odd. Here we log it
                     // with "ERROR" level, so it will show up even on
                     // less-than-verbose logs.
                     Http11NioProtocol.log.error
-                        (sm.getString("http11protocol.proto.error"), e);
-                } finally {
-                    if (state != SocketState.LONG) {
+                            (sm.getString("http11protocol.proto.error"), e);
+                }
+                finally
+                {
+                    if (state != SocketState.LONG)
+                    {
                         release(socket, result);
-                        if (state == SocketState.OPEN) {
+                        if (state == SocketState.OPEN)
+                        {
                             socket.getPoller().add(socket);
                         }
-                    } else {
-                        if (log.isDebugEnabled()) log.debug("Keeping processor["+result);
+                    } else
+                    {
+                        if (log.isDebugEnabled()) log.debug("Keeping processor[" + result);
                         //add correct poller events here based on Comet stuff
-                        NioEndpoint.KeyAttachment att = (NioEndpoint.KeyAttachment)socket.getAttachment(false);
-                        socket.getPoller().add(socket,att.getCometOps());
+                        NioEndpoint.KeyAttachment att = (NioEndpoint.KeyAttachment) socket.getAttachment(false);
+                        socket.getPoller().add(socket, att.getCometOps());
                     }
                 }
             }
             return state;
         }
 
-        public SocketState process(NioChannel socket) {
+        public SocketState process(NioChannel socket)
+        {
             Http11NioProcessor processor = null;
-            try {
+            try
+            {
                 processor = connections.remove(socket);
 
-                if (processor == null) {
+                if (processor == null)
+                {
                     processor = recycledProcessors.poll();
                 }
-                if (processor == null) {
+                if (processor == null)
+                {
                     processor = createProcessor();
                 }
 
-                if (processor instanceof ActionHook) {
+                if (processor instanceof ActionHook)
+                {
                     ((ActionHook) processor).action(ActionCode.ACTION_START, null);
                 }
 
-                if (proto.ep.isSSLEnabled() && (proto.sslImplementation != null)) {
-                    if (socket instanceof SecureNioChannel) {
-                        SecureNioChannel ch = (SecureNioChannel)socket;
+                if (proto.ep.isSSLEnabled() && (proto.sslImplementation != null))
+                {
+                    if (socket instanceof SecureNioChannel)
+                    {
+                        SecureNioChannel ch = (SecureNioChannel) socket;
                         processor.setSslSupport(proto.sslImplementation.getSSLSupport(ch.getSslEngine().getSession()));
-                    }else processor.setSslSupport(null);
-                } else {
+                    } else processor.setSslSupport(null);
+                } else
+                {
                     processor.setSslSupport(null);
                 }
 
 
                 SocketState state = processor.process(socket);
-                if (state == SocketState.LONG) {
+                if (state == SocketState.LONG)
+                {
                     // In the middle of processing a request/response. Keep the
                     // socket associated with the processor.
                     connections.put(socket, processor);
                     socket.getPoller().add(socket);
-                } else if (state == SocketState.OPEN) {
+                } else if (state == SocketState.OPEN)
+                {
                     // In keep-alive but between requests. OK to recycle
                     // processor. Continue to poll for the next request.
                     release(socket, processor);
                     socket.getPoller().add(socket);
-                } else {
+                } else
+                {
                     // Connection closed. OK to recycle the processor.
                     release(socket, processor);
                 }
                 return state;
 
-            } catch (java.net.SocketException e) {
+            }
+            catch (java.net.SocketException e)
+            {
                 // SocketExceptions are normal
                 Http11NioProtocol.log.debug
-                    (sm.getString
-                     ("http11protocol.proto.socketexception.debug"), e);
-            } catch (java.io.IOException e) {
+                        (sm.getString
+                                ("http11protocol.proto.socketexception.debug"), e);
+            }
+            catch (java.io.IOException e)
+            {
                 // IOExceptions are normal
                 Http11NioProtocol.log.debug
-                    (sm.getString
-                     ("http11protocol.proto.ioexception.debug"), e);
+                        (sm.getString
+                                ("http11protocol.proto.ioexception.debug"), e);
             }
             // Future developers: if you discover any other
             // rare-but-nonfatal exceptions, catch them here, and log as
             // above.
-            catch (Throwable e) {
+            catch (Throwable e)
+            {
                 // any other exception or error is odd. Here we log it
                 // with "ERROR" level, so it will show up even on
                 // less-than-verbose logs.
                 Http11NioProtocol.log.error
-                    (sm.getString("http11protocol.proto.error"), e);
+                        (sm.getString("http11protocol.proto.error"), e);
             }
             release(socket, processor);
             return SocketState.CLOSED;
         }
 
-        public Http11NioProcessor createProcessor() {
+        public Http11NioProcessor createProcessor()
+        {
             Http11NioProcessor processor = new Http11NioProcessor(
-              proto.ep.getSocketProperties().getRxBufSize(),
-              proto.ep.getSocketProperties().getTxBufSize(),
-              proto.maxHttpHeaderSize,
-              proto.ep);
+                    proto.ep.getSocketProperties().getRxBufSize(),
+                    proto.ep.getSocketProperties().getTxBufSize(),
+                    proto.maxHttpHeaderSize,
+                    proto.ep);
             processor.setAdapter(proto.adapter);
             processor.setMaxKeepAliveRequests(proto.maxKeepAliveRequests);
             processor.setTimeout(proto.timeout);
@@ -810,88 +1118,58 @@ public class Http11NioProtocol extends AbstractProtocol implements MBeanRegistra
             register(processor);
             return processor;
         }
-        AtomicInteger registerCount = new AtomicInteger(0);
-        public void register(Http11NioProcessor processor) {
-            if (proto.getDomain() != null) {
-                synchronized (this) {
-                    try {
+
+        public void register(Http11NioProcessor processor)
+        {
+            if (proto.getDomain() != null)
+            {
+                synchronized (this)
+                {
+                    try
+                    {
                         registerCount.addAndGet(1);
-                        if (log.isDebugEnabled()) log.debug("Register ["+processor+"] count="+registerCount.get());
+                        if (log.isDebugEnabled())
+                            log.debug("Register [" + processor + "] count=" + registerCount.get());
                         RequestInfo rp = processor.getRequest().getRequestProcessor();
                         rp.setGlobalProcessor(global);
                         ObjectName rpName = new ObjectName
-                            (proto.getDomain() + ":type=RequestProcessor,worker="
-                             + proto.getName() + ",name=HttpRequest" + count++);
+                                (proto.getDomain() + ":type=RequestProcessor,worker="
+                                        + proto.getName() + ",name=HttpRequest" + count++);
                         Registry.getRegistry(null, null).registerComponent(rp, rpName, null);
                         rp.setRpName(rpName);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e)
+                    {
                         log.warn("Error registering request");
                     }
                 }
             }
         }
 
-        public void deregister(Http11NioProcessor processor) {
-            if (proto.getDomain() != null) {
-                synchronized (this) {
-                    try {
+        public void deregister(Http11NioProcessor processor)
+        {
+            if (proto.getDomain() != null)
+            {
+                synchronized (this)
+                {
+                    try
+                    {
                         registerCount.addAndGet(-1);
-                        if (log.isDebugEnabled()) log.debug("Deregister ["+processor+"] count="+registerCount.get());
+                        if (log.isDebugEnabled())
+                            log.debug("Deregister [" + processor + "] count=" + registerCount.get());
                         RequestInfo rp = processor.getRequest().getRequestProcessor();
                         rp.setGlobalProcessor(null);
                         ObjectName rpName = rp.getRpName();
                         Registry.getRegistry(null, null).unregisterComponent(rpName);
                         rp.setRpName(null);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e)
+                    {
                         log.warn("Error unregistering request", e);
                     }
                 }
             }
         }
 
-    }
-
-
-
-    protected static org.apache.juli.logging.Log log
-        = org.apache.juli.logging.LogFactory.getLog(Http11NioProtocol.class);
-
-    // -------------------- Various implementation classes --------------------
-
-    protected String domain;
-    protected ObjectName oname;
-    protected MBeanServer mserver;
-
-    public ObjectName getObjectName() {
-        return oname;
-    }
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public int getProcessorCache() {
-        return processorCache;
-    }
-
-    public int getOomParachute() {
-        return ep.getOomParachute();
-    }
-
-    public ObjectName preRegister(MBeanServer server,
-                                  ObjectName name) throws Exception {
-        oname=name;
-        mserver=server;
-        domain=name.getDomain();
-        return name;
-    }
-
-    public void postRegister(Boolean registrationDone) {
-    }
-
-    public void preDeregister() throws Exception {
-    }
-
-    public void postDeregister() {
     }
 }

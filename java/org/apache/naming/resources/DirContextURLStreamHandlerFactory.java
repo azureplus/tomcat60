@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.apache.naming.resources;
 
@@ -22,45 +22,49 @@ import java.net.URLStreamHandlerFactory;
 
 /**
  * Factory for Stream handlers to a JNDI directory context.
- * 
- * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  *
+ * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  */
-public class DirContextURLStreamHandlerFactory 
-    implements URLStreamHandlerFactory {
-    
-    
+public class DirContextURLStreamHandlerFactory
+        implements URLStreamHandlerFactory
+{
+
+
     // ----------------------------------------------------------- Constructors
-    
-    
-    public DirContextURLStreamHandlerFactory() {
+
+
+    public DirContextURLStreamHandlerFactory()
+    {
     }
-    
-    
+
+
     // ----------------------------------------------------- Instance Variables
-    
-    
+
+
     // ------------------------------------------------------------- Properties
-    
-    
+
+
     // ---------------------------------------- URLStreamHandlerFactory Methods
-    
-    
+
+
     /**
      * Creates a new URLStreamHandler instance with the specified protocol.
      * Will return null if the protocol is not <code>jndi</code>.
-     * 
+     *
      * @param protocol the protocol (must be "jndi" here)
-     * @return a URLStreamHandler for the jndi protocol, or null if the 
+     * @return a URLStreamHandler for the jndi protocol, or null if the
      * protocol is not JNDI
      */
-    public URLStreamHandler createURLStreamHandler(String protocol) {
-        if (protocol.equals("jndi")) {
+    public URLStreamHandler createURLStreamHandler(String protocol)
+    {
+        if (protocol.equals("jndi"))
+        {
             return new DirContextURLStreamHandler();
-        } else {
+        } else
+        {
             return null;
         }
     }
-    
-    
+
+
 }

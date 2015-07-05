@@ -20,14 +20,15 @@ package org.apache.jk.common;
 import org.apache.jk.core.JkHandler;
 
 
-
-/** Channel using shm.
+/**
+ * Channel using shm.
  *
  * @author Costin Manolache
  */
-public class ChannelShm extends JkHandler {
+public class ChannelShm extends JkHandler
+{
 
     // Not implemented yet.
-    
-    
+
+
 }

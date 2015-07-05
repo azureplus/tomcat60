@@ -24,20 +24,24 @@ import java.util.Properties;
 /**
  * @deprecated
  */
-public class Apr {
+public class Apr
+{
     private static String aprInfo = null;
 
-    static {
+    static
+    {
 
-        try {
+        try
+        {
             InputStream is = Apr.class.getResourceAsStream
-                ("/org/apache/tomcat/apr.properties");
+                    ("/org/apache/tomcat/apr.properties");
             Properties props = new Properties();
             props.load(is);
             is.close();
             aprInfo = props.getProperty("tcn.info");
         }
-        catch (Throwable t) {
+        catch (Throwable t)
+        {
             ; // Nothing
         }
     }

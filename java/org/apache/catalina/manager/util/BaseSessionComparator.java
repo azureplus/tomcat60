@@ -17,20 +17,23 @@
 
 package org.apache.catalina.manager.util;
 
-import java.util.Comparator;
-
 import org.apache.catalina.Session;
+
+import java.util.Comparator;
 
 /**
  * Comparator which permits to compare on a session's content
+ *
  * @author C&eacute;drik LIME
  */
-public abstract class BaseSessionComparator implements Comparator {
+public abstract class BaseSessionComparator implements Comparator
+{
 
     /**
-     * 
+     *
      */
-    public BaseSessionComparator() {
+    public BaseSessionComparator()
+    {
         super();
     }
 
@@ -39,9 +42,10 @@ public abstract class BaseSessionComparator implements Comparator {
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
-    public final int compare(Object o1, Object o2) {
-        Comparable c1 = getComparableObject((Session)o1);
-        Comparable c2 = getComparableObject((Session)o2);
-        return c1==null ? (c2==null ? 0 : -1) : (c2==null ? 1 : c1.compareTo(c2));
+    public final int compare(Object o1, Object o2)
+    {
+        Comparable c1 = getComparableObject((Session) o1);
+        Comparable c2 = getComparableObject((Session) o2);
+        return c1 == null ? (c2 == null ? 0 : -1) : (c2 == null ? 1 : c1.compareTo(c2));
     }
 }

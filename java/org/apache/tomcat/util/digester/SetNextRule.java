@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.tomcat.util.digester;
@@ -25,85 +25,48 @@ import org.apache.tomcat.util.IntrospectionUtils;
  * <p>Rule implementation that calls a method on the (top-1) (parent)
  * object, passing the top object (child) as an argument.  It is
  * commonly used to establish parent-child relationships.</p>
- *
+ * <p/>
  * <p>This rule now supports more flexible method matching by default.
- * It is possible that this may break (some) code 
+ * It is possible that this may break (some) code
  * written against release 1.1.1 or earlier.
- * See {@link #isExactMatch()} for more details.</p> 
+ * See {@link #isExactMatch()} for more details.</p>
  */
 
-public class SetNextRule extends Rule {
+public class SetNextRule extends Rule
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
+     * The method name to call on the parent object.
+     */
+    protected String methodName = null;
+    /**
+     * The Java class name of the parameter type expected by the method.
+     */
+    protected String paramType = null;
+    /**
+     * Should we use exact matching. Default is no.
+     */
+    protected boolean useExactMatch = false;
+
+
+    /**
      * Construct a "set next" rule with the specified method name.  The
      * method's argument type is assumed to be the class of the
      * child object.
      *
-     * @param digester The associated Digester
+     * @param digester   The associated Digester
      * @param methodName Method name of the parent method to call
-     *
-     * @deprecated The digester instance is now set in the {@link Digester#addRule} method. 
+     * @deprecated The digester instance is now set in the {@link Digester#addRule} method.
      * Use {@link #SetNextRule(String methodName)} instead.
      */
-    public SetNextRule(Digester digester, String methodName) {
+    public SetNextRule(Digester digester, String methodName)
+    {
 
         this(methodName);
-
-    }
-
-
-    /**
-     * Construct a "set next" rule with the specified method name.
-     *
-     * @param digester The associated Digester
-     * @param methodName Method name of the parent method to call
-     * @param paramType Java class of the parent method's argument
-     *  (if you wish to use a primitive type, specify the corresonding
-     *  Java wrapper class instead, such as <code>java.lang.Boolean</code>
-     *  for a <code>boolean</code> parameter)
-     *
-     * @deprecated The digester instance is now set in the {@link Digester#addRule} method. 
-     * Use {@link #SetNextRule(String methodName,String paramType)} instead.
-     */
-    public SetNextRule(Digester digester, String methodName,
-                       String paramType) {
-
-        this(methodName, paramType);
-
-    }
-
-    /**
-     * Construct a "set next" rule with the specified method name.  The
-     * method's argument type is assumed to be the class of the
-     * child object.
-     *
-     * @param methodName Method name of the parent method to call
-     */
-    public SetNextRule(String methodName) {
-
-        this(methodName, null);
-
-    }
-
-
-    /**
-     * Construct a "set next" rule with the specified method name.
-     *
-     * @param methodName Method name of the parent method to call
-     * @param paramType Java class of the parent method's argument
-     *  (if you wish to use a primitive type, specify the corresonding
-     *  Java wrapper class instead, such as <code>java.lang.Boolean</code>
-     *  for a <code>boolean</code> parameter)
-     */
-    public SetNextRule(String methodName,
-                       String paramType) {
-
-        this.methodName = methodName;
-        this.paramType = paramType;
 
     }
 
@@ -112,58 +75,96 @@ public class SetNextRule extends Rule {
 
 
     /**
-     * The method name to call on the parent object.
+     * Construct a "set next" rule with the specified method name.
+     *
+     * @param digester   The associated Digester
+     * @param methodName Method name of the parent method to call
+     * @param paramType  Java class of the parent method's argument
+     *                   (if you wish to use a primitive type, specify the corresonding
+     *                   Java wrapper class instead, such as <code>java.lang.Boolean</code>
+     *                   for a <code>boolean</code> parameter)
+     * @deprecated The digester instance is now set in the {@link Digester#addRule} method.
+     * Use {@link #SetNextRule(String methodName, String paramType)} instead.
      */
-    protected String methodName = null;
+    public SetNextRule(Digester digester, String methodName,
+                       String paramType)
+    {
+
+        this(methodName, paramType);
+
+    }
 
 
     /**
-     * The Java class name of the parameter type expected by the method.
+     * Construct a "set next" rule with the specified method name.  The
+     * method's argument type is assumed to be the class of the
+     * child object.
+     *
+     * @param methodName Method name of the parent method to call
      */
-    protected String paramType = null;
+    public SetNextRule(String methodName)
+    {
+
+        this(methodName, null);
+
+    }
 
     /**
-     * Should we use exact matching. Default is no.
+     * Construct a "set next" rule with the specified method name.
+     *
+     * @param methodName Method name of the parent method to call
+     * @param paramType  Java class of the parent method's argument
+     *                   (if you wish to use a primitive type, specify the corresonding
+     *                   Java wrapper class instead, such as <code>java.lang.Boolean</code>
+     *                   for a <code>boolean</code> parameter)
      */
-    protected boolean useExactMatch = false;
+    public SetNextRule(String methodName,
+                       String paramType)
+    {
+
+        this.methodName = methodName;
+        this.paramType = paramType;
+
+    }
 
     // --------------------------------------------------------- Public Methods
 
-
     /**
      * <p>Is exact matching being used.</p>
-     *
-     * <p>This rule uses <code>org.apache.commons.beanutils.MethodUtils</code> 
+     * <p/>
+     * <p>This rule uses <code>org.apache.commons.beanutils.MethodUtils</code>
      * to introspect the relevent objects so that the right method can be called.
      * Originally, <code>MethodUtils.invokeExactMethod</code> was used.
-     * This matches methods very strictly 
+     * This matches methods very strictly
      * and so may not find a matching method when one exists.
      * This is still the behaviour when exact matching is enabled.</p>
-     *
+     * <p/>
      * <p>When exact matching is disabled, <code>MethodUtils.invokeMethod</code> is used.
-     * This method finds more methods but is less precise when there are several methods 
+     * This method finds more methods but is less precise when there are several methods
      * with correct signatures.
      * So, if you want to choose an exact signature you might need to enable this property.</p>
-     *
+     * <p/>
      * <p>The default setting is to disable exact matches.</p>
      *
      * @return true iff exact matching is enabled
      * @since Digester Release 1.1.1
      */
-    public boolean isExactMatch() {
-    
+    public boolean isExactMatch()
+    {
+
         return useExactMatch;
     }
-    
+
     /**
      * <p>Set whether exact matching is enabled.</p>
-     *
+     * <p/>
      * <p>See {@link #isExactMatch()}.</p>
      *
      * @param useExactMatch should this rule use exact method matching
      * @since Digester Release 1.1.1
-     */    
-    public void setExactMatch(boolean useExactMatch) {
+     */
+    public void setExactMatch(boolean useExactMatch)
+    {
 
         this.useExactMatch = useExactMatch;
     }
@@ -171,17 +172,21 @@ public class SetNextRule extends Rule {
     /**
      * Process the end of this element.
      */
-    public void end() throws Exception {
+    public void end() throws Exception
+    {
 
         // Identify the objects to be used
         Object child = digester.peek(0);
         Object parent = digester.peek(1);
-        if (digester.log.isDebugEnabled()) {
-            if (parent == null) {
+        if (digester.log.isDebugEnabled())
+        {
+            if (parent == null)
+            {
                 digester.log.debug("[SetNextRule]{" + digester.match +
                         "} Call [NULL PARENT]." +
                         methodName + "(" + child + ")");
-            } else {
+            } else
+            {
                 digester.log.debug("[SetNextRule]{" + digester.match +
                         "} Call " + parent.getClass().getName() + "." +
                         methodName + "(" + child + ")");
@@ -191,14 +196,15 @@ public class SetNextRule extends Rule {
         // Call the specified method
         IntrospectionUtils.callMethod1(parent, methodName,
                 child, paramType, digester.getClassLoader());
-                
+
     }
 
 
     /**
      * Render a printable version of this Rule.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("SetNextRule[");
         sb.append("methodName=");

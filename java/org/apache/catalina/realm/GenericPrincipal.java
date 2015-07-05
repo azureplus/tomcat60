@@ -32,85 +32,121 @@ import java.util.List;
  * is available for use by <code>Realm</code> implementations.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class GenericPrincipal implements Principal {
+public class GenericPrincipal implements Principal
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
+     * The username of the user represented by this Principal.
+     */
+    protected String name = null;
+    /**
+     * The authentication credentials for the user represented by
+     * this Principal.
+     */
+    protected String password = null;
+    /**
+     * The Realm with which this Principal is associated.
+     */
+    protected Realm realm = null;
+    /**
+     * The set of roles associated with this user.
+     */
+    protected String roles[] = new String[0];
+
+
+    // ------------------------------------------------------------- Properties
+    /**
+     * The authenticated Principal to be exposed to applications.
+     */
+    protected Principal userPrincipal = null;
+    /**
+     * The JAAS LoginContext, if any, used to authenticate this Principal.
+     * Kept so we can call logout().
+     */
+    protected LoginContext loginContext = null;
+
+
+    /**
      * Construct a new Principal, associated with the specified Realm, for the
      * specified username and password.
      *
-     * @param realm The Realm that owns this Principal
-     * @param name The username of the user represented by this Principal
+     * @param realm    The Realm that owns this Principal
+     * @param name     The username of the user represented by this Principal
      * @param password Credentials used to authenticate this user
      */
-    public GenericPrincipal(Realm realm, String name, String password) {
+    public GenericPrincipal(Realm realm, String name, String password)
+    {
 
         this(realm, name, password, null);
 
     }
 
-
     /**
      * Construct a new Principal, associated with the specified Realm, for the
      * specified username and password, with the specified role names
      * (as Strings).
      *
-     * @param realm The Realm that owns this principal
-     * @param name The username of the user represented by this Principal
+     * @param realm    The Realm that owns this principal
+     * @param name     The username of the user represented by this Principal
      * @param password Credentials used to authenticate this user
-     * @param roles List of roles (must be Strings) possessed by this user
+     * @param roles    List of roles (must be Strings) possessed by this user
      */
     public GenericPrincipal(Realm realm, String name, String password,
-                            List<String> roles) {
+                            List<String> roles)
+    {
         this(realm, name, password, roles, null);
     }
 
+
     /**
      * Construct a new Principal, associated with the specified Realm, for the
      * specified username and password, with the specified role names
      * (as Strings).
      *
-     * @param realm The Realm that owns this principal
-     * @param name The username of the user represented by this Principal
-     * @param password Credentials used to authenticate this user
-     * @param roles List of roles (must be Strings) possessed by this user
-     * @param userPrincipal - the principal to be returned from the request 
-     *        getUserPrincipal call if not null; if null, this will be returned
+     * @param realm         The Realm that owns this principal
+     * @param name          The username of the user represented by this Principal
+     * @param password      Credentials used to authenticate this user
+     * @param roles         List of roles (must be Strings) possessed by this user
+     * @param userPrincipal - the principal to be returned from the request
+     *                      getUserPrincipal call if not null; if null, this will be returned
      */
     public GenericPrincipal(Realm realm, String name, String password,
-                            List<String> roles, Principal userPrincipal) {
+                            List<String> roles, Principal userPrincipal)
+    {
         this(realm, name, password, roles, userPrincipal, null);
     }
-    
+
     /**
      * Construct a new Principal, associated with the specified Realm, for the
      * specified username and password, with the specified role names
      * (as Strings).
      *
-     * @param realm The Realm that owns this principal
-     * @param name The username of the user represented by this Principal
-     * @param password Credentials used to authenticate this user
-     * @param roles List of roles (must be Strings) possessed by this user
-     * @param userPrincipal - the principal to be returned from the request 
-     *        getUserPrincipal call if not null; if null, this will be returned
+     * @param realm         The Realm that owns this principal
+     * @param name          The username of the user represented by this Principal
+     * @param password      Credentials used to authenticate this user
+     * @param roles         List of roles (must be Strings) possessed by this user
+     * @param userPrincipal - the principal to be returned from the request
+     *                      getUserPrincipal call if not null; if null, this will be returned
      * @param loginContext  - If provided, this will be used to log out the user
-     *        at the appropriate time
+     *                      at the appropriate time
      */
     public GenericPrincipal(Realm realm, String name, String password,
                             List<String> roles, Principal userPrincipal,
-                            LoginContext loginContext) {
+                            LoginContext loginContext)
+    {
         super();
         this.realm = realm;
         this.name = name;
         this.password = password;
         this.userPrincipal = userPrincipal;
-        if (roles != null) {
+        if (roles != null)
+        {
             this.roles = new String[roles.size()];
             this.roles = (String[]) roles.toArray(this.roles);
             if (this.roles.length > 1)
@@ -119,77 +155,45 @@ public class GenericPrincipal implements Principal {
         this.loginContext = loginContext;
     }
 
-
-    // ------------------------------------------------------------- Properties
-
-
-    /**
-     * The username of the user represented by this Principal.
-     */
-    protected String name = null;
-
-    public String getName() {
+    public String getName()
+    {
         return (this.name);
     }
 
-
-    /**
-     * The authentication credentials for the user represented by
-     * this Principal.
-     */
-    protected String password = null;
-
-    public String getPassword() {
+    public String getPassword()
+    {
         return (this.password);
     }
 
-
-    /**
-     * The Realm with which this Principal is associated.
-     */
-    protected Realm realm = null;
-
-    public Realm getRealm() {
+    public Realm getRealm()
+    {
         return (this.realm);
     }
 
-    void setRealm( Realm realm ) {
-        this.realm=realm;
+    void setRealm(Realm realm)
+    {
+        this.realm = realm;
     }
 
-
-    /**
-     * The set of roles associated with this user.
-     */
-    protected String roles[] = new String[0];
-
-    public String[] getRoles() {
+    public String[] getRoles()
+    {
         return (this.roles);
     }
 
-
-    /**
-     * The authenticated Principal to be exposed to applications.
-     */
-    protected Principal userPrincipal = null;
-
-    public Principal getUserPrincipal() {
-        if (userPrincipal != null) {
+    public Principal getUserPrincipal()
+    {
+        if (userPrincipal != null)
+        {
             return userPrincipal;
-        } else {
+        } else
+        {
             return this;
         }
     }
 
-    
-    /**
-     * The JAAS LoginContext, if any, used to authenticate this Principal.
-     * Kept so we can call logout().
-     */
-    protected LoginContext loginContext = null;
-
-    void setLoginContext( LoginContext loginContext ) {
-        this.loginContext=loginContext;
+    void setLoginContext(LoginContext loginContext)
+    {
+        this.loginContext = loginContext;
     }
 
     // --------------------------------------------------------- Public Methods
@@ -200,9 +204,10 @@ public class GenericPrincipal implements Principal {
      *
      * @param role Role to be tested
      */
-    public boolean hasRole(String role) {
+    public boolean hasRole(String role)
+    {
 
-        if("*".equals(role)) // Special 2.4 role meaning everyone
+        if ("*".equals(role)) // Special 2.4 role meaning everyone
             return true;
         if (role == null)
             return (false);
@@ -215,32 +220,35 @@ public class GenericPrincipal implements Principal {
      * Return a String representation of this object, which exposes only
      * information that should be public.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("GenericPrincipal[");
         sb.append(this.name);
         sb.append("(");
-        for( int i=0;i<roles.length; i++ ) {
-            sb.append( roles[i]).append(",");
+        for (int i = 0; i < roles.length; i++)
+        {
+            sb.append(roles[i]).append(",");
         }
         sb.append(")]");
         return (sb.toString());
 
     }
 
-    
+
     /**
      * Calls logout, if necessary, on any associated JAASLoginContext. May in
      * the future be extended to cover other logout requirements.
-     * 
+     *
      * @throws Exception If something goes wrong with the logout. Uses Exception
      *                   to allow for future expansion of this method to cover
      *                   other logout mechanisms that might throw a different
      *                   exception to LoginContext
-     * 
      */
-    public void logout() throws Exception {
-        if (loginContext != null) {
+    public void logout() throws Exception
+    {
+        if (loginContext != null)
+        {
             loginContext.logout();
         }
     }

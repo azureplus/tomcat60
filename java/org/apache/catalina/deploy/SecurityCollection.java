@@ -28,7 +28,7 @@ import java.io.Serializable;
  * Representation of a web resource collection for a web application's security
  * constraint, as represented in a <code>&lt;web-resource-collection&gt;</code>
  * element in the deployment descriptor.
- * <p>
+ * <p/>
  * <b>WARNING</b>:  It is assumed that instances of this class will be created
  * and modified only within the context of a single thread, before the instance
  * is made visible to the remainder of the application.  After that, only read
@@ -36,18 +36,40 @@ import java.io.Serializable;
  * this class is synchronized.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class SecurityCollection implements Serializable {
+public class SecurityCollection implements Serializable
+{
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
+     * Description of this web resource collection.
+     */
+    private String description = null;
+    /**
+     * The HTTP methods covered by this web resource collection.
+     */
+    private String methods[] = new String[0];
+    /**
+     * The name of this web resource collection.
+     */
+    private String name = null;
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * The URL patterns protected by this security collection.
+     */
+    private String patterns[] = new String[0];
+
+
+    /**
      * Construct a new security collection instance with default values.
      */
-    public SecurityCollection() {
+    public SecurityCollection()
+    {
 
         this(null, null);
 
@@ -59,7 +81,8 @@ public class SecurityCollection implements Serializable {
      *
      * @param name Name of this security collection
      */
-    public SecurityCollection(String name) {
+    public SecurityCollection(String name)
+    {
 
         this(name, null);
 
@@ -69,10 +92,11 @@ public class SecurityCollection implements Serializable {
     /**
      * Construct a new security collection instance with specified values.
      *
-     * @param name Name of this security collection
+     * @param name        Name of this security collection
      * @param description Description of this security collection
      */
-    public SecurityCollection(String name, String description) {
+    public SecurityCollection(String name, String description)
+    {
 
         super();
         setName(name);
@@ -81,40 +105,13 @@ public class SecurityCollection implements Serializable {
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * Description of this web resource collection.
-     */
-    private String description = null;
-
-
-    /**
-     * The HTTP methods covered by this web resource collection.
-     */
-    private String methods[] = new String[0];
-
-
-    /**
-     * The name of this web resource collection.
-     */
-    private String name = null;
-
-
-    /**
-     * The URL patterns protected by this security collection.
-     */
-    private String patterns[] = new String[0];
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return the description of this web resource collection.
      */
-    public String getDescription() {
+    public String getDescription()
+    {
 
         return (this.description);
 
@@ -126,7 +123,8 @@ public class SecurityCollection implements Serializable {
      *
      * @param description The new description
      */
-    public void setDescription(String description) {
+    public void setDescription(String description)
+    {
 
         this.description = description;
 
@@ -136,7 +134,8 @@ public class SecurityCollection implements Serializable {
     /**
      * Return the name of this web resource collection.
      */
-    public String getName() {
+    public String getName()
+    {
 
         return (this.name);
 
@@ -148,7 +147,8 @@ public class SecurityCollection implements Serializable {
      *
      * @param name The new name
      */
-    public void setName(String name) {
+    public void setName(String name)
+    {
 
         this.name = name;
 
@@ -161,7 +161,8 @@ public class SecurityCollection implements Serializable {
     /**
      * Add an HTTP request method to be part of this web resource collection.
      */
-    public void addMethod(String method) {
+    public void addMethod(String method)
+    {
 
         if (method == null)
             return;
@@ -177,14 +178,16 @@ public class SecurityCollection implements Serializable {
     /**
      * Add a URL pattern to be part of this web resource collection.
      */
-    public void addPattern(String pattern) {
+    public void addPattern(String pattern)
+    {
 
         if (pattern == null)
             return;
 
         pattern = RequestUtil.URLDecode(pattern);
         String results[] = new String[patterns.length + 1];
-        for (int i = 0; i < patterns.length; i++) {
+        for (int i = 0; i < patterns.length; i++)
+        {
             results[i] = patterns[i];
         }
         results[patterns.length] = pattern;
@@ -199,11 +202,13 @@ public class SecurityCollection implements Serializable {
      *
      * @param method Request method to check
      */
-    public boolean findMethod(String method) {
+    public boolean findMethod(String method)
+    {
 
         if (methods.length == 0)
             return (true);
-        for (int i = 0; i < methods.length; i++) {
+        for (int i = 0; i < methods.length; i++)
+        {
             if (methods[i].equals(method))
                 return (true);
         }
@@ -217,7 +222,8 @@ public class SecurityCollection implements Serializable {
      * resource collection, or a zero-length array if all request methods
      * are included.
      */
-    public String[] findMethods() {
+    public String[] findMethods()
+    {
 
         return (methods);
 
@@ -229,9 +235,11 @@ public class SecurityCollection implements Serializable {
      *
      * @param pattern Pattern to be compared
      */
-    public boolean findPattern(String pattern) {
+    public boolean findPattern(String pattern)
+    {
 
-        for (int i = 0; i < patterns.length; i++) {
+        for (int i = 0; i < patterns.length; i++)
+        {
             if (patterns[i].equals(pattern))
                 return (true);
         }
@@ -245,7 +253,8 @@ public class SecurityCollection implements Serializable {
      * collection.  If none have been specified, a zero-length array is
      * returned.
      */
-    public String[] findPatterns() {
+    public String[] findPatterns()
+    {
 
         return (patterns);
 
@@ -258,21 +267,26 @@ public class SecurityCollection implements Serializable {
      *
      * @param method Request method to be removed
      */
-    public void removeMethod(String method) {
+    public void removeMethod(String method)
+    {
 
         if (method == null)
             return;
         int n = -1;
-        for (int i = 0; i < methods.length; i++) {
-            if (methods[i].equals(method)) {
+        for (int i = 0; i < methods.length; i++)
+        {
+            if (methods[i].equals(method))
+            {
                 n = i;
                 break;
             }
         }
-        if (n >= 0) {
+        if (n >= 0)
+        {
             int j = 0;
             String results[] = new String[methods.length - 1];
-            for (int i = 0; i < methods.length; i++) {
+            for (int i = 0; i < methods.length; i++)
+            {
                 if (i != n)
                     results[j++] = methods[i];
             }
@@ -288,21 +302,26 @@ public class SecurityCollection implements Serializable {
      *
      * @param pattern Pattern to be removed
      */
-    public void removePattern(String pattern) {
+    public void removePattern(String pattern)
+    {
 
         if (pattern == null)
             return;
         int n = -1;
-        for (int i = 0; i < patterns.length; i++) {
-            if (patterns[i].equals(pattern)) {
+        for (int i = 0; i < patterns.length; i++)
+        {
+            if (patterns[i].equals(pattern))
+            {
                 n = i;
                 break;
             }
         }
-        if (n >= 0) {
+        if (n >= 0)
+        {
             int j = 0;
             String results[] = new String[patterns.length - 1];
-            for (int i = 0; i < patterns.length; i++) {
+            for (int i = 0; i < patterns.length; i++)
+            {
                 if (i != n)
                     results[j++] = patterns[i];
             }
@@ -315,11 +334,13 @@ public class SecurityCollection implements Serializable {
     /**
      * Return a String representation of this security collection.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("SecurityCollection[");
         sb.append(name);
-        if (description != null) {
+        if (description != null)
+        {
             sb.append(", ");
             sb.append(description);
         }

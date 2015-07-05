@@ -18,13 +18,13 @@
 package org.apache.catalina.mbeans;
 
 
-import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.RuntimeOperationsException;
-
 import org.apache.tomcat.util.modeler.BaseModelMBean;
 import org.apache.tomcat.util.modeler.ManagedBean;
 import org.apache.tomcat.util.modeler.Registry;
+
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.RuntimeOperationsException;
 
 
 /**
@@ -32,33 +32,13 @@ import org.apache.tomcat.util.modeler.Registry;
  * <code>org.apache.catalina.Role</code> component.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class RoleMBean extends BaseModelMBean {
+public class RoleMBean extends BaseModelMBean
+{
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    /**
-     * Construct a <code>ModelMBean</code> with default
-     * <code>ModelMBeanInfo</code> information.
-     *
-     * @exception MBeanException if the initializer of an object
-     *  throws an exception
-     * @exception RuntimeOperationsException if an IllegalArgumentException
-     *  occurs
-     */
-    public RoleMBean()
-        throws MBeanException, RuntimeOperationsException {
-
-        super();
-
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
 
 
     /**
@@ -67,17 +47,34 @@ public class RoleMBean extends BaseModelMBean {
     protected Registry registry = MBeanUtils.createRegistry();
 
 
+    // ----------------------------------------------------- Instance Variables
     /**
      * The <code>MBeanServer</code> in which we are registered.
      */
     protected MBeanServer mserver = MBeanUtils.createServer();
-
-
     /**
      * The <code>ManagedBean</code> information describing this MBean.
      */
     protected ManagedBean managed =
-        registry.findManagedBean("Role");
+            registry.findManagedBean("Role");
+
+
+    /**
+     * Construct a <code>ModelMBean</code> with default
+     * <code>ModelMBeanInfo</code> information.
+     *
+     * @throws MBeanException             if the initializer of an object
+     *                                    throws an exception
+     * @throws RuntimeOperationsException if an IllegalArgumentException
+     *                                    occurs
+     */
+    public RoleMBean()
+            throws MBeanException, RuntimeOperationsException
+    {
+
+        super();
+
+    }
 
 
     // ------------------------------------------------------------- Attributes

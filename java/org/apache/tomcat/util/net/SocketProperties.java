@@ -18,6 +18,7 @@ package org.apache.tomcat.util.net;
 
 import java.net.Socket;
 import java.net.SocketException;
+
 /**
  * Properties that can be set in the &lt;Connector&gt; element
  * in server.xml. All properties are prefixed with &quot;socket.&quot;
@@ -25,7 +26,8 @@ import java.net.SocketException;
  *
  * @author Filip Hanik
  */
-public class SocketProperties {
+public class SocketProperties
+{
     /**
      * Enable/disable key cache, this bounded cache stores
      * KeyAttachment objects to reduce GC
@@ -34,7 +36,7 @@ public class SocketProperties {
      * 0 is disabled
      */
     protected int keyCache = 500;
-    
+
     /**
      * Enable/disable socket processor cache, this bounded cache stores
      * SocketProcessor objects to reduce GC
@@ -45,11 +47,10 @@ public class SocketProperties {
     protected int processorCache = 500;
 
 
-
     /**
      * Enable/disable poller event cache, this bounded cache stores
      * PollerEvent objects to reduce GC for the poller
-     * Default is 500 
+     * Default is 500
      * -1 is unlimited
      * 0 is disabled
      * >0 the max number of objects to keep in cache.
@@ -99,7 +100,7 @@ public class SocketProperties {
      * -1 means unlimited, 0 means no cache
      * Default value is 100MB (1024*1024*100 bytes)
      */
-    protected int bufferPoolSize = 1024*1024*100;
+    protected int bufferPoolSize = 1024 * 1024 * 100;
 
     /**
      * TCP_NO_DELAY option, default is true
@@ -156,13 +157,13 @@ public class SocketProperties {
      * Default value is 1
      */
     protected int performanceBandwidth = 1;
-    
+
     /**
-     * The minimum frequency of the timeout interval to avoid the 
+     * The minimum frequency of the timeout interval to avoid the
      * poller going boinkers during high traffic
      */
     protected long timeoutInterval = 1000;
-    
+
     /**
      * Timeout in milliseconds for an unlock to take place.
      */
@@ -171,215 +172,264 @@ public class SocketProperties {
 
     private Socket properties;
 
-    public void setProperties(Socket socket) throws SocketException{
+    public boolean getDirectBuffer()
+    {
+        return directBuffer;
+    }
+
+    public void setDirectBuffer(boolean directBuffer)
+    {
+        this.directBuffer = directBuffer;
+    }
+
+    public boolean getOoBInline()
+    {
+        return ooBInline;
+    }
+
+    public void setOoBInline(boolean ooBInline)
+    {
+        this.ooBInline = ooBInline;
+    }
+
+    public int getPerformanceBandwidth()
+    {
+        return performanceBandwidth;
+    }
+
+    public void setPerformanceBandwidth(int performanceBandwidth)
+    {
+        this.performanceBandwidth = performanceBandwidth;
+    }
+
+    public int getPerformanceConnectionTime()
+    {
+        return performanceConnectionTime;
+    }
+
+    public void setPerformanceConnectionTime(int performanceConnectionTime)
+    {
+        this.performanceConnectionTime = performanceConnectionTime;
+    }
+
+    public int getPerformanceLatency()
+    {
+        return performanceLatency;
+    }
+
+    public void setPerformanceLatency(int performanceLatency)
+    {
+        this.performanceLatency = performanceLatency;
+    }
+
+    public int getRxBufSize()
+    {
+        return rxBufSize;
+    }
+
+    public void setRxBufSize(int rxBufSize)
+    {
+        this.rxBufSize = rxBufSize;
+    }
+
+    public boolean getSoKeepAlive()
+    {
+        return soKeepAlive;
+    }
+
+    public void setSoKeepAlive(boolean soKeepAlive)
+    {
+        this.soKeepAlive = soKeepAlive;
+    }
+
+    public boolean getSoLingerOn()
+    {
+        return soLingerOn;
+    }
+
+    public void setSoLingerOn(boolean soLingerOn)
+    {
+        this.soLingerOn = soLingerOn;
+    }
+
+    public int getSoLingerTime()
+    {
+        return soLingerTime;
+    }
+
+    public void setSoLingerTime(int soLingerTime)
+    {
+        this.soLingerTime = soLingerTime;
+    }
+
+    public boolean getSoReuseAddress()
+    {
+        return soReuseAddress;
+    }
+
+    public void setSoReuseAddress(boolean soReuseAddress)
+    {
+        this.soReuseAddress = soReuseAddress;
+    }
+
+    public int getSoTimeout()
+    {
+        return soTimeout;
+    }
+
+    public void setSoTimeout(int soTimeout)
+    {
+        this.soTimeout = soTimeout;
+    }
+
+    public int getSoTrafficClass()
+    {
+        return soTrafficClass;
+    }
+
+    public void setSoTrafficClass(int soTrafficClass)
+    {
+        this.soTrafficClass = soTrafficClass;
+    }
+
+    public boolean getTcpNoDelay()
+    {
+        return tcpNoDelay;
+    }
+
+    public void setTcpNoDelay(boolean tcpNoDelay)
+    {
+        this.tcpNoDelay = tcpNoDelay;
+    }
+
+    public int getTxBufSize()
+    {
+        return txBufSize;
+    }
+
+    public void setTxBufSize(int txBufSize)
+    {
+        this.txBufSize = txBufSize;
+    }
+
+    public int getBufferPool()
+    {
+        return bufferPool;
+    }
+
+    public void setBufferPool(int bufferPool)
+    {
+        this.bufferPool = bufferPool;
+    }
+
+    public int getBufferPoolSize()
+    {
+        return bufferPoolSize;
+    }
+
+    public void setBufferPoolSize(int bufferPoolSize)
+    {
+        this.bufferPoolSize = bufferPoolSize;
+    }
+
+    public int getEventCache()
+    {
+        return eventCache;
+    }
+
+    public void setEventCache(int eventCache)
+    {
+        this.eventCache = eventCache;
+    }
+
+    public int getKeyCache()
+    {
+        return keyCache;
+    }
+
+    public void setKeyCache(int keyCache)
+    {
+        this.keyCache = keyCache;
+    }
+
+    public Socket getProperties()
+    {
+        return properties;
+    }
+
+    public void setProperties(Socket socket) throws SocketException
+    {
         socket.setReceiveBufferSize(rxBufSize);
         socket.setSendBufferSize(txBufSize);
         socket.setOOBInline(ooBInline);
         socket.setKeepAlive(soKeepAlive);
-        socket.setPerformancePreferences(performanceConnectionTime,performanceLatency,performanceBandwidth);
+        socket.setPerformancePreferences(performanceConnectionTime, performanceLatency, performanceBandwidth);
         socket.setReuseAddress(soReuseAddress);
-        socket.setSoLinger(soLingerOn,soLingerTime);
+        socket.setSoLinger(soLingerOn, soLingerTime);
         socket.setSoTimeout(soTimeout);
         socket.setTcpNoDelay(tcpNoDelay);
         socket.setTrafficClass(soTrafficClass);
     }
 
-    public boolean getDirectBuffer() {
-        return directBuffer;
-    }
-
-    public boolean getOoBInline() {
-        return ooBInline;
-    }
-
-    public int getPerformanceBandwidth() {
-        return performanceBandwidth;
-    }
-
-    public int getPerformanceConnectionTime() {
-        return performanceConnectionTime;
-    }
-
-    public int getPerformanceLatency() {
-        return performanceLatency;
-    }
-
-    public int getRxBufSize() {
-        return rxBufSize;
-    }
-
-    public boolean getSoKeepAlive() {
-        return soKeepAlive;
-    }
-
-    public boolean getSoLingerOn() {
-        return soLingerOn;
-    }
-
-    public int getSoLingerTime() {
-        return soLingerTime;
-    }
-
-    public boolean getSoReuseAddress() {
-        return soReuseAddress;
-    }
-
-    public int getSoTimeout() {
-        return soTimeout;
-    }
-
-    public int getSoTrafficClass() {
-        return soTrafficClass;
-    }
-
-    public boolean getTcpNoDelay() {
-        return tcpNoDelay;
-    }
-
-    public int getTxBufSize() {
-        return txBufSize;
-    }
-
-    public int getBufferPool() {
-        return bufferPool;
-    }
-
-    public int getBufferPoolSize() {
-        return bufferPoolSize;
-    }
-
-    public int getEventCache() {
-        return eventCache;
-    }
-
-    public int getKeyCache() {
-        return keyCache;
-    }
-
-    public Socket getProperties() {
-        return properties;
-    }
-
-    public int getAppReadBufSize() {
+    public int getAppReadBufSize()
+    {
         return appReadBufSize;
     }
 
-    public int getAppWriteBufSize() {
-        return appWriteBufSize;
-    }
-
-    public int getProcessorCache() {
-        return processorCache;
-    }
-
-    public long getTimeoutInterval() {
-        return timeoutInterval;
-    }
-
-    public int getDirectBufferPool() {
-        return bufferPool;
-    }
-
-    public void setPerformanceConnectionTime(int performanceConnectionTime) {
-        this.performanceConnectionTime = performanceConnectionTime;
-    }
-
-    public void setTxBufSize(int txBufSize) {
-        this.txBufSize = txBufSize;
-    }
-
-    public void setTcpNoDelay(boolean tcpNoDelay) {
-        this.tcpNoDelay = tcpNoDelay;
-    }
-
-    public void setSoTrafficClass(int soTrafficClass) {
-        this.soTrafficClass = soTrafficClass;
-    }
-
-    public void setSoTimeout(int soTimeout) {
-        this.soTimeout = soTimeout;
-    }
-
-    public void setSoReuseAddress(boolean soReuseAddress) {
-        this.soReuseAddress = soReuseAddress;
-    }
-
-    public void setSoLingerTime(int soLingerTime) {
-        this.soLingerTime = soLingerTime;
-    }
-
-    public void setSoKeepAlive(boolean soKeepAlive) {
-        this.soKeepAlive = soKeepAlive;
-    }
-
-    public void setRxBufSize(int rxBufSize) {
-        this.rxBufSize = rxBufSize;
-    }
-
-    public void setPerformanceLatency(int performanceLatency) {
-        this.performanceLatency = performanceLatency;
-    }
-
-    public void setPerformanceBandwidth(int performanceBandwidth) {
-        this.performanceBandwidth = performanceBandwidth;
-    }
-
-    public void setOoBInline(boolean ooBInline) {
-        this.ooBInline = ooBInline;
-    }
-
-    public void setDirectBuffer(boolean directBuffer) {
-        this.directBuffer = directBuffer;
-    }
-
-    public void setSoLingerOn(boolean soLingerOn) {
-        this.soLingerOn = soLingerOn;
-    }
-
-    public void setBufferPool(int bufferPool) {
-        this.bufferPool = bufferPool;
-    }
-
-    public void setBufferPoolSize(int bufferPoolSize) {
-        this.bufferPoolSize = bufferPoolSize;
-    }
-
-    public void setEventCache(int eventCache) {
-        this.eventCache = eventCache;
-    }
-
-    public void setKeyCache(int keyCache) {
-        this.keyCache = keyCache;
-    }
-
-    public void setAppReadBufSize(int appReadBufSize) {
+    public void setAppReadBufSize(int appReadBufSize)
+    {
         this.appReadBufSize = appReadBufSize;
     }
 
-    public void setAppWriteBufSize(int appWriteBufSize) {
+    public int getAppWriteBufSize()
+    {
+        return appWriteBufSize;
+    }
+
+    public void setAppWriteBufSize(int appWriteBufSize)
+    {
         this.appWriteBufSize = appWriteBufSize;
     }
 
-    public void setProcessorCache(int processorCache) {
+    public int getProcessorCache()
+    {
+        return processorCache;
+    }
+
+    public void setProcessorCache(int processorCache)
+    {
         this.processorCache = processorCache;
     }
 
-    public void setTimeoutInterval(long timeoutInterval) {
+    public long getTimeoutInterval()
+    {
+        return timeoutInterval;
+    }
+
+    public void setTimeoutInterval(long timeoutInterval)
+    {
         this.timeoutInterval = timeoutInterval;
     }
 
-    public void setDirectBufferPool(int directBufferPool) {
+    public int getDirectBufferPool()
+    {
+        return bufferPool;
+    }
+
+    public void setDirectBufferPool(int directBufferPool)
+    {
         this.bufferPool = directBufferPool;
     }
 
-    public int getUnlockTimeout() {
+    public int getUnlockTimeout()
+    {
         return unlockTimeout;
     }
 
-    public void setUnlockTimeout(int unlockTimeout) {
+    public void setUnlockTimeout(int unlockTimeout)
+    {
         this.unlockTimeout = unlockTimeout;
     }
-    
-    
+
 
 }

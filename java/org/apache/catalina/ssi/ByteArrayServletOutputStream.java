@@ -26,10 +26,10 @@ import java.io.ByteArrayOutputStream;
  * <code>SsiInclude</code>
  *
  * @author Bip Thelin
- *
  * @see ServletOutputStream and ByteArrayOutputStream
  */
-public class ByteArrayServletOutputStream extends ServletOutputStream {
+public class ByteArrayServletOutputStream extends ServletOutputStream
+{
     /**
      * Our buffer to hold the stream.
      */
@@ -39,7 +39,8 @@ public class ByteArrayServletOutputStream extends ServletOutputStream {
     /**
      * Construct a new ServletOutputStream.
      */
-    public ByteArrayServletOutputStream() {
+    public ByteArrayServletOutputStream()
+    {
         buf = new ByteArrayOutputStream();
     }
 
@@ -47,7 +48,8 @@ public class ByteArrayServletOutputStream extends ServletOutputStream {
     /**
      * @return the byte array.
      */
-    public byte[] toByteArray() {
+    public byte[] toByteArray()
+    {
         return buf.toByteArray();
     }
 
@@ -57,7 +59,8 @@ public class ByteArrayServletOutputStream extends ServletOutputStream {
      *
      * @param b The parameter to write
      */
-    public void write(int b) {
+    public void write(int b)
+    {
         buf.write(b);
     }
 }

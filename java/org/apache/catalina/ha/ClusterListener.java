@@ -28,12 +28,12 @@ import java.io.Serializable;
 /**
  * Receive SessionID cluster change from other backup node after primary session
  * node is failed.
- * 
+ *
  * @author Peter Rossbach
  * @author Filip Hanik
- *
  */
-public abstract class ClusterListener implements ChannelListener {
+public abstract class ClusterListener implements ChannelListener
+{
 
     public static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(ClusterListener.class);
 
@@ -49,17 +49,21 @@ public abstract class ClusterListener implements ChannelListener {
 
     //--Constructor---------------------------------------------
 
-    public ClusterListener() {
+    public ClusterListener()
+    {
     }
-    
+
     //--Instance Getters/Setters--------------------------------
-    
-    public CatalinaCluster getCluster() {
+
+    public CatalinaCluster getCluster()
+    {
         return cluster;
     }
 
-    public void setCluster(CatalinaCluster cluster) {
-        if (log.isDebugEnabled()) {
+    public void setCluster(CatalinaCluster cluster)
+    {
+        if (log.isDebugEnabled())
+        {
             if (cluster != null)
                 log.debug("add ClusterListener " + this.toString() + " to cluster" + cluster);
             else
@@ -68,45 +72,47 @@ public abstract class ClusterListener implements ChannelListener {
         this.cluster = cluster;
     }
 
-    public boolean equals(Object listener) {
+    public boolean equals(Object listener)
+    {
         return super.equals(listener);
     }
 
-    public int hashCode() {
+    public int hashCode()
+    {
         return super.hashCode();
     }
 
     //--Logic---------------------------------------------------
 
-    public final void messageReceived(Serializable msg, Member member) {
-        if ( msg instanceof ClusterMessage ) messageReceived((ClusterMessage)msg);
-    }
-    public final boolean accept(Serializable msg, Member member) {
-        if ( msg instanceof ClusterMessage ) return true;
-        return false;
+    public final void messageReceived(Serializable msg, Member member)
+    {
+        if (msg instanceof ClusterMessage) messageReceived((ClusterMessage) msg);
     }
 
+    public final boolean accept(Serializable msg, Member member)
+    {
+        if (msg instanceof ClusterMessage) return true;
+        return false;
+    }
 
 
     /**
      * Callback from the cluster, when a message is received, The cluster will
      * broadcast it invoking the messageReceived on the receiver.
-     * 
-     * @param msg
-     *            ClusterMessage - the message received from the cluster
+     *
+     * @param msg ClusterMessage - the message received from the cluster
      */
-    public abstract void messageReceived(ClusterMessage msg) ;
-    
+    public abstract void messageReceived(ClusterMessage msg);
+
 
     /**
      * Accept only SessionIDMessages
-     * 
-     * @param msg
-     *            ClusterMessage
+     *
+     * @param msg ClusterMessage
      * @return boolean - returns true to indicate that messageReceived should be
-     *         invoked. If false is returned, the messageReceived method will
-     *         not be invoked.
+     * invoked. If false is returned, the messageReceived method will
+     * not be invoked.
      */
-    public abstract boolean accept(ClusterMessage msg) ;
+    public abstract boolean accept(ClusterMessage msg);
 
 }

@@ -19,7 +19,11 @@
 package org.apache.catalina.servlets;
 
 
-import java.io.IOException;
+import org.apache.catalina.ContainerServlet;
+import org.apache.catalina.Context;
+import org.apache.catalina.Globals;
+import org.apache.catalina.Wrapper;
+import org.apache.catalina.util.StringManager;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -27,12 +31,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.ContainerServlet;
-import org.apache.catalina.Context;
-import org.apache.catalina.Globals;
-import org.apache.catalina.Wrapper;
-import org.apache.catalina.util.StringManager;
+import java.io.IOException;
 
 
 /**
@@ -40,38 +39,31 @@ import org.apache.catalina.util.StringManager;
  * used to serve requests to servlets that have not been registered
  * in the web application deployment descriptor.
  *
- * @deprecated Servlets should be explicitly mapped in web.xml
- *
  * @author Craig R. McClanahan
- *
+ * @deprecated Servlets should be explicitly mapped in web.xml
  */
 
 public final class InvokerServlet
-    extends HttpServlet implements ContainerServlet {
+        extends HttpServlet implements ContainerServlet
+{
 
 
     // ----------------------------------------------------- Instance Variables
 
 
     /**
+     * The string manager for this package.
+     */
+    private static StringManager sm =
+            StringManager.getManager(Constants.Package);
+    /**
      * The Context container associated with our web application.
      */
     private Context context = null;
-
-
     /**
      * The debugging detail level for this servlet.
      */
     private int debug = 0;
-
-
-    /**
-     * The string manager for this package.
-     */
-    private static StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-
     /**
      * The Wrapper container associated with this servlet.
      */
@@ -84,7 +76,8 @@ public final class InvokerServlet
     /**
      * Return the Wrapper with which we are associated.
      */
-    public Wrapper getWrapper() {
+    public Wrapper getWrapper()
+    {
 
         return (this.wrapper);
 
@@ -96,7 +89,8 @@ public final class InvokerServlet
      *
      * @param wrapper The new wrapper
      */
-    public void setWrapper(Wrapper wrapper) {
+    public void setWrapper(Wrapper wrapper)
+    {
 
         this.wrapper = wrapper;
         if (wrapper == null)
@@ -113,7 +107,8 @@ public final class InvokerServlet
     /**
      * Finalize this servlet.
      */
-    public void destroy() {
+    public void destroy()
+    {
 
         ;       // No actions necessary
 
@@ -123,15 +118,15 @@ public final class InvokerServlet
     /**
      * Process a GET request for the specified resource.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet-specified error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet-specified error occurs
      */
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         serveRequest(request, response);
 
@@ -141,15 +136,15 @@ public final class InvokerServlet
     /**
      * Process a HEAD request for the specified resource.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet-specified error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet-specified error occurs
      */
     public void doHead(HttpServletRequest request,
                        HttpServletResponse response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         serveRequest(request, response);
 
@@ -159,15 +154,15 @@ public final class InvokerServlet
     /**
      * Process a POST request for the specified resource.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet-specified error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet-specified error occurs
      */
     public void doPost(HttpServletRequest request,
                        HttpServletResponse response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         serveRequest(request, response);
 
@@ -177,12 +172,13 @@ public final class InvokerServlet
     /**
      * Initialize this servlet.
      */
-    public void init() throws ServletException {
+    public void init() throws ServletException
+    {
 
         // Ensure that our ContainerServlet properties have been set
         if ((wrapper == null) || (context == null))
             throw new UnavailableException
-                (sm.getString("invokerServlet.noWrapper"));
+                    (sm.getString("invokerServlet.noWrapper"));
 
         // Set our properties from the initialization parameters
         if (getServletConfig().getInitParameter("debug") != null)
@@ -194,7 +190,6 @@ public final class InvokerServlet
     }
 
 
-
     // -------------------------------------------------------- Private Methods
 
 
@@ -204,57 +199,62 @@ public final class InvokerServlet
      * be served directly (like any registered servlet) because it will have
      * been registered and mapped in our associated Context.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet-specified error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet-specified error occurs
      */
     public void serveRequest(HttpServletRequest request,
                              HttpServletResponse response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Disallow calling this servlet via a named dispatcher
         if (request.getAttribute(Globals.NAMED_DISPATCHER_ATTR) != null)
             throw new ServletException
-                (sm.getString("invokerServlet.notNamed"));
+                    (sm.getString("invokerServlet.notNamed"));
 
         // Identify the input parameters and our "included" state
         String inRequestURI = null;
         String inServletPath = null;
         String inPathInfo = null;
         boolean included =
-            (request.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR) != null);
+                (request.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR) != null);
 
-        if (included) {
+        if (included)
+        {
             inRequestURI =
-                (String) request.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR);
+                    (String) request.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR);
             inServletPath =
-                (String) request.getAttribute(Globals.INCLUDE_SERVLET_PATH_ATTR);
+                    (String) request.getAttribute(Globals.INCLUDE_SERVLET_PATH_ATTR);
             inPathInfo =
-                (String) request.getAttribute(Globals.INCLUDE_PATH_INFO_ATTR);
-        } else {
+                    (String) request.getAttribute(Globals.INCLUDE_PATH_INFO_ATTR);
+        } else
+        {
             inRequestURI = request.getRequestURI();
             inServletPath = request.getServletPath();
             inPathInfo = request.getPathInfo();
         }
-        if (debug >= 1) {
+        if (debug >= 1)
+        {
             log("included='" + included + "', requestURI='" +
-                inRequestURI + "'");
+                    inRequestURI + "'");
             log("  servletPath='" + inServletPath + "', pathInfo='" +
-                inPathInfo + "'");
+                    inPathInfo + "'");
         }
 
         // Make sure a servlet name or class name was specified
-        if (inPathInfo == null) {
+        if (inPathInfo == null)
+        {
             if (debug >= 1)
                 log("Invalid pathInfo '" + inPathInfo + "'");
             if (included)
                 throw new ServletException
-                    (sm.getString("invokerServlet.invalidPath", inRequestURI));
-            else {
+                        (sm.getString("invokerServlet.invalidPath", inRequestURI));
+            else
+            {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                                   inRequestURI);
+                        inRequestURI);
                 return;
             }
         }
@@ -263,76 +263,87 @@ public final class InvokerServlet
         String pathInfo = inPathInfo;
         String servletClass = pathInfo.substring(1);
         int slash = servletClass.indexOf('/');
-        if (slash >= 0) {
+        if (slash >= 0)
+        {
             pathInfo = servletClass.substring(slash);
             servletClass = servletClass.substring(0, slash);
-        } else {
+        } else
+        {
             pathInfo = "";
         }
 
-        if (servletClass.startsWith("org.apache.catalina")) {
+        if (servletClass.startsWith("org.apache.catalina"))
+        {
             response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                               inRequestURI);
+                    inRequestURI);
             return;
         }
 
         if (debug >= 1)
             log("Processing servlet '" + servletClass +
-                "' with path info '" + pathInfo + "'");
+                    "' with path info '" + pathInfo + "'");
         String name = "org.apache.catalina.INVOKER." + servletClass;
         String pattern = inServletPath + "/" + servletClass + "/*";
         Wrapper wrapper = null;
 
         // Synchronize to avoid race conditions when multiple requests
         // try to initialize the same servlet at the same time
-        synchronized (this) {
+        synchronized (this)
+        {
 
             // Are we referencing an existing servlet class or name?
             wrapper = (Wrapper) context.findChild(servletClass);
             if (wrapper == null)
                 wrapper = (Wrapper) context.findChild(name);
-            if (wrapper != null) {
+            if (wrapper != null)
+            {
                 String actualServletClass = wrapper.getServletClass();
                 if ((actualServletClass != null)
-                    && (actualServletClass.startsWith
-                        ("org.apache.catalina"))) {
+                        && (actualServletClass.startsWith
+                        ("org.apache.catalina")))
+                {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                                       inRequestURI);
+                            inRequestURI);
                     return;
                 }
                 if (debug >= 1)
                     log("Using wrapper for servlet '" +
-                        wrapper.getName() + "' with mapping '" +
-                        pattern + "'");
+                            wrapper.getName() + "' with mapping '" +
+                            pattern + "'");
                 context.addServletMapping(pattern, wrapper.getName());
             }
 
             // No, create a new wrapper for the specified servlet class
-            else {
+            else
+            {
 
                 if (debug >= 1)
                     log("Creating wrapper for '" + servletClass +
-                        "' with mapping '" + pattern + "'");
+                            "' with mapping '" + pattern + "'");
 
-                try {
+                try
+                {
                     wrapper = context.createWrapper();
                     wrapper.setName(name);
                     wrapper.setLoadOnStartup(1);
                     wrapper.setServletClass(servletClass);
                     context.addChild(wrapper);
                     context.addServletMapping(pattern, name);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     log(sm.getString("invokerServlet.cannotCreate",
-                                     inRequestURI), e);
+                            inRequestURI), e);
                     context.removeServletMapping(pattern);
                     context.removeChild(wrapper);
                     if (included)
                         throw new ServletException
-                            (sm.getString("invokerServlet.cannotCreate",
-                                          inRequestURI), e);
-                    else {
+                                (sm.getString("invokerServlet.cannotCreate",
+                                        inRequestURI), e);
+                    else
+                    {
                         response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                                           inRequestURI);
+                                inRequestURI);
                         return;
                     }
                 }
@@ -342,76 +353,95 @@ public final class InvokerServlet
 
         // Create a request wrapper to pass on to the invoked servlet
         InvokerHttpRequest wrequest =
-            new InvokerHttpRequest(request);
+                new InvokerHttpRequest(request);
         wrequest.setRequestURI(inRequestURI);
         StringBuffer sb = new StringBuffer(inServletPath);
         sb.append("/");
         sb.append(servletClass);
         wrequest.setServletPath(sb.toString());
-        if ((pathInfo == null) || (pathInfo.length() < 1)) {
+        if ((pathInfo == null) || (pathInfo.length() < 1))
+        {
             wrequest.setPathInfo(null);
             wrequest.setPathTranslated(null);
-        } else {
+        } else
+        {
             wrequest.setPathInfo(pathInfo);
             wrequest.setPathTranslated
-                (getServletContext().getRealPath(pathInfo));
+                    (getServletContext().getRealPath(pathInfo));
         }
 
         // Allocate a servlet instance to perform this request
         Servlet instance = null;
-        try {
+        try
+        {
             instance = wrapper.allocate();
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             log(sm.getString("invokerServlet.allocate", inRequestURI), e);
             context.removeServletMapping(pattern);
             context.removeChild(wrapper);
             Throwable rootCause = e.getRootCause();
             if (rootCause == null)
                 rootCause = e;
-            if (rootCause instanceof ClassNotFoundException) {
+            if (rootCause instanceof ClassNotFoundException)
+            {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                                   inRequestURI);
+                        inRequestURI);
                 return;
-            } else if (rootCause instanceof IOException) {
+            } else if (rootCause instanceof IOException)
+            {
                 throw (IOException) rootCause;
-            } else if (rootCause instanceof RuntimeException) {
+            } else if (rootCause instanceof RuntimeException)
+            {
                 throw (RuntimeException) rootCause;
-            } else if (rootCause instanceof ServletException) {
+            } else if (rootCause instanceof ServletException)
+            {
                 throw (ServletException) rootCause;
-            } else {
+            } else
+            {
                 throw new ServletException
-                    (sm.getString("invokerServlet.allocate", inRequestURI),
-                     rootCause);
+                        (sm.getString("invokerServlet.allocate", inRequestURI),
+                                rootCause);
             }
         }
 
         // After loading the wrapper, restore some of the fields when including
-        if (included) {
+        if (included)
+        {
             wrequest.setRequestURI(request.getRequestURI());
             wrequest.setPathInfo(request.getPathInfo());
             wrequest.setServletPath(request.getServletPath());
         }
 
         // Invoke the service() method of the allocated servlet
-        try {
+        try
+        {
             String jspFile = wrapper.getJspFile();
             if (jspFile != null)
                 request.setAttribute(Globals.JSP_FILE_ATTR, jspFile);
             else
                 request.removeAttribute(Globals.JSP_FILE_ATTR);
             request.setAttribute(Globals.INVOKED_ATTR,
-                                 request.getServletPath());
+                    request.getServletPath());
             instance.service(wrequest, response);
-        } catch (UnavailableException e) {
+        }
+        catch (UnavailableException e)
+        {
             context.removeServletMapping(pattern);
             throw e;
-        } finally {
+        }
+        finally
+        {
             request.removeAttribute(Globals.INVOKED_ATTR);
             request.removeAttribute(Globals.JSP_FILE_ATTR);
             // Deallocate the allocated servlet instance
-            try {
+            try
+            {
                 wrapper.deallocate(instance);
-            } catch (ServletException e) {
+            }
+            catch (ServletException e)
+            {
                 log(sm.getString("invokerServlet.deallocate", inRequestURI), e);
                 throw e;
             }

@@ -30,11 +30,11 @@ import java.util.Iterator;
  * <p>Convenience base class for {@link Group} implementations.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
-public abstract class AbstractGroup implements Group {
+public abstract class AbstractGroup implements Group
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -58,7 +58,8 @@ public abstract class AbstractGroup implements Group {
     /**
      * Return the description of this group.
      */
-    public String getDescription() {
+    public String getDescription()
+    {
 
         return (this.description);
 
@@ -70,7 +71,8 @@ public abstract class AbstractGroup implements Group {
      *
      * @param description The new description
      */
-    public void setDescription(String description) {
+    public void setDescription(String description)
+    {
 
         this.description = description;
 
@@ -81,7 +83,8 @@ public abstract class AbstractGroup implements Group {
      * Return the group name of this group, which must be unique
      * within the scope of a {@link UserDatabase}.
      */
-    public String getGroupname() {
+    public String getGroupname()
+    {
 
         return (this.groupname);
 
@@ -94,7 +97,8 @@ public abstract class AbstractGroup implements Group {
      *
      * @param groupname The new group name
      */
-    public void setGroupname(String groupname) {
+    public void setGroupname(String groupname)
+    {
 
         this.groupname = groupname;
 
@@ -114,7 +118,7 @@ public abstract class AbstractGroup implements Group {
 
 
     /**
-     * Return an Iterator over the set of {@link org.apache.catalina.User}s that 
+     * Return an Iterator over the set of {@link org.apache.catalina.User}s that
      * are members of this group.
      */
     public abstract Iterator getUsers();
@@ -159,7 +163,8 @@ public abstract class AbstractGroup implements Group {
     /**
      * Make the principal name the same as the group name.
      */
-    public String getName() {
+    public String getName()
+    {
 
         return (getGroupname());
 

@@ -17,35 +17,38 @@
 
 package org.apache.catalina.ha.deploy;
 
+import org.apache.catalina.ha.ClusterMessage;
+import org.apache.catalina.ha.ClusterMessageBase;
+import org.apache.catalina.tribes.Member;
+
 import java.io.Serializable;
 
-import org.apache.catalina.ha.ClusterMessage;
-import org.apache.catalina.tribes.Member;
-import org.apache.catalina.ha.ClusterMessageBase;
-
 /**
- * Contains the data for a file being transferred over TCP, this is 
+ * Contains the data for a file being transferred over TCP, this is
  * essentially a fragment of a file, read and written by the FileMessageFactory
+ *
  * @author Filip Hanik
  * @version 1.0
  */
 
-public class FileMessage extends ClusterMessageBase implements ClusterMessage, Serializable {
+public class FileMessage extends ClusterMessageBase implements ClusterMessage, Serializable
+{
     private int messageNumber;
     private byte[] data;
     private int dataLength;
-    
+
     private long totalLength;
     private long totalNrOfMsgs;
     private String fileName;
     private String contextPath;
-    
+
     public FileMessage(Member source,
                        String fileName,
-                       String contextPath) {
-        this.address=source;
-        this.fileName=fileName;
-        this.contextPath=contextPath;
+                       String contextPath)
+    {
+        this.address = source;
+        this.fileName = fileName;
+        this.contextPath = contextPath;
     }
     
     /*
@@ -57,40 +60,60 @@ public class FileMessage extends ClusterMessageBase implements ClusterMessage, S
                   
     }
     */
-   
-    public int getMessageNumber() {
+
+    public int getMessageNumber()
+    {
         return messageNumber;
     }
-    public void setMessageNumber(int messageNumber) {
+
+    public void setMessageNumber(int messageNumber)
+    {
         this.messageNumber = messageNumber;
     }
-    public long getTotalNrOfMsgs() {
+
+    public long getTotalNrOfMsgs()
+    {
         return totalNrOfMsgs;
     }
-    public void setTotalNrOfMsgs(long totalNrOfMsgs) {
+
+    public void setTotalNrOfMsgs(long totalNrOfMsgs)
+    {
         this.totalNrOfMsgs = totalNrOfMsgs;
     }
-    public byte[] getData() {
+
+    public byte[] getData()
+    {
         return data;
     }
-    public void setData(byte[] data, int length) {
+
+    public void setData(byte[] data, int length)
+    {
         this.data = data;
         this.dataLength = length;
     }
-    public int getDataLength() {
+
+    public int getDataLength()
+    {
         return dataLength;
     }
-    public void setDataLength(int dataLength) {
+
+    public void setDataLength(int dataLength)
+    {
         this.dataLength = dataLength;
     }
-    public long getTotalLength() {
+
+    public long getTotalLength()
+    {
         return totalLength;
     }
-    public void setTotalLength(long totalLength) {
+
+    public void setTotalLength(long totalLength)
+    {
         this.totalLength = totalLength;
     }
 
-    public String getUniqueId() {
+    public String getUniqueId()
+    {
         StringBuffer result = new StringBuffer(getFileName());
         result.append("#-#");
         result.append(getMessageNumber());
@@ -99,15 +122,20 @@ public class FileMessage extends ClusterMessageBase implements ClusterMessage, S
         return result.toString();
     }
 
-    
-    public String getFileName() {
+
+    public String getFileName()
+    {
         return fileName;
     }
-    public void setFileName(String fileName) {
+
+    public void setFileName(String fileName)
+    {
         this.fileName = fileName;
     }
-    public String getContextPath() {
+
+    public String getContextPath()
+    {
         return contextPath;
     }
-    
+
 }

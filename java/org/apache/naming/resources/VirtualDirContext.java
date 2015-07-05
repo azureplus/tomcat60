@@ -31,26 +31,25 @@ import java.util.*;
  * from META-INF dir from jars available in the classpath: using this DirContext
  * implementation you will be able to use unexpanded jars during development and
  * to make any tld in them virtually available to the webapp.
- *
+ * <p/>
  * Sample context xml configuration:
- *
+ * <p/>
  * <code>
  * &lt;Context docBase="\webapps\mydocbase">
- *   &lt;Resources className="org.apache.naming.resources.VirtualDirContext"
- *              virtualClasspath="\dir\classes;\somedir\somejar.jar"/>
+ * &lt;Resources className="org.apache.naming.resources.VirtualDirContext"
+ * virtualClasspath="\dir\classes;\somedir\somejar.jar"/>
  * &lt;/Resources>
  * </code>
- *
- *
+ * <p/>
+ * <p/>
  * <strong>This is not meant to be used for production.
  * Its meant to ease development with IDE's without the
  * need for fully republishing jars in WEB-INF/lib</strong>
  *
- *
  * @author Fabrizio Giustina
- *
  */
-public class VirtualDirContext extends FileDirContext {
+public class VirtualDirContext extends FileDirContext
+{
 
     /**
      * Map containing generated virtual names for tld files under WEB-INF and
@@ -73,9 +72,11 @@ public class VirtualDirContext extends FileDirContext {
      * <code>virtualClasspath</code> attribute that will be automatically set
      * from the <code>Context</code> <code>virtualClasspath</code> attribute
      * from the context xml file.
+     *
      * @param path <code>;</code> separated list of path elements.
      */
-    public void setVirtualClasspath(String path) {
+    public void setVirtualClasspath(String path)
+    {
         virtualClasspath = path;
     }
 
@@ -83,7 +84,8 @@ public class VirtualDirContext extends FileDirContext {
      * {@inheritDoc}
      */
     @Override
-    public void allocate() {
+    public void allocate()
+    {
         super.allocate();
 
         virtualMappings = new Hashtable<String, File>();
@@ -91,10 +93,12 @@ public class VirtualDirContext extends FileDirContext {
 
         // looks into any META-INF dir found in classpath entries for tld files.
         StringTokenizer tkn = new StringTokenizer(virtualClasspath, ";");
-        while (tkn.hasMoreTokens()) {
+        while (tkn.hasMoreTokens())
+        {
             File file = new File(tkn.nextToken(), "META-INF");
 
-            if (!file.exists() || !file.isDirectory()) {
+            if (!file.exists() || !file.isDirectory())
+            {
                 continue;
             }
             scanForTlds(file);
@@ -105,33 +109,41 @@ public class VirtualDirContext extends FileDirContext {
      * {@inheritDoc}
      */
     @Override
-    public void release() {
+    public void release()
+    {
         super.release();
         virtualMappings = null;
     }
 
     @Override
-    public Attributes getAttributes(String name) throws NamingException {
+    public Attributes getAttributes(String name) throws NamingException
+    {
 
         // handle "virtual" tlds
-        if (name.startsWith("/WEB-INF/") && name.endsWith(".tld")) {
+        if (name.startsWith("/WEB-INF/") && name.endsWith(".tld"))
+        {
             String tldName = name.substring(name.lastIndexOf("/") + 1);
-            if (virtualMappings.containsKey(tldName)) {
+            if (virtualMappings.containsKey(tldName))
+            {
                 return new FileResourceAttributes(virtualMappings.get(tldName));
             }
         } else if (name.startsWith("/META-INF/tags") && name.endsWith(".tag")
-                || name.endsWith(".tagx")) {
+                || name.endsWith(".tagx"))
+        {
 
             // already loaded tag file
-            if (tagfileMappings.containsKey(name)) {
+            if (tagfileMappings.containsKey(name))
+            {
                 return new FileResourceAttributes(tagfileMappings.get(name));
             }
 
             // unknown tagfile, search for it in virtualClasspath
             StringTokenizer tkn = new StringTokenizer(virtualClasspath, ";");
-            while (tkn.hasMoreTokens()) {
+            while (tkn.hasMoreTokens())
+            {
                 File file = new File(tkn.nextToken(), name);
-                if (file.exists()) {
+                if (file.exists())
+                {
                     tagfileMappings.put(name, file);
                     return new FileResourceAttributes(file);
                 }
@@ -143,11 +155,13 @@ public class VirtualDirContext extends FileDirContext {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected ArrayList list(File file) {
+    protected ArrayList list(File file)
+    {
         ArrayList entries = super.list(file);
 
         // adds virtual tlds for WEB-INF listing
-        if ("WEB-INF".equals(file.getName())) {
+        if ("WEB-INF".equals(file.getName()))
+        {
             entries.addAll(getVirtualNamingEntries());
         }
 
@@ -155,21 +169,26 @@ public class VirtualDirContext extends FileDirContext {
     }
 
     @Override
-    public Object lookup(String name) throws NamingException {
+    public Object lookup(String name) throws NamingException
+    {
 
         // handle "virtual" tlds
-        if (name.startsWith("/WEB-INF/") && name.endsWith(".tld")) {
+        if (name.startsWith("/WEB-INF/") && name.endsWith(".tld"))
+        {
             String tldName = name.substring(name.lastIndexOf("/") + 1);
-            if (virtualMappings.containsKey(tldName)) {
+            if (virtualMappings.containsKey(tldName))
+            {
                 return new FileResource(virtualMappings.get(tldName));
             }
         } else if (name.startsWith("/META-INF/tags") && name.endsWith(".tag")
-                || name.endsWith(".tagx")) {
+                || name.endsWith(".tagx"))
+        {
 
             // already loaded tag file: we are sure that getAttributes() has
             // already been called if we are here
             File tagFile = tagfileMappings.get(name);
-            if (tagFile != null) {
+            if (tagFile != null)
+            {
                 return new FileResource(tagFile);
             }
         }
@@ -180,17 +199,22 @@ public class VirtualDirContext extends FileDirContext {
     /**
      * Scan a given dir for tld files. Any found tld will be added to the
      * virtualMappings.
+     *
      * @param dir Dir to scan for tlds
      */
-    private void scanForTlds(File dir) {
+    private void scanForTlds(File dir)
+    {
 
         File[] files = dir.listFiles();
-        for (int j = 0; j < files.length; j++) {
+        for (int j = 0; j < files.length; j++)
+        {
             File file = files[j];
 
-            if (file.isDirectory()) {
+            if (file.isDirectory())
+            {
                 scanForTlds(file);
-            } else if (file.getName().endsWith(".tld")) {
+            } else if (file.getName().endsWith(".tld"))
+            {
                 // just generate a random name using the current timestamp, name
                 // doesn't matter since it needs to be referenced by URI
                 String virtualTldName = "~" + System.currentTimeMillis() + "~"
@@ -203,12 +227,15 @@ public class VirtualDirContext extends FileDirContext {
 
     /**
      * Returns a list of virtual naming entries.
+     *
      * @return list of naming entries, containing tlds in virtualMappings
      */
-    private List<NamingEntry> getVirtualNamingEntries() {
+    private List<NamingEntry> getVirtualNamingEntries()
+    {
         List<NamingEntry> virtual = new ArrayList<NamingEntry>();
 
-        for (String name : virtualMappings.keySet()) {
+        for (String name : virtualMappings.keySet())
+        {
 
             File file = virtualMappings.get(name);
             NamingEntry entry = new NamingEntry(name, new FileResource(file),

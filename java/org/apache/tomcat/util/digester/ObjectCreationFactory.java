@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.apache.tomcat.util.digester;
 
@@ -25,19 +25,19 @@ import org.xml.sax.Attributes;
  * The rule calls {@link #createObject} to create an object
  * to be pushed onto the <code>Digester</code> stack
  * whenever it is matched.</p>
- *
+ * <p/>
  * <p> {@link AbstractObjectCreationFactory} is an abstract
  * implementation suitable for creating anonymous
  * <code>ObjectCreationFactory</code> implementations.
  */
-public interface ObjectCreationFactory {
+public interface ObjectCreationFactory
+{
 
     /**
      * <p>Factory method called by {@link FactoryCreateRule} to supply an
      * object based on the element's attributes.
      *
      * @param attributes the element's attributes
-     *
      * @throws Exception any exception thrown will be propagated upwards
      */
     public Object createObject(Attributes attributes) throws Exception;

@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.apache.naming.resources;
 
@@ -21,13 +21,13 @@ import javax.naming.directory.DirContext;
 
 /**
  * Implements a cache entry.
- * 
- * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  *
+ * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  */
-public class CacheEntry {
-    
-    
+public class CacheEntry
+{
+
+
     // ------------------------------------------------- Instance Variables
 
 
@@ -44,7 +44,8 @@ public class CacheEntry {
     // ----------------------------------------------------- Public Methods
 
 
-    public void recycle() {
+    public void recycle()
+    {
         timestamp = -1;
         name = null;
         attributes = null;
@@ -56,7 +57,8 @@ public class CacheEntry {
     }
 
 
-    public String toString() {
+    public String toString()
+    {
         return ("Cache entry: " + name + "\n"
                 + "Exists: " + exists + "\n"
                 + "Attributes: " + attributes + "\n"

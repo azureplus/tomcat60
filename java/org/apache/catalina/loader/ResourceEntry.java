@@ -26,9 +26,9 @@ import java.util.jar.Manifest;
  * Resource entry.
  *
  * @author Remy Maucherat
- *
  */
-public class ResourceEntry {
+public class ResourceEntry
+{
 
 
     /**

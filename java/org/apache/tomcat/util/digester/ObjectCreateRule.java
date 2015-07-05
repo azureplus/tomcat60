@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.tomcat.util.digester;
@@ -28,22 +28,33 @@ import org.xml.sax.Attributes;
  * object will be popped
  */
 
-public class ObjectCreateRule extends Rule {
+public class ObjectCreateRule extends Rule
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
+     * The attribute containing an override class name if it is present.
+     */
+    protected String attributeName = null;
+    /**
+     * The Java class name of the object to be created.
+     */
+    protected String className = null;
+
+
+    /**
      * Construct an object create rule with the specified class name.
      *
-     * @param digester The associated Digester
+     * @param digester  The associated Digester
      * @param className Java class name of the object to be created
-     *
-     * @deprecated The digester instance is now set in the {@link Digester#addRule} method. 
+     * @deprecated The digester instance is now set in the {@link Digester#addRule} method.
      * Use {@link #ObjectCreateRule(String className)} instead.
      */
-    public ObjectCreateRule(Digester digester, String className) {
+    public ObjectCreateRule(Digester digester, String className)
+    {
 
         this(className);
 
@@ -54,34 +65,33 @@ public class ObjectCreateRule extends Rule {
      * Construct an object create rule with the specified class.
      *
      * @param digester The associated Digester
-     * @param clazz Java class name of the object to be created
-     *
-     * @deprecated The digester instance is now set in the {@link Digester#addRule} method. 
+     * @param clazz    Java class name of the object to be created
+     * @deprecated The digester instance is now set in the {@link Digester#addRule} method.
      * Use {@link #ObjectCreateRule(Class clazz)} instead.
      */
-    public ObjectCreateRule(Digester digester, Class clazz) {
+    public ObjectCreateRule(Digester digester, Class clazz)
+    {
 
         this(clazz);
 
     }
 
-
     /**
      * Construct an object create rule with the specified class name and an
      * optional attribute name containing an override.
      *
-     * @param digester The associated Digester
-     * @param className Java class name of the object to be created
+     * @param digester      The associated Digester
+     * @param className     Java class name of the object to be created
      * @param attributeName Attribute name which, if present, contains an
-     *  override of the class name to create
-     *
-     * @deprecated The digester instance is now set in the {@link Digester#addRule} method. 
+     *                      override of the class name to create
+     * @deprecated The digester instance is now set in the {@link Digester#addRule} method.
      * Use {@link #ObjectCreateRule(String className, String attributeName)} instead.
      */
     public ObjectCreateRule(Digester digester, String className,
-                            String attributeName) {
+                            String attributeName)
+    {
 
-        this (className, attributeName);
+        this(className, attributeName);
 
     }
 
@@ -90,28 +100,30 @@ public class ObjectCreateRule extends Rule {
      * Construct an object create rule with the specified class and an
      * optional attribute name containing an override.
      *
-     * @param digester The associated Digester
+     * @param digester      The associated Digester
      * @param attributeName Attribute name which, if present, contains an
-     * @param clazz Java class name of the object to be created
-     *  override of the class name to create
-     *
-     * @deprecated The digester instance is now set in the {@link Digester#addRule} method. 
+     * @param clazz         Java class name of the object to be created
+     *                      override of the class name to create
+     * @deprecated The digester instance is now set in the {@link Digester#addRule} method.
      * Use {@link #ObjectCreateRule(String attributeName, Class clazz)} instead.
      */
     public ObjectCreateRule(Digester digester,
                             String attributeName,
-                            Class clazz) {
+                            Class clazz)
+    {
 
         this(attributeName, clazz);
 
     }
+
 
     /**
      * Construct an object create rule with the specified class name.
      *
      * @param className Java class name of the object to be created
      */
-    public ObjectCreateRule(String className) {
+    public ObjectCreateRule(String className)
+    {
 
         this(className, (String) null);
 
@@ -123,23 +135,27 @@ public class ObjectCreateRule extends Rule {
      *
      * @param clazz Java class name of the object to be created
      */
-    public ObjectCreateRule(Class clazz) {
+    public ObjectCreateRule(Class clazz)
+    {
 
         this(clazz.getName(), (String) null);
 
     }
+
+    // ----------------------------------------------------- Instance Variables
 
 
     /**
      * Construct an object create rule with the specified class name and an
      * optional attribute name containing an override.
      *
-     * @param className Java class name of the object to be created
+     * @param className     Java class name of the object to be created
      * @param attributeName Attribute name which, if present, contains an
-     *  override of the class name to create
+     *                      override of the class name to create
      */
     public ObjectCreateRule(String className,
-                            String attributeName) {
+                            String attributeName)
+    {
 
         this.className = className;
         this.attributeName = attributeName;
@@ -152,50 +168,40 @@ public class ObjectCreateRule extends Rule {
      * optional attribute name containing an override.
      *
      * @param attributeName Attribute name which, if present, contains an
-     * @param clazz Java class name of the object to be created
-     *  override of the class name to create
+     * @param clazz         Java class name of the object to be created
+     *                      override of the class name to create
      */
     public ObjectCreateRule(String attributeName,
-                            Class clazz) {
+                            Class clazz)
+    {
 
         this(clazz.getName(), attributeName);
 
     }
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The attribute containing an override class name if it is present.
-     */
-    protected String attributeName = null;
-
-
-    /**
-     * The Java class name of the object to be created.
-     */
-    protected String className = null;
-
 
     // --------------------------------------------------------- Public Methods
-
 
     /**
      * Process the beginning of this element.
      *
      * @param attributes The attribute list of this element
      */
-    public void begin(Attributes attributes) throws Exception {
+    public void begin(Attributes attributes) throws Exception
+    {
 
         // Identify the name of the class to instantiate
         String realClassName = className;
-        if (attributeName != null) {
+        if (attributeName != null)
+        {
             String value = attributes.getValue(attributeName);
-            if (value != null) {
+            if (value != null)
+            {
                 realClassName = value;
             }
         }
-        if (digester.log.isDebugEnabled()) {
+        if (digester.log.isDebugEnabled())
+        {
             digester.log.debug("[ObjectCreateRule]{" + digester.match +
                     "}New " + realClassName);
         }
@@ -211,10 +217,12 @@ public class ObjectCreateRule extends Rule {
     /**
      * Process the end of this element.
      */
-    public void end() throws Exception {
+    public void end() throws Exception
+    {
 
         Object top = digester.pop();
-        if (digester.log.isDebugEnabled()) {
+        if (digester.log.isDebugEnabled())
+        {
             digester.log.debug("[ObjectCreateRule]{" + digester.match +
                     "} Pop " + top.getClass().getName());
         }
@@ -225,7 +233,8 @@ public class ObjectCreateRule extends Rule {
     /**
      * Render a printable version of this Rule.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ObjectCreateRule[");
         sb.append("className=");

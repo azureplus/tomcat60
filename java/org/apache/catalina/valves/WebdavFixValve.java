@@ -17,53 +17,54 @@
 
 package org.apache.catalina.valves;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-
-import org.apache.catalina.valves.ValveBase;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
+
+import javax.servlet.ServletException;
+import java.io.IOException;
 
 /**
  * Valve that attempts to force MS WebDAV clients connecting on port 80 to use
  * a WebDAV client that actually works. Other workarounds that might help
  * include:
  * <ul>
- *   <li>Specifing the port, even if it is port 80, when trying to connect.</li>
- *   <li>Canceling the first authentication dialog box and then trying to
- *       reconnect.</li>
+ * <li>Specifing the port, even if it is port 80, when trying to connect.</li>
+ * <li>Canceling the first authentication dialog box and then trying to
+ * reconnect.</li>
  * </ul>
  * To use this valve add the following <code>&lt;Valve
  * className="org.apache.catalina.valves.WebdavFixValve" /&gt;</code>
  * to your <code>Engine</code>, <code>Host</code> or <code>Context</code> as
  * required. Normally, this valve would be used at the <code>Context</code>
  * level.
- *
- *
  */
 
 public class WebdavFixValve
-    extends ValveBase {
+        extends ValveBase
+{
 
     /**
      * Check for the broken MS WebDAV client and if detected issue a re-direct
      * that hopefully will cause the non-broken client to be used.
      */
     public void invoke(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         String ua = request.getHeader("User-Agent");
-        if (ua != null && ua.contains("MiniRedir")) {
+        if (ua != null && ua.contains("MiniRedir"))
+        {
             response.sendRedirect(buildRedirect(request));
-        } else {
+        } else
+        {
             getNext().invoke(request, response);
         }
     }
 
-    private String buildRedirect(Request request) {
+    private String buildRedirect(Request request)
+    {
         StringBuffer location =
-            new StringBuffer(request.getRequestURL().length());
+                new StringBuffer(request.getRequestURL().length());
         location.append(request.getScheme());
         location.append("://");
         location.append(request.getHost().getName());

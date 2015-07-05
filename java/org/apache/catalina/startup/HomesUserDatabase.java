@@ -20,8 +20,8 @@ package org.apache.catalina.startup;
 
 
 import java.io.File;
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 
 /**
@@ -30,27 +30,14 @@ import java.util.Enumeration;
  * to our constructor to be "home" directories for those users.
  *
  * @author Craig R. McClanahan
- *
  */
 
 public final class HomesUserDatabase
-    implements UserDatabase {
+        implements UserDatabase
+{
 
 
     // --------------------------------------------------------- Constructors
-
-
-    /**
-     * Initialize a new instance of this user database component.
-     */
-    public HomesUserDatabase() {
-
-        super();
-
-    }
-
-
-    // --------------------------------------------------- Instance Variables
 
 
     /**
@@ -59,19 +46,31 @@ public final class HomesUserDatabase
     private Hashtable homes = new Hashtable();
 
 
+    // --------------------------------------------------- Instance Variables
     /**
      * The UserConfig listener with which we are associated.
      */
     private UserConfig userConfig = null;
 
 
-    // ----------------------------------------------------------- Properties
+    /**
+     * Initialize a new instance of this user database component.
+     */
+    public HomesUserDatabase()
+    {
 
+        super();
+
+    }
+
+
+    // ----------------------------------------------------------- Properties
 
     /**
      * Return the UserConfig listener with which we are associated.
      */
-    public UserConfig getUserConfig() {
+    public UserConfig getUserConfig()
+    {
 
         return (this.userConfig);
 
@@ -83,7 +82,8 @@ public final class HomesUserDatabase
      *
      * @param userConfig The new UserConfig listener
      */
-    public void setUserConfig(UserConfig userConfig) {
+    public void setUserConfig(UserConfig userConfig)
+    {
 
         this.userConfig = userConfig;
         init();
@@ -99,7 +99,8 @@ public final class HomesUserDatabase
      *
      * @param user User for which a home directory should be retrieved
      */
-    public String getHome(String user) {
+    public String getHome(String user)
+    {
 
         return ((String) homes.get(user));
 
@@ -109,7 +110,8 @@ public final class HomesUserDatabase
     /**
      * Return an enumeration of the usernames defined on this server.
      */
-    public Enumeration getUsers() {
+    public Enumeration getUsers()
+    {
 
         return (homes.keys());
 
@@ -122,7 +124,8 @@ public final class HomesUserDatabase
     /**
      * Initialize our set of users and home directories.
      */
-    private void init() {
+    private void init()
+    {
 
         String homeBase = userConfig.getHomeBase();
         File homeBaseDir = new File(homeBase);
@@ -130,7 +133,8 @@ public final class HomesUserDatabase
             return;
         String homeBaseFiles[] = homeBaseDir.list();
 
-        for (int i = 0; i < homeBaseFiles.length; i++) {
+        for (int i = 0; i < homeBaseFiles.length; i++)
+        {
             File homeDir = new File(homeBaseDir, homeBaseFiles[i]);
             if (!homeDir.isDirectory() || !homeDir.canRead())
                 continue;

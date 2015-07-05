@@ -22,7 +22,6 @@ package org.apache.catalina.ha;
  * different deployment implementations
  *
  * @author Filip Hanik
- *
  */
 
 import org.apache.catalina.LifecycleException;
@@ -31,11 +30,13 @@ import org.apache.catalina.tribes.ChannelListener;
 import java.io.IOException;
 import java.net.URL;
 
-public interface ClusterDeployer extends ChannelListener {
+public interface ClusterDeployer extends ChannelListener
+{
     /**
      * Descriptive information about this component implementation.
      */
     public String info = "ClusterDeployer/1.0";
+
     /**
      * Start the cluster deployer, the owning container will invoke this
      * @throws Exception - if failure to start cluster
@@ -107,7 +108,7 @@ public interface ClusterDeployer extends ChannelListener {
      * call from container Background Process
      */
     public void backgroundProcess();
-    
+
     /**
      * Returns the cluster the cluster deployer is associated with
      * @return CatalinaCluster

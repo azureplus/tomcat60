@@ -23,38 +23,42 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+
 /**
  * Implements the Server-side #exec command
- * 
+ *
  * @author Bip Thelin
  * @author Amy Roh
  * @author Paul Speed
  * @author Dan Sandberg
  * @author David Becker
- *
  */
-public class SSIExec implements SSICommand {
-    protected SSIInclude ssiInclude = new SSIInclude();
+public class SSIExec implements SSICommand
+{
     protected final static int BUFFER_SIZE = 1024;
-
+    protected SSIInclude ssiInclude = new SSIInclude();
 
     /**
      * @see SSICommand
      */
     public long process(SSIMediator ssiMediator, String commandName,
-            String[] paramNames, String[] paramValues, PrintWriter writer) {
+                        String[] paramNames, String[] paramValues, PrintWriter writer)
+    {
         long lastModified = 0;
         String configErrMsg = ssiMediator.getConfigErrMsg();
         String paramName = paramNames[0];
         String paramValue = paramValues[0];
         String substitutedValue = ssiMediator.substituteVariables(paramValue);
-        if (paramName.equalsIgnoreCase("cgi")) {
+        if (paramName.equalsIgnoreCase("cgi"))
+        {
             lastModified = ssiInclude.process(ssiMediator, "include",
-                    			new String[]{"virtual"}, new String[]{substitutedValue},
-								writer);
-        } else if (paramName.equalsIgnoreCase("cmd")) {
+                    new String[]{"virtual"}, new String[]{substitutedValue},
+                    writer);
+        } else if (paramName.equalsIgnoreCase("cmd"))
+        {
             boolean foundProgram = false;
-            try {
+            try
+            {
                 Runtime rt = Runtime.getRuntime();
                 Process proc = rt.exec(substitutedValue);
                 foundProgram = true;
@@ -66,12 +70,17 @@ public class SSIExec implements SSICommand {
                 IOTools.flow(stdErrReader, writer, buf);
                 IOTools.flow(stdOutReader, writer, buf);
                 proc.waitFor();
-                lastModified = System.currentTimeMillis();                
-            } catch (InterruptedException e) {
+                lastModified = System.currentTimeMillis();
+            }
+            catch (InterruptedException e)
+            {
                 ssiMediator.log("Couldn't exec file: " + substitutedValue, e);
                 writer.write(configErrMsg);
-            } catch (IOException e) {
-                if (!foundProgram) {
+            }
+            catch (IOException e)
+            {
+                if (!foundProgram)
+                {
                     //apache doesn't output an error message if it can't find
                     // a program
                 }

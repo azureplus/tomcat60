@@ -17,14 +17,15 @@
 
 package org.apache.tomcat.util.net;
 
-import java.net.Socket;
-
 import org.apache.tomcat.util.threads.ThreadWithAttributes;
+
+import java.net.Socket;
 
 /**
  * Regular master slave thread pool. Slave threads will wait for work.
  */
-class MasterSlaveWorkerThread implements Runnable {
+class MasterSlaveWorkerThread implements Runnable
+{
 
     protected PoolTcpEndpoint endpoint;
     protected String threadName;
@@ -36,8 +37,9 @@ class MasterSlaveWorkerThread implements Runnable {
     private TcpConnection con = new TcpConnection();
     private Object[] threadData = null;
 
-    
-    public MasterSlaveWorkerThread(PoolTcpEndpoint endpoint, String threadName) {
+
+    public MasterSlaveWorkerThread(PoolTcpEndpoint endpoint, String threadName)
+    {
         this.endpoint = endpoint;
         this.threadName = threadName;
     }
@@ -52,13 +54,18 @@ class MasterSlaveWorkerThread implements Runnable {
      *
      * @param socket TCP socket to process
      */
-    synchronized void assign(Socket socket) {
+    synchronized void assign(Socket socket)
+    {
 
         // Wait for the Processor to get the previous Socket
-        while (available) {
-            try {
+        while (available)
+        {
+            try
+            {
                 wait();
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e)
+            {
             }
         }
 
@@ -69,18 +76,23 @@ class MasterSlaveWorkerThread implements Runnable {
 
     }
 
-    
+
     /**
      * Await a newly assigned Socket from our Connector, or <code>null</code>
      * if we are supposed to shut down.
      */
-    private synchronized Socket await() {
+    private synchronized Socket await()
+    {
 
         // Wait for the Connector to provide a new Socket
-        while (!available) {
-            try {
+        while (!available)
+        {
+            try
+            {
                 wait();
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e)
+            {
             }
         }
 
@@ -94,15 +106,16 @@ class MasterSlaveWorkerThread implements Runnable {
     }
 
 
-
     /**
      * The background thread that listens for incoming TCP/IP connections and
      * hands them off to an appropriate processor.
      */
-    public void run() {
+    public void run()
+    {
 
         // Process requests until we receive a shutdown signal
-        while (!stopped) {
+        while (!stopped)
+        {
 
             // Wait for the next socket to be assigned
             Socket socket = await();
@@ -118,7 +131,8 @@ class MasterSlaveWorkerThread implements Runnable {
         }
 
         // Tell threadStop() we have shut ourselves down successfully
-        synchronized (threadSync) {
+        synchronized (threadSync)
+        {
             threadSync.notifyAll();
         }
 
@@ -128,7 +142,8 @@ class MasterSlaveWorkerThread implements Runnable {
     /**
      * Start the background processing thread.
      */
-    public void start() {
+    public void start()
+    {
         threadData = endpoint.getConnectionHandler().init();
         thread = new ThreadWithAttributes(null, this);
         thread.setName(threadName);
@@ -140,7 +155,8 @@ class MasterSlaveWorkerThread implements Runnable {
     /**
      * Stop the background processing thread.
      */
-    public void stop() {
+    public void stop()
+    {
         stopped = true;
         assign(null);
         thread = null;

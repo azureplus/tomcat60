@@ -27,10 +27,10 @@ import org.apache.tools.ant.BuildException;
  * Tomcat manager application.
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
-public class ListTask extends AbstractCatalinaTask {
+public class ListTask extends AbstractCatalinaTask
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -42,9 +42,10 @@ public class ListTask extends AbstractCatalinaTask {
     /**
      * Execute the requested operation.
      *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
 
         super.execute();
         execute("/list");

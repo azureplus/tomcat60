@@ -22,14 +22,15 @@ import java.io.Serializable;
 /**
  *
  */
-public abstract class Expression implements Serializable {
+public abstract class Expression implements Serializable
+{
 
     public abstract boolean equals(Object obj);
 
     public abstract int hashCode();
-    
+
     public abstract String getExpressionString();
-    
+
     public abstract boolean isLiteralText();
 
 }

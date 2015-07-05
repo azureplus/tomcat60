@@ -16,7 +16,8 @@
  */
 package org.apache.tomcat.util.descriptor;
 
-public class Constants {
+public class Constants
+{
 
     public static final String PACKAGE_NAME =
             Constants.class.getPackage().getName();

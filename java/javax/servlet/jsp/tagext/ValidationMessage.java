@@ -21,7 +21,7 @@ package javax.servlet.jsp.tagext;
 
 /**
  * A validation message from either TagLibraryValidator or TagExtraInfo.
- * <p>
+ * <p/>
  * As of JSP 2.0, a JSP container must support a jsp:id attribute
  * to provide higher quality validation errors.
  * The container will track the JSP pages
@@ -33,16 +33,21 @@ package javax.servlet.jsp.tagext;
  * objects.  The container then, in turn, can use these
  * values to provide more precise information on the location
  * of an error.
- *  
- * <p>
- * The actual prefix of the <code>id</code> attribute may or may not be 
+ * <p/>
+ * <p/>
+ * The actual prefix of the <code>id</code> attribute may or may not be
  * <code>jsp</code> but it will always map to the namespace
  * <code>http://java.sun.com/JSP/Page</code>.  A TagLibraryValidator
  * implementation must rely on the uri, not the prefix, of the <code>id</code>
  * attribute.
  */
 
-public class ValidationMessage {
+public class ValidationMessage
+{
+
+    // Private data
+    private String id;
+    private String message;
 
     /**
      * Create a ValidationMessage.  The message String should be
@@ -52,14 +57,14 @@ public class ValidationMessage {
      * id must be the value of a jsp:id attribute for the PageData
      * passed into the validate() method.
      *
-     * @param id Either null, or the value of a jsp:id attribute.
+     * @param id      Either null, or the value of a jsp:id attribute.
      * @param message A localized validation message.
      */
-    public ValidationMessage(String id, String message) {
-	this.id = id;
-	this.message = message;
+    public ValidationMessage(String id, String message)
+    {
+        this.id = id;
+        this.message = message;
     }
-
 
     /**
      * Get the jsp:id.
@@ -67,8 +72,9 @@ public class ValidationMessage {
      *
      * @return The jsp:id information.
      */
-    public String getId() {
-	return id;
+    public String getId()
+    {
+        return id;
     }
 
     /**
@@ -76,11 +82,8 @@ public class ValidationMessage {
      *
      * @return A validation message
      */
-    public String getMessage(){
-	return message;
+    public String getMessage()
+    {
+        return message;
     }
-
-    // Private data
-    private String id;
-    private String message;
 }

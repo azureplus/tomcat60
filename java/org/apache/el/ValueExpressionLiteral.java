@@ -31,7 +31,8 @@ import java.io.ObjectOutput;
 
 
 public final class ValueExpressionLiteral extends ValueExpression implements
-        Externalizable {
+        Externalizable
+{
 
     private static final long serialVersionUID = 1L;
 
@@ -39,72 +40,88 @@ public final class ValueExpressionLiteral extends ValueExpression implements
 
     private Class expectedType;
 
-    public ValueExpressionLiteral() {
+    public ValueExpressionLiteral()
+    {
         super();
     }
 
-    public ValueExpressionLiteral(Object value, Class expectedType) {
+    public ValueExpressionLiteral(Object value, Class expectedType)
+    {
         this.value = value;
         this.expectedType = expectedType;
     }
 
-    public Object getValue(ELContext context) {
-        if (this.expectedType != null) {
+    public Object getValue(ELContext context)
+    {
+        if (this.expectedType != null)
+        {
             return ELSupport.coerceToType(this.value, this.expectedType);
         }
         return this.value;
     }
 
-    public void setValue(ELContext context, Object value) {
+    public void setValue(ELContext context, Object value)
+    {
         throw new PropertyNotWritableException(MessageFactory.get(
                 "error.value.literal.write", this.value));
     }
 
-    public boolean isReadOnly(ELContext context) {
+    public boolean isReadOnly(ELContext context)
+    {
         return true;
     }
 
-    public Class getType(ELContext context) {
+    public Class getType(ELContext context)
+    {
         return (this.value != null) ? this.value.getClass() : null;
     }
 
-    public Class getExpectedType() {
+    public Class getExpectedType()
+    {
         return this.expectedType;
     }
 
-    public String getExpressionString() {
+    public String getExpressionString()
+    {
         return (this.value != null) ? this.value.toString() : null;
     }
 
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         return (obj instanceof ValueExpressionLiteral && this
                 .equals((ValueExpressionLiteral) obj));
     }
 
-    public boolean equals(ValueExpressionLiteral ve) {
+    public boolean equals(ValueExpressionLiteral ve)
+    {
         return (ve != null && (this.value != null && ve.value != null && (this.value == ve.value || this.value
                 .equals(ve.value))));
     }
 
-    public int hashCode() {
+    public int hashCode()
+    {
         return (this.value != null) ? this.value.hashCode() : 0;
     }
 
-    public boolean isLiteralText() {
+    public boolean isLiteralText()
+    {
         return true;
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
         out.writeObject(this.value);
         out.writeUTF((this.expectedType != null) ? this.expectedType.getName()
                 : "");
     }
 
     public void readExternal(ObjectInput in) throws IOException,
-            ClassNotFoundException {
+            ClassNotFoundException
+    {
         this.value = in.readObject();
         String type = in.readUTF();
-        if (!"".equals(type)) {
+        if (!"".equals(type))
+        {
             this.expectedType = ReflectionUtil.forName(type);
         }
     }

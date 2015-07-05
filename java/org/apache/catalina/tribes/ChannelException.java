@@ -26,11 +26,12 @@ import java.util.ArrayList;
  * If an application is sending a message and some of the recipients fail to receive it,
  * the application can retrieve what recipients failed by using the <code>getFaultyMembers()</code>
  * method. This way, an application will always know if a message was delivered successfully or not.
- * @author Filip Hanik
  *
+ * @author Filip Hanik
  */
 
-public class ChannelException extends Exception {
+public class ChannelException extends Exception
+{
     /**
      * Empty list to avoid reinstatiating lists
      */
@@ -38,140 +39,169 @@ public class ChannelException extends Exception {
     /*
      * Holds a list of faulty members
      */
-    private ArrayList faultyMembers=null;
-    
+    private ArrayList faultyMembers = null;
+
     /**
      * Constructor, creates a ChannelException
+     *
      * @see java.lang.Exception#Exception()
      */
-    public ChannelException() {
+    public ChannelException()
+    {
         super();
     }
 
     /**
      * Constructor, creates a ChannelException with an error message
+     *
      * @see java.lang.Exception#Exception(String)
      */
-    public ChannelException(String message) {
+    public ChannelException(String message)
+    {
         super(message);
     }
 
     /**
      * Constructor, creates a ChannelException with an error message and a cause
+     *
      * @param message String
-     * @param cause Throwable
-     * @see java.lang.Exception#Exception(String,Throwable)
+     * @param cause   Throwable
+     * @see java.lang.Exception#Exception(String, Throwable)
      */
-    public ChannelException(String message, Throwable cause) {
+    public ChannelException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
     /**
      * Constructor, creates a ChannelException with a cause
+     *
      * @param cause Throwable
      * @see java.lang.Exception#Exception(Throwable)
      */
-    public ChannelException(Throwable cause) {
+    public ChannelException(Throwable cause)
+    {
         super(cause);
     }
-    
+
     /**
      * Returns the message for this exception
+     *
      * @return String
      * @see java.lang.Exception#getMessage()
      */
-    public String getMessage() {
+    public String getMessage()
+    {
         StringBuffer buf = new StringBuffer(super.getMessage());
-        if (faultyMembers==null || faultyMembers.size() == 0 ) {
+        if (faultyMembers == null || faultyMembers.size() == 0)
+        {
             buf.append("; No faulty members identified.");
-        } else {
+        } else
+        {
             buf.append("; Faulty members:");
-            for ( int i=0; i<faultyMembers.size(); i++ ) {
-                FaultyMember mbr = (FaultyMember)faultyMembers.get(i);
+            for (int i = 0; i < faultyMembers.size(); i++)
+            {
+                FaultyMember mbr = (FaultyMember) faultyMembers.get(i);
                 buf.append(mbr.getMember().getName());
                 buf.append("; ");
             }
         }
         return buf.toString();
     }
-    
+
     /**
      * Adds a faulty member, and the reason the member failed.
+     *
      * @param mbr Member
-     * @param x Exception
+     * @param x   Exception
      */
-    public boolean addFaultyMember(Member mbr, Exception x ) {
-        return addFaultyMember(new FaultyMember(mbr,x));
+    public boolean addFaultyMember(Member mbr, Exception x)
+    {
+        return addFaultyMember(new FaultyMember(mbr, x));
     }
-    
+
     /**
      * Adds a list of faulty members
+     *
      * @param mbrs FaultyMember[]
      */
-    public int addFaultyMember(FaultyMember[] mbrs) {
+    public int addFaultyMember(FaultyMember[] mbrs)
+    {
         int result = 0;
-        for (int i=0; mbrs!=null && i<mbrs.length; i++ ) {
-            if ( addFaultyMember(mbrs[i]) ) result++;
+        for (int i = 0; mbrs != null && i < mbrs.length; i++)
+        {
+            if (addFaultyMember(mbrs[i])) result++;
         }
         return result;
     }
 
     /**
      * Adds a faulty member
+     *
      * @param mbr FaultyMember
      */
-    public boolean addFaultyMember(FaultyMember mbr) {
-        if ( this.faultyMembers==null ) this.faultyMembers = new ArrayList();
-        if ( !faultyMembers.contains(mbr) ) return faultyMembers.add(mbr);
+    public boolean addFaultyMember(FaultyMember mbr)
+    {
+        if (this.faultyMembers == null) this.faultyMembers = new ArrayList();
+        if (!faultyMembers.contains(mbr)) return faultyMembers.add(mbr);
         else return false;
     }
-    
+
     /**
      * Returns an array of members that failed and the reason they failed.
+     *
      * @return FaultyMember[]
      */
-    public FaultyMember[] getFaultyMembers() {
-        if ( this.faultyMembers==null ) return EMPTY_LIST;
-        return (FaultyMember[])faultyMembers.toArray(new FaultyMember[faultyMembers.size()]);
+    public FaultyMember[] getFaultyMembers()
+    {
+        if (this.faultyMembers == null) return EMPTY_LIST;
+        return (FaultyMember[]) faultyMembers.toArray(new FaultyMember[faultyMembers.size()]);
     }
-    
+
     /**
-     * 
-     * <p>Title: FaultyMember class</p> 
-     * 
+     * <p>Title: FaultyMember class</p>
+     * <p/>
      * <p>Description: Represent a failure to a specific member when a message was sent
-     * to more than one member</p> 
-     * 
+     * to more than one member</p>
+     *
      * @author Filip Hanik
      * @version 1.0
      */
-    public static class FaultyMember {
+    public static class FaultyMember
+    {
         protected Exception cause;
         protected Member member;
-        public FaultyMember(Member mbr, Exception x) { 
+
+        public FaultyMember(Member mbr, Exception x)
+        {
             this.member = mbr;
             this.cause = x;
         }
-        
-        public Member getMember() {
+
+        public Member getMember()
+        {
             return member;
         }
-        
-        public Exception getCause() {
+
+        public Exception getCause()
+        {
             return cause;
         }
-        
-        public String toString() {
-            return "FaultyMember:"+member.toString();
+
+        public String toString()
+        {
+            return "FaultyMember:" + member.toString();
         }
-        
-        public int hashCode() {
-            return (member!=null)?member.hashCode():0;
+
+        public int hashCode()
+        {
+            return (member != null) ? member.hashCode() : 0;
         }
-        
-        public boolean equals(Object o) {
-            if (member==null || (!(o instanceof FaultyMember)) || (((FaultyMember)o).member==null)) return false;
-            return member.equals(((FaultyMember)o).member);
+
+        public boolean equals(Object o)
+        {
+            if (member == null || (!(o instanceof FaultyMember)) || (((FaultyMember) o).member == null)) return false;
+            return member.equals(((FaultyMember) o).member);
         }
     }
 

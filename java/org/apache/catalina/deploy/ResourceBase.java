@@ -27,105 +27,108 @@ import java.util.Iterator;
  * Representation of an Context element
  *
  * @author Peter Rossbach (pero@apache.org)
- *
  */
 
-public class ResourceBase implements Serializable {
+public class ResourceBase implements Serializable
+{
 
 
     // ------------------------------------------------------------- Properties
 
 
     /**
+     * The NamingResources with which we are associated (if any).
+     */
+    protected NamingResources resources = null;
+    /**
      * The description of this Context Element.
      */
     private String description = null;
-
-    public String getDescription() {
-        return (this.description);
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-
-
     /**
      * The name of this context Element.
      */
     private String name = null;
-
-    public String getName() {
-        return (this.name);
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
     /**
      * The name of the EJB bean implementation class.
      */
     private String type = null;
-
-    public String getType() {
-        return (this.type);
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-
     /**
      * Holder for our configured properties.
      */
     private HashMap properties = new HashMap();
 
+    public String getDescription()
+    {
+        return (this.description);
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public String getName()
+    {
+        return (this.name);
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getType()
+    {
+        return (this.type);
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
     /**
      * Return a configured property.
      */
-    public Object getProperty(String name) {
+    public Object getProperty(String name)
+    {
         return properties.get(name);
     }
 
     /**
      * Set a configured property.
      */
-    public void setProperty(String name, Object value) {
+    public void setProperty(String name, Object value)
+    {
         properties.put(name, value);
     }
 
-    /** 
+    /**
      * remove a configured property.
      */
-    public void removeProperty(String name) {
+    public void removeProperty(String name)
+    {
         properties.remove(name);
     }
+
+
+    // -------------------------------------------------------- Package Methods
 
     /**
      * List properties.
      */
-    public Iterator listProperties() {
+    public Iterator listProperties()
+    {
         return properties.keySet().iterator();
     }
-    
-    
-    // -------------------------------------------------------- Package Methods
 
-
-    /**
-     * The NamingResources with which we are associated (if any).
-     */
-    protected NamingResources resources = null;
-
-    public NamingResources getNamingResources() {
+    public NamingResources getNamingResources()
+    {
         return (this.resources);
     }
 
-    void setNamingResources(NamingResources resources) {
+    void setNamingResources(NamingResources resources)
+    {
         this.resources = resources;
     }
 

@@ -17,11 +17,11 @@
 
 package org.apache.tomcat.util.net.jsse;
 
+import javax.net.ssl.X509KeyManager;
 import java.net.Socket;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import javax.net.ssl.X509KeyManager;
 
 /**
  * X509KeyManager which allows selection of a specific keypair and certificate
@@ -30,7 +30,8 @@ import javax.net.ssl.X509KeyManager;
  *
  * @author Jan Luehe
  */
-public final class JSSEKeyManager implements X509KeyManager {
+public final class JSSEKeyManager implements X509KeyManager
+{
 
     private X509KeyManager delegate;
     private String serverKeyAlias;
@@ -38,11 +39,12 @@ public final class JSSEKeyManager implements X509KeyManager {
     /**
      * Constructor.
      *
-     * @param mgr The X509KeyManager used as a delegate
+     * @param mgr            The X509KeyManager used as a delegate
      * @param serverKeyAlias The alias name of the server's keypair and
-     * supporting certificate chain
+     *                       supporting certificate chain
      */
-    public JSSEKeyManager(X509KeyManager mgr, String serverKeyAlias) {
+    public JSSEKeyManager(X509KeyManager mgr, String serverKeyAlias)
+    {
         this.delegate = mgr;
         this.serverKeyAlias = serverKeyAlias;
     }
@@ -53,18 +55,18 @@ public final class JSSEKeyManager implements X509KeyManager {
      * recognized by the peer (if any).
      *
      * @param keyType The key algorithm type name(s), ordered with the
-     * most-preferred key type first
+     *                most-preferred key type first
      * @param issuers The list of acceptable CA issuer subject names, or null
-     * if it does not matter which issuers are used
-     * @param socket The socket to be used for this connection. This parameter
-     * can be null, in which case this method will return the most generic
-     * alias to use
-     *
+     *                if it does not matter which issuers are used
+     * @param socket  The socket to be used for this connection. This parameter
+     *                can be null, in which case this method will return the most generic
+     *                alias to use
      * @return The alias name for the desired key, or null if there are no
      * matches
      */
     public String chooseClientAlias(String[] keyType, Principal[] issuers,
-                                    Socket socket) {
+                                    Socket socket)
+    {
         return delegate.chooseClientAlias(keyType, issuers, socket);
     }
 
@@ -74,15 +76,15 @@ public final class JSSEKeyManager implements X509KeyManager {
      *
      * @param keyType The key algorithm type name (ignored)
      * @param issuers The list of acceptable CA issuer subject names, or null
-     * if it does not matter which issuers are used (ignored)
-     * @param socket The socket to be used for this connection. This parameter
-     * can be null, in which case this method will return the most generic
-     * alias to use (ignored)
-     *
+     *                if it does not matter which issuers are used (ignored)
+     * @param socket  The socket to be used for this connection. This parameter
+     *                can be null, in which case this method will return the most generic
+     *                alias to use (ignored)
      * @return Alias name for the desired key
      */
     public String chooseServerAlias(String keyType, Principal[] issuers,
-                                    Socket socket) {
+                                    Socket socket)
+    {
         return serverKeyAlias;
     }
 
@@ -90,13 +92,13 @@ public final class JSSEKeyManager implements X509KeyManager {
      * Returns the certificate chain associated with the given alias.
      *
      * @param alias The alias name
-     *
      * @return Certificate chain (ordered with the user's certificate first
      * and the root certificate authority last), or null if the alias can't be
      * found
      */
-    public X509Certificate[] getCertificateChain(String alias) {
-        return delegate.getCertificateChain(alias); 
+    public X509Certificate[] getCertificateChain(String alias)
+    {
+        return delegate.getCertificateChain(alias);
     }
 
     /**
@@ -106,12 +108,12 @@ public final class JSSEKeyManager implements X509KeyManager {
      *
      * @param keyType The key algorithm type name
      * @param issuers The list of acceptable CA issuer subject names, or null
-     * if it does not matter which issuers are used
-     *
+     *                if it does not matter which issuers are used
      * @return Array of the matching alias names, or null if there were no
      * matches
      */
-    public String[] getClientAliases(String keyType, Principal[] issuers) {
+    public String[] getClientAliases(String keyType, Principal[] issuers)
+    {
         return delegate.getClientAliases(keyType, issuers);
     }
 
@@ -122,12 +124,12 @@ public final class JSSEKeyManager implements X509KeyManager {
      *
      * @param keyType The key algorithm type name
      * @param issuers The list of acceptable CA issuer subject names, or null
-     * if it does not matter which issuers are used
-     *
+     *                if it does not matter which issuers are used
      * @return Array of the matching alias names, or null if there were no
      * matches
      */
-    public String[] getServerAliases(String keyType, Principal[] issuers) {
+    public String[] getServerAliases(String keyType, Principal[] issuers)
+    {
         return delegate.getServerAliases(keyType, issuers);
     }
 
@@ -135,10 +137,10 @@ public final class JSSEKeyManager implements X509KeyManager {
      * Returns the key associated with the given alias.
      *
      * @param alias The alias name
-     *
      * @return The requested key, or null if the alias can't be found
      */
-    public PrivateKey getPrivateKey(String alias) {
+    public PrivateKey getPrivateKey(String alias)
+    {
         return delegate.getPrivateKey(alias);
     }
 }

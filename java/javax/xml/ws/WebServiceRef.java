@@ -26,10 +26,15 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 
-public @interface WebServiceRef {
+public @interface WebServiceRef
+{
     public String name() default "";
+
     public Class type() default java.lang.Object.class;
+
     public Class value() default java.lang.Object.class;
+
     public String wsdlLocation() default "";
+
     public String mappedName() default "";
 }

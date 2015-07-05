@@ -16,12 +16,12 @@
   limitations under the License.
 -->
 <mbeans-descriptors>
-  <mbean         
-    name="FarmWarDeployer"
-    className="org.apache.catalina.mbeans.ClassNameMBean"
-    description="Farm Deployer - Broken"
-    domain="Catalina"
-    group="Cluster"
-    type="org.apache.catalina.ha.deploy.FarmWarDeployer">
-  </mbean>
+    <mbean
+            name="FarmWarDeployer"
+            className="org.apache.catalina.mbeans.ClassNameMBean"
+            description="Farm Deployer - Broken"
+            domain="Catalina"
+            group="Cluster"
+            type="org.apache.catalina.ha.deploy.FarmWarDeployer">
+    </mbean>
 </mbeans-descriptors>

@@ -18,24 +18,32 @@
 
 package org.apache.jasper.tagplugins.jstl.core;
 
-import org.apache.jasper.compiler.tagplugin.*;
+import org.apache.jasper.compiler.tagplugin.TagPlugin;
+import org.apache.jasper.compiler.tagplugin.TagPluginContext;
 
-public final class If implements TagPlugin {
-    
-    public void doTag(TagPluginContext ctxt) {
+public final class If implements TagPlugin
+{
+
+    public void doTag(TagPluginContext ctxt)
+    {
         String condV = ctxt.getTemporaryVariableName();
         ctxt.generateJavaSource("boolean " + condV + "=");
         ctxt.generateAttribute("test");
         ctxt.generateJavaSource(";");
-        if (ctxt.isAttributeSpecified("var")) {
+        if (ctxt.isAttributeSpecified("var"))
+        {
             String scope = "PageContext.PAGE_SCOPE";
-            if (ctxt.isAttributeSpecified("scope")) {
+            if (ctxt.isAttributeSpecified("scope"))
+            {
                 String scopeStr = ctxt.getConstantAttribute("scope");
-                if ("request".equals(scopeStr)) {
+                if ("request".equals(scopeStr))
+                {
                     scope = "PageContext.REQUEST_SCOPE";
-                } else if ("session".equals(scopeStr)) {
+                } else if ("session".equals(scopeStr))
+                {
                     scope = "PageContext.SESSION_SCOPE";
-                } else if ("application".equals(scopeStr)) {
+                } else if ("application".equals(scopeStr))
+                {
                     scope = "PageContext.APPLICATION_SCOPE";
                 }
             }

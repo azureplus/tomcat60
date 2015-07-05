@@ -19,39 +19,7 @@
 package org.apache.catalina.session;
 
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
-import org.apache.catalina.Engine;
-import org.apache.catalina.Globals;
-import org.apache.catalina.Manager;
-import org.apache.catalina.Session;
+import org.apache.catalina.*;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardHost;
@@ -60,6 +28,20 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.modeler.Registry;
 
+import javax.management.MBeanRegistration;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.*;
+import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * Minimal implementation of the <b>Manager</b> interface that supports
@@ -67,166 +49,126 @@ import org.apache.tomcat.util.modeler.Registry;
  * be subclassed to create more sophisticated Manager implementations.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public abstract class ManagerBase implements Manager, MBeanRegistration {
-    protected Log log = LogFactory.getLog(ManagerBase.class);
-
-    // ----------------------------------------------------- Instance Variables
-
-    private static final String devRandomSourceDefault;
-    static {
-        // - Use the default value only if it is a Unix-like system
-        // - Check that it exists 
-        File f = new File("/dev/urandom");
-        if (f.isAbsolute() && f.exists()) {
-            devRandomSourceDefault = f.getPath();
-        } else {
-            devRandomSourceDefault = null;
-        }
-    }
-
-    protected DataInputStream randomIS=null;
-    protected String devRandomSource = devRandomSourceDefault;
-
+public abstract class ManagerBase implements Manager, MBeanRegistration
+{
     /**
      * The default message digest algorithm to use if we cannot use
      * the requested one.
      */
     protected static final String DEFAULT_ALGORITHM = "MD5";
 
+    // ----------------------------------------------------- Instance Variables
+    protected static final int TIMING_STATS_CACHE_SIZE = 100;
+    private static final String devRandomSourceDefault;
+    /**
+     * The descriptive information string for this implementation.
+     */
+    private static final String info = "ManagerBase/1.0";
+    /**
+     * The descriptive name of this Manager implementation (for logging).
+     */
+    protected static String name = "ManagerBase";
+    /**
+     * The string manager for this package.
+     */
+    protected static StringManager sm =
+            StringManager.getManager(Constants.Package);
 
+    static
+    {
+        // - Use the default value only if it is a Unix-like system
+        // - Check that it exists 
+        File f = new File("/dev/urandom");
+        if (f.isAbsolute() && f.exists())
+        {
+            devRandomSourceDefault = f.getPath();
+        } else
+        {
+            devRandomSourceDefault = null;
+        }
+    }
+
+    private final Object maxActiveUpdateLock = new Object();
+    protected Log log = LogFactory.getLog(ManagerBase.class);
+    protected DataInputStream randomIS = null;
+    protected String devRandomSource = devRandomSourceDefault;
     /**
      * The message digest algorithm to be used when generating session
      * identifiers.  This must be an algorithm supported by the
      * <code>java.security.MessageDigest</code> class on your platform.
      */
     protected String algorithm = DEFAULT_ALGORITHM;
-
-
     /**
      * The Container with which this Manager is associated.
      */
     protected Container container;
-
-
     /**
      * Return the MessageDigest implementation to be used when
      * creating session identifiers.
      */
     protected MessageDigest digest = null;
-
-
     /**
      * The distributable flag for Sessions created by this Manager.  If this
      * flag is set to <code>true</code>, any user attributes added to a
      * session controlled by this Manager must be Serializable.
      */
     protected boolean distributable;
-
-
     /**
      * A String initialization parameter used to increase the entropy of
      * the initialization of our random number generator.
      */
     protected String entropy = null;
-
-
-    /**
-     * The descriptive information string for this implementation.
-     */
-    private static final String info = "ManagerBase/1.0";
-
-
     /**
      * The default maximum inactive interval for Sessions created by
      * this Manager.
      */
     protected int maxInactiveInterval = 60;
-
-
     /**
      * The session id length of Sessions created by this Manager.
      */
     protected int sessionIdLength = 16;
-
-
-    /**
-     * The descriptive name of this Manager implementation (for logging).
-     */
-    protected static String name = "ManagerBase";
-
-
     /**
      * A random number generator to use when generating session identifiers.
      */
     protected Random random = null;
-
-
     /**
      * The Java class name of the random number generator class to be used
      * when generating session identifiers.
      */
     protected String randomClass = "java.security.SecureRandom";
-
-
     /**
      * The longest time (in seconds) that an expired session had been alive.
      */
     protected int sessionMaxAliveTime;
-
-
     /**
      * Average time (in seconds) that expired sessions had been alive.
      */
     protected int sessionAverageAliveTime;
-
-
-    protected static final int TIMING_STATS_CACHE_SIZE = 100;
-
     protected LinkedList<SessionTiming> sessionCreationTiming =
-        new LinkedList<SessionTiming>();
-
+            new LinkedList<SessionTiming>();
     protected LinkedList<SessionTiming> sessionExpirationTiming =
-        new LinkedList<SessionTiming>();
-
-
+            new LinkedList<SessionTiming>();
     /**
      * Number of sessions that have expired.
      */
     protected int expiredSessions = 0;
-
-
     /**
      * The set of currently active Sessions for this Manager, keyed by
      * session identifier.
      */
     protected Map<String, Session> sessions = new ConcurrentHashMap<String, Session>();
-
     // Number of sessions created by this manager
-    protected int sessionCounter=0;
-
-    protected volatile int maxActive=0;
-
-    private final Object maxActiveUpdateLock = new Object();
-
+    protected int sessionCounter = 0;
+    protected volatile int maxActive = 0;
     // number of duplicated session ids - anything >0 means we have problems
-    protected int duplicates=0;
-
-    protected boolean initialized=false;
-    
+    protected int duplicates = 0;
+    protected boolean initialized = false;
     /**
      * Processing time during session expiration.
      */
     protected long processingTime = 0;
-
-    /**
-     * Iteration count for background processing.
-     */
-    private int count = 0;
-
-
     /**
      * Frequency of the session expiration, and related manager operations.
      * Manager operations will be done once for the specified amount of
@@ -234,55 +176,41 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      * checks will occur).
      */
     protected int processExpiresFrequency = 6;
-
-    /**
-     * The string manager for this package.
-     */
-    protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
-
     /**
      * The property change support for this component.
      */
     protected PropertyChangeSupport support = new PropertyChangeSupport(this);
-    
+    // -------------------- JMX and Registration  --------------------
+    protected String domain;
+
     // ------------------------------------------------------------- Security classes
-
-
-    private class PrivilegedSetRandomFile
-            implements PrivilegedAction<Void>{
-
-        private final String s;
-
-        public PrivilegedSetRandomFile(String s) {
-            this.s = s;
-        }
-
-        public Void run(){
-            doSetRandomFile(s);
-            return null;
-        }
-    }
+    protected ObjectName oname;
 
 
     // ------------------------------------------------------------- Properties
+    protected MBeanServer mserver;
+    /**
+     * Iteration count for background processing.
+     */
+    private int count = 0;
 
     /**
      * Return the message digest algorithm for this Manager.
      */
-    public String getAlgorithm() {
+    public String getAlgorithm()
+    {
 
         return (this.algorithm);
 
     }
-
 
     /**
      * Set the message digest algorithm for this Manager.
      *
      * @param algorithm The new message digest algorithm
      */
-    public void setAlgorithm(String algorithm) {
+    public void setAlgorithm(String algorithm)
+    {
 
         String oldAlgorithm = this.algorithm;
         this.algorithm = algorithm;
@@ -290,82 +218,89 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
 
     }
 
-
     /**
      * Return the Container with which this Manager is associated.
      */
-    public Container getContainer() {
+    public Container getContainer()
+    {
 
         return (this.container);
 
     }
-
 
     /**
      * Set the Container with which this Manager is associated.
      *
      * @param container The newly associated Container
      */
-    public void setContainer(Container container) {
+    public void setContainer(Container container)
+    {
 
         Container oldContainer = this.container;
         this.container = container;
         support.firePropertyChange("container", oldContainer, this.container);
     }
 
-
-    /** Returns the name of the implementation class.
+    /**
+     * Returns the name of the implementation class.
      */
-    public String getClassName() {
+    public String getClassName()
+    {
         return this.getClass().getName();
     }
-
 
     /**
      * Return the MessageDigest object to be used for calculating
      * session identifiers.  If none has been created yet, initialize
      * one the first time this method is called.
      */
-    public synchronized MessageDigest getDigest() {
+    public synchronized MessageDigest getDigest()
+    {
 
-        if (this.digest == null) {
-            long t1=System.currentTimeMillis();
+        if (this.digest == null)
+        {
+            long t1 = System.currentTimeMillis();
             if (log.isDebugEnabled())
                 log.debug(sm.getString("managerBase.getting", algorithm));
-            try {
+            try
+            {
                 this.digest = MessageDigest.getInstance(algorithm);
-            } catch (NoSuchAlgorithmException e) {
+            }
+            catch (NoSuchAlgorithmException e)
+            {
                 log.error(sm.getString("managerBase.digest", algorithm), e);
-                try {
+                try
+                {
                     this.digest = MessageDigest.getInstance(DEFAULT_ALGORITHM);
-                } catch (NoSuchAlgorithmException f) {
+                }
+                catch (NoSuchAlgorithmException f)
+                {
                     log.error(sm.getString("managerBase.digest",
-                                     DEFAULT_ALGORITHM), e);
+                            DEFAULT_ALGORITHM), e);
                     this.digest = null;
                 }
             }
             if (log.isDebugEnabled())
                 log.debug(sm.getString("managerBase.gotten"));
-            long t2=System.currentTimeMillis();
-            if( log.isDebugEnabled() )
-                log.debug("getDigest() " + (t2-t1));
+            long t2 = System.currentTimeMillis();
+            if (log.isDebugEnabled())
+                log.debug("getDigest() " + (t2 - t1));
         }
 
         return (this.digest);
 
     }
 
-
     /**
      * Return the distributable flag for the sessions supported by
      * this Manager.
      */
-    public boolean getDistributable() {
+    public boolean getDistributable()
+    {
 
         return (this.distributable);
 
     }
-
 
     /**
      * Set the distributable flag for the sessions supported by this
@@ -374,29 +309,32 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      *
      * @param distributable The new distributable flag
      */
-    public void setDistributable(boolean distributable) {
+    public void setDistributable(boolean distributable)
+    {
 
         boolean oldDistributable = this.distributable;
         this.distributable = distributable;
         support.firePropertyChange("distributable",
-                                   new Boolean(oldDistributable),
-                                   new Boolean(this.distributable));
+                new Boolean(oldDistributable),
+                new Boolean(this.distributable));
 
     }
-
 
     /**
      * Return the entropy increaser value, or compute a semi-useful value
      * if this String has not yet been set.
      */
-    public String getEntropy() {
+    public String getEntropy()
+    {
 
         // Calculate a semi-useful value if this has not been set
-        if (this.entropy == null) {
+        if (this.entropy == null)
+        {
             // Use APR to get a crypto secure entropy value
             byte[] result = new byte[32];
             boolean apr = false;
-            try {
+            try
+            {
                 String methodName = "random";
                 Class paramTypes[] = new Class[2];
                 paramTypes[0] = result.getClass();
@@ -405,20 +343,27 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
                 paramValues[0] = result;
                 paramValues[1] = new Integer(32);
                 Method method = Class.forName("org.apache.tomcat.jni.OS")
-                    .getMethod(methodName, paramTypes);
+                        .getMethod(methodName, paramTypes);
                 method.invoke(null, paramValues);
                 apr = true;
-            } catch (Throwable t) {
+            }
+            catch (Throwable t)
+            {
                 // Ignore
             }
-            if (apr) {
-                try {
+            if (apr)
+            {
+                try
+                {
                     setEntropy(new String(result, "ISO-8859-1"));
-                } catch (UnsupportedEncodingException ux) {
+                }
+                catch (UnsupportedEncodingException ux)
+                {
                     // ISO-8859-1 should always be supported
                     throw new Error(ux);
                 }
-            } else {
+            } else
+            {
                 setEntropy(this.toString());
             }
         }
@@ -427,13 +372,13 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
 
     }
 
-
     /**
      * Set the entropy increaser value.
      *
      * @param entropy The new entropy increaser value
      */
-    public void setEntropy(String entropy) {
+    public void setEntropy(String entropy)
+    {
 
         String oldEntropy = entropy;
         this.entropy = entropy;
@@ -441,29 +386,28 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
 
     }
 
-
     /**
      * Return descriptive information about this Manager implementation and
      * the corresponding version number, in the format
      * <code>&lt;description&gt;/&lt;version&gt;</code>.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
     }
 
-
     /**
      * Return the default maximum inactive interval (in seconds)
      * for Sessions created by this Manager.
      */
-    public int getMaxInactiveInterval() {
+    public int getMaxInactiveInterval()
+    {
 
         return (this.maxInactiveInterval);
 
     }
-
 
     /**
      * Set the default maximum inactive interval (in seconds)
@@ -471,16 +415,16 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      *
      * @param interval The new default value
      */
-    public void setMaxInactiveInterval(int interval) {
+    public void setMaxInactiveInterval(int interval)
+    {
 
         int oldMaxInactiveInterval = this.maxInactiveInterval;
         this.maxInactiveInterval = interval;
         support.firePropertyChange("maxInactiveInterval",
-                                   new Integer(oldMaxInactiveInterval),
-                                   new Integer(this.maxInactiveInterval));
+                new Integer(oldMaxInactiveInterval),
+                new Integer(this.maxInactiveInterval));
 
     }
-
 
     /**
      * Gets the session id length (in bytes) of Sessions created by
@@ -488,12 +432,12 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      *
      * @return The session id length
      */
-    public int getSessionIdLength() {
+    public int getSessionIdLength()
+    {
 
         return (this.sessionIdLength);
 
     }
-
 
     /**
      * Sets the session id length (in bytes) for Sessions created by this
@@ -501,192 +445,224 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      *
      * @param idLength The session id length
      */
-    public void setSessionIdLength(int idLength) {
+    public void setSessionIdLength(int idLength)
+    {
 
         int oldSessionIdLength = this.sessionIdLength;
         this.sessionIdLength = idLength;
         support.firePropertyChange("sessionIdLength",
-                                   new Integer(oldSessionIdLength),
-                                   new Integer(this.sessionIdLength));
+                new Integer(oldSessionIdLength),
+                new Integer(this.sessionIdLength));
 
     }
-
 
     /**
      * Return the descriptive short name of this Manager implementation.
      */
-    public String getName() {
+    public String getName()
+    {
 
         return (name);
 
     }
 
-    /** 
-     * Use /dev/random-type special device. This is new code, but may reduce
-     * the big delay in generating the random.
-     *
-     *  You must specify a path to a random generator file. Use /dev/urandom
-     *  for linux ( or similar ) systems. Use /dev/random for maximum security
-     *  ( it may block if not enough "random" exist ). You can also use
-     *  a pipe that generates random.
-     *
-     *  The code will check if the file exists, and default to java Random
-     *  if not found. There is a significant performance difference, very
-     *  visible on the first call to getSession ( like in the first JSP )
-     *  - so use it if available.
-     */
-    public void setRandomFile( String s ) {
-        // as a hack, you can use a static file - and generate the same
-        // session ids ( good for strange debugging )
-        if (Globals.IS_SECURITY_ENABLED){
-            AccessController.doPrivileged(new PrivilegedSetRandomFile(s));
-        } else {
-            doSetRandomFile(s);
-        }
-    }
-
-    private void doSetRandomFile(String s) {
+    private void doSetRandomFile(String s)
+    {
         DataInputStream is = null;
-        try {
-            if (s == null || s.length() == 0) {
+        try
+        {
+            if (s == null || s.length() == 0)
+            {
                 return;
             }
             File f = new File(s);
-            if( ! f.exists() ) return;
-            if( log.isDebugEnabled() ) {
-                log.debug( "Opening " + s );
+            if (!f.exists()) return;
+            if (log.isDebugEnabled())
+            {
+                log.debug("Opening " + s);
             }
-            is = new DataInputStream( new FileInputStream(f));
+            is = new DataInputStream(new FileInputStream(f));
             is.readLong();
-        } catch( IOException ex ) {
+        }
+        catch (IOException ex)
+        {
             log.warn("Error reading " + s, ex);
-            if (is != null) {
-                try {
+            if (is != null)
+            {
+                try
+                {
                     is.close();
-                } catch (Exception ex2) {
+                }
+                catch (Exception ex2)
+                {
                     log.warn("Failed to close " + s, ex2);
                 }
                 is = null;
             }
-        } finally {
+        }
+        finally
+        {
             DataInputStream oldIS = randomIS;
-            if (is != null) {
+            if (is != null)
+            {
                 devRandomSource = s;
-            } else {
+            } else
+            {
                 devRandomSource = null;
             }
             randomIS = is;
-            if (oldIS != null) {
-                try {
+            if (oldIS != null)
+            {
+                try
+                {
                     oldIS.close();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     log.warn("Failed to close RandomIS", ex);
                 }
             }
         }
     }
 
-    public String getRandomFile() {
+    public String getRandomFile()
+    {
         return devRandomSource;
     }
 
+    /**
+     * Use /dev/random-type special device. This is new code, but may reduce
+     * the big delay in generating the random.
+     * <p/>
+     * You must specify a path to a random generator file. Use /dev/urandom
+     * for linux ( or similar ) systems. Use /dev/random for maximum security
+     * ( it may block if not enough "random" exist ). You can also use
+     * a pipe that generates random.
+     * <p/>
+     * The code will check if the file exists, and default to java Random
+     * if not found. There is a significant performance difference, very
+     * visible on the first call to getSession ( like in the first JSP )
+     * - so use it if available.
+     */
+    public void setRandomFile(String s)
+    {
+        // as a hack, you can use a static file - and generate the same
+        // session ids ( good for strange debugging )
+        if (Globals.IS_SECURITY_ENABLED)
+        {
+            AccessController.doPrivileged(new PrivilegedSetRandomFile(s));
+        } else
+        {
+            doSetRandomFile(s);
+        }
+    }
 
     /**
      * Return the random number generator instance we should use for
      * generating session identifiers.  If there is no such generator
      * currently defined, construct and seed a new one.
      */
-    public Random getRandom() {
-        if (this.random == null) {
+    public Random getRandom()
+    {
+        if (this.random == null)
+        {
             // Calculate the new random number generator seed
             long seed = System.currentTimeMillis();
             long t1 = seed;
             char entropy[] = getEntropy().toCharArray();
-            for (int i = 0; i < entropy.length; i++) {
+            for (int i = 0; i < entropy.length; i++)
+            {
                 long update = ((long) entropy[i]) << ((i % 8) * 8);
                 seed ^= update;
             }
-            try {
+            try
+            {
                 // Construct and seed a new random number generator
                 Class clazz = Class.forName(randomClass);
                 this.random = (Random) clazz.newInstance();
                 this.random.setSeed(seed);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 // Fall back to the simple case
                 log.error(sm.getString("managerBase.random", randomClass),
                         e);
                 this.random = new java.util.Random();
                 this.random.setSeed(seed);
             }
-            if(log.isDebugEnabled()) {
-                long t2=System.currentTimeMillis();
-                if( (t2-t1) > 100 )
-                    log.debug(sm.getString("managerBase.seeding", randomClass) + " " + (t2-t1));
+            if (log.isDebugEnabled())
+            {
+                long t2 = System.currentTimeMillis();
+                if ((t2 - t1) > 100)
+                    log.debug(sm.getString("managerBase.seeding", randomClass) + " " + (t2 - t1));
             }
         }
-        
+
         return (this.random);
 
     }
 
-
     /**
      * Return the random number generator class name.
      */
-    public String getRandomClass() {
+    public String getRandomClass()
+    {
 
         return (this.randomClass);
 
     }
-
 
     /**
      * Set the random number generator class name.
      *
      * @param randomClass The new random number generator class name
      */
-    public void setRandomClass(String randomClass) {
+    public void setRandomClass(String randomClass)
+    {
 
         String oldRandomClass = this.randomClass;
         this.randomClass = randomClass;
         support.firePropertyChange("randomClass", oldRandomClass,
-                                   this.randomClass);
+                this.randomClass);
 
     }
-
 
     /**
      * Gets the number of sessions that have expired.
      *
      * @return Number of sessions that have expired
      */
-    public int getExpiredSessions() {
+    public int getExpiredSessions()
+    {
         return expiredSessions;
     }
-
 
     /**
      * Sets the number of sessions that have expired.
      *
      * @param expiredSessions Number of sessions that have expired
      */
-    public void setExpiredSessions(int expiredSessions) {
+    public void setExpiredSessions(int expiredSessions)
+    {
         this.expiredSessions = expiredSessions;
     }
 
-    public long getProcessingTime() {
+    public long getProcessingTime()
+    {
         return processingTime;
     }
 
-
-    public void setProcessingTime(long processingTime) {
+    public void setProcessingTime(long processingTime)
+    {
         this.processingTime = processingTime;
     }
-    
+    // --------------------------------------------------------- Public Methods
+
     /**
      * Return the frequency of manager checks.
      */
-    public int getProcessExpiresFrequency() {
+    public int getProcessExpiresFrequency()
+    {
 
         return (this.processExpiresFrequency);
 
@@ -697,26 +673,27 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      *
      * @param processExpiresFrequency the new manager checks frequency
      */
-    public void setProcessExpiresFrequency(int processExpiresFrequency) {
+    public void setProcessExpiresFrequency(int processExpiresFrequency)
+    {
 
-        if (processExpiresFrequency <= 0) {
+        if (processExpiresFrequency <= 0)
+        {
             return;
         }
 
         int oldProcessExpiresFrequency = this.processExpiresFrequency;
         this.processExpiresFrequency = processExpiresFrequency;
         support.firePropertyChange("processExpiresFrequency",
-                                   new Integer(oldProcessExpiresFrequency),
-                                   new Integer(this.processExpiresFrequency));
+                new Integer(oldProcessExpiresFrequency),
+                new Integer(this.processExpiresFrequency));
 
     }
-    // --------------------------------------------------------- Public Methods
-
 
     /**
      * Implements the Manager interface, direct call to processExpires
      */
-    public void backgroundProcess() {
+    public void backgroundProcess()
+    {
         count = (count + 1) % processExpiresFrequency;
         if (count == 0)
             processExpires();
@@ -725,82 +702,98 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
     /**
      * Invalidate all sessions that have expired.
      */
-    public void processExpires() {
+    public void processExpires()
+    {
 
         long timeNow = System.currentTimeMillis();
         Session sessions[] = findSessions();
-        int expireHere = 0 ;
-        
-        if(log.isDebugEnabled())
+        int expireHere = 0;
+
+        if (log.isDebugEnabled())
             log.debug("Start expire sessions " + getName() + " at " + timeNow + " sessioncount " + sessions.length);
-        for (int i = 0; i < sessions.length; i++) {
-            if (sessions[i]!=null && !sessions[i].isValid()) {
+        for (int i = 0; i < sessions.length; i++)
+        {
+            if (sessions[i] != null && !sessions[i].isValid())
+            {
                 expireHere++;
             }
         }
         long timeEnd = System.currentTimeMillis();
-        if(log.isDebugEnabled())
-             log.debug("End expire sessions " + getName() + " processingTime " + (timeEnd - timeNow) + " expired sessions: " + expireHere);
-        processingTime += ( timeEnd - timeNow );
+        if (log.isDebugEnabled())
+            log.debug("End expire sessions " + getName() + " processingTime " + (timeEnd - timeNow) + " expired sessions: " + expireHere);
+        processingTime += (timeEnd - timeNow);
 
     }
 
-    public void destroy() {
-        if( oname != null )
+    public void destroy()
+    {
+        if (oname != null)
             Registry.getRegistry(null, null).unregisterComponent(oname);
-        if (randomIS!=null) {
-            try {
+        if (randomIS != null)
+        {
+            try
+            {
                 randomIS.close();
-            } catch (IOException ioe) {
+            }
+            catch (IOException ioe)
+            {
                 log.warn("Failed to close randomIS.");
             }
-            randomIS=null;
+            randomIS = null;
         }
 
-        initialized=false;
+        initialized = false;
         oname = null;
     }
-    
-    public void init() {
-        if( initialized ) return;
-        initialized=true;        
-        
+
+    public void init()
+    {
+        if (initialized) return;
+        initialized = true;
+
         log = LogFactory.getLog(ManagerBase.class);
-        
-        if( oname==null ) {
-            try {
-                StandardContext ctx=(StandardContext)this.getContainer();
-                Engine eng=(Engine)ctx.getParent().getParent();
-                domain=ctx.getEngineName();
+
+        if (oname == null)
+        {
+            try
+            {
+                StandardContext ctx = (StandardContext) this.getContainer();
+                Engine eng = (Engine) ctx.getParent().getParent();
+                domain = ctx.getEngineName();
                 distributable = ctx.getDistributable();
-                StandardHost hst=(StandardHost)ctx.getParent();
+                StandardHost hst = (StandardHost) ctx.getParent();
                 String path = ctx.getPath();
-                if (path.equals("")) {
+                if (path.equals(""))
+                {
                     path = "/";
-                }   
-                oname=new ObjectName(domain + ":type=Manager,path="
-                + path + ",host=" + hst.getName());
-                Registry.getRegistry(null, null).registerComponent(this, oname, null );
-            } catch (Exception e) {
-                log.error("Error registering ",e);
+                }
+                oname = new ObjectName(domain + ":type=Manager,path="
+                        + path + ",host=" + hst.getName());
+                Registry.getRegistry(null, null).registerComponent(this, oname, null);
+            }
+            catch (Exception e)
+            {
+                log.error("Error registering ", e);
             }
         }
-        
+
         // Initialize random number generation
         getRandomBytes(new byte[16]);
-        
+
         // Ensure caches for timing stats are the right size by filling with
         // nulls.
-        while (sessionCreationTiming.size() < TIMING_STATS_CACHE_SIZE) {
+        while (sessionCreationTiming.size() < TIMING_STATS_CACHE_SIZE)
+        {
             sessionCreationTiming.add(null);
         }
-        while (sessionExpirationTiming.size() < TIMING_STATS_CACHE_SIZE) {
+        while (sessionExpirationTiming.size() < TIMING_STATS_CACHE_SIZE)
+        {
             sessionExpirationTiming.add(null);
         }
 
-        if(log.isDebugEnabled())
-            log.debug("Registering " + oname );
-               
+        if (log.isDebugEnabled())
+            log.debug("Registering " + oname);
+
     }
 
     /**
@@ -808,31 +801,34 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      *
      * @param session Session to be added
      */
-    public void add(Session session) {
+    public void add(Session session)
+    {
 
         sessions.put(session.getIdInternal(), session);
         int size = sessions.size();
-        if( size > maxActive ) {
-            synchronized(maxActiveUpdateLock) {
-                if( size > maxActive ) {
+        if (size > maxActive)
+        {
+            synchronized (maxActiveUpdateLock)
+            {
+                if (size > maxActive)
+                {
                     maxActive = size;
                 }
             }
         }
     }
 
-
     /**
      * Add a property change listener to this component.
      *
      * @param listener The listener to add
      */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
+    public void addPropertyChangeListener(PropertyChangeListener listener)
+    {
 
         support.addPropertyChangeListener(listener);
 
     }
-
 
     /**
      * Construct and return a new session object, based on the default
@@ -840,31 +836,32 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      * id will be assigned by this method, and available via the getId()
      * method of the returned session.  If a new session cannot be created
      * for any reason, return <code>null</code>.
-     * 
-     * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
+     *
+     * @throws IllegalStateException if a new session cannot be
+     *                               instantiated for any reason
      * @deprecated
      */
-    public Session createSession() {
+    public Session createSession()
+    {
         return createSession(null);
     }
-    
-    
+
     /**
      * Construct and return a new session object, based on the default
      * settings specified by this Manager's properties.  The session
-     * id specified will be used as the session id.  
-     * If a new session cannot be created for any reason, return 
+     * id specified will be used as the session id.
+     * If a new session cannot be created for any reason, return
      * <code>null</code>.
-     * 
+     *
      * @param sessionId The session id which should be used to create the
-     *  new session; if <code>null</code>, a new session id will be
-     *  generated
-     * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
+     *                  new session; if <code>null</code>, a new session id will be
+     *                  generated
+     * @throws IllegalStateException if a new session cannot be
+     *                               instantiated for any reason
      */
-    public Session createSession(String sessionId) {
-        
+    public Session createSession(String sessionId)
+    {
+
         // Recycle or create a Session instance
         Session session = createEmptySession();
 
@@ -873,9 +870,10 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
         session.setValid(true);
         session.setCreationTime(System.currentTimeMillis());
         session.setMaxInactiveInterval(this.maxInactiveInterval);
-        if (sessionId == null) {
+        if (sessionId == null)
+        {
             sessionId = generateSessionId();
-        // FIXME WHy we need no duplication check?
+            // FIXME WHy we need no duplication check?
         /*         
              synchronized (sessions) {
                 while (sessions.get(sessionId) != null) { // Guarantee
@@ -885,7 +883,7 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
                 }
             }
         */
-            
+
             // FIXME: Code to be used in case route replacement is needed
             /*
         } else {
@@ -907,37 +905,37 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
         sessionCounter++;
 
         SessionTiming timing = new SessionTiming(session.getCreationTime(), 0);
-        synchronized (sessionCreationTiming) {
+        synchronized (sessionCreationTiming)
+        {
             sessionCreationTiming.add(timing);
             sessionCreationTiming.poll();
         }
         return (session);
 
     }
-    
-    
+
     /**
      * Get a session from the recycled ones or create a new empty one.
      * The PersistentManager manager does not need to create session data
      * because it reads it from the Store.
      */
-    public Session createEmptySession() {
+    public Session createEmptySession()
+    {
         return (getNewSession());
     }
-
 
     /**
      * Return the active Session, associated with this Manager, with the
      * specified session id (if any); otherwise return <code>null</code>.
      *
      * @param id The session id for the session to be returned
-     *
-     * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
-     * @exception IOException if an input/output error occurs while
-     *  processing this request
+     * @throws IllegalStateException if a new session cannot be
+     *                               instantiated for any reason
+     * @throws IOException           if an input/output error occurs while
+     *                               processing this request
      */
-    public Session findSession(String id) throws IOException {
+    public Session findSession(String id) throws IOException
+    {
 
         if (id == null)
             return (null);
@@ -945,105 +943,118 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
 
     }
 
-
     /**
      * Return the set of active Sessions associated with this Manager.
      * If this Manager has no active Sessions, a zero-length array is returned.
      */
-    public Session[] findSessions() {
+    public Session[] findSessions()
+    {
 
         return sessions.values().toArray(new Session[0]);
 
     }
-
 
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
      * @param session Session to be removed
      */
-    public void remove(Session session) {
+    public void remove(Session session)
+    {
 
         sessions.remove(session.getIdInternal());
 
     }
 
 
+    // ------------------------------------------------------ Protected Methods
+
     /**
      * Remove a property change listener from this component.
      *
      * @param listener The listener to remove
      */
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
+    public void removePropertyChangeListener(PropertyChangeListener listener)
+    {
 
         support.removePropertyChangeListener(listener);
 
     }
 
-
     /**
      * Change the session ID of the current session to a new randomly generated
      * session ID.
-     * 
-     * @param session   The session to change the session ID for
+     *
+     * @param session The session to change the session ID for
      */
-    public void changeSessionId(Session session) {
+    public void changeSessionId(Session session)
+    {
         String oldId = session.getIdInternal();
         session.setId(generateSessionId(), false);
         String newId = session.getIdInternal();
-        if (container instanceof ContainerBase) {
-            ((ContainerBase)container).fireContainerEvent(
+        if (container instanceof ContainerBase)
+        {
+            ((ContainerBase) container).fireContainerEvent(
                     Context.CHANGE_SESSION_ID_EVENT,
-                    new String[] {oldId, newId});
+                    new String[]{oldId, newId});
         }
     }
-    
-    
-    // ------------------------------------------------------ Protected Methods
-
 
     /**
      * Get new session class to be used in the doLoad() method.
      */
-    protected StandardSession getNewSession() {
+    protected StandardSession getNewSession()
+    {
         return new StandardSession(this);
     }
 
 
-    protected void getRandomBytes(byte bytes[]) {
+    // ------------------------------------------------------ Protected Methods
+
+    protected void getRandomBytes(byte bytes[])
+    {
         // Generate a byte array containing a session identifier
-        if (devRandomSource != null && randomIS == null) {
+        if (devRandomSource != null && randomIS == null)
+        {
             setRandomFile(devRandomSource);
         }
-        if (randomIS != null) {
-            try {
+        if (randomIS != null)
+        {
+            try
+            {
                 int len = randomIS.read(bytes);
-                if (len == bytes.length) {
+                if (len == bytes.length)
+                {
                     return;
                 }
-                if(log.isDebugEnabled())
-                    log.debug("Got " + len + " " + bytes.length );
-            } catch (Exception ex) {
+                if (log.isDebugEnabled())
+                    log.debug("Got " + len + " " + bytes.length);
+            }
+            catch (Exception ex)
+            {
                 // Ignore
             }
             devRandomSource = null;
-            
-            try {
+
+            try
+            {
                 randomIS.close();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 log.warn("Failed to close randomIS.");
             }
-            
+
             randomIS = null;
         }
         getRandom().nextBytes(bytes);
     }
 
-
     /**
      * Generate and return a new session identifier.
      */
-    protected synchronized String generateSessionId() {
+    protected synchronized String generateSessionId()
+    {
 
         byte random[] = new byte[16];
         String jvmRoute = getJvmRoute();
@@ -1051,19 +1062,23 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
 
         // Render the result as a String of hexadecimal digits
         StringBuffer buffer = new StringBuffer();
-        do {
+        do
+        {
             int resultLenBytes = 0;
-            if (result != null) {
+            if (result != null)
+            {
                 buffer = new StringBuffer();
                 duplicates++;
             }
 
-            while (resultLenBytes < this.sessionIdLength) {
+            while (resultLenBytes < this.sessionIdLength)
+            {
                 getRandomBytes(random);
                 random = getDigest().digest(random);
                 for (int j = 0;
-                j < random.length && resultLenBytes < this.sessionIdLength;
-                j++) {
+                     j < random.length && resultLenBytes < this.sessionIdLength;
+                     j++)
+                {
                     byte b1 = (byte) ((random[j] & 0xf0) >> 4);
                     byte b2 = (byte) (random[j] & 0x0f);
                     if (b1 < 10)
@@ -1077,7 +1092,8 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
                     resultLenBytes++;
                 }
             }
-            if (jvmRoute != null) {
+            if (jvmRoute != null)
+            {
                 buffer.append('.').append(jvmRoute);
             }
             result = buffer.toString();
@@ -1087,95 +1103,95 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
     }
 
 
-    // ------------------------------------------------------ Protected Methods
-
+    // -------------------------------------------------------- Package Methods
 
     /**
      * Retrieve the enclosing Engine for this Manager.
      *
      * @return an Engine object (or null).
      */
-    public Engine getEngine() {
+    public Engine getEngine()
+    {
         Engine e = null;
-        for (Container c = getContainer(); e == null && c != null ; c = c.getParent()) {
-            if (c != null && c instanceof Engine) {
-                e = (Engine)c;
+        for (Container c = getContainer(); e == null && c != null; c = c.getParent())
+        {
+            if (c != null && c instanceof Engine)
+            {
+                e = (Engine) c;
             }
         }
         return e;
     }
 
-
     /**
      * Retrieve the JvmRoute for the enclosing Engine.
+     *
      * @return the JvmRoute or null.
      */
-    public String getJvmRoute() {
+    public String getJvmRoute()
+    {
         Engine e = getEngine();
         return e == null ? null : e.getJvmRoute();
     }
 
-
-    // -------------------------------------------------------- Package Methods
-
-
-    public void setSessionCounter(int sessionCounter) {
-        this.sessionCounter = sessionCounter;
-    }
-
-
-    /** 
+    /**
      * Total sessions created by this manager.
      *
      * @return sessions created
      */
-    public int getSessionCounter() {
+    public int getSessionCounter()
+    {
         return sessionCounter;
     }
 
+    public void setSessionCounter(int sessionCounter)
+    {
+        this.sessionCounter = sessionCounter;
+    }
 
-    /** 
+    /**
      * Number of duplicated session IDs generated by the random source.
      * Anything bigger than 0 means problems.
      *
      * @return The count of duplicates
      */
-    public int getDuplicates() {
+    public int getDuplicates()
+    {
         return duplicates;
     }
 
-
-    public void setDuplicates(int duplicates) {
+    public void setDuplicates(int duplicates)
+    {
         this.duplicates = duplicates;
     }
 
-
-    /** 
+    /**
      * Returns the number of active sessions
      *
      * @return number of sessions active
      */
-    public int getActiveSessions() {
+    public int getActiveSessions()
+    {
         return sessions.size();
     }
-
 
     /**
      * Max number of concurrent active sessions
      *
      * @return The highest number of concurrent active sessions
      */
-    public int getMaxActive() {
+    public int getMaxActive()
+    {
         return maxActive;
     }
 
-
-    public void setMaxActive(int maxActive) {
-        synchronized (maxActiveUpdateLock) {
+    public void setMaxActive(int maxActive)
+    {
+        synchronized (maxActiveUpdateLock)
+        {
             this.maxActive = maxActive;
         }
     }
-
 
     /**
      * Gets the longest time (in seconds) that an expired session had been
@@ -1184,22 +1200,22 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      * @return Longest time (in seconds) that an expired session had been
      * alive.
      */
-    public int getSessionMaxAliveTime() {
+    public int getSessionMaxAliveTime()
+    {
         return sessionMaxAliveTime;
     }
-
 
     /**
      * Sets the longest time (in seconds) that an expired session had been
      * alive.
      *
      * @param sessionMaxAliveTime Longest time (in seconds) that an expired
-     * session had been alive.
+     *                            session had been alive.
      */
-    public void setSessionMaxAliveTime(int sessionMaxAliveTime) {
+    public void setSessionMaxAliveTime(int sessionMaxAliveTime)
+    {
         this.sessionMaxAliveTime = sessionMaxAliveTime;
     }
-
 
     /**
      * Gets the average time (in seconds) that expired sessions had been
@@ -1208,100 +1224,115 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
      * @return Average time (in seconds) that expired sessions had been
      * alive.
      */
-    public int getSessionAverageAliveTime() {
+    public int getSessionAverageAliveTime()
+    {
         return sessionAverageAliveTime;
     }
-
 
     /**
      * Sets the average time (in seconds) that expired sessions had been
      * alive.
      *
      * @param sessionAverageAliveTime Average time (in seconds) that expired
-     * sessions had been alive.
+     *                                sessions had been alive.
      */
-    public void setSessionAverageAliveTime(int sessionAverageAliveTime) {
+    public void setSessionAverageAliveTime(int sessionAverageAliveTime)
+    {
         this.sessionAverageAliveTime = sessionAverageAliveTime;
     }
-
 
     /**
      * Gets the current rate of session creation (in session per minute) based
      * on the creation time of the previous 100 sessions created. If less than
      * 100 sessions have been created then all available data is used.
-     * 
-     * @return  The current rate (in sessions per minute) of session creation
+     *
+     * @return The current rate (in sessions per minute) of session creation
      */
-    public int getSessionCreateRate() {
+    public int getSessionCreateRate()
+    {
         long now = System.currentTimeMillis();
         // Copy current stats
         List<SessionTiming> copy = new ArrayList<SessionTiming>();
-        synchronized (sessionCreationTiming) {
+        synchronized (sessionCreationTiming)
+        {
             copy.addAll(sessionCreationTiming);
         }
-        
+
         // Init
         long oldest = now;
         int counter = 0;
         int result = 0;
         Iterator<SessionTiming> iter = copy.iterator();
-        
+
         // Calculate rate
-        while (iter.hasNext()) {
+        while (iter.hasNext())
+        {
             SessionTiming timing = iter.next();
-            if (timing != null) {
+            if (timing != null)
+            {
                 counter++;
-                if (timing.getTimestamp() < oldest) {
+                if (timing.getTimestamp() < oldest)
+                {
                     oldest = timing.getTimestamp();
                 }
             }
         }
-        if (counter > 0) {
-            if (oldest < now) {
-                result = (int) ((1000*60*counter)/(now - oldest));
-            } else {
+        if (counter > 0)
+        {
+            if (oldest < now)
+            {
+                result = (int) ((1000 * 60 * counter) / (now - oldest));
+            } else
+            {
                 result = Integer.MAX_VALUE;
             }
         }
         return result;
     }
-    
 
     /**
      * Gets the current rate of session expiration (in session per minute) based
      * on the expiry time of the previous 100 sessions expired. If less than
      * 100 sessions have expired then all available data is used.
-     * 
-     * @return  The current rate (in sessions per minute) of session expiration
+     *
+     * @return The current rate (in sessions per minute) of session expiration
      */
-    public int getSessionExpireRate() {
+    public int getSessionExpireRate()
+    {
         long now = System.currentTimeMillis();
         // Copy current stats
         List<SessionTiming> copy = new ArrayList<SessionTiming>();
-        synchronized (sessionExpirationTiming) {
+        synchronized (sessionExpirationTiming)
+        {
             copy.addAll(sessionExpirationTiming);
         }
-        
+
         // Init
         long oldest = now;
         int counter = 0;
         int result = 0;
         Iterator<SessionTiming> iter = copy.iterator();
-        
+
         // Calculate rate
-        while (iter.hasNext()) {
+        while (iter.hasNext())
+        {
             SessionTiming timing = iter.next();
-            if (timing != null) {
+            if (timing != null)
+            {
                 counter++;
-                if (timing.getTimestamp() < oldest) {
+                if (timing.getTimestamp() < oldest)
+                {
                     oldest = timing.getTimestamp();
                 }
             }
         }
-        if (counter > 0) {
-            if (oldest < now) {
-                result = (int) ((1000*60*counter)/(now - oldest));
-            } else {
+        if (counter > 0)
+        {
+            if (oldest < now)
+            {
+                result = (int) ((1000 * 60 * counter) / (now - oldest));
+            } else
+            {
                 // Better than reporting zero
                 result = Integer.MAX_VALUE;
             }
@@ -1309,69 +1340,73 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
         return result;
     }
 
-
-    /** 
+    /**
      * For debugging: return a list of all session ids currently active
-     *
      */
-    public String listSessionIds() {
-        StringBuffer sb=new StringBuffer();
+    public String listSessionIds()
+    {
+        StringBuffer sb = new StringBuffer();
         Iterator keys = sessions.keySet().iterator();
-        while (keys.hasNext()) {
+        while (keys.hasNext())
+        {
             sb.append(keys.next()).append(" ");
         }
         return sb.toString();
     }
 
-
-    /** 
+    /**
      * For debugging: get a session attribute
      *
      * @param sessionId
      * @param key
      * @return The attribute value, if found, null otherwise
      */
-    public String getSessionAttribute( String sessionId, String key ) {
+    public String getSessionAttribute(String sessionId, String key)
+    {
         Session s = (Session) sessions.get(sessionId);
-        if( s==null ) {
-            if(log.isInfoEnabled())
+        if (s == null)
+        {
+            if (log.isInfoEnabled())
                 log.info("Session not found " + sessionId);
             return null;
         }
-        Object o=s.getSession().getAttribute(key);
-        if( o==null ) return null;
+        Object o = s.getSession().getAttribute(key);
+        if (o == null) return null;
         return o.toString();
     }
 
-
     /**
      * Returns information about the session with the given session id.
-     * 
-     * <p>The session information is organized as a HashMap, mapping 
+     * <p/>
+     * <p>The session information is organized as a HashMap, mapping
      * session attribute names to the String representation of their values.
      *
      * @param sessionId Session id
-     * 
      * @return HashMap mapping session attribute names to the String
      * representation of their values, or null if no session with the
      * specified id exists, or if the session does not have any attributes
      */
-    public HashMap getSession(String sessionId) {
+    public HashMap getSession(String sessionId)
+    {
         Session s = (Session) sessions.get(sessionId);
-        if (s == null) {
-            if (log.isInfoEnabled()) {
+        if (s == null)
+        {
+            if (log.isInfoEnabled())
+            {
                 log.info("Session not found " + sessionId);
             }
             return null;
         }
 
         Enumeration ee = s.getSession().getAttributeNames();
-        if (ee == null || !ee.hasMoreElements()) {
+        if (ee == null || !ee.hasMoreElements())
+        {
             return null;
         }
 
         HashMap map = new HashMap();
-        while (ee.hasMoreElements()) {
+        while (ee.hasMoreElements())
+        {
             String attrName = (String) ee.nextElement();
             map.put(attrName, getSessionAttribute(sessionId, attrName));
         }
@@ -1379,105 +1414,135 @@ public abstract class ManagerBase implements Manager, MBeanRegistration {
         return map;
     }
 
-
-    public void expireSession( String sessionId ) {
-        Session s=(Session)sessions.get(sessionId);
-        if( s==null ) {
-            if(log.isInfoEnabled())
+    public void expireSession(String sessionId)
+    {
+        Session s = (Session) sessions.get(sessionId);
+        if (s == null)
+        {
+            if (log.isInfoEnabled())
                 log.info("Session not found " + sessionId);
             return;
         }
         s.expire();
     }
 
-    public long getLastAccessedTimestamp( String sessionId ) {
-        Session s=(Session)sessions.get(sessionId);
-        if(s== null)
-            return -1 ;
+    public long getLastAccessedTimestamp(String sessionId)
+    {
+        Session s = (Session) sessions.get(sessionId);
+        if (s == null)
+            return -1;
         return s.getLastAccessedTime();
     }
-  
-    public String getLastAccessedTime( String sessionId ) {
-        Session s=(Session)sessions.get(sessionId);
-        if( s==null ) {
-            if(log.isInfoEnabled())
+
+    public String getLastAccessedTime(String sessionId)
+    {
+        Session s = (Session) sessions.get(sessionId);
+        if (s == null)
+        {
+            if (log.isInfoEnabled())
                 log.info("Session not found " + sessionId);
             return "";
         }
         return new Date(s.getLastAccessedTime()).toString();
     }
 
-    public String getCreationTime( String sessionId ) {
-        Session s=(Session)sessions.get(sessionId);
-        if( s==null ) {
-            if(log.isInfoEnabled())
+    public String getCreationTime(String sessionId)
+    {
+        Session s = (Session) sessions.get(sessionId);
+        if (s == null)
+        {
+            if (log.isInfoEnabled())
                 log.info("Session not found " + sessionId);
             return "";
         }
         return new Date(s.getCreationTime()).toString();
     }
 
-    public long getCreationTimestamp( String sessionId ) {
-        Session s=(Session)sessions.get(sessionId);
-        if(s== null)
-            return -1 ;
+    public long getCreationTimestamp(String sessionId)
+    {
+        Session s = (Session) sessions.get(sessionId);
+        if (s == null)
+            return -1;
         return s.getCreationTime();
     }
 
-    // -------------------- JMX and Registration  --------------------
-    protected String domain;
-    protected ObjectName oname;
-    protected MBeanServer mserver;
-
-    public ObjectName getObjectName() {
+    public ObjectName getObjectName()
+    {
         return oname;
     }
 
-    public String getDomain() {
+    public String getDomain()
+    {
         return domain;
     }
 
     public ObjectName preRegister(MBeanServer server,
-                                  ObjectName name) throws Exception {
-        oname=name;
-        mserver=server;
-        domain=name.getDomain();
+                                  ObjectName name) throws Exception
+    {
+        oname = name;
+        mserver = server;
+        domain = name.getDomain();
         return name;
     }
 
-    public void postRegister(Boolean registrationDone) {
+    public void postRegister(Boolean registrationDone)
+    {
     }
 
-    public void preDeregister() throws Exception {
+    public void preDeregister() throws Exception
+    {
     }
 
-    public void postDeregister() {
+    public void postDeregister()
+    {
     }
 
-    // ----------------------------------------------------------- Inner classes
-    
-    protected static final class SessionTiming {
+    protected static final class SessionTiming
+    {
         private long timestamp;
         private int duration;
-        
-        public SessionTiming(long timestamp, int duration) {
+
+        public SessionTiming(long timestamp, int duration)
+        {
             this.timestamp = timestamp;
             this.duration = duration;
         }
-        
+
         /**
          * Time stamp associated with this piece of timing information in
          * milliseconds.
          */
-        public long getTimestamp() {
+        public long getTimestamp()
+        {
             return timestamp;
         }
-        
+
         /**
          * Duration associated with this piece of timing information in seconds.
          */
-        public int getDuration() {
+        public int getDuration()
+        {
             return duration;
+        }
+    }
+
+    // ----------------------------------------------------------- Inner classes
+
+    private class PrivilegedSetRandomFile
+            implements PrivilegedAction<Void>
+    {
+
+        private final String s;
+
+        public PrivilegedSetRandomFile(String s)
+        {
+            this.s = s;
+        }
+
+        public Void run()
+        {
+            doSetRandomFile(s);
+            return null;
         }
     }
 }

@@ -21,26 +21,41 @@ import org.apache.jasper.Options;
 
 /**
  */
-public class TextOptimizer {
+public class TextOptimizer
+{
+
+    public static void concatenate(Compiler compiler, Node.Nodes page)
+            throws JasperException
+    {
+
+        TextCatVisitor v = new TextCatVisitor(compiler);
+        page.visit(v);
+
+        // Cleanup, in case the page ends with a template text
+        v.collectText();
+    }
 
     /**
      * A visitor to concatenate contiguous template texts.
      */
-    static class TextCatVisitor extends Node.Visitor {
+    static class TextCatVisitor extends Node.Visitor
+    {
 
+        private final String emptyText = new String("");
         private Options options;
         private PageInfo pageInfo;
         private int textNodeCount = 0;
         private Node.TemplateText firstTextNode = null;
         private StringBuffer textBuffer;
-        private final String emptyText = new String("");
 
-        public TextCatVisitor(Compiler compiler) {
+        public TextCatVisitor(Compiler compiler)
+        {
             options = compiler.getCompilationContext().getOptions();
             pageInfo = compiler.getPageInfo();
         }
 
-        public void doVisit(Node n) throws JasperException {
+        public void doVisit(Node n) throws JasperException
+        {
             collectText();
         }
 
@@ -48,40 +63,50 @@ public class TextOptimizer {
          * The following directis are ignored in text concatenation
          */
 
-        public void visit(Node.PageDirective n) throws JasperException {
+        public void visit(Node.PageDirective n) throws JasperException
+        {
         }
 
-        public void visit(Node.TagDirective n) throws JasperException {
+        public void visit(Node.TagDirective n) throws JasperException
+        {
         }
 
-        public void visit(Node.TaglibDirective n) throws JasperException {
+        public void visit(Node.TaglibDirective n) throws JasperException
+        {
         }
 
-        public void visit(Node.AttributeDirective n) throws JasperException {
+        public void visit(Node.AttributeDirective n) throws JasperException
+        {
         }
 
-        public void visit(Node.VariableDirective n) throws JasperException {
+        public void visit(Node.VariableDirective n) throws JasperException
+        {
         }
 
         /*
          * Don't concatenate text across body boundaries
          */
-        public void visitBody(Node n) throws JasperException {
+        public void visitBody(Node n) throws JasperException
+        {
             super.visitBody(n);
             collectText();
         }
 
-        public void visit(Node.TemplateText n) throws JasperException {
-            if ((options.getTrimSpaces() || pageInfo.isTrimDirectiveWhitespaces()) 
-                    && n.isAllSpace()) {
+        public void visit(Node.TemplateText n) throws JasperException
+        {
+            if ((options.getTrimSpaces() || pageInfo.isTrimDirectiveWhitespaces())
+                    && n.isAllSpace())
+            {
                 n.setText(emptyText);
                 return;
             }
 
-            if (textNodeCount++ == 0) {
+            if (textNodeCount++ == 0)
+            {
                 firstTextNode = n;
                 textBuffer = new StringBuffer(n.getText());
-            } else {
+            } else
+            {
                 // Append text to text buffer
                 textBuffer.append(n.getText());
                 n.setText(emptyText);
@@ -90,26 +115,18 @@ public class TextOptimizer {
 
         /**
          * This method breaks concatenation mode.  As a side effect it copies
-         * the concatenated string to the first text node 
+         * the concatenated string to the first text node
          */
-        private void collectText() {
+        private void collectText()
+        {
 
-            if (textNodeCount > 1) {
+            if (textNodeCount > 1)
+            {
                 // Copy the text in buffer into the first template text node.
                 firstTextNode.setText(textBuffer.toString());
             }
             textNodeCount = 0;
         }
 
-    }
-
-    public static void concatenate(Compiler compiler, Node.Nodes page)
-            throws JasperException {
-
-        TextCatVisitor v = new TextCatVisitor(compiler);
-        page.visit(v);
-
-	// Cleanup, in case the page ends with a template text
-        v.collectText();
     }
 }

@@ -16,12 +16,12 @@
  */
 package org.apache.catalina.tribes.io;
 
+import org.apache.catalina.tribes.ChannelMessage;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-
-import org.apache.catalina.tribes.ChannelMessage;
 
 /**
  * The object reader object is an object used in conjunction with
@@ -31,74 +31,84 @@ import org.apache.catalina.tribes.ChannelMessage;
  * for message encoding and decoding.
  *
  * @author Filip Hanik
- *
  */
-public class ObjectReader {
+public class ObjectReader
+{
 
     protected static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(ObjectReader.class);
-
-    private XByteBuffer buffer;
-    
     protected long lastAccess = System.currentTimeMillis();
-    
     protected boolean accessed = false;
+    private XByteBuffer buffer;
     private boolean cancelled;
 
     /**
      * Creates an <code>ObjectReader</code> for a TCP NIO socket channel
+     *
      * @param channel - the channel to be read.
      */
-    public ObjectReader(SocketChannel channel) {
+    public ObjectReader(SocketChannel channel)
+    {
         this(channel.socket());
     }
-    
+
     /**
      * Creates an <code>ObjectReader</code> for a TCP socket
+     *
      * @param socket Socket
      */
-    public ObjectReader(Socket socket) {
-        try{
+    public ObjectReader(Socket socket)
+    {
+        try
+        {
             this.buffer = new XByteBuffer(socket.getReceiveBufferSize(), true);
-        }catch ( IOException x ) {
+        }
+        catch (IOException x)
+        {
             //unable to get buffer size
             log.warn("Unable to retrieve the socket receiver buffer size, setting to default 43800 bytes.");
-            this.buffer = new XByteBuffer(43800,true);
+            this.buffer = new XByteBuffer(43800, true);
         }
     }
-    
-    public synchronized void access() {
+
+    public synchronized void access()
+    {
         this.accessed = true;
         this.lastAccess = System.currentTimeMillis();
     }
-    
-    public synchronized void finish() {
+
+    public synchronized void finish()
+    {
         this.accessed = false;
         this.lastAccess = System.currentTimeMillis();
     }
-    
-    public boolean isAccessed() {
+
+    public boolean isAccessed()
+    {
         return this.accessed;
     }
 
     /**
-     * Append new bytes to buffer. 
-     * @see XByteBuffer#countPackages()
+     * Append new bytes to buffer.
+     *
      * @param data new transfer buffer
-     * @param len length in buffer
+     * @param len  length in buffer
      * @return number of messages that sent to callback
      * @throws java.io.IOException
+     * @see XByteBuffer#countPackages()
      */
-    public int append(ByteBuffer data, int len, boolean count) throws java.io.IOException {
-        buffer.append(data,len);
+    public int append(ByteBuffer data, int len, boolean count) throws java.io.IOException
+    {
+        buffer.append(data, len);
         int pkgCnt = -1;
-        if ( count ) pkgCnt = buffer.countPackages();
+        if (count) pkgCnt = buffer.countPackages();
         return pkgCnt;
     }
 
-     public int append(byte[] data,int off,int len, boolean count) throws java.io.IOException {
-        buffer.append(data,off,len);
+    public int append(byte[] data, int off, int len, boolean count) throws java.io.IOException
+    {
+        buffer.append(data, off, len);
         int pkgCnt = -1;
-        if ( count ) pkgCnt = buffer.countPackages();
+        if (count) pkgCnt = buffer.countPackages();
         return pkgCnt;
     }
 
@@ -106,56 +116,67 @@ public class ObjectReader {
      * Send buffer to cluster listener (callback).
      * Is message complete receiver send message to callback?
      *
+     * @return number of received packages/messages
+     * @throws java.io.IOException
      * @see org.apache.catalina.tribes.transport.ReceiverBase#messageDataReceived(ChannelMessage)
      * @see XByteBuffer#doesPackageExist()
      * @see XByteBuffer#extractPackage(boolean)
-     *
-     * @return number of received packages/messages
-     * @throws java.io.IOException
      */
-    public ChannelMessage[] execute() throws java.io.IOException {
+    public ChannelMessage[] execute() throws java.io.IOException
+    {
         int pkgCnt = buffer.countPackages();
         ChannelMessage[] result = new ChannelMessage[pkgCnt];
-        for (int i=0; i<pkgCnt; i++)  {
+        for (int i = 0; i < pkgCnt; i++)
+        {
             ChannelMessage data = buffer.extractPackage(true);
             result[i] = data;
         }
         return result;
     }
-    
-    public int bufferSize() {
+
+    public int bufferSize()
+    {
         return buffer.getLength();
     }
-    
 
-    public boolean hasPackage() {
-        return buffer.countPackages(true)>0;
+
+    public boolean hasPackage()
+    {
+        return buffer.countPackages(true) > 0;
     }
+
     /**
      * Returns the number of packages that the reader has read
+     *
      * @return int
      */
-    public int count() {
+    public int count()
+    {
         return buffer.countPackages();
     }
-    
-    public void close() {
+
+    public void close()
+    {
         this.buffer = null;
     }
 
-    public long getLastAccess() {
+    public long getLastAccess()
+    {
         return lastAccess;
     }
 
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    public void setLastAccess(long lastAccess) {
+    public void setLastAccess(long lastAccess)
+    {
         this.lastAccess = lastAccess;
     }
 
-    public void setCancelled(boolean cancelled) {
+    public boolean isCancelled()
+    {
+        return cancelled;
+    }
+
+    public void setCancelled(boolean cancelled)
+    {
         this.cancelled = cancelled;
     }
 

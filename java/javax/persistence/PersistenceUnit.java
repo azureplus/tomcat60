@@ -26,7 +26,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 
-public @interface PersistenceUnit {
-   String name() default "";
-   String unitName() default "";
+public @interface PersistenceUnit
+{
+    String name() default "";
+
+    String unitName() default "";
 }

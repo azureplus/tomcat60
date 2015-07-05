@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming.resources;
@@ -27,23 +27,14 @@ import java.util.Vector;
  * Naming enumeration implementation.
  *
  * @author Remy Maucherat
- *
  */
 
-public class RecyclableNamingEnumeration 
-    implements NamingEnumeration {
+public class RecyclableNamingEnumeration
+        implements NamingEnumeration
+{
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    public RecyclableNamingEnumeration(Vector entries) {
-        this.entries = entries;
-        recycle();
-    }
-
-
-    // -------------------------------------------------------------- Variables
 
 
     /**
@@ -52,20 +43,28 @@ public class RecyclableNamingEnumeration
     protected Vector entries;
 
 
+    // -------------------------------------------------------------- Variables
     /**
      * Underlying enumeration.
      */
     protected Enumeration enumeration;
 
 
-    // --------------------------------------------------------- Public Methods
+    public RecyclableNamingEnumeration(Vector entries)
+    {
+        this.entries = entries;
+        recycle();
+    }
 
+
+    // --------------------------------------------------------- Public Methods
 
     /**
      * Retrieves the next element in the enumeration.
      */
     public Object next()
-        throws NamingException {
+            throws NamingException
+    {
         return nextElement();
     }
 
@@ -74,7 +73,8 @@ public class RecyclableNamingEnumeration
      * Determines whether there are any more elements in the enumeration.
      */
     public boolean hasMore()
-        throws NamingException {
+            throws NamingException
+    {
         return enumeration.hasMoreElements();
     }
 
@@ -83,16 +83,19 @@ public class RecyclableNamingEnumeration
      * Closes this enumeration.
      */
     public void close()
-        throws NamingException {
+            throws NamingException
+    {
     }
 
 
-    public boolean hasMoreElements() {
+    public boolean hasMoreElements()
+    {
         return enumeration.hasMoreElements();
     }
 
 
-    public Object nextElement() {
+    public Object nextElement()
+    {
         return enumeration.nextElement();
     }
 
@@ -103,8 +106,9 @@ public class RecyclableNamingEnumeration
     /**
      * Recycle.
      */
-    void recycle() {
-    	enumeration = entries.elements();
+    void recycle()
+    {
+        enumeration = entries.elements();
     }
 
 

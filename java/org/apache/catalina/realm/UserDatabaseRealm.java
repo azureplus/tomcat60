@@ -38,37 +38,36 @@ import java.util.List;
  * of <code>UserDatabase</code> that we should consult.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
 public class UserDatabaseRealm
-    extends RealmBase {
+        extends RealmBase
+{
 
 
     // ----------------------------------------------------- Instance Variables
 
 
     /**
-     * The <code>UserDatabase</code> we will use to authenticate users
-     * and identify associated roles.
+     * Descriptive information about this Realm implementation.
      */
-    protected UserDatabase database = null;
-
-
+    protected static final String name = "UserDatabaseRealm";
+    /**
+     * The string manager for this package.
+     */
+    private static StringManager sm =
+            StringManager.getManager(Constants.Package);
     /**
      * Descriptive information about this Realm implementation.
      */
     protected final String info =
-        "org.apache.catalina.realm.UserDatabaseRealm/1.0";
-
-
+            "org.apache.catalina.realm.UserDatabaseRealm/1.0";
     /**
-     * Descriptive information about this Realm implementation.
+     * The <code>UserDatabase</code> we will use to authenticate users
+     * and identify associated roles.
      */
-    protected static final String name = "UserDatabaseRealm";
-
-
+    protected UserDatabase database = null;
     /**
      * The global JNDI name of the <code>UserDatabase</code> resource
      * we will be utilizing.
@@ -76,22 +75,15 @@ public class UserDatabaseRealm
     protected String resourceName = "UserDatabase";
 
 
-    /**
-     * The string manager for this package.
-     */
-    private static StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return descriptive information about this Realm implementation and
      * the corresponding version number, in the format
      * <code>&lt;description&gt;/&lt;version&gt;</code>.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return info;
 
@@ -102,7 +94,8 @@ public class UserDatabaseRealm
      * Return the global JNDI name of the <code>UserDatabase</code> resource
      * we will be using.
      */
-    public String getResourceName() {
+    public String getResourceName()
+    {
 
         return resourceName;
 
@@ -115,7 +108,8 @@ public class UserDatabaseRealm
      *
      * @param resourceName The new global JNDI name
      */
-    public void setResourceName(String resourceName) {
+    public void setResourceName(String resourceName)
+    {
 
         this.resourceName = resourceName;
 
@@ -130,52 +124,63 @@ public class UserDatabaseRealm
      * security role, within the context of this Realm; otherwise return
      * <code>false</code>. This implementation returns <code>true</code>
      * if the <code>User</code> has the role, or if any <code>Group</code>
-     * that the <code>User</code> is a member of has the role. 
+     * that the <code>User</code> is a member of has the role.
      *
      * @param principal Principal for whom the role is to be checked
-     * @param role Security role to be checked
+     * @param role      Security role to be checked
      */
-    public boolean hasRole(Principal principal, String role) {
-        if( principal instanceof GenericPrincipal) {
-            GenericPrincipal gp = (GenericPrincipal)principal;
-            if(gp.getUserPrincipal() instanceof User) {
+    public boolean hasRole(Principal principal, String role)
+    {
+        if (principal instanceof GenericPrincipal)
+        {
+            GenericPrincipal gp = (GenericPrincipal) principal;
+            if (gp.getUserPrincipal() instanceof User)
+            {
                 principal = gp.getUserPrincipal();
             }
         }
-        if(! (principal instanceof User) ) {
+        if (!(principal instanceof User))
+        {
             //Play nice with SSO and mixed Realms
             return super.hasRole(principal, role);
         }
-        if("*".equals(role)) {
+        if ("*".equals(role))
+        {
             return true;
-        } else if(role == null) {
+        } else if (role == null)
+        {
             return false;
         }
-        User user = (User)principal;
+        User user = (User) principal;
         Role dbrole = database.findRole(role);
-        if(dbrole == null) {
-            return false; 
+        if (dbrole == null)
+        {
+            return false;
         }
-        if(user.isInRole(dbrole)) {
+        if (user.isInRole(dbrole))
+        {
             return true;
         }
         Iterator groups = user.getGroups();
-        while(groups.hasNext()) {
-            Group group = (Group)groups.next();
-            if(group.isInRole(dbrole)) {
+        while (groups.hasNext())
+        {
+            Group group = (Group) groups.next();
+            if (group.isInRole(dbrole))
+            {
                 return true;
             }
         }
         return false;
     }
-		
+
     // ------------------------------------------------------ Protected Methods
 
 
     /**
      * Return a short name for this Realm implementation.
      */
-    protected String getName() {
+    protected String getName()
+    {
 
         return (name);
 
@@ -185,13 +190,15 @@ public class UserDatabaseRealm
     /**
      * Return the password associated with the given principal's user name.
      */
-    protected String getPassword(String username) {
+    protected String getPassword(String username)
+    {
 
         User user = database.findUser(username);
 
-        if (user == null) {
+        if (user == null)
+        {
             return null;
-        } 
+        }
 
         return (user.getPassword());
 
@@ -201,25 +208,30 @@ public class UserDatabaseRealm
     /**
      * Return the Principal associated with the given user name.
      */
-    protected Principal getPrincipal(String username) {
+    protected Principal getPrincipal(String username)
+    {
 
         User user = database.findUser(username);
-        if(user == null) {
+        if (user == null)
+        {
             return null;
         }
 
         List<String> roles = new ArrayList<String>();
         Iterator uroles = user.getRoles();
-        while(uroles.hasNext()) {
-            Role role = (Role)uroles.next();
+        while (uroles.hasNext())
+        {
+            Role role = (Role) uroles.next();
             roles.add(role.getName());
         }
         Iterator groups = user.getGroups();
-        while(groups.hasNext()) {
-            Group group = (Group)groups.next();
+        while (groups.hasNext())
+        {
+            Group group = (Group) groups.next();
             uroles = group.getRoles();
-            while(uroles.hasNext()) {
-                Role role = (Role)uroles.next();
+            while (uroles.hasNext())
+            {
+                Role role = (Role) uroles.next();
                 roles.add(role.getName());
             }
         }
@@ -233,27 +245,32 @@ public class UserDatabaseRealm
     /**
      * Prepare for active use of the public methods of this Component.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents it from being started
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents it from being started
      */
-    public synchronized void start() throws LifecycleException {
+    public synchronized void start() throws LifecycleException
+    {
 
         // Perform normal superclass initialization
         super.start();
 
-        try {
+        try
+        {
             StandardServer server = (StandardServer) ServerFactory.getServer();
             Context context = server.getGlobalNamingContext();
             database = (UserDatabase) context.lookup(resourceName);
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             containerLog.error(sm.getString("userDatabaseRealm.lookup",
-                                            resourceName),
-                               e);
+                            resourceName),
+                    e);
             database = null;
         }
-        if (database == null) {
+        if (database == null)
+        {
             throw new LifecycleException
-                (sm.getString("userDatabaseRealm.noDatabase", resourceName));
+                    (sm.getString("userDatabaseRealm.noDatabase", resourceName));
         }
 
     }
@@ -262,10 +279,11 @@ public class UserDatabaseRealm
     /**
      * Gracefully shut down active use of the public methods of this Component.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that needs to be reported
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that needs to be reported
      */
-    public synchronized void stop() throws LifecycleException {
+    public synchronized void stop() throws LifecycleException
+    {
 
         // Perform normal superclass finalization
         super.stop();

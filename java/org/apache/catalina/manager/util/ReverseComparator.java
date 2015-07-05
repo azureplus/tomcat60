@@ -21,15 +21,18 @@ import java.util.Comparator;
 
 /**
  * Comparator which reverse the sort order
+ *
  * @author C&eacute;drik LIME
  */
-public class ReverseComparator implements Comparator {
+public class ReverseComparator implements Comparator
+{
     protected Comparator comparator;
 
     /**
-     * 
+     *
      */
-    public ReverseComparator(Comparator comparator) {
+    public ReverseComparator(Comparator comparator)
+    {
         super();
         this.comparator = comparator;
     }
@@ -37,8 +40,9 @@ public class ReverseComparator implements Comparator {
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
-    public int compare(Object o1, Object o2) {
+    public int compare(Object o1, Object o2)
+    {
         int returnValue = comparator.compare(o1, o2);
-        return (- returnValue);
+        return (-returnValue);
     }
 }

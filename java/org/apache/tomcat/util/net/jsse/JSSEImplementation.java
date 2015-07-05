@@ -17,12 +17,12 @@
 
 package org.apache.tomcat.util.net.jsse;
 
-import java.net.Socket;
-
 import org.apache.tomcat.util.net.SSLImplementation;
 import org.apache.tomcat.util.net.SSLSupport;
 import org.apache.tomcat.util.net.ServerSocketFactory;
+
 import javax.net.ssl.SSLSession;
+import java.net.Socket;
 
 /* JSSEImplementation:
 
@@ -30,17 +30,18 @@ import javax.net.ssl.SSLSession;
 
    @author EKR
 */
-        
+
 public class JSSEImplementation extends SSLImplementation
 {
     static final String SSLSocketClass = "javax.net.ssl.SSLSocket";
 
-    static org.apache.juli.logging.Log logger = 
-        org.apache.juli.logging.LogFactory.getLog(JSSEImplementation.class);
+    static org.apache.juli.logging.Log logger =
+            org.apache.juli.logging.LogFactory.getLog(JSSEImplementation.class);
 
     private JSSEFactory factory = null;
 
-    public JSSEImplementation() throws ClassNotFoundException {
+    public JSSEImplementation() throws ClassNotFoundException
+    {
         // Check to see if JSSE is floating around somewhere
         Class.forName(SSLSocketClass);
         factory = new JSSEFactory();
@@ -48,30 +49,35 @@ public class JSSEImplementation extends SSLImplementation
 
 
     @Override
-    public String getImplementationName(){
-      return "JSSE";
+    public String getImplementationName()
+    {
+        return "JSSE";
     }
 
     @Override
-    public ServerSocketFactory getServerSocketFactory()  {
+    public ServerSocketFactory getServerSocketFactory()
+    {
         ServerSocketFactory ssf = factory.getSocketFactory();
         return ssf;
     }
 
     @Override
-    public ServerSocketFactory getServerSocketFactory(String sslProtocol)  {
+    public ServerSocketFactory getServerSocketFactory(String sslProtocol)
+    {
         ServerSocketFactory ssf = factory.getSocketFactory(sslProtocol);
         return ssf;
     }
 
     @Override
-    public SSLSupport getSSLSupport(Socket s) {
+    public SSLSupport getSSLSupport(Socket s)
+    {
         SSLSupport ssls = factory.getSSLSupport(s);
         return ssls;
     }
 
     @Override
-    public SSLSupport getSSLSupport(SSLSession session) {
+    public SSLSupport getSSLSupport(SSLSession session)
+    {
         SSLSupport ssls = factory.getSSLSupport(session);
         return ssls;
     }

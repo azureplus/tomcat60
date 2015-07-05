@@ -25,23 +25,24 @@ import java.io.IOException;
 
 /**
  * Output filter.
- * 
+ *
  * @author Remy Maucherat
  */
-public interface OutputFilter extends OutputBuffer {
+public interface OutputFilter extends OutputBuffer
+{
 
 
     /**
      * Write some bytes.
-     * 
+     *
      * @return number of bytes written by the filter
      */
     public int doWrite(ByteChunk chunk, Response unused)
-        throws IOException;
+            throws IOException;
 
 
     /**
-     * Some filters need additional parameters from the response. All the 
+     * Some filters need additional parameters from the response. All the
      * necessary reading can occur in that method, as this method is called
      * after the response header processing is complete.
      */
@@ -69,14 +70,14 @@ public interface OutputFilter extends OutputBuffer {
     /**
      * End the current request. It is acceptable to write extra bytes using
      * buffer.doWrite during the execution of this method.
-     * 
-     * @return Should return 0 unless the filter does some content length 
+     *
+     * @return Should return 0 unless the filter does some content length
      * delimitation, in which case the number is the amount of extra bytes or
-     * missing bytes, which would indicate an error. 
+     * missing bytes, which would indicate an error.
      * Note: It is recommended that extra bytes be swallowed by the filter.
      */
     public long end()
-        throws IOException;
+            throws IOException;
 
 
 }

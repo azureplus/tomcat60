@@ -13,28 +13,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.catalina.connector;
 
+import org.apache.catalina.security.SecurityUtil;
+
+import javax.servlet.ServletInputStream;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-import javax.servlet.ServletInputStream;
-
-import org.apache.catalina.security.SecurityUtil;
-
 /**
  * This class handles reading bytes.
- * 
+ *
  * @author Remy Maucherat
  * @author Jean-Francois Arcand
  */
 public class CoyoteInputStream
-    extends ServletInputStream {
+        extends ServletInputStream
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -46,7 +46,8 @@ public class CoyoteInputStream
     // ----------------------------------------------------------- Constructors
 
 
-    protected CoyoteInputStream(InputBuffer ib) {
+    protected CoyoteInputStream(InputBuffer ib)
+    {
         this.ib = ib;
     }
 
@@ -57,7 +58,8 @@ public class CoyoteInputStream
     /**
      * Clear facade.
      */
-    void clear() {
+    void clear()
+    {
         ib = null;
     }
 
@@ -69,7 +71,8 @@ public class CoyoteInputStream
      * Prevent cloning the facade.
      */
     protected Object clone()
-        throws CloneNotSupportedException {
+            throws CloneNotSupportedException
+    {
         throw new CloneNotSupportedException();
     }
 
@@ -78,156 +81,207 @@ public class CoyoteInputStream
 
 
     public int read()
-        throws IOException {    
-        if (SecurityUtil.isPackageProtectionEnabled()){
-            
-            try{
-                Integer result = 
-                    (Integer)AccessController.doPrivileged(
-                        new PrivilegedExceptionAction(){
+            throws IOException
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
 
-                            public Object run() throws IOException{
-                                Integer integer = new Integer(ib.readByte());
-                                return integer;
-                            }
+            try
+            {
+                Integer result =
+                        (Integer) AccessController.doPrivileged(
+                                new PrivilegedExceptionAction()
+                                {
 
-                });
+                                    public Object run() throws IOException
+                                    {
+                                        Integer integer = new Integer(ib.readByte());
+                                        return integer;
+                                    }
+
+                                });
                 return result.intValue();
-            } catch(PrivilegedActionException pae){
+            }
+            catch (PrivilegedActionException pae)
+            {
                 Exception e = pae.getException();
-                if (e instanceof IOException){
-                    throw (IOException)e;
-                } else {
+                if (e instanceof IOException)
+                {
+                    throw (IOException) e;
+                } else
+                {
                     throw new RuntimeException(e.getMessage());
                 }
             }
-        } else {
+        } else
+        {
             return ib.readByte();
         }
     }
 
-    public int available() throws IOException {
-        
-        if (SecurityUtil.isPackageProtectionEnabled()){
-            try{
-                Integer result = 
-                    (Integer)AccessController.doPrivileged(
-                        new PrivilegedExceptionAction(){
+    public int available() throws IOException
+    {
 
-                            public Object run() throws IOException{
-                                Integer integer = new Integer(ib.available());
-                                return integer;
-                            }
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            try
+            {
+                Integer result =
+                        (Integer) AccessController.doPrivileged(
+                                new PrivilegedExceptionAction()
+                                {
 
-                });
+                                    public Object run() throws IOException
+                                    {
+                                        Integer integer = new Integer(ib.available());
+                                        return integer;
+                                    }
+
+                                });
                 return result.intValue();
-            } catch(PrivilegedActionException pae){
+            }
+            catch (PrivilegedActionException pae)
+            {
                 Exception e = pae.getException();
-                if (e instanceof IOException){
-                    throw (IOException)e;
-                } else {
+                if (e instanceof IOException)
+                {
+                    throw (IOException) e;
+                } else
+                {
                     throw new RuntimeException(e.getMessage());
                 }
             }
-        } else {
-           return ib.available();
-        }    
+        } else
+        {
+            return ib.available();
+        }
     }
 
-    public int read(final byte[] b) throws IOException {
-        
-        if (SecurityUtil.isPackageProtectionEnabled()){
-            try{
-                Integer result = 
-                    (Integer)AccessController.doPrivileged(
-                        new PrivilegedExceptionAction(){
+    public int read(final byte[] b) throws IOException
+    {
 
-                            public Object run() throws IOException{
-                                Integer integer = 
-                                    new Integer(ib.read(b, 0, b.length));
-                                return integer;
-                            }
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            try
+            {
+                Integer result =
+                        (Integer) AccessController.doPrivileged(
+                                new PrivilegedExceptionAction()
+                                {
 
-                });
+                                    public Object run() throws IOException
+                                    {
+                                        Integer integer =
+                                                new Integer(ib.read(b, 0, b.length));
+                                        return integer;
+                                    }
+
+                                });
                 return result.intValue();
-            } catch(PrivilegedActionException pae){
+            }
+            catch (PrivilegedActionException pae)
+            {
                 Exception e = pae.getException();
-                if (e instanceof IOException){
-                    throw (IOException)e;
-                } else {
+                if (e instanceof IOException)
+                {
+                    throw (IOException) e;
+                } else
+                {
                     throw new RuntimeException(e.getMessage());
                 }
             }
-        } else {
+        } else
+        {
             return ib.read(b, 0, b.length);
-         }        
+        }
     }
 
 
     public int read(final byte[] b, final int off, final int len)
-        throws IOException {
-            
-        if (SecurityUtil.isPackageProtectionEnabled()){
-            try{
-                Integer result = 
-                    (Integer)AccessController.doPrivileged(
-                        new PrivilegedExceptionAction(){
+            throws IOException
+    {
 
-                            public Object run() throws IOException{
-                                Integer integer = 
-                                    new Integer(ib.read(b, off, len));
-                                return integer;
-                            }
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            try
+            {
+                Integer result =
+                        (Integer) AccessController.doPrivileged(
+                                new PrivilegedExceptionAction()
+                                {
 
-                });
+                                    public Object run() throws IOException
+                                    {
+                                        Integer integer =
+                                                new Integer(ib.read(b, off, len));
+                                        return integer;
+                                    }
+
+                                });
                 return result.intValue();
-            } catch(PrivilegedActionException pae){
+            }
+            catch (PrivilegedActionException pae)
+            {
                 Exception e = pae.getException();
-                if (e instanceof IOException){
-                    throw (IOException)e;
-                } else {
+                if (e instanceof IOException)
+                {
+                    throw (IOException) e;
+                } else
+                {
                     throw new RuntimeException(e.getMessage());
                 }
             }
-        } else {
+        } else
+        {
             return ib.read(b, off, len);
-        }            
+        }
     }
 
 
-    public int readLine(byte[] b, int off, int len) throws IOException {
+    public int readLine(byte[] b, int off, int len) throws IOException
+    {
         return super.readLine(b, off, len);
     }
 
 
-    /** 
+    /**
      * Close the stream
      * Since we re-cycle, we can't allow the call to super.close()
      * which would permantely disable us.
      */
-    public void close() throws IOException {
-        
-        if (SecurityUtil.isPackageProtectionEnabled()){
-            try{
+    public void close() throws IOException
+    {
+
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            try
+            {
                 AccessController.doPrivileged(
-                    new PrivilegedExceptionAction(){
+                        new PrivilegedExceptionAction()
+                        {
 
-                        public Object run() throws IOException{
-                            ib.close();
-                            return null;
-                        }
+                            public Object run() throws IOException
+                            {
+                                ib.close();
+                                return null;
+                            }
 
-                });
-            } catch(PrivilegedActionException pae){
+                        });
+            }
+            catch (PrivilegedActionException pae)
+            {
                 Exception e = pae.getException();
-                if (e instanceof IOException){
-                    throw (IOException)e;
-                } else {
+                if (e instanceof IOException)
+                {
+                    throw (IOException) e;
+                } else
+                {
                     throw new RuntimeException(e.getMessage());
                 }
             }
-        } else {
-             ib.close();
+        } else
+        {
+            ib.close();
         }
     }
 

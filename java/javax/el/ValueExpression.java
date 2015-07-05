@@ -20,16 +20,21 @@ package javax.el;
 /**
  *
  */
-public abstract class ValueExpression extends Expression {
+public abstract class ValueExpression extends Expression
+{
 
     public abstract Class<?> getExpectedType();
-    
-    public abstract Class<?> getType(ELContext context) throws NullPointerException, PropertyNotFoundException, ELException;
-    
-    public abstract boolean isReadOnly(ELContext context) throws NullPointerException, PropertyNotFoundException, ELException;
-    
-    public abstract void setValue(ELContext context, Object value) throws NullPointerException, PropertyNotFoundException, PropertyNotWritableException, ELException;
-    
-    public abstract Object getValue(ELContext context) throws NullPointerException, PropertyNotFoundException, ELException;
+
+    public abstract Class<?> getType(ELContext context) throws NullPointerException, PropertyNotFoundException,
+            ELException;
+
+    public abstract boolean isReadOnly(ELContext context) throws NullPointerException, PropertyNotFoundException,
+            ELException;
+
+    public abstract void setValue(ELContext context, Object value) throws NullPointerException,
+            PropertyNotFoundException, PropertyNotWritableException, ELException;
+
+    public abstract Object getValue(ELContext context) throws NullPointerException, PropertyNotFoundException,
+            ELException;
 
 }

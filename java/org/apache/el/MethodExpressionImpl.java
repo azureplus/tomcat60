@@ -31,7 +31,7 @@ import java.io.ObjectOutput;
 
 /**
  * An <code>Expression</code> that refers to a method on an object.
- *
+ * <p/>
  * <p>
  * <code>The {@link ExpressionFactory#createMethodExpression} method
  * can be used to parse an expression string and return a concrete instance
@@ -39,7 +39,7 @@ import java.io.ObjectOutput;
  * The {@link FunctionMapper} is used at parse time, not evaluation time,
  * so one is not needed to evaluate an expression using this class.
  * However, the {@link ELContext} is needed at evaluation time.</p>
- *
+ * <p/>
  * <p>The {@link #getMethodInfo} and {@link #invoke} methods will evaluate the
  * expression each time they are called. The {@link ELResolver} in the
  * <code>ELContext</code> is used to resolve the top-level variables and to
@@ -54,20 +54,19 @@ import java.io.ObjectOutput;
  * name and expected parameters provided at parse time is found and it is
  * either queried or invoked (depending on the method called on this
  * <code>MethodExpression</code>).</p>
- *
+ * <p/>
  * <p>See the notes about comparison, serialization and immutability in
  * the {@link Expression} javadocs.
  *
+ * @author Jacob Hookom [jacob@hookom.net]
  * @see javax.el.ELResolver
  * @see javax.el.Expression
  * @see javax.el.ExpressionFactory
  * @see javax.el.MethodExpression
- *
- * @author Jacob Hookom [jacob@hookom.net]
- *
  */
 public final class MethodExpressionImpl extends MethodExpression implements
-        Externalizable {
+        Externalizable
+{
 
     private Class expectedType;
 
@@ -84,7 +83,8 @@ public final class MethodExpressionImpl extends MethodExpression implements
     /**
      *
      */
-    public MethodExpressionImpl() {
+    public MethodExpressionImpl()
+    {
         super();
     }
 
@@ -96,8 +96,9 @@ public final class MethodExpressionImpl extends MethodExpression implements
      * @param paramTypes
      */
     public MethodExpressionImpl(String expr, Node node,
-            FunctionMapper fnMapper, VariableMapper varMapper,
-            Class expectedType, Class[] paramTypes) {
+                                FunctionMapper fnMapper, VariableMapper varMapper,
+                                Class expectedType, Class[] paramTypes)
+    {
         super();
         this.expr = expr;
         this.node = node;
@@ -110,7 +111,7 @@ public final class MethodExpressionImpl extends MethodExpression implements
     /**
      * Determines whether the specified object is equal to this
      * <code>Expression</code>.
-     *
+     * <p/>
      * <p>
      * The result is <code>true</code> if and only if the argument is not
      * <code>null</code>, is an <code>Expression</code> object that is the
@@ -118,7 +119,7 @@ public final class MethodExpressionImpl extends MethodExpression implements
      * <code>MethodExpression</code>), and has an identical parsed
      * representation.
      * </p>
-     *
+     * <p/>
      * <p>
      * Note that two expressions can be equal if their expression Strings are
      * different. For example, <code>${fn1:foo()}</code> and
@@ -127,14 +128,14 @@ public final class MethodExpressionImpl extends MethodExpression implements
      * <code>fn2:foo</code> to the same method.
      * </p>
      *
-     * @param obj
-     *            the <code>Object</code> to test for equality.
+     * @param obj the <code>Object</code> to test for equality.
      * @return <code>true</code> if <code>obj</code> equals this
-     *         <code>Expression</code>; <code>false</code> otherwise.
+     * <code>Expression</code>; <code>false</code> otherwise.
      * @see java.util.Hashtable
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         return (obj instanceof MethodExpressionImpl && obj.hashCode() == this
                 .hashCode());
     }
@@ -142,13 +143,13 @@ public final class MethodExpressionImpl extends MethodExpression implements
     /**
      * Returns the original String used to create this <code>Expression</code>,
      * unmodified.
-     *
+     * <p/>
      * <p>
      * This is used for debugging purposes but also for the purposes of
      * comparison (e.g. to ensure the expression in a configuration file has not
      * changed).
      * </p>
-     *
+     * <p/>
      * <p>
      * This method does not provide sufficient information to re-create an
      * expression. Two different expressions can have exactly the same
@@ -157,10 +158,10 @@ public final class MethodExpressionImpl extends MethodExpression implements
      * </p>
      *
      * @return The original expression String.
-     *
      * @see javax.el.Expression#getExpressionString()
      */
-    public String getExpressionString() {
+    public String getExpressionString()
+    {
         return this.expr;
     }
 
@@ -168,35 +169,33 @@ public final class MethodExpressionImpl extends MethodExpression implements
      * Evaluates the expression relative to the provided context, and returns
      * information about the actual referenced method.
      *
-     * @param context
-     *            The context of this evaluation
+     * @param context The context of this evaluation
      * @return an instance of <code>MethodInfo</code> containing information
-     *         about the method the expression evaluated to.
-     * @throws NullPointerException
-     *             if context is <code>null</code> or the base object is
-     *             <code>null</code> on the last resolution.
-     * @throws PropertyNotFoundException
-     *             if one of the property resolutions failed because a specified
-     *             variable or property does not exist or is not readable.
-     * @throws MethodNotFoundException
-     *             if no suitable method can be found.
-     * @throws ELException
-     *             if an exception was thrown while performing property or
-     *             variable resolution. The thrown exception must be included as
-     *             the cause property of this exception, if available.
+     * about the method the expression evaluated to.
+     * @throws NullPointerException      if context is <code>null</code> or the base object is
+     *                                   <code>null</code> on the last resolution.
+     * @throws PropertyNotFoundException if one of the property resolutions failed because a specified
+     *                                   variable or property does not exist or is not readable.
+     * @throws MethodNotFoundException   if no suitable method can be found.
+     * @throws ELException               if an exception was thrown while performing property or
+     *                                   variable resolution. The thrown exception must be included as
+     *                                   the cause property of this exception, if available.
      * @see javax.el.MethodExpression#getMethodInfo(javax.el.ELContext)
      */
     public MethodInfo getMethodInfo(ELContext context)
             throws PropertyNotFoundException, MethodNotFoundException,
-            ELException {
+            ELException
+    {
         Node n = this.getNode();
         EvaluationContext ctx = new EvaluationContext(context, this.fnMapper,
                 this.varMapper);
         return n.getMethodInfo(ctx, this.paramTypes);
     }
 
-    private Node getNode() throws ELException {
-        if (this.node == null) {
+    private Node getNode() throws ELException
+    {
+        if (this.node == null)
+        {
             this.node = ExpressionBuilder.createNode(this.expr);
         }
         return this.node;
@@ -204,7 +203,7 @@ public final class MethodExpressionImpl extends MethodExpression implements
 
     /**
      * Returns the hash code for this <code>Expression</code>.
-     *
+     * <p/>
      * <p>
      * See the note in the {@link #equals} method on how two expressions can be
      * equal if their expression Strings are different. Recall that if two
@@ -219,7 +218,8 @@ public final class MethodExpressionImpl extends MethodExpression implements
      * @see java.util.Hashtable
      * @see java.lang.Object#hashCode()
      */
-    public int hashCode() {
+    public int hashCode()
+    {
         return this.expr.hashCode();
     }
 
@@ -228,34 +228,29 @@ public final class MethodExpressionImpl extends MethodExpression implements
      * method that was found using the supplied parameters, and returns the
      * result of the method invocation.
      *
-     * @param context
-     *            The context of this evaluation.
-     * @param params
-     *            The parameters to pass to the method, or <code>null</code>
-     *            if no parameters.
+     * @param context The context of this evaluation.
+     * @param params  The parameters to pass to the method, or <code>null</code>
+     *                if no parameters.
      * @return the result of the method invocation (<code>null</code> if the
-     *         method has a <code>void</code> return type).
-     * @throws NullPointerException
-     *             if context is <code>null</code> or the base object is
-     *             <code>null</code> on the last resolution.
-     * @throws PropertyNotFoundException
-     *             if one of the property resolutions failed because a specified
-     *             variable or property does not exist or is not readable.
-     * @throws MethodNotFoundException
-     *             if no suitable method can be found.
-     * @throws ELException
-     *             if an exception was thrown while performing property or
-     *             variable resolution. The thrown exception must be included as
-     *             the cause property of this exception, if available. If the
-     *             exception thrown is an <code>InvocationTargetException</code>,
-     *             extract its <code>cause</code> and pass it to the
-     *             <code>ELException</code> constructor.
+     * method has a <code>void</code> return type).
+     * @throws NullPointerException      if context is <code>null</code> or the base object is
+     *                                   <code>null</code> on the last resolution.
+     * @throws PropertyNotFoundException if one of the property resolutions failed because a specified
+     *                                   variable or property does not exist or is not readable.
+     * @throws MethodNotFoundException   if no suitable method can be found.
+     * @throws ELException               if an exception was thrown while performing property or
+     *                                   variable resolution. The thrown exception must be included as
+     *                                   the cause property of this exception, if available. If the
+     *                                   exception thrown is an <code>InvocationTargetException</code>,
+     *                                   extract its <code>cause</code> and pass it to the
+     *                                   <code>ELException</code> constructor.
      * @see javax.el.MethodExpression#invoke(javax.el.ELContext,
-     *      java.lang.Object[])
+     * java.lang.Object[])
      */
     public Object invoke(ELContext context, Object[] params)
             throws PropertyNotFoundException, MethodNotFoundException,
-            ELException {
+            ELException
+    {
         EvaluationContext ctx = new EvaluationContext(context, this.fnMapper,
                 this.varMapper);
         return this.getNode().invoke(ctx, this.paramTypes, params);
@@ -267,10 +262,12 @@ public final class MethodExpressionImpl extends MethodExpression implements
      * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
      */
     public void readExternal(ObjectInput in) throws IOException,
-            ClassNotFoundException {
+            ClassNotFoundException
+    {
         this.expr = in.readUTF();
         String type = in.readUTF();
-        if (!"".equals(type)) {
+        if (!"".equals(type))
+        {
             this.expectedType = ReflectionUtil.forName(type);
         }
         this.paramTypes = ReflectionUtil.toTypeArray(((String[]) in
@@ -284,7 +281,8 @@ public final class MethodExpressionImpl extends MethodExpression implements
      *
      * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
      */
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
         out.writeUTF(this.expr);
         out.writeUTF((this.expectedType != null) ? this.expectedType.getName()
                 : "");
@@ -293,7 +291,8 @@ public final class MethodExpressionImpl extends MethodExpression implements
         out.writeObject(this.varMapper);
     }
 
-    public boolean isLiteralText() {
+    public boolean isLiteralText()
+    {
         return false;
     }
 }

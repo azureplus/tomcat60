@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.apache.tomcat.util.digester;
 
 
@@ -24,7 +24,8 @@ import org.xml.sax.Attributes;
  * <p>Abstract base class for <code>ObjectCreationFactory</code>
  * implementations.</p>
  */
-abstract public class AbstractObjectCreationFactory implements ObjectCreationFactory {
+abstract public class AbstractObjectCreationFactory implements ObjectCreationFactory
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -45,7 +46,6 @@ abstract public class AbstractObjectCreationFactory implements ObjectCreationFac
      * object based on the element's attributes.
      *
      * @param attributes the element's attributes
-     *
      * @throws Exception any exception thrown will be propagated upwards
      */
     public abstract Object createObject(Attributes attributes) throws Exception;
@@ -55,7 +55,8 @@ abstract public class AbstractObjectCreationFactory implements ObjectCreationFac
      * <p>Returns the {@link Digester} that was set by the
      * {@link FactoryCreateRule} upon initialization.
      */
-    public Digester getDigester() {
+    public Digester getDigester()
+    {
 
         return (this.digester);
 
@@ -68,7 +69,8 @@ abstract public class AbstractObjectCreationFactory implements ObjectCreationFac
      *
      * @param digester parent Digester object
      */
-    public void setDigester(Digester digester) {
+    public void setDigester(Digester digester)
+    {
 
         this.digester = digester;
 

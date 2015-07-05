@@ -28,15 +28,19 @@ import java.util.Iterator;
  * an <code>&lt;res-env-refy&gt;</code> element in the deployment descriptor.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class ContextTransaction implements Serializable {
+public class ContextTransaction implements Serializable
+{
 
 
     // ------------------------------------------------------------- Properties
 
 
+    /**
+     * The NamingResources with which we are associated (if any).
+     */
+    protected NamingResources resources = null;
     /**
      * Holder for our configured properties.
      */
@@ -45,39 +49,46 @@ public class ContextTransaction implements Serializable {
     /**
      * Return a configured property.
      */
-    public Object getProperty(String name) {
+    public Object getProperty(String name)
+    {
         return properties.get(name);
     }
 
     /**
      * Set a configured property.
      */
-    public void setProperty(String name, Object value) {
+    public void setProperty(String name, Object value)
+    {
         properties.put(name, value);
     }
 
-    /** 
+    /**
      * remove a configured property.
      */
-    public void removeProperty(String name) {
+    public void removeProperty(String name)
+    {
         properties.remove(name);
     }
+
+
+    // --------------------------------------------------------- Public Methods
 
     /**
      * List properties.
      */
-    public Iterator listProperties() {
+    public Iterator listProperties()
+    {
         return properties.keySet().iterator();
     }
-    
-    
-    // --------------------------------------------------------- Public Methods
 
+
+    // -------------------------------------------------------- Package Methods
 
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("Transaction[");
         sb.append("]");
@@ -85,20 +96,13 @@ public class ContextTransaction implements Serializable {
 
     }
 
-
-    // -------------------------------------------------------- Package Methods
-
-
-    /**
-     * The NamingResources with which we are associated (if any).
-     */
-    protected NamingResources resources = null;
-
-    public NamingResources getNamingResources() {
+    public NamingResources getNamingResources()
+    {
         return (this.resources);
     }
 
-    void setNamingResources(NamingResources resources) {
+    void setNamingResources(NamingResources resources)
+    {
         this.resources = resources;
     }
 

@@ -25,16 +25,18 @@ import java.util.Vector;
  *
  * @author Anil V (akv@eng.sun.com)
  */
-public class Queue {
+public class Queue
+{
     private Vector vector = new Vector();
 
     /**
      * Put the object into the queue.
      *
-     * @param   object          the object to be appended to the
-     *                          queue.
+     * @param object the object to be appended to the
+     *               queue.
      */
-    public synchronized void put(Object object) {
+    public synchronized void put(Object object)
+    {
         vector.addElement(object);
         notify();
     }
@@ -43,11 +45,15 @@ public class Queue {
      * Pull the first object out of the queue. Wait if the queue is
      * empty.
      */
-    public synchronized Object pull() {
+    public synchronized Object pull()
+    {
         while (isEmpty())
-            try {
+            try
+            {
                 wait();
-            } catch (InterruptedException ex) {
+            }
+            catch (InterruptedException ex)
+            {
             }
         return get();
     }
@@ -56,7 +62,8 @@ public class Queue {
      * Get the first object out of the queue. Return null if the queue
      * is empty.
      */
-    public synchronized Object get() {
+    public synchronized Object get()
+    {
         Object object = peek();
         if (object != null)
             vector.removeElementAt(0);
@@ -66,7 +73,8 @@ public class Queue {
     /**
      * Peek to see if something is available.
      */
-    public Object peek() {
+    public Object peek()
+    {
         if (isEmpty())
             return null;
         return vector.elementAt(0);
@@ -75,14 +83,16 @@ public class Queue {
     /**
      * Is the queue empty?
      */
-    public boolean isEmpty() {
+    public boolean isEmpty()
+    {
         return vector.isEmpty();
     }
 
     /**
      * How many elements are there in this queue?
      */
-    public int size() {
+    public int size()
+    {
         return vector.size();
     }
 }

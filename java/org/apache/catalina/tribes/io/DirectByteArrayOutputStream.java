@@ -26,12 +26,14 @@ import java.io.OutputStream;
  * @author not attributable
  * @version 1.0
  */
-public class DirectByteArrayOutputStream extends OutputStream {
-    
+public class DirectByteArrayOutputStream extends OutputStream
+{
+
     private XByteBuffer buffer;
-    
-    public DirectByteArrayOutputStream(int size) {
-        buffer = new XByteBuffer(size,false);
+
+    public DirectByteArrayOutputStream(int size)
+    {
+        buffer = new XByteBuffer(size, false);
     }
 
     /**
@@ -39,22 +41,26 @@ public class DirectByteArrayOutputStream extends OutputStream {
      *
      * @param b the <code>byte</code>.
      * @throws IOException if an I/O error occurs. In particular, an
-     *   <code>IOException</code> may be thrown if the output stream has
-     *   been closed.
+     *                     <code>IOException</code> may be thrown if the output stream has
+     *                     been closed.
      */
-    public void write(int b) throws IOException {
-        buffer.append((byte)b);
+    public void write(int b) throws IOException
+    {
+        buffer.append((byte) b);
     }
-    
-    public int size() {
+
+    public int size()
+    {
         return buffer.getLength();
     }
-    
-    public byte[] getArrayDirect() {
+
+    public byte[] getArrayDirect()
+    {
         return buffer.getBytesDirect();
     }
-    
-    public byte[] getArray() {
+
+    public byte[] getArray()
+    {
         return buffer.getBytes();
     }
 

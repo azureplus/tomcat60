@@ -14,32 +14,42 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
- 
+
 package javax.servlet.jsp.tagext;
 
 /**
  * Information for a function in a Tag Library.
  * This class is instantiated from the Tag Library Descriptor file (TLD)
  * and is available only at translation time.
- * 
+ *
  * @since 2.0
  */
-public class FunctionInfo {
+public class FunctionInfo
+{
+
+    private String name;
+    private String functionClass;
+    private String functionSignature;
 
     /**
      * Constructor for FunctionInfo.
      *
-     * @param name The name of the function
-     * @param klass The class of the function
+     * @param name      The name of the function
+     * @param klass     The class of the function
      * @param signature The signature of the function
      */
 
-    public FunctionInfo(String name, String klass, String signature) {
+    public FunctionInfo(String name, String klass, String signature)
+    {
 
-	this.name = name;
+        this.name = name;
         this.functionClass = klass;
         this.functionSignature = signature;
     }
+
+    /*
+     * fields
+     */
 
     /**
      * The name of the function.
@@ -47,8 +57,9 @@ public class FunctionInfo {
      * @return The name of the function
      */
 
-    public String getName() {
-	return name;
+    public String getName()
+    {
+        return name;
     }
 
     /**
@@ -57,7 +68,8 @@ public class FunctionInfo {
      * @return The class of the function
      */
 
-    public String getFunctionClass() {
+    public String getFunctionClass()
+    {
         return functionClass;
     }
 
@@ -67,15 +79,8 @@ public class FunctionInfo {
      * @return The signature of the function
      */
 
-    public String getFunctionSignature() {
+    public String getFunctionSignature()
+    {
         return functionSignature;
     }
-
-    /*
-     * fields
-     */
-
-    private String name;
-    private String functionClass;
-    private String functionSignature;
 }

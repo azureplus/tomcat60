@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.catalina.connector;
@@ -23,17 +23,18 @@ import java.io.PrintWriter;
 
 /**
  * Coyote implementation of the servlet writer.
- * 
+ *
  * @author Remy Maucherat
  */
 public class CoyoteWriter
-    extends PrintWriter {
+        extends PrintWriter
+{
 
 
     // -------------------------------------------------------------- Constants
 
 
-    private static final char[] LINE_SEP = { '\r', '\n' };
+    private static final char[] LINE_SEP = {'\r', '\n'};
 
 
     // ----------------------------------------------------- Instance Variables
@@ -46,7 +47,8 @@ public class CoyoteWriter
     // ----------------------------------------------------------- Constructors
 
 
-    public CoyoteWriter(OutputBuffer ob) {
+    public CoyoteWriter(OutputBuffer ob)
+    {
         super(ob);
         this.ob = ob;
     }
@@ -59,7 +61,8 @@ public class CoyoteWriter
      * Prevent cloning the facade.
      */
     protected Object clone()
-        throws CloneNotSupportedException {
+            throws CloneNotSupportedException
+    {
         throw new CloneNotSupportedException();
     }
 
@@ -70,7 +73,8 @@ public class CoyoteWriter
     /**
      * Clear facade.
      */
-    void clear() {
+    void clear()
+    {
         ob = null;
     }
 
@@ -78,7 +82,8 @@ public class CoyoteWriter
     /**
      * Recycle.
      */
-    void recycle() {
+    void recycle()
+    {
         error = false;
     }
 
@@ -86,27 +91,35 @@ public class CoyoteWriter
     // --------------------------------------------------------- Writer Methods
 
 
-    public void flush() {
+    public void flush()
+    {
 
         if (error)
             return;
 
-        try {
+        try
+        {
             ob.flush();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             error = true;
         }
 
     }
 
 
-    public void close() {
+    public void close()
+    {
 
         // We don't close the PrintWriter - super() is not called,
         // so the stream can be reused. We close ob.
-        try {
+        try
+        {
             ob.close();
-        } catch (IOException ex ) {
+        }
+        catch (IOException ex)
+        {
             ;
         }
         error = false;
@@ -114,60 +127,75 @@ public class CoyoteWriter
     }
 
 
-    public boolean checkError() {
+    public boolean checkError()
+    {
         flush();
         return error;
     }
 
 
-    public void write(int c) {
+    public void write(int c)
+    {
 
         if (error)
             return;
 
-        try {
+        try
+        {
             ob.write(c);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             error = true;
         }
 
     }
 
 
-    public void write(char buf[], int off, int len) {
+    public void write(char buf[], int off, int len)
+    {
 
         if (error)
             return;
 
-        try {
+        try
+        {
             ob.write(buf, off, len);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             error = true;
         }
 
     }
 
 
-    public void write(char buf[]) {
-	write(buf, 0, buf.length);
+    public void write(char buf[])
+    {
+        write(buf, 0, buf.length);
     }
 
 
-    public void write(String s, int off, int len) {
+    public void write(String s, int off, int len)
+    {
 
         if (error)
             return;
 
-        try {
+        try
+        {
             ob.write(s, off, len);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             error = true;
         }
 
     }
 
 
-    public void write(String s) {
+    public void write(String s)
+    {
         write(s, 0, s.length());
     }
 
@@ -175,112 +203,134 @@ public class CoyoteWriter
     // ---------------------------------------------------- PrintWriter Methods
 
 
-    public void print(boolean b) {
-        if (b) {
+    public void print(boolean b)
+    {
+        if (b)
+        {
             write("true");
-        } else {
+        } else
+        {
             write("false");
         }
     }
 
 
-    public void print(char c) {
+    public void print(char c)
+    {
         write(c);
     }
 
 
-    public void print(int i) {
+    public void print(int i)
+    {
         write(String.valueOf(i));
     }
 
 
-    public void print(long l) {
+    public void print(long l)
+    {
         write(String.valueOf(l));
     }
 
 
-    public void print(float f) {
+    public void print(float f)
+    {
         write(String.valueOf(f));
     }
 
 
-    public void print(double d) {
+    public void print(double d)
+    {
         write(String.valueOf(d));
     }
 
 
-    public void print(char s[]) {
+    public void print(char s[])
+    {
         write(s);
     }
 
 
-    public void print(String s) {
-        if (s == null) {
+    public void print(String s)
+    {
+        if (s == null)
+        {
             s = "null";
         }
         write(s);
     }
 
 
-    public void print(Object obj) {
+    public void print(Object obj)
+    {
         write(String.valueOf(obj));
     }
 
 
-    public void println() {
+    public void println()
+    {
         write(LINE_SEP);
     }
 
 
-    public void println(boolean b) {
+    public void println(boolean b)
+    {
         print(b);
         println();
     }
 
 
-    public void println(char c) {
+    public void println(char c)
+    {
         print(c);
         println();
     }
 
 
-    public void println(int i) {
+    public void println(int i)
+    {
         print(i);
         println();
     }
 
 
-    public void println(long l) {
+    public void println(long l)
+    {
         print(l);
         println();
     }
 
 
-    public void println(float f) {
+    public void println(float f)
+    {
         print(f);
         println();
     }
 
 
-    public void println(double d) {
+    public void println(double d)
+    {
         print(d);
         println();
     }
 
 
-    public void println(char c[]) {
+    public void println(char c[])
+    {
         print(c);
         println();
     }
 
 
-    public void println(String s) {
+    public void println(String s)
+    {
         print(s);
         println();
     }
 
 
-    public void println(Object o) {
+    public void println(Object o)
+    {
         print(o);
         println();
     }

@@ -25,23 +25,24 @@ import java.io.IOException;
 
 /**
  * Input filter interface.
- * 
+ *
  * @author Remy Maucherat
  */
-public interface InputFilter extends InputBuffer {
+public interface InputFilter extends InputBuffer
+{
 
 
     /**
      * Read bytes.
-     * 
+     *
      * @return Number of bytes read.
      */
     public int doRead(ByteChunk chunk, Request unused)
-        throws IOException;
+            throws IOException;
 
 
     /**
-     * Some filters need additional parameters from the request. All the 
+     * Some filters need additional parameters from the request. All the
      * necessary reading can occur in that method, as this method is called
      * after the request header processing is complete.
      */
@@ -68,14 +69,14 @@ public interface InputFilter extends InputBuffer {
 
     /**
      * End the current request.
-     * 
+     *
      * @return 0 is the expected return value. A positive value indicates that
      * too many bytes were read. This method is allowed to use buffer.doRead
      * to consume extra bytes. The result of this method can't be negative (if
      * an error happens, an IOException should be thrown instead).
      */
     public long end()
-        throws IOException;
+            throws IOException;
 
 
     /**

@@ -18,6 +18,13 @@
 
 package org.apache.catalina.connector;
 
+import org.apache.catalina.Globals;
+import org.apache.catalina.security.SecurityUtil;
+import org.apache.catalina.util.StringManager;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.AccessController;
@@ -26,67 +33,31 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Locale;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.Globals;
-import org.apache.catalina.util.StringManager;
-import org.apache.catalina.security.SecurityUtil;
-
 /**
- * Facade class that wraps a Coyote response object. 
+ * Facade class that wraps a Coyote response object.
  * All methods are delegated to the wrapped response.
  *
  * @author Remy Maucherat
  * @author Jean-Francois Arcand
- *
  */
 @SuppressWarnings("deprecation")
-public class ResponseFacade 
-    implements HttpServletResponse {
+public class ResponseFacade
+        implements HttpServletResponse
+{
 
 
     // ----------------------------------------------------------- DoPrivileged
-    
-    private final class SetContentTypePrivilegedAction
-            implements PrivilegedAction {
 
-        private String contentType;
+    /**
+     * The string manager for this package.
+     */
+    protected static StringManager sm =
+            StringManager.getManager(Constants.Package);
+    /**
+     * The wrapped response.
+     */
+    protected Response response = null;
 
-        public SetContentTypePrivilegedAction(String contentType){
-            this.contentType = contentType;
-        }
-        
-        public Object run() {
-            response.setContentType(contentType);
-            return null;
-        }            
-    }
-
-    private final class DateHeaderPrivilegedAction
-            implements PrivilegedAction {
-
-        private String name;
-        private long value;
-        private boolean add;
-
-        DateHeaderPrivilegedAction(String name, long value, boolean add) {
-            this.name = name;
-            this.value = value;
-            this.add = add;
-        }
-
-        public Object run() {
-            if(add) {
-                response.addDateHeader(name, value);
-            } else {
-                response.setDateHeader(name, value);
-            }
-            return null;
-        }
-    }
-    
     // ----------------------------------------------------------- Constructors
 
 
@@ -95,86 +66,89 @@ public class ResponseFacade
      *
      * @param response The response to be wrapped
      */
-    public ResponseFacade(Response response) {
+    public ResponseFacade(Response response)
+    {
 
-         this.response = response;
+        this.response = response;
     }
 
 
     // ----------------------------------------------- Class/Instance Variables
 
-
-    /**
-     * The string manager for this package.
-     */
-    protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-
-    /**
-     * The wrapped response.
-     */
-    protected Response response = null;
-
-
-    // --------------------------------------------------------- Public Methods
-
-
     /**
      * Clear facade.
      */
-    public void clear() {
+    public void clear()
+    {
         response = null;
     }
-
 
     /**
      * Prevent cloning the facade.
      */
     protected Object clone()
-        throws CloneNotSupportedException {
+            throws CloneNotSupportedException
+    {
         throw new CloneNotSupportedException();
     }
 
 
-    public void finish() {
+    // --------------------------------------------------------- Public Methods
 
-        if (response == null) {
+    public void finish()
+    {
+
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         response.setSuspended(true);
     }
 
+    public boolean isFinished()
+    {
 
-    public boolean isFinished() {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.isSuspended();
     }
 
+    public String getCharacterEncoding()
+    {
 
-    // ------------------------------------------------ ServletResponse Methods
-
-
-    public String getCharacterEncoding() {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.getCharacterEncoding();
     }
 
+    public void setCharacterEncoding(String arg0)
+    {
+
+        if (response == null)
+        {
+            throw new IllegalStateException(
+                    sm.getString("responseFacade.nullResponse"));
+        }
+
+        response.setCharacterEncoding(arg0);
+    }
+
+
+    // ------------------------------------------------ ServletResponse Methods
 
     public ServletOutputStream getOutputStream()
-        throws IOException {
+            throws IOException
+    {
 
         //        if (isFinished())
         //            throw new IllegalStateException
@@ -187,9 +161,9 @@ public class ResponseFacade
 
     }
 
-
     public PrintWriter getWriter()
-        throws IOException {
+            throws IOException
+    {
 
         //        if (isFinished())
         //            throw new IllegalStateException
@@ -202,8 +176,8 @@ public class ResponseFacade
 
     }
 
-
-    public void setContentLength(int len) {
+    public void setContentLength(int len)
+    {
 
         if (isCommitted())
             return;
@@ -212,110 +186,119 @@ public class ResponseFacade
 
     }
 
+    public int getBufferSize()
+    {
 
-    public void setContentType(String type) {
-
-        if (isCommitted())
-            return;
-        
-        if (SecurityUtil.isPackageProtectionEnabled()){
-            AccessController.doPrivileged(new SetContentTypePrivilegedAction(type));
-        } else {
-            response.setContentType(type);            
-        }
-    }
-
-
-    public void setBufferSize(int size) {
-
-        if (isCommitted())
-            throw new IllegalStateException
-                (/*sm.getString("responseBase.reset.ise")*/);
-
-        response.setBufferSize(size);
-
-    }
-
-
-    public int getBufferSize() {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.getBufferSize();
     }
 
+    public void setBufferSize(int size)
+    {
+
+        if (isCommitted())
+            throw new IllegalStateException
+                    (/*sm.getString("responseBase.reset.ise")*/);
+
+        response.setBufferSize(size);
+
+    }
 
     public void flushBuffer()
-        throws IOException {
+            throws IOException
+    {
 
         if (isFinished())
             //            throw new IllegalStateException
             //                (/*sm.getString("responseFacade.finished")*/);
             return;
 
-        if (SecurityUtil.isPackageProtectionEnabled()){
-            try{
-                AccessController.doPrivileged(new PrivilegedExceptionAction(){
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            try
+            {
+                AccessController.doPrivileged(new PrivilegedExceptionAction()
+                {
 
-                    public Object run() throws IOException{
+                    public Object run() throws IOException
+                    {
                         response.setAppCommitted(true);
 
                         response.flushBuffer();
                         return null;
                     }
                 });
-            } catch(PrivilegedActionException e){
+            }
+            catch (PrivilegedActionException e)
+            {
                 Exception ex = e.getException();
-                if (ex instanceof IOException){
-                    throw (IOException)ex;
+                if (ex instanceof IOException)
+                {
+                    throw (IOException) ex;
                 }
             }
-        } else {
+        } else
+        {
             response.setAppCommitted(true);
 
-            response.flushBuffer();            
+            response.flushBuffer();
         }
 
     }
 
-
-    public void resetBuffer() {
+    public void resetBuffer()
+    {
 
         if (isCommitted())
             throw new IllegalStateException
-                (/*sm.getString("responseBase.reset.ise")*/);
+                    (/*sm.getString("responseBase.reset.ise")*/);
 
         response.resetBuffer();
 
     }
 
+    public boolean isCommitted()
+    {
 
-    public boolean isCommitted() {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return (response.isAppCommitted());
     }
 
-
-    public void reset() {
+    public void reset()
+    {
 
         if (isCommitted())
             throw new IllegalStateException
-                (/*sm.getString("responseBase.reset.ise")*/);
+                    (/*sm.getString("responseBase.reset.ise")*/);
 
         response.reset();
 
     }
 
+    public Locale getLocale()
+    {
 
-    public void setLocale(Locale loc) {
+        if (response == null)
+        {
+            throw new IllegalStateException(
+                    sm.getString("responseFacade.nullResponse"));
+        }
+
+        return response.getLocale();
+    }
+
+    public void setLocale(Locale loc)
+    {
 
         if (isCommitted())
             return;
@@ -323,19 +306,8 @@ public class ResponseFacade
         response.setLocale(loc);
     }
 
-
-    public Locale getLocale() {
-
-        if (response == null) {
-            throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
-        }
-
-        return response.getLocale();
-    }
-
-
-    public void addCookie(Cookie cookie) {
+    public void addCookie(Cookie cookie)
+    {
 
         if (isCommitted())
             return;
@@ -344,68 +316,73 @@ public class ResponseFacade
 
     }
 
+    public boolean containsHeader(String name)
+    {
 
-    public boolean containsHeader(String name) {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.containsHeader(name);
     }
 
+    public String encodeURL(String url)
+    {
 
-    public String encodeURL(String url) {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.encodeURL(url);
     }
 
+    public String encodeRedirectURL(String url)
+    {
 
-    public String encodeRedirectURL(String url) {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.encodeRedirectURL(url);
     }
 
+    public String encodeUrl(String url)
+    {
 
-    public String encodeUrl(String url) {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.encodeURL(url);
     }
 
+    public String encodeRedirectUrl(String url)
+    {
 
-    public String encodeRedirectUrl(String url) {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.encodeRedirectURL(url);
     }
-
 
     public void sendError(int sc, String msg)
-        throws IOException {
+            throws IOException
+    {
 
         if (isCommitted())
             throw new IllegalStateException
-                (/*sm.getString("responseBase.reset.ise")*/);
+                    (/*sm.getString("responseBase.reset.ise")*/);
 
         response.setAppCommitted(true);
 
@@ -413,13 +390,13 @@ public class ResponseFacade
 
     }
 
-
     public void sendError(int sc)
-        throws IOException {
+            throws IOException
+    {
 
         if (isCommitted())
             throw new IllegalStateException
-                (/*sm.getString("responseBase.reset.ise")*/);
+                    (/*sm.getString("responseBase.reset.ise")*/);
 
         response.setAppCommitted(true);
 
@@ -427,13 +404,13 @@ public class ResponseFacade
 
     }
 
-
     public void sendRedirect(String location)
-        throws IOException {
+            throws IOException
+    {
 
         if (isCommitted())
             throw new IllegalStateException
-                (/*sm.getString("responseBase.reset.ise")*/);
+                    (/*sm.getString("responseBase.reset.ise")*/);
 
         response.setAppCommitted(true);
 
@@ -441,38 +418,42 @@ public class ResponseFacade
 
     }
 
-
-    public void setDateHeader(String name, long date) {
+    public void setDateHeader(String name, long date)
+    {
 
         if (isCommitted())
             return;
 
-        if(Globals.IS_SECURITY_ENABLED) {
+        if (Globals.IS_SECURITY_ENABLED)
+        {
             AccessController.doPrivileged(new DateHeaderPrivilegedAction
-                                             (name, date, false));
-        } else {
+                    (name, date, false));
+        } else
+        {
             response.setDateHeader(name, date);
         }
 
     }
 
-
-    public void addDateHeader(String name, long date) {
+    public void addDateHeader(String name, long date)
+    {
 
         if (isCommitted())
             return;
 
-        if(Globals.IS_SECURITY_ENABLED) {
+        if (Globals.IS_SECURITY_ENABLED)
+        {
             AccessController.doPrivileged(new DateHeaderPrivilegedAction
-                                             (name, date, true));
-        } else {
+                    (name, date, true));
+        } else
+        {
             response.addDateHeader(name, date);
         }
 
     }
 
-
-    public void setHeader(String name, String value) {
+    public void setHeader(String name, String value)
+    {
 
         if (isCommitted())
             return;
@@ -481,8 +462,8 @@ public class ResponseFacade
 
     }
 
-
-    public void addHeader(String name, String value) {
+    public void addHeader(String name, String value)
+    {
 
         if (isCommitted())
             return;
@@ -491,8 +472,8 @@ public class ResponseFacade
 
     }
 
-
-    public void setIntHeader(String name, int value) {
+    public void setIntHeader(String name, int value)
+    {
 
         if (isCommitted())
             return;
@@ -501,8 +482,8 @@ public class ResponseFacade
 
     }
 
-
-    public void addIntHeader(String name, int value) {
+    public void addIntHeader(String name, int value)
+    {
 
         if (isCommitted())
             return;
@@ -511,8 +492,8 @@ public class ResponseFacade
 
     }
 
-
-    public void setStatus(int sc) {
+    public void setStatus(int sc)
+    {
 
         if (isCommitted())
             return;
@@ -521,8 +502,8 @@ public class ResponseFacade
 
     }
 
-
-    public void setStatus(int sc, String sm) {
+    public void setStatus(int sc, String sm)
+    {
 
         if (isCommitted())
             return;
@@ -530,26 +511,77 @@ public class ResponseFacade
         response.setStatus(sc, sm);
     }
 
+    public String getContentType()
+    {
 
-    public String getContentType() {
-
-        if (response == null) {
+        if (response == null)
+        {
             throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+                    sm.getString("responseFacade.nullResponse"));
         }
 
         return response.getContentType();
     }
 
+    public void setContentType(String type)
+    {
 
-    public void setCharacterEncoding(String arg0) {
+        if (isCommitted())
+            return;
 
-        if (response == null) {
-            throw new IllegalStateException(
-                            sm.getString("responseFacade.nullResponse"));
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            AccessController.doPrivileged(new SetContentTypePrivilegedAction(type));
+        } else
+        {
+            response.setContentType(type);
+        }
+    }
+
+    private final class SetContentTypePrivilegedAction
+            implements PrivilegedAction
+    {
+
+        private String contentType;
+
+        public SetContentTypePrivilegedAction(String contentType)
+        {
+            this.contentType = contentType;
         }
 
-        response.setCharacterEncoding(arg0);
+        public Object run()
+        {
+            response.setContentType(contentType);
+            return null;
+        }
+    }
+
+    private final class DateHeaderPrivilegedAction
+            implements PrivilegedAction
+    {
+
+        private String name;
+        private long value;
+        private boolean add;
+
+        DateHeaderPrivilegedAction(String name, long value, boolean add)
+        {
+            this.name = name;
+            this.value = value;
+            this.add = add;
+        }
+
+        public Object run()
+        {
+            if (add)
+            {
+                response.addDateHeader(name, value);
+            } else
+            {
+                response.setDateHeader(name, value);
+            }
+            return null;
+        }
     }
 
 }

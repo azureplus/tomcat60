@@ -28,56 +28,58 @@ import org.apache.juli.logging.Log;
 import java.util.Map;
 
 
-
 /**
- * A <b>CatalinaCluster</b> interface allows to plug in and out the 
+ * A <b>CatalinaCluster</b> interface allows to plug in and out the
  * different cluster implementations
  *
  * @author Filip Hanik
- *
  */
 
-public interface CatalinaCluster extends Cluster {
+public interface CatalinaCluster extends Cluster
+{
     // ----------------------------------------------------- Instance Variables
 
     /**
      * Descriptive information about this component implementation.
      */
     public String info = "CatalinaCluster/2.0";
-    
+
     /**
      * Start the cluster, the owning container will invoke this
+     *
      * @throws Exception - if failure to start cluster
      */
     public void start() throws Exception;
-    
+
     /**
      * Stops the cluster, the owning container will invoke this
+     *
      * @throws LifecycleException
      */
     public void stop() throws LifecycleException;
-    
+
     /**
      * Returns the associates logger with this cluster.
      *
      * @return Log
      */
     public Log getLogger();
-    
+
     /**
      * Sends a message to all the members in the cluster
+     *
      * @param msg ClusterMessage
      */
     public void send(ClusterMessage msg);
-    
+
     /**
      * Sends a message to a specific member in the cluster.
      *
-     * @param msg ClusterMessage
+     * @param msg  ClusterMessage
      * @param dest Member
      */
     public void send(ClusterMessage msg, Member dest);
-    
+
     /**
      * Sends a message to a all members at local cluster domain
      *
@@ -96,35 +98,38 @@ public interface CatalinaCluster extends Cluster {
      * @return Member[]
      */
     public Member[] getMembers();
-    
+
     /**
      * Return the member that represents this node.
      *
      * @return Member
      */
     public Member getLocalMember();
-    
+
     public void addValve(Valve valve);
-    
+
     public void addClusterListener(ClusterListener listener);
-    
+
     public void removeClusterListener(ClusterListener listener);
-    
-    public void setClusterDeployer(ClusterDeployer deployer);
-    
+
     public ClusterDeployer getClusterDeployer();
-    
+
+    public void setClusterDeployer(ClusterDeployer deployer);
+
     /**
      * @return The map of managers
      */
     public Map getManagers();
 
     public Manager getManager(String name);
+
     public String getManagerName(String name, Manager manager);
+
     public Valve[] getValves();
-    
-    public void setChannel(Channel channel);
+
     public Channel getChannel();
-    
+
+    public void setChannel(Channel channel);
+
 
 }

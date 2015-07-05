@@ -17,44 +17,46 @@
 
 package org.apache.tomcat.jni;
 
-/** OS
+/**
+ * OS
  *
  * @author Mladen Turk
  */
-public class OS {
+public class OS
+{
 
-    /* OS Enums */
-    private static final int UNIX      = 1;
-    private static final int NETWARE   = 2;
-    private static final int WIN32     = 3;
-    private static final int WIN64     = 4;
-    private static final int LINUX     = 5;
-    private static final int SOLARIS   = 6;
-    private static final int BSD       = 7;
-
-    public static final int LOG_EMERG  = 1;
-    public static final int LOG_ERROR  = 2;
+    public static final int LOG_EMERG = 1;
+    public static final int LOG_ERROR = 2;
     public static final int LOG_NOTICE = 3;
-    public static final int LOG_WARN   = 4;
-    public static final int LOG_INFO   = 5;
-    public static final int LOG_DEBUG  = 6;
+    public static final int LOG_WARN = 4;
+    public static final int LOG_INFO = 5;
+    public static final int LOG_DEBUG = 6;
+    /* OS Enums */
+    private static final int UNIX = 1;
+    public static final boolean IS_UNIX = is(UNIX);
+    private static final int NETWARE = 2;
+    public static final boolean IS_NETWARE = is(NETWARE);
+    private static final int WIN32 = 3;
+    public static final boolean IS_WIN32 = is(WIN32);
+    private static final int WIN64 = 4;
+    public static final boolean IS_WIN64 = is(WIN64);
+    private static final int LINUX = 5;
+    public static final boolean IS_LINUX = is(LINUX);
+    private static final int SOLARIS = 6;
+    public static final boolean IS_SOLARIS = is(SOLARIS);
+    private static final int BSD = 7;
+    public static final boolean IS_BSD = is(BSD);
 
     /**
      * Check for OS type.
+     *
      * @param type OS type to test.
      */
     private static native boolean is(int type);
 
-    public static final boolean IS_UNIX    = is(UNIX);
-    public static final boolean IS_NETWARE = is(NETWARE);
-    public static final boolean IS_WIN32   = is(WIN32);
-    public static final boolean IS_WIN64   = is(WIN64);
-    public static final boolean IS_LINUX   = is(LINUX);
-    public static final boolean IS_SOLARIS = is(SOLARIS);
-    public static final boolean IS_BSD     = is(BSD);
-
     /**
      * Get the name of the system default character set.
+     *
      * @param pool the pool to allocate the name from, if needed
      */
     public static native String defaultEncoding(long pool);
@@ -63,16 +65,18 @@ public class OS {
      * Get the name of the current locale character set.
      * Defers to apr_os_default_encoding if the current locale's
      * data can't be retrieved on this system.
+     *
      * @param pool the pool to allocate the name from, if needed
      */
     public static native String localeEncoding(long pool);
 
     /**
      * Generate random bytes.
+     *
      * @param buf Buffer to fill with random bytes
      * @param len Length of buffer in bytes
      */
-    public static native int random(byte [] buf, int len);
+    public static native int random(byte[] buf, int len);
 
     /**
      * Gather system info.
@@ -85,26 +89,28 @@ public class OS {
      * inf[4]  - Amount of shared memory
      * inf[5]  - Memory used by buffers
      * inf[6]  - Memory Load
-     *
+     * <p/>
      * inf[7]  - Idle Time in microseconds
      * inf[8]  - Kernel Time in microseconds
      * inf[9]  - User Time in microseconds
-     *
+     * <p/>
      * inf[10] - Process creation time (apr_time_t)
      * inf[11] - Process Kernel Time in microseconds
      * inf[12] - Process User Time in microseconds
-     *
+     * <p/>
      * inf[13] - Current working set size.
      * inf[14] - Peak working set size.
      * inf[15] - Number of page faults.
      * </PRE>
+     *
      * @param inf array that will be filled with system information.
      *            Array length must be at least 16.
      */
-    public static native int info(long [] inf);
+    public static native int info(long[] inf);
 
     /**
      * Expand environment variables.
+     *
      * @param str String to expand
      * @return Expanded string with replaced environment variables.
      */
@@ -112,13 +118,15 @@ public class OS {
 
     /**
      * Initialize system logging.
+     *
      * @param domain String that will be prepended to every message
      */
     public static native void sysloginit(String domain);
 
     /**
      * Log message.
-     * @param level Log message severity. See LOG_XXX enums.
+     *
+     * @param level   Log message severity. See LOG_XXX enums.
      * @param message Message to log
      */
     public static native void syslog(int level, String message);

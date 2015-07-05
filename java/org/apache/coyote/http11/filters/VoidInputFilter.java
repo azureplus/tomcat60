@@ -17,21 +17,21 @@
 
 package org.apache.coyote.http11.filters;
 
-import java.io.IOException;
-
-import org.apache.tomcat.util.buf.ByteChunk;
-
 import org.apache.coyote.InputBuffer;
 import org.apache.coyote.Request;
 import org.apache.coyote.http11.InputFilter;
+import org.apache.tomcat.util.buf.ByteChunk;
+
+import java.io.IOException;
 
 /**
  * Void input filter, which returns -1 when attempting a read. Used with a GET,
  * HEAD, or a similar request.
- * 
+ *
  * @author Remy Maucherat
  */
-public class VoidInputFilter implements InputFilter {
+public class VoidInputFilter implements InputFilter
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -44,7 +44,8 @@ public class VoidInputFilter implements InputFilter {
     // ----------------------------------------------------- Static Initializer
 
 
-    static {
+    static
+    {
         ENCODING.setBytes(ENCODING_NAME.getBytes(), 0, ENCODING_NAME.length());
     }
 
@@ -57,11 +58,12 @@ public class VoidInputFilter implements InputFilter {
 
     /**
      * Write some bytes.
-     * 
+     *
      * @return number of bytes written by the filter
      */
     public int doRead(ByteChunk chunk, Request req)
-        throws IOException {
+            throws IOException
+    {
 
         return -1;
 
@@ -74,29 +76,33 @@ public class VoidInputFilter implements InputFilter {
     /**
      * Set the associated reauest.
      */
-    public void setRequest(Request request) {
+    public void setRequest(Request request)
+    {
     }
 
 
     /**
      * Set the next buffer in the filter pipeline.
      */
-    public void setBuffer(InputBuffer buffer) {
+    public void setBuffer(InputBuffer buffer)
+    {
     }
 
 
     /**
      * Make the filter ready to process the next request.
      */
-    public void recycle() {
+    public void recycle()
+    {
     }
 
 
     /**
-     * Return the name of the associated encoding; Here, the value is 
+     * Return the name of the associated encoding; Here, the value is
      * "void".
      */
-    public ByteChunk getEncodingName() {
+    public ByteChunk getEncodingName()
+    {
         return ENCODING;
     }
 
@@ -104,14 +110,15 @@ public class VoidInputFilter implements InputFilter {
     /**
      * End the current request. It is acceptable to write extra bytes using
      * buffer.doWrite during the execution of this method.
-     * 
-     * @return Should return 0 unless the filter does some content length 
+     *
+     * @return Should return 0 unless the filter does some content length
      * delimitation, in which case the number is the amount of extra bytes or
-     * missing bytes, which would indicate an error. 
+     * missing bytes, which would indicate an error.
      * Note: It is recommended that extra bytes be swallowed by the filter.
      */
     public long end()
-        throws IOException {
+            throws IOException
+    {
         return 0;
     }
 
@@ -119,8 +126,9 @@ public class VoidInputFilter implements InputFilter {
     /**
      * Amount of bytes still available in a buffer.
      */
-    public int available() {
+    public int available()
+    {
         return 0;
     }
-    
+
 }

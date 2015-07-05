@@ -26,20 +26,26 @@ import java.math.BigDecimal;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstFloatingPoint extends SimpleNode {
-    public AstFloatingPoint(int id) {
+public final class AstFloatingPoint extends SimpleNode
+{
+    private volatile Number number;
+
+    public AstFloatingPoint(int id)
+    {
         super(id);
     }
 
-    private volatile Number number;
-
-    public Number getFloatingPoint() {
-        if (this.number == null) {
-            try {
+    public Number getFloatingPoint()
+    {
+        if (this.number == null)
+        {
+            try
+            {
                 this.number = new Double(this.image);
-            } catch (ArithmeticException e0) {
+            }
+            catch (ArithmeticException e0)
+            {
                 this.number = new BigDecimal(this.image);
             }
         }
@@ -47,12 +53,14 @@ public final class AstFloatingPoint extends SimpleNode {
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return this.getFloatingPoint();
     }
 
     public Class getType(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return this.getFloatingPoint().getClass();
     }
 }

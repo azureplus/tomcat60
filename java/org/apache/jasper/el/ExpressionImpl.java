@@ -22,17 +22,20 @@ import javax.servlet.jsp.el.ELException;
 import javax.servlet.jsp.el.Expression;
 import javax.servlet.jsp.el.VariableResolver;
 
-public final class ExpressionImpl extends Expression {
+public final class ExpressionImpl extends Expression
+{
 
-	private final ValueExpression ve;
-	
-	public ExpressionImpl(ValueExpression ve) {
-		this.ve = ve;
-	}
+    private final ValueExpression ve;
 
-	public Object evaluate(VariableResolver vResolver) throws ELException {
-		ELContext ctx = new ELContextImpl(new ELResolverImpl(vResolver));
-		return ve.getValue(ctx);
-	}
+    public ExpressionImpl(ValueExpression ve)
+    {
+        this.ve = ve;
+    }
+
+    public Object evaluate(VariableResolver vResolver) throws ELException
+    {
+        ELContext ctx = new ELContextImpl(new ELResolverImpl(vResolver));
+        return ve.getValue(ctx);
+    }
 
 }

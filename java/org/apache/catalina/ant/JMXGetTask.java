@@ -30,16 +30,16 @@ import java.net.URLEncoder;
  * supported by the Tomcat manager application.
  *
  * @author Peter Rossbach
- *
  */
-public class JMXGetTask extends AbstractCatalinaTask {
+public class JMXGetTask extends AbstractCatalinaTask
+{
 
     // Properties
 
     /**
      * The full bean name
      */
-    protected String bean      = null;
+    protected String bean = null;
 
     /**
      * The attribute you wish to alter
@@ -47,58 +47,71 @@ public class JMXGetTask extends AbstractCatalinaTask {
     protected String attribute = null;
 
     // Public Methods
-    
+
     /**
      * Get method for the bean name
+     *
      * @return Bean name
      */
-    public String getBean () {
+    public String getBean()
+    {
         return this.bean;
     }
 
     /**
      * Set method for the bean name
+     *
      * @param bean Bean name
      */
-    public void setBean (String bean) {
+    public void setBean(String bean)
+    {
         this.bean = bean;
     }
 
     /**
      * Get method for the attribute name
+     *
      * @return Attribute name
      */
-    public String getAttribute () {
+    public String getAttribute()
+    {
         return this.attribute;
     }
 
     /**
      * Set method for the attribute name
+     *
      * @param attribute Attribute name
      */
-    public void setAttribute (String attribute) {
+    public void setAttribute(String attribute)
+    {
         this.attribute = attribute;
     }
 
     /**
      * Execute the requested operation.
      *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
         super.execute();
-        if (bean == null || attribute == null) {
+        if (bean == null || attribute == null)
+        {
             throw new BuildException
-                ("Must specify 'bean' and 'attribute' attributes");
+                    ("Must specify 'bean' and 'attribute' attributes");
         }
         log("Getting attribute " + attribute +
-                " in bean " + bean );
-        try {
-            execute("/jmxproxy/?get=" + URLEncoder.encode(bean, getCharset()) 
+                " in bean " + bean);
+        try
+        {
+            execute("/jmxproxy/?get=" + URLEncoder.encode(bean, getCharset())
                     + "&att=" + URLEncoder.encode(attribute, getCharset()));
-        } catch (UnsupportedEncodingException e) {
+        }
+        catch (UnsupportedEncodingException e)
+        {
             throw new BuildException
-                ("Invalid 'charset' attribute: " + getCharset());
+                    ("Invalid 'charset' attribute: " + getCharset());
         }
     }
 }

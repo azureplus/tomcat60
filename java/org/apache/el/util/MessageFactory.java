@@ -21,49 +21,58 @@ import java.util.ResourceBundle;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class MessageFactory {
+public final class MessageFactory
+{
 
     protected final static ResourceBundle bundle = ResourceBundle
             .getBundle("org.apache.el.Messages");
+
     /**
-     * 
+     *
      */
-    public MessageFactory() {
+    public MessageFactory()
+    {
         super();
     }
 
-    public static String get(final String key) {
+    public static String get(final String key)
+    {
         return bundle.getString(key);
     }
 
-    public static String get(final String key, final Object obj0) {
-        return getArray(key, new Object[] { obj0 });
+    public static String get(final String key, final Object obj0)
+    {
+        return getArray(key, new Object[]{obj0});
     }
 
     public static String get(final String key, final Object obj0,
-            final Object obj1) {
-        return getArray(key, new Object[] { obj0, obj1 });
+                             final Object obj1)
+    {
+        return getArray(key, new Object[]{obj0, obj1});
     }
 
     public static String get(final String key, final Object obj0,
-            final Object obj1, final Object obj2) {
-        return getArray(key, new Object[] { obj0, obj1, obj2 });
+                             final Object obj1, final Object obj2)
+    {
+        return getArray(key, new Object[]{obj0, obj1, obj2});
     }
 
     public static String get(final String key, final Object obj0,
-            final Object obj1, final Object obj2, final Object obj3) {
-        return getArray(key, new Object[] { obj0, obj1, obj2, obj3 });
+                             final Object obj1, final Object obj2, final Object obj3)
+    {
+        return getArray(key, new Object[]{obj0, obj1, obj2, obj3});
     }
 
     public static String get(final String key, final Object obj0,
-            final Object obj1, final Object obj2, final Object obj3,
-            final Object obj4) {
-        return getArray(key, new Object[] { obj0, obj1, obj2, obj3, obj4 });
+                             final Object obj1, final Object obj2, final Object obj3,
+                             final Object obj4)
+    {
+        return getArray(key, new Object[]{obj0, obj1, obj2, obj3, obj4});
     }
 
-    public static String getArray(final String key, final Object[] objA) {
+    public static String getArray(final String key, final Object[] objA)
+    {
         return MessageFormat.format(bundle.getString(key), objA);
     }
 

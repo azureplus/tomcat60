@@ -25,13 +25,14 @@ import java.io.File;
 import java.util.Map;
 
 /**
- * A class to hold all init parameters specific to the JSP engine. 
+ * A class to hold all init parameters specific to the JSP engine.
  *
  * @author Anil K. Vijendran
  * @author Hans Bergsten
  * @author Pierre Delisle
  */
-public interface Options {
+public interface Options
+{
 
     /**
      * Returns true if Jasper issues a compilation error instead of a runtime
@@ -57,11 +58,12 @@ public interface Options {
 
     /**
      * Should errors be sent to client or thrown into stderr?
+     *
      * @deprecated
      */
     @Deprecated
     public boolean getSendErrorToClient();
- 
+
     /**
      * Should we include debug information in compiled class?
      */
@@ -121,8 +123,8 @@ public interface Options {
 
     /**
      * Compiler to use.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * If <code>null</code> (the default), the java compiler from Eclipse JDT
      * project, bundled with Tomcat, will be used. Otherwise, the
      * <code>javac</code> task from Apache Ant will be used to call an external
@@ -139,19 +141,19 @@ public interface Options {
     /**
      * The compiler source VM, e.g. 1.3, 1.4, 1.5 or 1.6.
      */
-    public String getCompilerSourceVM();   
+    public String getCompilerSourceVM();
 
     /**
      * Jasper Java compiler class to use.
      */
-    public String getCompilerClassName();   
+    public String getCompilerClassName();
 
     /**
      * The cache for the location of the TLD's
      * for the various tag libraries 'exposed'
      * by the web application.
-     * A tag library is 'exposed' either explicitely in 
-     * web.xml or implicitely via the uri tag in the TLD 
+     * A tag library is 'exposed' either explicitely in
+     * web.xml or implicitely via the uri tag in the TLD
      * of a taglib deployed in a jar file (WEB-INF/lib).
      *
      * @return the instance of the TldLocationsCache
@@ -167,15 +169,15 @@ public interface Options {
 
     /**
      * The boolean flag to tell Ant whether to fork JSP page compilations.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * Is used only when Jasper uses an external java compiler (wrapped through
      * a <code>javac</code> Apache Ant task).
      */
     public boolean getFork();
 
     /**
-     * Obtain JSP configuration informantion specified in web.xml.  
+     * Obtain JSP configuration informantion specified in web.xml.
      */
     public JspConfig getJspConfig();
 
@@ -191,39 +193,39 @@ public interface Options {
 
     /**
      * Indicates whether text strings are to be generated as char arrays.
-     * 
+     *
      * @return <code>true</code> if text strings are to be generated as char
-     *         arrays, <code>false</code> otherwise
+     * arrays, <code>false</code> otherwise
      */
     public boolean genStringAsCharArray();
-    
+
     /**
      * Modification test interval.
      */
     public int getModificationTestInterval();
-    
+
 
     /**
      * Re-compile on failure.
      */
     public boolean getRecompileOnFail();
-    
+
     /**
      * Is caching enabled (used for precompilation).
      */
     public boolean isCaching();
-    
+
     /**
      * The web-application wide cache for the TagLibraryInfo tag library
      * descriptors, used if {@link #isCaching()} returns <code>true</code>.
-     * 
+     * <p/>
      * <p>
      * Using this cache avoids the cost of repeating the parsing of a tag
      * library descriptor XML file (performed by TagLibraryInfoImpl.parseTLD).
      * </p>
-     * 
+     *
      * @return the Map(String uri, TagLibraryInfo tld) instance.
      */
     public Map getCache();
-    
+
 }

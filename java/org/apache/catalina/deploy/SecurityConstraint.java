@@ -25,7 +25,7 @@ import java.io.Serializable;
  * Representation of a security constraint element for a web application,
  * as represented in a <code>&lt;security-constraint&gt;</code> element in the
  * deployment descriptor.
- * <p>
+ * <p/>
  * <b>WARNING</b>:  It is assumed that instances of this class will be created
  * and modified only within the context of a single thread, before the instance
  * is made visible to the remainder of the application.  After that, only read
@@ -33,26 +33,13 @@ import java.io.Serializable;
  * this class is synchronized.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class SecurityConstraint implements Serializable {
+public class SecurityConstraint implements Serializable
+{
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    /**
-     * Construct a new security constraint instance with default values.
-     */
-    public SecurityConstraint() {
-
-        super();
-
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
 
 
     /**
@@ -62,6 +49,7 @@ public class SecurityConstraint implements Serializable {
     private boolean allRoles = false;
 
 
+    // ----------------------------------------------------- Instance Variables
     /**
      * Was an authorization constraint included in this security constraint?
      * This is necessary to distinguish the case where an auth-constraint with
@@ -69,28 +57,20 @@ public class SecurityConstraint implements Serializable {
      * a lack of auth-constraint which implies no access control checking.
      */
     private boolean authConstraint = false;
-
-
     /**
      * The set of roles permitted to access resources protected by this
      * security constraint.
      */
     private String authRoles[] = new String[0];
-
-
     /**
      * The set of web resource collections protected by this security
      * constraint.
      */
     private SecurityCollection collections[] = new SecurityCollection[0];
-
-
     /**
      * The display name of this security constraint.
      */
     private String displayName = null;
-
-
     /**
      * The user data constraint for this security constraint.  Must be NONE,
      * INTEGRAL, or CONFIDENTIAL.
@@ -98,14 +78,25 @@ public class SecurityConstraint implements Serializable {
     private String userConstraint = "NONE";
 
 
-    // ------------------------------------------------------------- Properties
+    /**
+     * Construct a new security constraint instance with default values.
+     */
+    public SecurityConstraint()
+    {
 
+        super();
+
+    }
+
+
+    // ------------------------------------------------------------- Properties
 
     /**
      * Was the "all roles" wildcard included in this authentication
      * constraint?
      */
-    public boolean getAllRoles() {
+    public boolean getAllRoles()
+    {
 
         return (this.allRoles);
 
@@ -116,7 +107,8 @@ public class SecurityConstraint implements Serializable {
      * Return the authorization constraint present flag for this security
      * constraint.
      */
-    public boolean getAuthConstraint() {
+    public boolean getAuthConstraint()
+    {
 
         return (this.authConstraint);
 
@@ -127,7 +119,8 @@ public class SecurityConstraint implements Serializable {
      * Set the authorization constraint present flag for this security
      * constraint.
      */
-    public void setAuthConstraint(boolean authConstraint) {
+    public void setAuthConstraint(boolean authConstraint)
+    {
 
         this.authConstraint = authConstraint;
 
@@ -137,7 +130,8 @@ public class SecurityConstraint implements Serializable {
     /**
      * Return the display name of this security constraint.
      */
-    public String getDisplayName() {
+    public String getDisplayName()
+    {
 
         return (this.displayName);
 
@@ -147,7 +141,8 @@ public class SecurityConstraint implements Serializable {
     /**
      * Set the display name of this security constraint.
      */
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(String displayName)
+    {
 
         this.displayName = displayName;
 
@@ -157,7 +152,8 @@ public class SecurityConstraint implements Serializable {
     /**
      * Return the user data constraint for this security constraint.
      */
-    public String getUserConstraint() {
+    public String getUserConstraint()
+    {
 
         return (userConstraint);
 
@@ -169,7 +165,8 @@ public class SecurityConstraint implements Serializable {
      *
      * @param userConstraint The new user data constraint
      */
-    public void setUserConstraint(String userConstraint) {
+    public void setUserConstraint(String userConstraint)
+    {
 
         if (userConstraint != null)
             this.userConstraint = userConstraint;
@@ -186,11 +183,13 @@ public class SecurityConstraint implements Serializable {
      *
      * @param authRole Role name to be added
      */
-    public void addAuthRole(String authRole) {
+    public void addAuthRole(String authRole)
+    {
 
         if (authRole == null)
             return;
-        if ("*".equals(authRole)) {
+        if ("*".equals(authRole))
+        {
             allRoles = true;
             return;
         }
@@ -210,12 +209,13 @@ public class SecurityConstraint implements Serializable {
      *
      * @param collection The new web resource collection
      */
-    public void addCollection(SecurityCollection collection) {
+    public void addCollection(SecurityCollection collection)
+    {
 
         if (collection == null)
             return;
         SecurityCollection results[] =
-            new SecurityCollection[collections.length + 1];
+                new SecurityCollection[collections.length + 1];
         for (int i = 0; i < collections.length; i++)
             results[i] = collections[i];
         results[collections.length] = collection;
@@ -230,11 +230,13 @@ public class SecurityConstraint implements Serializable {
      *
      * @param role Role name to be checked
      */
-    public boolean findAuthRole(String role) {
+    public boolean findAuthRole(String role)
+    {
 
         if (role == null)
             return (false);
-        for (int i = 0; i < authRoles.length; i++) {
+        for (int i = 0; i < authRoles.length; i++)
+        {
             if (role.equals(authRoles[i]))
                 return (true);
         }
@@ -249,7 +251,8 @@ public class SecurityConstraint implements Serializable {
      * a zero-length array is returned (which implies that all authenticated
      * users are permitted access).
      */
-    public String[] findAuthRoles() {
+    public String[] findAuthRoles()
+    {
 
         return (authRoles);
 
@@ -262,11 +265,13 @@ public class SecurityConstraint implements Serializable {
      *
      * @param name Web resource collection name to return
      */
-    public SecurityCollection findCollection(String name) {
+    public SecurityCollection findCollection(String name)
+    {
 
         if (name == null)
             return (null);
-        for (int i = 0; i < collections.length; i++) {
+        for (int i = 0; i < collections.length; i++)
+        {
             if (name.equals(collections[i].getName()))
                 return (collections[i]);
         }
@@ -280,7 +285,8 @@ public class SecurityConstraint implements Serializable {
      * security constraint.  If there are none, a zero-length array is
      * returned.
      */
-    public SecurityCollection[] findCollections() {
+    public SecurityCollection[] findCollections()
+    {
 
         return (collections);
 
@@ -291,21 +297,24 @@ public class SecurityConstraint implements Serializable {
      * Return <code>true</code> if the specified context-relative URI (and
      * associated HTTP method) are protected by this security constraint.
      *
-     * @param uri Context-relative URI to check
+     * @param uri    Context-relative URI to check
      * @param method Request method being used
      */
-    public boolean included(String uri, String method) {
+    public boolean included(String uri, String method)
+    {
 
         // We cannot match without a valid request method
         if (method == null)
             return (false);
 
         // Check all of the collections included in this constraint
-        for (int i = 0; i < collections.length; i++) {
+        for (int i = 0; i < collections.length; i++)
+        {
             if (!collections[i].findMethod(method))
                 continue;
             String patterns[] = collections[i].findPatterns();
-            for (int j = 0; j < patterns.length; j++) {
+            for (int j = 0; j < patterns.length; j++)
+            {
                 if (matchPattern(uri, patterns[j]))
                     return (true);
             }
@@ -323,21 +332,26 @@ public class SecurityConstraint implements Serializable {
      *
      * @param authRole Role name to be removed
      */
-    public void removeAuthRole(String authRole) {
+    public void removeAuthRole(String authRole)
+    {
 
         if (authRole == null)
             return;
         int n = -1;
-        for (int i = 0; i < authRoles.length; i++) {
-            if (authRoles[i].equals(authRole)) {
+        for (int i = 0; i < authRoles.length; i++)
+        {
+            if (authRoles[i].equals(authRole))
+            {
                 n = i;
                 break;
             }
         }
-        if (n >= 0) {
+        if (n >= 0)
+        {
             int j = 0;
             String results[] = new String[authRoles.length - 1];
-            for (int i = 0; i < authRoles.length; i++) {
+            for (int i = 0; i < authRoles.length; i++)
+            {
                 if (i != n)
                     results[j++] = authRoles[i];
             }
@@ -353,22 +367,27 @@ public class SecurityConstraint implements Serializable {
      *
      * @param collection Web resource collection to be removed
      */
-    public void removeCollection(SecurityCollection collection) {
+    public void removeCollection(SecurityCollection collection)
+    {
 
         if (collection == null)
             return;
         int n = -1;
-        for (int i = 0; i < collections.length; i++) {
-            if (collections[i].equals(collection)) {
+        for (int i = 0; i < collections.length; i++)
+        {
+            if (collections[i].equals(collection))
+            {
                 n = i;
                 break;
             }
         }
-        if (n >= 0) {
+        if (n >= 0)
+        {
             int j = 0;
             SecurityCollection results[] =
-                new SecurityCollection[collections.length - 1];
-            for (int i = 0; i < collections.length; i++) {
+                    new SecurityCollection[collections.length - 1];
+            for (int i = 0; i < collections.length; i++)
+            {
                 if (i != n)
                     results[j++] = collections[i];
             }
@@ -381,10 +400,12 @@ public class SecurityConstraint implements Serializable {
     /**
      * Return a String representation of this security constraint.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("SecurityConstraint[");
-        for (int i = 0; i < collections.length; i++) {
+        for (int i = 0; i < collections.length; i++)
+        {
             if (i > 0)
                 sb.append(", ");
             sb.append(collections[i].getName());
@@ -403,11 +424,12 @@ public class SecurityConstraint implements Serializable {
      * This method follows the same rules (in the same order) as those used
      * for mapping requests to servlets.
      *
-     * @param path Context-relative request path to be checked
-     *  (must start with '/')
+     * @param path    Context-relative request path to be checked
+     *                (must start with '/')
      * @param pattern URL pattern to be compared against
      */
-    private boolean matchPattern(String path, String pattern) {
+    private boolean matchPattern(String path, String pattern)
+    {
 
         // Normalize the argument strings
         if ((path == null) || (path.length() == 0))
@@ -420,13 +442,15 @@ public class SecurityConstraint implements Serializable {
             return (true);
 
         // Check for path prefix matching
-        if (pattern.startsWith("/") && pattern.endsWith("/*")) {
+        if (pattern.startsWith("/") && pattern.endsWith("/*"))
+        {
             pattern = pattern.substring(0, pattern.length() - 2);
             if (pattern.length() == 0)
                 return (true);  // "/*" is the same as "/"
             if (path.endsWith("/"))
                 path = path.substring(0, path.length() - 1);
-            while (true) {
+            while (true)
+            {
                 if (pattern.equals(path))
                     return (true);
                 int slash = path.lastIndexOf('/');
@@ -438,11 +462,13 @@ public class SecurityConstraint implements Serializable {
         }
 
         // Check for suffix matching
-        if (pattern.startsWith("*.")) {
+        if (pattern.startsWith("*."))
+        {
             int slash = path.lastIndexOf('/');
             int period = path.lastIndexOf('.');
             if ((slash >= 0) && (period > slash) &&
-                path.endsWith(pattern.substring(1))) {
+                    path.endsWith(pattern.substring(1)))
+            {
                 return (true);
             }
             return (false);

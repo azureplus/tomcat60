@@ -17,26 +17,18 @@
 
 package org.apache.catalina.valves;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.res.StringManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
-
-import org.apache.tomcat.util.res.StringManager;
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
-import org.apache.catalina.valves.Constants;
-import org.apache.catalina.valves.RequestFilterValve;
-import org.apache.catalina.valves.ValveBase;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * <p>
@@ -168,7 +160,7 @@ import org.apache.juli.logging.LogFactory;
  * RemoteIpValve configuration:
  * </p>
  * <code><pre>
- * &lt;Valve 
+ * &lt;Valve
  *   className="org.apache.catalina.valves.RemoteIpValve"
  *   internalProxies="192\.168\.0\.10, 192\.168\.0\.11"
  *   remoteIpHeader="x-forwarded-for"
@@ -230,7 +222,7 @@ import org.apache.juli.logging.LogFactory;
  * RemoteIpValve configuration:
  * </p>
  * <code><pre>
- * &lt;Valve 
+ * &lt;Valve
  *   className="org.apache.catalina.valves.RemoteIpValve"
  *   internalProxies="192\.168\.0\.10, 192\.168\.0\.11"
  *   remoteIpHeader="x-forwarded-for"
@@ -272,7 +264,7 @@ import org.apache.juli.logging.LogFactory;
  * RemoteIpValve configuration:
  * </p>
  * <code><pre>
- * &lt;Valve 
+ * &lt;Valve
  *   className="org.apache.catalina.valves.RemoteIpValve"
  *   internalProxies="192\.168\.0\.10, 192\.168\.0\.11"
  *   remoteIpHeader="x-forwarded-for"
@@ -315,7 +307,7 @@ import org.apache.juli.logging.LogFactory;
  * RemoteIpValve configuration:
  * </p>
  * <code><pre>
- * &lt;Valve 
+ * &lt;Valve
  *   className="org.apache.catalina.valves.RemoteIpValve"
  *   internalProxies="192\.168\.0\.10, 192\.168\.0\.11"
  *   remoteIpHeader="x-forwarded-for"
@@ -352,329 +344,141 @@ import org.apache.juli.logging.LogFactory;
  * verified by <code>proxy1</code>.
  * </p>
  */
-public class RemoteIpValve extends ValveBase {
-    
+public class RemoteIpValve extends ValveBase
+{
+
     /**
      * {@link Pattern} for a comma delimited string that support whitespace characters
      */
     private static final Pattern commaSeparatedValuesPattern = Pattern.compile("\\s*,\\s*");
-    
+
     /**
      * The descriptive information related to this implementation.
      */
     private static final String info = "org.apache.catalina.valves.RemoteIpValve/1.0";
-    
-    /**
-     * Logger
-     */
-    private static Log log = LogFactory.getLog(RemoteIpValve.class);
-    
     /**
      * The StringManager for this package.
      */
     protected static StringManager sm = StringManager.getManager(Constants.Package);
-    
+    /**
+     * Logger
+     */
+    private static Log log = LogFactory.getLog(RemoteIpValve.class);
+    /**
+     * @see #setHttpServerPort(int)
+     */
+    private int httpServerPort = 80;
+    /**
+     * @see #setHttpsServerPort(int)
+     */
+    private int httpsServerPort = 443;
+    /**
+     * @see #setInternalProxies(String)
+     */
+    private Pattern[] internalProxies = new Pattern[]{
+            Pattern.compile("10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}"), Pattern.compile("192\\.168\\.\\d{1,3}\\.\\d{1,3}"),
+            Pattern.compile("169\\.254\\.\\d{1,3}\\.\\d{1,3}"), Pattern.compile("127\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+    };
+    /**
+     * @see #setProtocolHeader(String)
+     */
+    private String protocolHeader = null;
+    /**
+     * @see #setProtocolHeaderHttpsValue(String)
+     */
+    private String protocolHeaderHttpsValue = "https";
+    /**
+     * @see #setProxiesHeader(String)
+     */
+    private String proxiesHeader = "X-Forwarded-By";
+    /**
+     * @see #setRemoteIpHeader(String)
+     */
+    private String remoteIpHeader = "X-Forwarded-For";
+    /**
+     * @see RemoteIpValve#setTrustedProxies(String)
+     */
+    private Pattern[] trustedProxies = new Pattern[0];
+
     /**
      * Convert a given comma delimited list of regular expressions into an array of compiled {@link Pattern}
-     * 
+     *
      * @return array of patterns (not <code>null</code>)
      */
-    protected static Pattern[] commaDelimitedListToPatternArray(String commaDelimitedPatterns) {
+    protected static Pattern[] commaDelimitedListToPatternArray(String commaDelimitedPatterns)
+    {
         String[] patterns = commaDelimitedListToStringArray(commaDelimitedPatterns);
         List<Pattern> patternsList = new ArrayList<Pattern>();
-        for (String pattern : patterns) {
-            try {
+        for (String pattern : patterns)
+        {
+            try
+            {
                 patternsList.add(Pattern.compile(pattern));
-            } catch (PatternSyntaxException e) {
+            }
+            catch (PatternSyntaxException e)
+            {
                 throw new IllegalArgumentException(sm.getString("remoteIpValve.syntax", pattern), e);
             }
         }
         return patternsList.toArray(new Pattern[0]);
     }
-    
+
     /**
      * Convert a given comma delimited list of regular expressions into an array of String
-     * 
+     *
      * @return array of patterns (non <code>null</code>)
      */
-    protected static String[] commaDelimitedListToStringArray(String commaDelimitedStrings) {
+    protected static String[] commaDelimitedListToStringArray(String commaDelimitedStrings)
+    {
         return (commaDelimitedStrings == null || commaDelimitedStrings.length() == 0) ? new String[0] : commaSeparatedValuesPattern
-            .split(commaDelimitedStrings);
+                .split(commaDelimitedStrings);
     }
-    
+
     /**
      * Convert an array of strings in a comma delimited string
      */
-    protected static String listToCommaDelimitedString(List<String> stringList) {
-        if (stringList == null) {
+    protected static String listToCommaDelimitedString(List<String> stringList)
+    {
+        if (stringList == null)
+        {
             return "";
         }
         StringBuilder result = new StringBuilder();
-        for (Iterator<String> it = stringList.iterator(); it.hasNext();) {
+        for (Iterator<String> it = stringList.iterator(); it.hasNext(); )
+        {
             Object element = it.next();
-            if (element != null) {
+            if (element != null)
+            {
                 result.append(element);
-                if (it.hasNext()) {
+                if (it.hasNext())
+                {
                     result.append(", ");
                 }
             }
         }
         return result.toString();
     }
-    
+
     /**
      * Return <code>true</code> if the given <code>str</code> matches at least one of the given <code>patterns</code>.
      */
-    protected static boolean matchesOne(String str, Pattern... patterns) {
-        for (Pattern pattern : patterns) {
-            if (pattern.matcher(str).matches()) {
+    protected static boolean matchesOne(String str, Pattern... patterns)
+    {
+        for (Pattern pattern : patterns)
+        {
+            if (pattern.matcher(str).matches())
+            {
                 return true;
             }
         }
         return false;
     }
-    
-    /**
-     * @see #setHttpServerPort(int)
-     */
-    private int httpServerPort = 80;
-    
-    /**
-     * @see #setHttpsServerPort(int)
-     */
-    private int httpsServerPort = 443;
-    
-    /**
-     * @see #setInternalProxies(String)
-     */
-    private Pattern[] internalProxies = new Pattern[] {
-        Pattern.compile("10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}"), Pattern.compile("192\\.168\\.\\d{1,3}\\.\\d{1,3}"),
-        Pattern.compile("169\\.254\\.\\d{1,3}\\.\\d{1,3}"), Pattern.compile("127\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
-    };
-    
-    /**
-     * @see #setProtocolHeader(String)
-     */
-    private String protocolHeader = null;
-    
-    /**
-     * @see #setProtocolHeaderHttpsValue(String)
-     */
-    private String protocolHeaderHttpsValue = "https";
-    
-    /**
-     * @see #setProxiesHeader(String)
-     */
-    private String proxiesHeader = "X-Forwarded-By";
-    
-    /**
-     * @see #setRemoteIpHeader(String)
-     */
-    private String remoteIpHeader = "X-Forwarded-For";
-    
-    /**
-     * @see RemoteIpValve#setTrustedProxies(String)
-     */
-    private Pattern[] trustedProxies = new Pattern[0];
-    
-    public int getHttpsServerPort() {
+
+    public int getHttpsServerPort()
+    {
         return httpsServerPort;
     }
-    
-    public int getHttpServerPort() {
-        return httpServerPort;
-    }
-    
-    /**
-     * Return descriptive information about this Valve implementation.
-     */
-    @Override
-    public String getInfo() {
-        return info;
-    }
-    
-    /**
-     * @see #setInternalProxies(String)
-     * @return comma delimited list of internal proxies
-     */
-    public String getInternalProxies() {
-        List<String> internalProxiesAsStringList = new ArrayList<String>();
-        for (Pattern internalProxyPattern : internalProxies) {
-            internalProxiesAsStringList.add(String.valueOf(internalProxyPattern));
-        }
-        return listToCommaDelimitedString(internalProxiesAsStringList);
-    }
-    
-    /**
-     * @see #setProtocolHeader(String)
-     * @return the protocol header (e.g. "X-Forwarded-Proto")
-     */
-    public String getProtocolHeader() {
-        return protocolHeader;
-    }
-    
-    /**
-     * @see RemoteIpValve#setProtocolHeaderHttpsValue(String)
-     * @return the value of the protocol header for incoming https request (e.g. "https")
-     */
-    public String getProtocolHeaderHttpsValue() {
-        return protocolHeaderHttpsValue;
-    }
-    
-    /**
-     * @see #setProxiesHeader(String)
-     * @return the proxies header name (e.g. "X-Forwarded-By")
-     */
-    public String getProxiesHeader() {
-        return proxiesHeader;
-    }
-    
-    /**
-     * @see #setRemoteIpHeader(String)
-     * @return the remote IP header name (e.g. "X-Forwarded-For")
-     */
-    public String getRemoteIpHeader() {
-        return remoteIpHeader;
-    }
 
-    /**
-     * @see #setTrustedProxies(String)
-     * @return comma delimited list of trusted proxies
-     */
-    public String getTrustedProxies() {
-        List<String> trustedProxiesAsStringList = new ArrayList<String>();
-        for (Pattern trustedProxy : trustedProxies) {
-            trustedProxiesAsStringList.add(String.valueOf(trustedProxy));
-        }
-        return listToCommaDelimitedString(trustedProxiesAsStringList);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void invoke(Request request, Response response) throws IOException, ServletException {
-        final String originalRemoteAddr = request.getRemoteAddr();
-        final String originalRemoteHost = request.getRemoteHost();
-        final String originalScheme = request.getScheme();
-        final boolean originalSecure = request.isSecure();
-        final int originalServerPort = request.getServerPort();
-        
-        if (matchesOne(originalRemoteAddr, internalProxies)) {
-            String remoteIp = null;
-            // In java 6, proxiesHeaderValue should be declared as a java.util.Deque
-            LinkedList<String> proxiesHeaderValue = new LinkedList<String>();
-            StringBuffer concatRemoteIpHeaderValue = new StringBuffer();
-            
-            for (Enumeration<String> e = request.getHeaders(remoteIpHeader); e.hasMoreElements();) {
-                if (concatRemoteIpHeaderValue.length() > 0) {
-                    concatRemoteIpHeaderValue.append(", ");
-                }
-
-                concatRemoteIpHeaderValue.append(e.nextElement());
-            }
-
-            String[] remoteIpHeaderValue = commaDelimitedListToStringArray(concatRemoteIpHeaderValue.toString());
-            int idx;
-            // loop on remoteIpHeaderValue to find the first trusted remote ip and to build the proxies chain
-            for (idx = remoteIpHeaderValue.length - 1; idx >= 0; idx--) {
-                String currentRemoteIp = remoteIpHeaderValue[idx];
-                remoteIp = currentRemoteIp;
-                if (matchesOne(currentRemoteIp, internalProxies)) {
-                    // do nothing, internalProxies IPs are not appended to the
-                } else if (matchesOne(currentRemoteIp, trustedProxies)) {
-                    proxiesHeaderValue.addFirst(currentRemoteIp);
-                } else {
-                    idx--; // decrement idx because break statement doesn't do it
-                    break;
-                }
-            }
-            // continue to loop on remoteIpHeaderValue to build the new value of the remoteIpHeader
-            LinkedList<String> newRemoteIpHeaderValue = new LinkedList<String>();
-            for (; idx >= 0; idx--) {
-                String currentRemoteIp = remoteIpHeaderValue[idx];
-                newRemoteIpHeaderValue.addFirst(currentRemoteIp);
-            }
-            if (remoteIp != null) {
-                
-                request.setRemoteAddr(remoteIp);
-                request.setRemoteHost(remoteIp);
-                
-                // use request.coyoteRequest.mimeHeaders.setValue(str).setString(str) because request.addHeader(str, str) is no-op in Tomcat
-                // 6.0
-                if (proxiesHeaderValue.size() == 0) {
-                    request.getCoyoteRequest().getMimeHeaders().removeHeader(proxiesHeader);
-                } else {
-                    String commaDelimitedListOfProxies = listToCommaDelimitedString(proxiesHeaderValue);
-                    request.getCoyoteRequest().getMimeHeaders().setValue(proxiesHeader).setString(commaDelimitedListOfProxies);
-                }
-                if (newRemoteIpHeaderValue.size() == 0) {
-                    request.getCoyoteRequest().getMimeHeaders().removeHeader(remoteIpHeader);
-                } else {
-                    String commaDelimitedRemoteIpHeaderValue = listToCommaDelimitedString(newRemoteIpHeaderValue);
-                    request.getCoyoteRequest().getMimeHeaders().setValue(remoteIpHeader).setString(commaDelimitedRemoteIpHeaderValue);
-                }
-            }
-            
-            if (protocolHeader != null) {
-                String protocolHeaderValue = request.getHeader(protocolHeader);
-                if (protocolHeaderValue == null) {
-                    // don't modify the secure,scheme and serverPort attributes
-                    // of the request
-                } else if (protocolHeaderHttpsValue.equalsIgnoreCase(protocolHeaderValue)) {
-                    request.setSecure(true);
-                    // use request.coyoteRequest.scheme instead of request.setScheme() because request.setScheme() is no-op in Tomcat 6.0
-                    request.getCoyoteRequest().scheme().setString("https");
-                    
-                    request.setServerPort(httpsServerPort);
-                } else {
-                    request.setSecure(false);
-                    // use request.coyoteRequest.scheme instead of request.setScheme() because request.setScheme() is no-op in Tomcat 6.0
-                    request.getCoyoteRequest().scheme().setString("http");
-                    
-                    request.setServerPort(httpServerPort);
-                }
-            }
-            
-            if (log.isDebugEnabled()) {
-                log.debug("Incoming request " + request.getRequestURI() + " with originalRemoteAddr '" + originalRemoteAddr
-                          + "', originalRemoteHost='" + originalRemoteHost + "', originalSecure='" + originalSecure + "', originalScheme='"
-                          + originalScheme + "' will be seen as newRemoteAddr='" + request.getRemoteAddr() + "', newRemoteHost='"
-                          + request.getRemoteHost() + "', newScheme='" + request.getScheme() + "', newSecure='" + request.isSecure() + "'");
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Skip RemoteIpValve for request " + request.getRequestURI() + " with originalRemoteAddr '"
-                        + request.getRemoteAddr() + "'");
-            }
-        }
-        try {
-            getNext().invoke(request, response);
-        } finally {
-            request.setRemoteAddr(originalRemoteAddr);
-            request.setRemoteHost(originalRemoteHost);
-            
-            request.setSecure(originalSecure);
-            
-            // use request.coyoteRequest.scheme instead of request.setScheme() because request.setScheme() is no-op in Tomcat 6.0
-            request.getCoyoteRequest().scheme().setString(originalScheme);
-            
-            request.setServerPort(originalServerPort);
-        }
-    }
-    
-    /**
-     * <p>
-     * Server Port value if the {@link #protocolHeader} is not <code>null</code> and does not indicate HTTP
-     * </p>
-     * <p>
-     * Default value : 80
-     * </p>
-     */
-    public void setHttpServerPort(int httpServerPort) {
-        this.httpServerPort = httpServerPort;
-    }
-    
     /**
      * <p>
      * Server Port value if the {@link #protocolHeader} indicates HTTPS
@@ -683,10 +487,52 @@ public class RemoteIpValve extends ValveBase {
      * Default value : 443
      * </p>
      */
-    public void setHttpsServerPort(int httpsServerPort) {
+    public void setHttpsServerPort(int httpsServerPort)
+    {
         this.httpsServerPort = httpsServerPort;
     }
-    
+
+    public int getHttpServerPort()
+    {
+        return httpServerPort;
+    }
+
+    /**
+     * <p>
+     * Server Port value if the {@link #protocolHeader} is not <code>null</code> and does not indicate HTTP
+     * </p>
+     * <p>
+     * Default value : 80
+     * </p>
+     */
+    public void setHttpServerPort(int httpServerPort)
+    {
+        this.httpServerPort = httpServerPort;
+    }
+
+    /**
+     * Return descriptive information about this Valve implementation.
+     */
+    @Override
+    public String getInfo()
+    {
+        return info;
+    }
+
+    /**
+     * @return comma delimited list of internal proxies
+     * @see #setInternalProxies(String)
+     */
+    public String getInternalProxies()
+    {
+        List<String> internalProxiesAsStringList = new ArrayList<String>();
+        for (Pattern internalProxyPattern : internalProxies)
+        {
+            internalProxiesAsStringList.add(String.valueOf(internalProxyPattern));
+        }
+        return listToCommaDelimitedString(internalProxiesAsStringList);
+    }
+
     /**
      * <p>
      * Comma delimited list of internal proxies. Can be expressed with regular expressions.
@@ -698,10 +544,20 @@ public class RemoteIpValve extends ValveBase {
      * in the expression will be mistaken for separators between regular expressions.
      * </p>
      */
-    public void setInternalProxies(String commaDelimitedInternalProxies) {
+    public void setInternalProxies(String commaDelimitedInternalProxies)
+    {
         this.internalProxies = commaDelimitedListToPatternArray(commaDelimitedInternalProxies);
     }
-    
+
+    /**
+     * @return the protocol header (e.g. "X-Forwarded-Proto")
+     * @see #setProtocolHeader(String)
+     */
+    public String getProtocolHeader()
+    {
+        return protocolHeader;
+    }
+
     /**
      * <p>
      * Header that holds the incoming protocol, usally named <code>X-Forwarded-Proto</code>. If <code>null</code>, request.scheme and
@@ -711,10 +567,20 @@ public class RemoteIpValve extends ValveBase {
      * Default value : <code>null</code>
      * </p>
      */
-    public void setProtocolHeader(String protocolHeader) {
+    public void setProtocolHeader(String protocolHeader)
+    {
         this.protocolHeader = protocolHeader;
     }
-    
+
+    /**
+     * @return the value of the protocol header for incoming https request (e.g. "https")
+     * @see RemoteIpValve#setProtocolHeaderHttpsValue(String)
+     */
+    public String getProtocolHeaderHttpsValue()
+    {
+        return protocolHeaderHttpsValue;
+    }
+
     /**
      * <p>
      * Case insensitive value of the protocol header to indicate that the incoming http request uses SSL.
@@ -723,10 +589,20 @@ public class RemoteIpValve extends ValveBase {
      * Default value : <code>https</code>
      * </p>
      */
-    public void setProtocolHeaderHttpsValue(String protocolHeaderHttpsValue) {
+    public void setProtocolHeaderHttpsValue(String protocolHeaderHttpsValue)
+    {
         this.protocolHeaderHttpsValue = protocolHeaderHttpsValue;
     }
-    
+
+    /**
+     * @return the proxies header name (e.g. "X-Forwarded-By")
+     * @see #setProxiesHeader(String)
+     */
+    public String getProxiesHeader()
+    {
+        return proxiesHeader;
+    }
+
     /**
      * <p>
      * The proxiesHeader directive specifies a header into which mod_remoteip will collect a list of all of the intermediate client IP
@@ -743,10 +619,20 @@ public class RemoteIpValve extends ValveBase {
      * Default value : <code>X-Forwarded-By</code>
      * </p>
      */
-    public void setProxiesHeader(String proxiesHeader) {
+    public void setProxiesHeader(String proxiesHeader)
+    {
         this.proxiesHeader = proxiesHeader;
     }
-    
+
+    /**
+     * @return the remote IP header name (e.g. "X-Forwarded-For")
+     * @see #setRemoteIpHeader(String)
+     */
+    public String getRemoteIpHeader()
+    {
+        return remoteIpHeader;
+    }
+
     /**
      * <p>
      * Name of the http header from which the remote ip is extracted.
@@ -757,13 +643,28 @@ public class RemoteIpValve extends ValveBase {
      * <p>
      * Default value : <code>X-Forwarded-For</code>
      * </p>
-     * 
+     *
      * @param remoteIpHeader
      */
-    public void setRemoteIpHeader(String remoteIpHeader) {
+    public void setRemoteIpHeader(String remoteIpHeader)
+    {
         this.remoteIpHeader = remoteIpHeader;
     }
-    
+
+    /**
+     * @return comma delimited list of trusted proxies
+     * @see #setTrustedProxies(String)
+     */
+    public String getTrustedProxies()
+    {
+        List<String> trustedProxiesAsStringList = new ArrayList<String>();
+        for (Pattern trustedProxy : trustedProxies)
+        {
+            trustedProxiesAsStringList.add(String.valueOf(trustedProxy));
+        }
+        return listToCommaDelimitedString(trustedProxiesAsStringList);
+    }
+
     /**
      * <p>
      * Comma delimited list of proxies that are trusted when they appear in the {@link #remoteIpHeader} header. Can be expressed as a
@@ -773,7 +674,146 @@ public class RemoteIpValve extends ValveBase {
      * Default value : empty list, no external proxy is trusted.
      * </p>
      */
-    public void setTrustedProxies(String commaDelimitedTrustedProxies) {
+    public void setTrustedProxies(String commaDelimitedTrustedProxies)
+    {
         this.trustedProxies = commaDelimitedListToPatternArray(commaDelimitedTrustedProxies);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void invoke(Request request, Response response) throws IOException, ServletException
+    {
+        final String originalRemoteAddr = request.getRemoteAddr();
+        final String originalRemoteHost = request.getRemoteHost();
+        final String originalScheme = request.getScheme();
+        final boolean originalSecure = request.isSecure();
+        final int originalServerPort = request.getServerPort();
+
+        if (matchesOne(originalRemoteAddr, internalProxies))
+        {
+            String remoteIp = null;
+            // In java 6, proxiesHeaderValue should be declared as a java.util.Deque
+            LinkedList<String> proxiesHeaderValue = new LinkedList<String>();
+            StringBuffer concatRemoteIpHeaderValue = new StringBuffer();
+
+            for (Enumeration<String> e = request.getHeaders(remoteIpHeader); e.hasMoreElements(); )
+            {
+                if (concatRemoteIpHeaderValue.length() > 0)
+                {
+                    concatRemoteIpHeaderValue.append(", ");
+                }
+
+                concatRemoteIpHeaderValue.append(e.nextElement());
+            }
+
+            String[] remoteIpHeaderValue = commaDelimitedListToStringArray(concatRemoteIpHeaderValue.toString());
+            int idx;
+            // loop on remoteIpHeaderValue to find the first trusted remote ip and to build the proxies chain
+            for (idx = remoteIpHeaderValue.length - 1; idx >= 0; idx--)
+            {
+                String currentRemoteIp = remoteIpHeaderValue[idx];
+                remoteIp = currentRemoteIp;
+                if (matchesOne(currentRemoteIp, internalProxies))
+                {
+                    // do nothing, internalProxies IPs are not appended to the
+                } else if (matchesOne(currentRemoteIp, trustedProxies))
+                {
+                    proxiesHeaderValue.addFirst(currentRemoteIp);
+                } else
+                {
+                    idx--; // decrement idx because break statement doesn't do it
+                    break;
+                }
+            }
+            // continue to loop on remoteIpHeaderValue to build the new value of the remoteIpHeader
+            LinkedList<String> newRemoteIpHeaderValue = new LinkedList<String>();
+            for (; idx >= 0; idx--)
+            {
+                String currentRemoteIp = remoteIpHeaderValue[idx];
+                newRemoteIpHeaderValue.addFirst(currentRemoteIp);
+            }
+            if (remoteIp != null)
+            {
+
+                request.setRemoteAddr(remoteIp);
+                request.setRemoteHost(remoteIp);
+
+                // use request.coyoteRequest.mimeHeaders.setValue(str).setString(str) because request.addHeader(str, str) is no-op in Tomcat
+                // 6.0
+                if (proxiesHeaderValue.size() == 0)
+                {
+                    request.getCoyoteRequest().getMimeHeaders().removeHeader(proxiesHeader);
+                } else
+                {
+                    String commaDelimitedListOfProxies = listToCommaDelimitedString(proxiesHeaderValue);
+                    request.getCoyoteRequest().getMimeHeaders().setValue(proxiesHeader).setString(commaDelimitedListOfProxies);
+                }
+                if (newRemoteIpHeaderValue.size() == 0)
+                {
+                    request.getCoyoteRequest().getMimeHeaders().removeHeader(remoteIpHeader);
+                } else
+                {
+                    String commaDelimitedRemoteIpHeaderValue = listToCommaDelimitedString(newRemoteIpHeaderValue);
+                    request.getCoyoteRequest().getMimeHeaders().setValue(remoteIpHeader).setString(commaDelimitedRemoteIpHeaderValue);
+                }
+            }
+
+            if (protocolHeader != null)
+            {
+                String protocolHeaderValue = request.getHeader(protocolHeader);
+                if (protocolHeaderValue == null)
+                {
+                    // don't modify the secure,scheme and serverPort attributes
+                    // of the request
+                } else if (protocolHeaderHttpsValue.equalsIgnoreCase(protocolHeaderValue))
+                {
+                    request.setSecure(true);
+                    // use request.coyoteRequest.scheme instead of request.setScheme() because request.setScheme() is no-op in Tomcat 6.0
+                    request.getCoyoteRequest().scheme().setString("https");
+
+                    request.setServerPort(httpsServerPort);
+                } else
+                {
+                    request.setSecure(false);
+                    // use request.coyoteRequest.scheme instead of request.setScheme() because request.setScheme() is no-op in Tomcat 6.0
+                    request.getCoyoteRequest().scheme().setString("http");
+
+                    request.setServerPort(httpServerPort);
+                }
+            }
+
+            if (log.isDebugEnabled())
+            {
+                log.debug("Incoming request " + request.getRequestURI() + " with originalRemoteAddr '" + originalRemoteAddr
+                        + "', originalRemoteHost='" + originalRemoteHost + "', originalSecure='" + originalSecure + "', originalScheme='"
+                        + originalScheme + "' will be seen as newRemoteAddr='" + request.getRemoteAddr() + "', newRemoteHost='"
+                        + request.getRemoteHost() + "', newScheme='" + request.getScheme() + "', newSecure='" + request.isSecure() + "'");
+            }
+        } else
+        {
+            if (log.isDebugEnabled())
+            {
+                log.debug("Skip RemoteIpValve for request " + request.getRequestURI() + " with originalRemoteAddr '"
+                        + request.getRemoteAddr() + "'");
+            }
+        }
+        try
+        {
+            getNext().invoke(request, response);
+        }
+        finally
+        {
+            request.setRemoteAddr(originalRemoteAddr);
+            request.setRemoteHost(originalRemoteHost);
+
+            request.setSecure(originalSecure);
+
+            // use request.coyoteRequest.scheme instead of request.setScheme() because request.setScheme() is no-op in Tomcat 6.0
+            request.getCoyoteRequest().scheme().setString(originalScheme);
+
+            request.setServerPort(originalServerPort);
+        }
     }
 }

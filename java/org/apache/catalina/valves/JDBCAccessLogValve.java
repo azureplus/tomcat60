@@ -19,16 +19,6 @@
 package org.apache.catalina.valves;
 
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Properties;
-
-import javax.servlet.ServletException;
-
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
@@ -38,10 +28,15 @@ import org.apache.catalina.connector.Response;
 import org.apache.catalina.util.LifecycleSupport;
 import org.apache.catalina.util.StringManager;
 
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.sql.*;
+import java.util.Properties;
+
 /**
  * <p>
- * This Tomcat extension logs server access directly to a database, and can 
- * be used instead of the regular file-based access log implemented in 
+ * This Tomcat extension logs server access directly to a database, and can
+ * be used instead of the regular file-based access log implemented in
  * AccessLogValve.
  * To use, copy into the server/classes directory of the Tomcat installation
  * and configure in server.xml as:
@@ -59,7 +54,7 @@ import org.apache.catalina.util.StringManager;
  * the table name (<code>tableName</code>)
  * and the field names (corresponding to the get/set method names).
  * The same options as AccessLogValve are supported, such as
- * <code>resolveHosts</code> and <code>pattern</code> ("common" or "combined" 
+ * <code>resolveHosts</code> and <code>pattern</code> ("common" or "combined"
  * only).
  * </p>
  * <p>
@@ -67,7 +62,7 @@ import org.apache.catalina.util.StringManager;
  * is created and used for all the log activity. When Tomcat is shutdown, the
  * database connection is closed.
  * This logger can be used at the level of the Engine context (being shared
- * by all the defined hosts) or the Host context (one instance of the logger 
+ * by all the defined hosts) or the Host context (one instance of the logger
  * per host, possibly using different databases).
  * </p>
  * <p>
@@ -94,13 +89,13 @@ import org.apache.catalina.util.StringManager;
  * INDEX (userAgent)
  * );
  * </pre>
- * <p>Set JDBCAccessLogValve attribute useLongContentLength="true" as you have more then 4GB outputs. 
+ * <p>Set JDBCAccessLogValve attribute useLongContentLength="true" as you have more then 4GB outputs.
  * Please, use long SQL datatype at access.bytes attribute.
  * The datatype of bytes at oracle is <i>number</i> and other databases use <i>bytes BIGINT NOT NULL</i>.
  * </p>
- * 
+ * <p/>
  * <p>
- * If the table is created as above, its name and the field names don't need 
+ * If the table is created as above, its name and the field names don't need
  * to be defined.
  * </p>
  * <p>
@@ -110,15 +105,78 @@ import org.apache.catalina.util.StringManager;
  * <p>
  * <i>TO DO: provide option for excluding logging of certain MIME types.</i>
  * </p>
- * 
+ *
  * @author Andre de Jesus
  * @author Peter Rossbach
  */
 
 public final class JDBCAccessLogValve extends ValveBase
-        implements AccessLog, Lifecycle {
+        implements AccessLog, Lifecycle
+{
 
     // ----------------------------------------------------------- Constructors
+
+
+    /**
+     * The descriptive information about this implementation.
+     */
+    protected static String info =
+            "org.apache.catalina.valves.JDBCAccessLogValve/1.1";
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * Use long contentLength as you have more 4 GB output.
+     *
+     * @since 6.0.15
+     */
+    protected boolean useLongContentLength = false;
+
+    /**
+     * The connection username to use when trying to connect to the database.
+     */
+    protected String connectionName = null;
+
+
+    /**
+     * The connection URL to use when trying to connect to the database.
+     */
+    protected String connectionPassword = null;
+
+    /**
+     * Instance of the JDBC Driver class we use as a connection factory.
+     */
+    protected Driver driver = null;
+    /**
+     * The lifecycle event support for this component.
+     */
+    protected LifecycleSupport lifecycle = new LifecycleSupport(this);
+    private String driverName;
+    private String connectionURL;
+    private String tableName;
+    private String remoteHostField;
+    private String userField;
+    private String timestampField;
+    private String virtualHostField;
+    private String methodField;
+    private String queryField;
+    private String statusField;
+    private String bytesField;
+    private String refererField;
+    private String userAgentField;
+    private String pattern;
+    private boolean resolveHosts;
+    private Connection conn;
+    private PreparedStatement ps;
+    private long currentTimeMillis;
+    /**
+     * The string manager for this package.
+     */
+    private StringManager sm = StringManager.getManager(Constants.Package);
+    /**
+     * Has this component been started yet?
+     */
+    private boolean started = false;
 
 
     /**
@@ -142,7 +200,8 @@ public final class JDBCAccessLogValve extends ValveBase
      *      resolveHosts = false;
      * </pre>
      */
-    public JDBCAccessLogValve() {
+    public JDBCAccessLogValve()
+    {
         super();
         driverName = null;
         connectionURL = null;
@@ -165,87 +224,13 @@ public final class JDBCAccessLogValve extends ValveBase
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-   /**
-    * Use long contentLength as you have more 4 GB output.
-    * @since 6.0.15
-    */
-    protected boolean useLongContentLength = false ;
-    
-   /**
-     * The connection username to use when trying to connect to the database.
-     */
-    protected String connectionName = null;
-
-
-    /**
-     * The connection URL to use when trying to connect to the database.
-     */
-    protected String connectionPassword = null;
-
-   /**
-     * Instance of the JDBC Driver class we use as a connection factory.
-     */
-    protected Driver driver = null;
-
-
-    private String driverName;
-    private String connectionURL;
-    private String tableName;
-    private String remoteHostField;
-    private String userField;
-    private String timestampField;
-    private String virtualHostField;
-    private String methodField;
-    private String queryField;
-    private String statusField;
-    private String bytesField;
-    private String refererField;
-    private String userAgentField;
-    private String pattern;
-    private boolean resolveHosts;
-
-
-    private Connection conn;
-    private PreparedStatement ps;
-
-
-    private long currentTimeMillis;
-
-
-    /**
-     * The descriptive information about this implementation.
-     */
-    protected static String info = 
-        "org.apache.catalina.valves.JDBCAccessLogValve/1.1";
-
-
-    /**
-     * The lifecycle event support for this component.
-     */
-    protected LifecycleSupport lifecycle = new LifecycleSupport(this);
-
-
-    /**
-     * The string manager for this package.
-     */
-    private StringManager sm = StringManager.getManager(Constants.Package);
-
-
-    /**
-     * Has this component been started yet?
-     */
-    private boolean started = false;
-
-
     // ------------------------------------------------------------- Properties
- 
+
     /**
      * Return the username to use to connect to the database.
-     *
      */
-    public String getConnectionName() {
+    public String getConnectionName()
+    {
         return connectionName;
     }
 
@@ -254,24 +239,26 @@ public final class JDBCAccessLogValve extends ValveBase
      *
      * @param connectionName Username
      */
-    public void setConnectionName(String connectionName) {
+    public void setConnectionName(String connectionName)
+    {
         this.connectionName = connectionName;
     }
 
     /**
      * Sets the database driver name.
-     * 
+     *
      * @param driverName The complete name of the database driver class.
      */
-    public void setDriverName(String driverName) {
+    public void setDriverName(String driverName)
+    {
         this.driverName = driverName;
     }
 
-   /**
+    /**
      * Return the password to use to connect to the database.
-     *
      */
-    public String getConnectionPassword() {
+    public String getConnectionPassword()
+    {
         return connectionPassword;
     }
 
@@ -280,166 +267,183 @@ public final class JDBCAccessLogValve extends ValveBase
      *
      * @param connectionPassword User password
      */
-    public void setConnectionPassword(String connectionPassword) {
+    public void setConnectionPassword(String connectionPassword)
+    {
         this.connectionPassword = connectionPassword;
     }
 
     /**
      * Sets the JDBC URL for the database where the log is stored.
-     * 
+     *
      * @param connectionURL The JDBC URL of the database.
      */
-    public void setConnectionURL(String connectionURL) {
+    public void setConnectionURL(String connectionURL)
+    {
         this.connectionURL = connectionURL;
     }
 
 
     /**
      * Sets the name of the table where the logs are stored.
-     * 
+     *
      * @param tableName The name of the table.
      */
-    public void setTableName(String tableName) {
+    public void setTableName(String tableName)
+    {
         this.tableName = tableName;
     }
 
 
     /**
      * Sets the name of the field containing the remote host.
-     * 
+     *
      * @param remoteHostField The name of the remote host field.
      */
-    public void setRemoteHostField(String remoteHostField) {
+    public void setRemoteHostField(String remoteHostField)
+    {
         this.remoteHostField = remoteHostField;
     }
 
 
     /**
      * Sets the name of the field containing the remote user name.
-     * 
+     *
      * @param userField The name of the remote user field.
      */
-    public void setUserField(String userField) {
+    public void setUserField(String userField)
+    {
         this.userField = userField;
     }
 
 
     /**
      * Sets the name of the field containing the server-determined timestamp.
-     * 
+     *
      * @param timestampField The name of the server-determined timestamp field.
      */
-    public void setTimestampField(String timestampField) {
+    public void setTimestampField(String timestampField)
+    {
         this.timestampField = timestampField;
     }
 
 
     /**
-     * Sets the name of the field containing the virtual host information 
+     * Sets the name of the field containing the virtual host information
      * (this is in fact the server name).
-     * 
+     *
      * @param virtualHostField The name of the virtual host field.
      */
-    public void setVirtualHostField(String virtualHostField) {
+    public void setVirtualHostField(String virtualHostField)
+    {
         this.virtualHostField = virtualHostField;
     }
 
 
     /**
      * Sets the name of the field containing the HTTP request method.
-     * 
+     *
      * @param methodField The name of the HTTP request method field.
      */
-    public void setMethodField(String methodField) {
+    public void setMethodField(String methodField)
+    {
         this.methodField = methodField;
     }
 
 
     /**
      * Sets the name of the field containing the URL part of the HTTP query.
-     * 
-     * @param queryField The name of the field containing the URL part of 
-     * the HTTP query.
+     *
+     * @param queryField The name of the field containing the URL part of
+     *                   the HTTP query.
      */
-    public void setQueryField(String queryField) {
+    public void setQueryField(String queryField)
+    {
         this.queryField = queryField;
     }
 
 
-  /**
-   * Sets the name of the field containing the HTTP response status code.
-   * 
-   * @param statusField The name of the HTTP response status code field.
-   */  
-    public void setStatusField(String statusField) {
+    /**
+     * Sets the name of the field containing the HTTP response status code.
+     *
+     * @param statusField The name of the HTTP response status code field.
+     */
+    public void setStatusField(String statusField)
+    {
         this.statusField = statusField;
     }
 
 
     /**
      * Sets the name of the field containing the number of bytes returned.
-     * 
+     *
      * @param bytesField The name of the returned bytes field.
      */
-    public void setBytesField(String bytesField) {
+    public void setBytesField(String bytesField)
+    {
         this.bytesField = bytesField;
     }
 
 
     /**
      * Sets the name of the field containing the referer.
-     * 
+     *
      * @param refererField The referer field name.
      */
-    public void setRefererField(String refererField) {
+    public void setRefererField(String refererField)
+    {
         this.refererField = refererField;
     }
 
 
     /**
      * Sets the name of the field containing the user agent.
-     * 
+     *
      * @param userAgentField The name of the user agent field.
      */
-    public void setUserAgentField(String userAgentField) {
+    public void setUserAgentField(String userAgentField)
+    {
         this.userAgentField = userAgentField;
     }
 
 
     /**
-     * Sets the logging pattern. The patterns supported correspond to the 
-     * file-based "common" and "combined". These are translated into the use 
+     * Sets the logging pattern. The patterns supported correspond to the
+     * file-based "common" and "combined". These are translated into the use
      * of tables containing either set of fields.
      * <P><I>TO DO: more flexible field choices.</I></P>
-     * 
+     *
      * @param pattern The name of the logging pattern.
      */
-    public void setPattern(String pattern) {
+    public void setPattern(String pattern)
+    {
         this.pattern = pattern;
     }
 
 
     /**
      * Determines whether IP host name resolution is done.
-     * 
-     * @param resolveHosts "true" or "false", if host IP resolution 
-     * is desired or not.
+     *
+     * @param resolveHosts "true" or "false", if host IP resolution
+     *                     is desired or not.
      */
-    public void setResolveHosts(String resolveHosts) {
+    public void setResolveHosts(String resolveHosts)
+    {
         this.resolveHosts = new Boolean(resolveHosts).booleanValue();
     }
 
     /**
      * get useLongContentLength
      */
-    public  boolean getUseLongContentLength() {
-        return this.useLongContentLength ;
+    public boolean getUseLongContentLength()
+    {
+        return this.useLongContentLength;
     }
-    
+
     /**
      * @param useLongContentLength the useLongContentLength to set
      */
-    public void setUseLongContentLength(boolean useLongContentLength) {
+    public void setUseLongContentLength(boolean useLongContentLength)
+    {
         this.useLongContentLength = useLongContentLength;
     }
 
@@ -448,90 +452,100 @@ public final class JDBCAccessLogValve extends ValveBase
 
     /**
      * This method is invoked by Tomcat on each query.
-     * 
-     * @param request The Request object.
-     * @param response The Response object.
      *
-     * @exception IOException Should not be thrown.
-     * @exception ServletException Database SQLException is wrapped 
-     * in a ServletException.
-     */    
-    public void invoke(Request request, Response response) 
-        throws IOException, ServletException {
-        
+     * @param request  The Request object.
+     * @param response The Response object.
+     * @throws IOException      Should not be thrown.
+     * @throws ServletException Database SQLException is wrapped
+     *                          in a ServletException.
+     */
+    public void invoke(Request request, Response response)
+            throws IOException, ServletException
+    {
+
         getNext().invoke(request, response);
 
-        log (request, response, 0);
+        log(request, response, 0);
     }
 
 
-    public void log(Request request, Response response, long time) {
-        final String EMPTY = "" ;
-        
+    public void log(Request request, Response response, long time)
+    {
+        final String EMPTY = "";
+
         String remoteHost;
 
-        if(resolveHosts)
+        if (resolveHosts)
             remoteHost = request.getRemoteHost();
         else
             remoteHost = request.getRemoteAddr();
         String user = EMPTY;
-        if(request != null)
+        if (request != null)
             user = request.getRemoteUser();
-        String query="";
-        if(request != null)
+        String query = "";
+        if (request != null)
             query = request.getRequestURI();
-        
-        long bytes = response.getContentCountLong() ;
-        if(bytes < 0)
+
+        long bytes = response.getContentCountLong();
+        if (bytes < 0)
             bytes = 0;
         int status = response.getStatus();
         String virtualHost = EMPTY;
         String method = EMPTY;
         String referer = EMPTY;
         String userAgent = EMPTY;
-        if (pattern.equals("combined") && request != null) {
+        if (pattern.equals("combined") && request != null)
+        {
             virtualHost = request.getServerName();
             method = request.getMethod();
             referer = request.getHeader("referer");
             userAgent = request.getHeader("user-agent");
         }
-        synchronized (this) {
-          int numberOfTries = 2;
-          while (numberOfTries>0) {
-            try {
-                open();
-    
-                ps.setString(1, remoteHost);
-                ps.setString(2, user);
-                ps.setTimestamp(3, new Timestamp(getCurrentTimeMillis()));
-                ps.setString(4, query);
-                ps.setInt(5, status);
-                
-                if(useLongContentLength) {
-                    ps.setLong(6, bytes);                
-                } else {
-                    if (bytes > Integer.MAX_VALUE)
-                        bytes = -1 ;
-                    ps.setInt(6, (int) bytes);
-                }               
-                if (pattern.equals("combined")) {
-                      ps.setString(7, virtualHost);
-                      ps.setString(8, method);
-                      ps.setString(9, referer);
-                      ps.setString(10, userAgent);
-                }
-                ps.executeUpdate();
-                return;
-              } catch (SQLException e) {
-                // Log the problem for posterity
-                  container.getLogger().error(sm.getString("jdbcAccessLogValve.exception"), e);
+        synchronized (this)
+        {
+            int numberOfTries = 2;
+            while (numberOfTries > 0)
+            {
+                try
+                {
+                    open();
 
-                // Close the connection so that it gets reopened next time
-                if (conn != null)
-                    close();
-              }
-              numberOfTries--;
-           }
+                    ps.setString(1, remoteHost);
+                    ps.setString(2, user);
+                    ps.setTimestamp(3, new Timestamp(getCurrentTimeMillis()));
+                    ps.setString(4, query);
+                    ps.setInt(5, status);
+
+                    if (useLongContentLength)
+                    {
+                        ps.setLong(6, bytes);
+                    } else
+                    {
+                        if (bytes > Integer.MAX_VALUE)
+                            bytes = -1;
+                        ps.setInt(6, (int) bytes);
+                    }
+                    if (pattern.equals("combined"))
+                    {
+                        ps.setString(7, virtualHost);
+                        ps.setString(8, method);
+                        ps.setString(9, referer);
+                        ps.setString(10, userAgent);
+                    }
+                    ps.executeUpdate();
+                    return;
+                }
+                catch (SQLException e)
+                {
+                    // Log the problem for posterity
+                    container.getLogger().error(sm.getString("jdbcAccessLogValve.exception"), e);
+
+                    // Close the connection so that it gets reopened next time
+                    if (conn != null)
+                        close();
+                }
+                numberOfTries--;
+            }
         }
 
     }
@@ -539,10 +553,11 @@ public final class JDBCAccessLogValve extends ValveBase
 
     /**
      * Adds a Lifecycle listener.
-     * 
+     *
      * @param listener The listener to add.
-     */  
-    public void addLifecycleListener(LifecycleListener listener) {
+     */
+    public void addLifecycleListener(LifecycleListener listener)
+    {
 
         lifecycle.addLifecycleListener(listener);
 
@@ -550,10 +565,11 @@ public final class JDBCAccessLogValve extends ValveBase
 
 
     /**
-     * Get the lifecycle listeners associated with this lifecycle. If this 
+     * Get the lifecycle listeners associated with this lifecycle. If this
      * Lifecycle has no listeners registered, a zero-length array is returned.
      */
-    public LifecycleListener[] findLifecycleListeners() {
+    public LifecycleListener[] findLifecycleListeners()
+    {
 
         return lifecycle.findLifecycleListeners();
 
@@ -562,10 +578,11 @@ public final class JDBCAccessLogValve extends ValveBase
 
     /**
      * Removes a Lifecycle listener.
-     * 
+     *
      * @param listener The listener to remove.
      */
-    public void removeLifecycleListener(LifecycleListener listener) {
+    public void removeLifecycleListener(LifecycleListener listener)
+    {
 
         lifecycle.removeLifecycleListener(listener);
 
@@ -575,20 +592,25 @@ public final class JDBCAccessLogValve extends ValveBase
      * Open (if necessary) and return a database connection for use by
      * this AccessLogValve.
      *
-     * @exception SQLException if a database error occurs
+     * @throws SQLException if a database error occurs
      */
-    protected void open() throws SQLException {
+    protected void open() throws SQLException
+    {
 
         // Do nothing if there is a database connection already open
         if (conn != null)
-            return ;
+            return;
 
         // Instantiate our database driver if necessary
-        if (driver == null) {
-            try {
+        if (driver == null)
+        {
+            try
+            {
                 Class clazz = Class.forName(driverName);
                 driver = (Driver) clazz.newInstance();
-            } catch (Throwable e) {
+            }
+            catch (Throwable e)
+            {
                 throw new SQLException(e.getMessage());
             }
         }
@@ -602,71 +624,86 @@ public final class JDBCAccessLogValve extends ValveBase
             props.put("password", connectionPassword);
         conn = driver.connect(connectionURL, props);
         conn.setAutoCommit(true);
-        if (pattern.equals("common")) {
-                ps = conn.prepareStatement
-                    ("INSERT INTO " + tableName + " (" 
-                     + remoteHostField + ", " + userField + ", "
-                     + timestampField +", " + queryField + ", "
-                     + statusField + ", " + bytesField 
-                     + ") VALUES(?, ?, ?, ?, ?, ?)");
-        } else if (pattern.equals("combined")) {
-                ps = conn.prepareStatement
-                    ("INSERT INTO " + tableName + " (" 
-                     + remoteHostField + ", " + userField + ", "
-                     + timestampField + ", " + queryField + ", " 
-                     + statusField + ", " + bytesField + ", " 
-                     + virtualHostField + ", " + methodField + ", "
-                     + refererField + ", " + userAgentField
-                     + ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        if (pattern.equals("common"))
+        {
+            ps = conn.prepareStatement
+                    ("INSERT INTO " + tableName + " ("
+                            + remoteHostField + ", " + userField + ", "
+                            + timestampField + ", " + queryField + ", "
+                            + statusField + ", " + bytesField
+                            + ") VALUES(?, ?, ?, ?, ?, ?)");
+        } else if (pattern.equals("combined"))
+        {
+            ps = conn.prepareStatement
+                    ("INSERT INTO " + tableName + " ("
+                            + remoteHostField + ", " + userField + ", "
+                            + timestampField + ", " + queryField + ", "
+                            + statusField + ", " + bytesField + ", "
+                            + virtualHostField + ", " + methodField + ", "
+                            + refererField + ", " + userAgentField
+                            + ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
     /**
      * Close the specified database connection.
      */
-    protected void close() {
+    protected void close()
+    {
 
         // Do nothing if the database connection is already closed
         if (conn == null)
             return;
 
         // Close our prepared statements (if any)
-        try {
+        try
+        {
             ps.close();
-        } catch (Throwable f) {
+        }
+        catch (Throwable f)
+        {
             ;
         }
         this.ps = null;
 
 
-
         // Close this database connection, and log any errors
-        try {
+        try
+        {
             conn.close();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             container.getLogger().error(sm.getString("jdbcAccessLogValeve.close"), e); // Just log it here            
-        } finally {
-           this.conn = null;
+        }
+        finally
+        {
+            this.conn = null;
         }
 
     }
+
     /**
      * Invoked by Tomcat on startup. The database connection is set here.
-     * 
-     * @exception LifecycleException Can be thrown on lifecycle 
-     * inconsistencies or on database errors (as a wrapped SQLException).
+     *
+     * @throws LifecycleException Can be thrown on lifecycle
+     *                            inconsistencies or on database errors (as a wrapped SQLException).
      */
-    public void start() throws LifecycleException {
+    public void start() throws LifecycleException
+    {
 
         if (started)
             throw new LifecycleException
-                (sm.getString("accessLogValve.alreadyStarted"));
+                    (sm.getString("accessLogValve.alreadyStarted"));
         lifecycle.fireLifecycleEvent(START_EVENT, null);
         started = true;
 
-        try {
-            open() ;        
-        } catch (SQLException e) {
+        try
+        {
+            open();
+        }
+        catch (SQLException e)
+        {
             throw new LifecycleException(e);
         }
 
@@ -675,27 +712,30 @@ public final class JDBCAccessLogValve extends ValveBase
 
     /**
      * Invoked by tomcat on shutdown. The database connection is closed here.
-     * 
-     * @exception LifecycleException Can be thrown on lifecycle 
-     * inconsistencies or on database errors (as a wrapped SQLException).
+     *
+     * @throws LifecycleException Can be thrown on lifecycle
+     *                            inconsistencies or on database errors (as a wrapped SQLException).
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws LifecycleException
+    {
 
         if (!started)
             throw new LifecycleException
-                (sm.getString("accessLogValve.notStarted"));
+                    (sm.getString("accessLogValve.notStarted"));
         lifecycle.fireLifecycleEvent(STOP_EVENT, null);
         started = false;
-        
-        close() ;
+
+        close();
 
     }
 
 
-    public long getCurrentTimeMillis() {
-        long systime  =  System.currentTimeMillis();
-        if ((systime - currentTimeMillis) > 1000) {
-            currentTimeMillis  =  new java.util.Date(systime).getTime();
+    public long getCurrentTimeMillis()
+    {
+        long systime = System.currentTimeMillis();
+        if ((systime - currentTimeMillis) > 1000)
+        {
+            currentTimeMillis = new java.util.Date(systime).getTime();
         }
         return currentTimeMillis;
     }

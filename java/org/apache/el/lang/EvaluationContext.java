@@ -23,7 +23,8 @@ import javax.el.FunctionMapper;
 import javax.el.VariableMapper;
 import java.util.Locale;
 
-public final class EvaluationContext extends ELContext {
+public final class EvaluationContext extends ELContext
+{
 
     private final ELContext elContext;
 
@@ -32,49 +33,60 @@ public final class EvaluationContext extends ELContext {
     private final VariableMapper varMapper;
 
     public EvaluationContext(ELContext elContext, FunctionMapper fnMapper,
-            VariableMapper varMapper) {
+                             VariableMapper varMapper)
+    {
         this.elContext = elContext;
         this.fnMapper = fnMapper;
         this.varMapper = varMapper;
     }
 
-    public ELContext getELContext() {
+    public ELContext getELContext()
+    {
         return this.elContext;
     }
 
-    public FunctionMapper getFunctionMapper() {
+    public FunctionMapper getFunctionMapper()
+    {
         return this.fnMapper;
     }
 
-    public VariableMapper getVariableMapper() {
+    public VariableMapper getVariableMapper()
+    {
         return this.varMapper;
     }
 
-    public Object getContext(Class key) {
+    public Object getContext(Class key)
+    {
         return this.elContext.getContext(key);
     }
 
-    public ELResolver getELResolver() {
+    public ELResolver getELResolver()
+    {
         return this.elContext.getELResolver();
     }
 
-    public boolean isPropertyResolved() {
+    public boolean isPropertyResolved()
+    {
         return this.elContext.isPropertyResolved();
     }
 
-    public void putContext(Class key, Object contextObject) {
-        this.elContext.putContext(key, contextObject);
-    }
-
-    public void setPropertyResolved(boolean resolved) {
+    public void setPropertyResolved(boolean resolved)
+    {
         this.elContext.setPropertyResolved(resolved);
     }
 
-    public Locale getLocale() {
-        return this.elContext.getLocale();
-        }
+    public void putContext(Class key, Object contextObject)
+    {
+        this.elContext.putContext(key, contextObject);
+    }
 
-    public void setLocale(Locale locale) {
+    public Locale getLocale()
+    {
+        return this.elContext.getLocale();
+    }
+
+    public void setLocale(Locale locale)
+    {
         this.elContext.setLocale(locale);
     }
 }

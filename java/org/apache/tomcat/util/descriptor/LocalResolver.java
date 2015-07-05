@@ -16,6 +16,11 @@
  */
 package org.apache.tomcat.util.descriptor;
 
+import org.apache.tomcat.util.res.StringManager;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.ext.EntityResolver2;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,26 +29,22 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 
-import org.apache.tomcat.util.res.StringManager;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.ext.EntityResolver2;
-
 /**
  * A resolver for locally cached XML resources.
  */
-public class LocalResolver implements EntityResolver2 {
+public class LocalResolver implements EntityResolver2
+{
 
     private static final StringManager sm =
             StringManager.getManager(Constants.PACKAGE_NAME);
 
     private static final String[] JAVA_EE_NAMESPACES = {
-        XmlIdentifiers.JAVAEE_1_4_NS,
-        XmlIdentifiers.JAVAEE_5_NS };
+            XmlIdentifiers.JAVAEE_1_4_NS,
+            XmlIdentifiers.JAVAEE_5_NS};
 
 
-    private final Map<String,String> publicIds;
-    private final Map<String,String> systemIds;
+    private final Map<String, String> publicIds;
+    private final Map<String, String> systemIds;
     private final boolean blockExternal;
 
     /**
@@ -51,15 +52,16 @@ public class LocalResolver implements EntityResolver2 {
      * resources. Each map contains a mapping from a well-known identifier to a
      * URL for a local resource path.
      *
-     * @param publicIds mapping of well-known public identifiers to local
-     *                  resources
-     * @param systemIds mapping of well-known system identifiers to local
-     *                  resources
+     * @param publicIds     mapping of well-known public identifiers to local
+     *                      resources
+     * @param systemIds     mapping of well-known system identifiers to local
+     *                      resources
      * @param blockExternal are external resources blocked that are not
      *                      well-known
      */
-    public LocalResolver(Map<String,String> publicIds,
-            Map<String,String> systemIds, boolean blockExternal) {
+    public LocalResolver(Map<String, String> publicIds,
+                         Map<String, String> systemIds, boolean blockExternal)
+    {
         this.publicIds = publicIds;
         this.systemIds = systemIds;
         this.blockExternal = blockExternal;
@@ -67,31 +69,36 @@ public class LocalResolver implements EntityResolver2 {
 
 
     public InputSource resolveEntity(String publicId, String systemId)
-            throws SAXException, IOException {
+            throws SAXException, IOException
+    {
         return resolveEntity(null, publicId, null, systemId);
     }
 
 
     public InputSource resolveEntity(String name, String publicId,
-            String base, String systemId) throws SAXException, IOException {
+                                     String base, String systemId) throws SAXException, IOException
+    {
 
         // First try resolving using the publicId
         String resolved = publicIds.get(publicId);
-        if (resolved != null) {
+        if (resolved != null)
+        {
             InputSource is = new InputSource(resolved);
             is.setPublicId(publicId);
             return is;
         }
 
         // If there is no systemId, can't try anything else
-        if (systemId == null) {
+        if (systemId == null)
+        {
             throw new FileNotFoundException(sm.getString("localResolver.unresolvedEntity",
                     name, publicId, systemId, base));
         }
 
         // Try resolving with the supplied systemId
         resolved = systemIds.get(systemId);
-        if (resolved != null) {
+        if (resolved != null)
+        {
             InputSource is = new InputSource(resolved);
             is.setPublicId(publicId);
             return is;
@@ -99,10 +106,12 @@ public class LocalResolver implements EntityResolver2 {
 
         // Work-around for XML documents that use just the file name for the
         // location to refer to a JavaEE schema
-        for (String javaEENamespace : JAVA_EE_NAMESPACES) {
+        for (String javaEENamespace : JAVA_EE_NAMESPACES)
+        {
             String javaEESystemId = javaEENamespace + '/' + systemId;
             resolved = systemIds.get(javaEESystemId);
-            if (resolved != null) {
+            if (resolved != null)
+            {
                 InputSource is = new InputSource(resolved);
                 is.setPublicId(publicId);
                 return is;
@@ -111,10 +120,13 @@ public class LocalResolver implements EntityResolver2 {
 
         // Resolve the supplied systemId against the base
         URI systemUri;
-        try {
-            if (base == null) {
+        try
+        {
+            if (base == null)
+            {
                 systemUri = new URI(systemId);
-            } else {
+            } else
+            {
                 // Can't use URI.resolve() because "jar:..." URLs are not valid
                 // hierarchical URIs so resolve() does not work. new URL()
                 // delegates to the jar: stream handler and it manages to figure
@@ -123,26 +135,33 @@ public class LocalResolver implements EntityResolver2 {
                 systemUri = new URL(baseUri.toURL(), systemId).toURI();
             }
             systemUri = systemUri.normalize();
-        } catch (URISyntaxException e) {
+        }
+        catch (URISyntaxException e)
+        {
             // May be caused by a | being used instead of a : in an absolute
             // file URI on Windows.
-            if (blockExternal) {
+            if (blockExternal)
+            {
                 // Absolute paths aren't allowed so block it
                 throw new MalformedURLException(e.getMessage());
-            } else {
+            } else
+            {
                 // See if the URLHandler can resolve it
                 return new InputSource(systemId);
             }
         }
-        if (systemUri.isAbsolute()) {
+        if (systemUri.isAbsolute())
+        {
             // Try the resolved systemId
             resolved = systemIds.get(systemUri.toString());
-            if (resolved != null) {
+            if (resolved != null)
+            {
                 InputSource is = new InputSource(resolved);
                 is.setPublicId(publicId);
                 return is;
             }
-            if (!blockExternal) {
+            if (!blockExternal)
+            {
                 InputSource is = new InputSource(systemUri.toString());
                 is.setPublicId(publicId);
                 return is;
@@ -154,7 +173,8 @@ public class LocalResolver implements EntityResolver2 {
 
 
     public InputSource getExternalSubset(String name, String baseURI)
-            throws SAXException, IOException {
+            throws SAXException, IOException
+    {
         return null;
     }
 }

@@ -17,21 +17,21 @@
 
 package org.apache.coyote.http11.filters;
 
-import java.io.IOException;
-
-import org.apache.tomcat.util.buf.ByteChunk;
-import org.apache.tomcat.util.buf.HexUtils;
-
 import org.apache.coyote.OutputBuffer;
 import org.apache.coyote.Response;
 import org.apache.coyote.http11.OutputFilter;
+import org.apache.tomcat.util.buf.ByteChunk;
+import org.apache.tomcat.util.buf.HexUtils;
+
+import java.io.IOException;
 
 /**
  * Chunked output filter.
- * 
+ *
  * @author Remy Maucherat
  */
-public class ChunkedOutputFilter implements OutputFilter {
+public class ChunkedOutputFilter implements OutputFilter
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -50,29 +50,16 @@ public class ChunkedOutputFilter implements OutputFilter {
     // ----------------------------------------------------- Static Initializer
 
 
-    static {
+    static
+    {
         ENCODING.setBytes(ENCODING_NAME.getBytes(), 0, ENCODING_NAME.length());
-        byte[] END_CHUNK_BYTES = {(byte) '0', (byte) '\r', (byte) '\n', 
-                                  (byte) '\r', (byte) '\n'};
+        byte[] END_CHUNK_BYTES = {(byte) '0', (byte) '\r', (byte) '\n',
+                (byte) '\r', (byte) '\n'};
         END_CHUNK.setBytes(END_CHUNK_BYTES, 0, END_CHUNK_BYTES.length);
     }
 
 
     // ------------------------------------------------------------ Constructor
-
-
-    /**
-     * Default constructor.
-     */
-    public ChunkedOutputFilter() {
-        chunkLength = new byte[10];
-        chunkLength[8] = (byte) '\r';
-        chunkLength[9] = (byte) '\n';
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
-
 
     /**
      * Next buffer in the pipeline.
@@ -80,16 +67,26 @@ public class ChunkedOutputFilter implements OutputFilter {
     protected OutputBuffer buffer;
 
 
+    // ----------------------------------------------------- Instance Variables
     /**
      * Buffer used for chunk length conversion.
      */
     protected byte[] chunkLength = new byte[10];
-
-
     /**
      * Chunk header.
      */
     protected ByteChunk chunkHeader = new ByteChunk();
+
+
+    /**
+     * Default constructor.
+     */
+    public ChunkedOutputFilter()
+    {
+        chunkLength = new byte[10];
+        chunkLength[8] = (byte) '\r';
+        chunkLength[9] = (byte) '\n';
+    }
 
 
     // ------------------------------------------------------------- Properties
@@ -97,25 +94,27 @@ public class ChunkedOutputFilter implements OutputFilter {
 
     // --------------------------------------------------- OutputBuffer Methods
 
-
     /**
      * Write some bytes.
-     * 
+     *
      * @return number of bytes written by the filter
      */
     public int doWrite(ByteChunk chunk, Response res)
-        throws IOException {
+            throws IOException
+    {
 
         int result = chunk.getLength();
 
-        if (result <= 0) {
+        if (result <= 0)
+        {
             return 0;
         }
 
         // Calculate chunk header
         int pos = 7;
         int current = result;
-        while (current > 0) {
+        while (current > 0)
+        {
             int digit = current % 16;
             current = current / 16;
             chunkLength[pos--] = HexUtils.HEX[digit];
@@ -137,18 +136,20 @@ public class ChunkedOutputFilter implements OutputFilter {
 
 
     /**
-     * Some filters need additional parameters from the response. All the 
+     * Some filters need additional parameters from the response. All the
      * necessary reading can occur in that method, as this method is called
      * after the response header processing is complete.
      */
-    public void setResponse(Response response) {
+    public void setResponse(Response response)
+    {
     }
 
 
     /**
      * Set the next buffer in the filter pipeline.
      */
-    public void setBuffer(OutputBuffer buffer) {
+    public void setBuffer(OutputBuffer buffer)
+    {
         this.buffer = buffer;
     }
 
@@ -158,11 +159,12 @@ public class ChunkedOutputFilter implements OutputFilter {
      * buffer.doWrite during the execution of this method.
      */
     public long end()
-        throws IOException {
+            throws IOException
+    {
 
         // Write end chunk
         buffer.doWrite(END_CHUNK, null);
-        
+
         return 0;
 
     }
@@ -171,15 +173,17 @@ public class ChunkedOutputFilter implements OutputFilter {
     /**
      * Make the filter ready to process the next request.
      */
-    public void recycle() {
+    public void recycle()
+    {
     }
 
 
     /**
-     * Return the name of the associated encoding; Here, the value is 
+     * Return the name of the associated encoding; Here, the value is
      * "identity".
      */
-    public ByteChunk getEncodingName() {
+    public ByteChunk getEncodingName()
+    {
         return ENCODING;
     }
 

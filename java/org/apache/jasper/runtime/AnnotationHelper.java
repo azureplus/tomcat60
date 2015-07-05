@@ -28,33 +28,37 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author Fabien Carrion
  * @author Remy Maucherat
- *
  */
-public class AnnotationHelper {
+public class AnnotationHelper
+{
 
-    
+
     /**
      * Call postConstruct method on the specified instance. Note: In Jasper, this
      * calls naming resources injection as well.
      */
     public static void postConstruct(AnnotationProcessor processor, Object instance)
-        throws IllegalAccessException, InvocationTargetException, NamingException {
-        if (processor != null) {
+            throws IllegalAccessException, InvocationTargetException, NamingException
+    {
+        if (processor != null)
+        {
             processor.processAnnotations(instance);
             processor.postConstruct(instance);
         }
     }
-    
-    
+
+
     /**
      * Call preDestroy method on the specified instance.
      */
     public static void preDestroy(AnnotationProcessor processor, Object instance)
-        throws IllegalAccessException, InvocationTargetException {
-        if (processor != null) {
+            throws IllegalAccessException, InvocationTargetException
+    {
+        if (processor != null)
+        {
             processor.preDestroy(instance);
         }
     }
-    
+
 
 }

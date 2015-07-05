@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -27,22 +27,14 @@ import java.util.Iterator;
  * Naming enumeration implementation.
  *
  * @author Remy Maucherat
- *
  */
 
-public class NamingContextEnumeration 
-    implements NamingEnumeration {
+public class NamingContextEnumeration
+        implements NamingEnumeration
+{
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    public NamingContextEnumeration(Iterator entries) {
-    	iterator = entries;
-    }
-
-
-    // -------------------------------------------------------------- Variables
 
 
     /**
@@ -51,14 +43,23 @@ public class NamingContextEnumeration
     protected Iterator iterator;
 
 
-    // --------------------------------------------------------- Public Methods
+    // -------------------------------------------------------------- Variables
 
+
+    public NamingContextEnumeration(Iterator entries)
+    {
+        iterator = entries;
+    }
+
+
+    // --------------------------------------------------------- Public Methods
 
     /**
      * Retrieves the next element in the enumeration.
      */
     public Object next()
-        throws NamingException {
+            throws NamingException
+    {
         return nextElement();
     }
 
@@ -67,7 +68,8 @@ public class NamingContextEnumeration
      * Determines whether there are any more elements in the enumeration.
      */
     public boolean hasMore()
-        throws NamingException {
+            throws NamingException
+    {
         return iterator.hasNext();
     }
 
@@ -76,16 +78,19 @@ public class NamingContextEnumeration
      * Closes this enumeration.
      */
     public void close()
-        throws NamingException {
+            throws NamingException
+    {
     }
 
 
-    public boolean hasMoreElements() {
+    public boolean hasMoreElements()
+    {
         return iterator.hasNext();
     }
 
 
-    public Object nextElement() {
+    public Object nextElement()
+    {
         NamingEntry entry = (NamingEntry) iterator.next();
         return new NameClassPair(entry.name, entry.value.getClass().getName());
     }

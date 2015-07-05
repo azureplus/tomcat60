@@ -27,13 +27,14 @@ import java.util.Set;
  *
  * @author Remy Maucherat
  */
-public final class Constants {
+public final class Constants
+{
 
 
     // -------------------------------------------------------------- Constants
 
 
-    public static final String DEFAULT_CHARACTER_ENCODING="ISO-8859-1";
+    public static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";
 
 
     public static final String LOCALE_DEFAULT = "en";
@@ -60,56 +61,60 @@ public final class Constants {
      * Has security been turned on?
      */
     public static final boolean IS_SECURITY_ENABLED =
-        (System.getSecurityManager() != null);
+            (System.getSecurityManager() != null);
 
 
     /**
      * If true, custom HTTP status messages will be used in headers.
      */
     public static final boolean USE_CUSTOM_STATUS_MSG_IN_HEADER =
-        Boolean.valueOf(System.getProperty(
-                "org.apache.coyote.USE_CUSTOM_STATUS_MSG_IN_HEADER",
-                "false")).booleanValue(); 
+            Boolean.valueOf(System.getProperty(
+                    "org.apache.coyote.USE_CUSTOM_STATUS_MSG_IN_HEADER",
+                    "false")).booleanValue();
 
     /**
      * Limit on the total length of the trailer headers in
      * a chunked HTTP request.
      */
     public static final int MAX_TRAILER_SIZE =
-        Integer.parseInt(System.getProperty(
-                "org.apache.coyote.MAX_TRAILER_SIZE",
-                "8192"));
+            Integer.parseInt(System.getProperty(
+                    "org.apache.coyote.MAX_TRAILER_SIZE",
+                    "8192"));
 
     /**
      * Limit on the total length of the extension data in
      * a chunked HTTP request.
      */
     public static final int MAX_EXTENSION_SIZE =
-        Integer.parseInt(System.getProperty(
-                "org.apache.coyote.MAX_EXTENSION_SIZE",
-                "8192"));
+            Integer.parseInt(System.getProperty(
+                    "org.apache.coyote.MAX_EXTENSION_SIZE",
+                    "8192"));
 
     /**
      * Limit on the length of request body Tomcat will swallow if it is not
      * read during normal request processing. Defaults to 2MB.
      */
     public static final int MAX_SWALLOW_SIZE =
-        Integer.parseInt(System.getProperty(
-                "org.apache.coyote.MAX_SWALLOW_SIZE",
-                "2097152"));
-    
+            Integer.parseInt(System.getProperty(
+                    "org.apache.coyote.MAX_SWALLOW_SIZE",
+                    "2097152"));
+
     public static final Set<String> ALLOWED_TRAILER_HEADERS;
-    
-    
-    static {
+
+
+    static
+    {
         String commaSeparatedHeaders =
                 System.getProperty("org.apache.coyote.ALLOWED_TRAILER_HEADERS");
         Set<String> headerSet = new HashSet<String>();
-        if (commaSeparatedHeaders != null) {
+        if (commaSeparatedHeaders != null)
+        {
             String[] headers = commaSeparatedHeaders.split(",");
-            for (String header : headers) {
+            for (String header : headers)
+            {
                 String trimmedHeader = header.trim().toLowerCase(Locale.ENGLISH);
-                if (trimmedHeader.length() > 0) {
+                if (trimmedHeader.length() > 0)
+                {
                     headerSet.add(trimmedHeader);
                 }
             }

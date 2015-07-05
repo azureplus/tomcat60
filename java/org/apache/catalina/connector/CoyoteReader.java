@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.catalina.connector;
@@ -24,17 +24,18 @@ import java.io.IOException;
 
 /**
  * Coyote implementation of the buffred reader.
- * 
+ *
  * @author Remy Maucherat
  */
 public class CoyoteReader
-    extends BufferedReader {
+        extends BufferedReader
+{
 
 
     // -------------------------------------------------------------- Constants
 
 
-    private static final char[] LINE_SEP = { '\r', '\n' };
+    private static final char[] LINE_SEP = {'\r', '\n'};
     private static final int MAX_LINE_LENGTH = 4096;
 
 
@@ -50,7 +51,8 @@ public class CoyoteReader
     // ----------------------------------------------------------- Constructors
 
 
-    public CoyoteReader(InputBuffer ib) {
+    public CoyoteReader(InputBuffer ib)
+    {
         super(ib, 1);
         this.ib = ib;
     }
@@ -63,7 +65,8 @@ public class CoyoteReader
      * Prevent cloning the facade.
      */
     protected Object clone()
-        throws CloneNotSupportedException {
+            throws CloneNotSupportedException
+    {
         throw new CloneNotSupportedException();
     }
 
@@ -74,7 +77,8 @@ public class CoyoteReader
     /**
      * Clear facade.
      */
-    void clear() {
+    void clear()
+    {
         ib = null;
     }
 
@@ -83,64 +87,75 @@ public class CoyoteReader
 
 
     public void close()
-        throws IOException {
+            throws IOException
+    {
         ib.close();
     }
 
 
     public int read()
-        throws IOException {
+            throws IOException
+    {
         return ib.read();
     }
 
 
     public int read(char[] cbuf)
-        throws IOException {
+            throws IOException
+    {
         return ib.read(cbuf, 0, cbuf.length);
     }
 
 
     public int read(char[] cbuf, int off, int len)
-        throws IOException {
+            throws IOException
+    {
         return ib.read(cbuf, off, len);
     }
 
 
     public long skip(long n)
-        throws IOException {
+            throws IOException
+    {
         return ib.skip(n);
     }
 
 
     public boolean ready()
-        throws IOException {
+            throws IOException
+    {
         return ib.ready();
     }
 
 
-    public boolean markSupported() {
+    public boolean markSupported()
+    {
         return true;
     }
 
 
     public void mark(int readAheadLimit)
-        throws IOException {
+            throws IOException
+    {
         ib.mark(readAheadLimit);
     }
 
 
     public void reset()
-        throws IOException {
+            throws IOException
+    {
         ib.reset();
     }
 
 
     public String readLine()
-        throws IOException {
+            throws IOException
+    {
 
-        if (lineBuffer == null) {
+        if (lineBuffer == null)
+        {
             lineBuffer = new char[MAX_LINE_LENGTH];
-       }
+        }
 
         String result = null;
 
@@ -148,54 +163,70 @@ public class CoyoteReader
         int end = -1;
         int skip = -1;
         StringBuffer aggregator = null;
-        while (end < 0) {
+        while (end < 0)
+        {
             mark(MAX_LINE_LENGTH);
-            while ((pos < MAX_LINE_LENGTH) && (end < 0)) {
+            while ((pos < MAX_LINE_LENGTH) && (end < 0))
+            {
                 int nRead = read(lineBuffer, pos, MAX_LINE_LENGTH - pos);
-                if (nRead < 0) {
-                    if (pos == 0 && aggregator == null) {
+                if (nRead < 0)
+                {
+                    if (pos == 0 && aggregator == null)
+                    {
                         return null;
                     }
                     end = pos;
                     skip = pos;
                 }
-                for (int i = pos; (i < (pos + nRead)) && (end < 0); i++) {
-                    if (lineBuffer[i] == LINE_SEP[0]) {
+                for (int i = pos; (i < (pos + nRead)) && (end < 0); i++)
+                {
+                    if (lineBuffer[i] == LINE_SEP[0])
+                    {
                         end = i;
                         skip = i + 1;
                         char nextchar;
-                        if (i == (pos + nRead - 1)) {
+                        if (i == (pos + nRead - 1))
+                        {
                             nextchar = (char) read();
-                        } else {
-                            nextchar = lineBuffer[i+1];
+                        } else
+                        {
+                            nextchar = lineBuffer[i + 1];
                         }
-                        if (nextchar == LINE_SEP[1]) {
+                        if (nextchar == LINE_SEP[1])
+                        {
                             skip++;
                         }
-                    } else if (lineBuffer[i] == LINE_SEP[1]) {
+                    } else if (lineBuffer[i] == LINE_SEP[1])
+                    {
                         end = i;
                         skip = i + 1;
                     }
                 }
-                if (nRead > 0) {
+                if (nRead > 0)
+                {
                     pos += nRead;
                 }
             }
-            if (end < 0) {
-                if (aggregator == null) {
+            if (end < 0)
+            {
+                if (aggregator == null)
+                {
                     aggregator = new StringBuffer();
                 }
                 aggregator.append(lineBuffer);
                 pos = 0;
-            } else {
+            } else
+            {
                 reset();
                 skip(skip);
             }
         }
 
-        if (aggregator == null) {
+        if (aggregator == null)
+        {
             result = new String(lineBuffer, 0, end);
-        } else {
+        } else
+        {
             aggregator.append(lineBuffer, 0, end);
             result = aggregator.toString();
         }

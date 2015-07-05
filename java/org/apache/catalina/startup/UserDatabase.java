@@ -27,10 +27,10 @@ import java.util.Enumeration;
  * current server platform.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface UserDatabase {
+public interface UserDatabase
+{
 
 
     // ----------------------------------------------------------- Properties

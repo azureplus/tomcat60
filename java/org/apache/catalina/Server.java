@@ -26,26 +26,26 @@ import org.apache.catalina.deploy.NamingResources;
  * the servlet container as a whole.  A <code>Server</code> may contain
  * one or more <code>Services</code>, and the top level set of naming
  * resources.
- * <p>
+ * <p/>
  * Normally, an implementation of this interface will also implement
  * <code>Lifecycle</code>, such that when the <code>start()</code> and
  * <code>stop()</code> methods are called, all of the defined
  * <code>Services</code> are also started or stopped.
- * <p>
+ * <p/>
  * In between, the implementation must open a server socket on the port number
  * specified by the <code>port</code> property.  When a connection is accepted,
  * the first line is read and compared with the specified shutdown command.
  * If the command matches, shutdown of the server is initiated.
- * <p>
+ * <p/>
  * <strong>NOTE</strong> - The concrete implementation of this class should
  * register the (singleton) instance with the <code>ServerFactory</code>
  * class in its constructor(s).
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface Server {
+public interface Server
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -67,11 +67,11 @@ public interface Server {
 
     /**
      * Set the global naming resources.
-     * 
+     *
      * @param globalNamingResources The new global naming resources
      */
     public void setGlobalNamingResources
-        (NamingResources globalNamingResources);
+    (NamingResources globalNamingResources);
 
 
     /**
@@ -146,8 +146,8 @@ public interface Server {
      * Invoke a pre-startup initialization. This is used to allow connectors
      * to bind to restricted ports under Unix operating environments.
      *
-     * @exception LifecycleException If this server was already initialized.
+     * @throws LifecycleException If this server was already initialized.
      */
     public void initialize()
-    throws LifecycleException;
+            throws LifecycleException;
 }

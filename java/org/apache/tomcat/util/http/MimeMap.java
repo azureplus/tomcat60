@@ -17,8 +17,9 @@
 
 package org.apache.tomcat.util.http;
 
-import java.net.*;
-import java.util.*;
+import java.net.FileNameMap;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 
 /**
@@ -27,23 +28,26 @@ import java.util.*;
  * @author James Duncan Davidson [duncan@eng.sun.com]
  * @author Jason Hunter [jch@eng.sun.com]
  */
-public class MimeMap implements FileNameMap {
+public class MimeMap implements FileNameMap
+{
 
     // Defaults - all of them are "well-known" types,
     // you can add using normal web.xml.
-    
-    public static Hashtable<String,String> defaultMap =
-        new Hashtable<String,String>(101);
-    static {
+
+    public static Hashtable<String, String> defaultMap =
+            new Hashtable<String, String>(101);
+
+    static
+    {
         defaultMap.put("txt", "text/plain");
-        defaultMap.put("html","text/html");
+        defaultMap.put("html", "text/html");
         defaultMap.put("htm", "text/html");
         defaultMap.put("gif", "image/gif");
         defaultMap.put("jpg", "image/jpeg");
         defaultMap.put("jpe", "image/jpeg");
         defaultMap.put("jpeg", "image/jpeg");
         defaultMap.put("png", "image/png");
-                defaultMap.put("java", "text/plain");
+        defaultMap.put("java", "text/plain");
         defaultMap.put("body", "text/html");
         defaultMap.put("rtx", "text/richtext");
         defaultMap.put("tsv", "text/tab-separated-values");
@@ -121,9 +125,9 @@ public class MimeMap implements FileNameMap {
         defaultMap.put("mpv2", "video/mpeg2");
         
         /* Add XML related MIMEs */
-        
+
         defaultMap.put("xml", "text/xml");
-        defaultMap.put("xsl", "text/xml");        
+        defaultMap.put("xsl", "text/xml");
         defaultMap.put("svg", "image/svg+xml");
         defaultMap.put("svgz", "image/svg+xml");
         defaultMap.put("wbmp", "image/vnd.wap.wbmp");
@@ -132,55 +136,66 @@ public class MimeMap implements FileNameMap {
         defaultMap.put("wmls", "text/vnd.wap.wmlscript");
         defaultMap.put("wmlscriptc", "application/vnd.wap.wmlscriptc");
     }
-    
 
-    private Hashtable<String,String> map = new Hashtable<String,String>();
 
-    public void addContentType(String extn, String type) {
-        map.put(extn, type.toLowerCase());
-    }
+    private Hashtable<String, String> map = new Hashtable<String, String>();
 
-    public Enumeration getExtensions() {
-        return map.keys();
-    }
-
-    public String getContentType(String extn) {
-        String type = (String)map.get(extn.toLowerCase());
-        if( type == null ) type=(String)defaultMap.get( extn );
-        return type;
-    }
-
-    public void removeContentType(String extn) {
-        map.remove(extn.toLowerCase());
-    }
-
-    /** Get extension of file, without fragment id
+    /**
+     * Get extension of file, without fragment id
      */
-    public static String getExtension( String fileName ) {
+    public static String getExtension(String fileName)
+    {
         // play it safe and get rid of any fragment id
         // that might be there
-        int length=fileName.length();
-        
+        int length = fileName.length();
+
         int newEnd = fileName.lastIndexOf('#');
-        if( newEnd== -1 ) newEnd=length;
+        if (newEnd == -1) newEnd = length;
         // Instead of creating a new string.
         //         if (i != -1) {
         //             fileName = fileName.substring(0, i);
         //         }
-        int i = fileName.lastIndexOf('.', newEnd );
-        if (i != -1) {
-             return  fileName.substring(i + 1, newEnd );
-        } else {
+        int i = fileName.lastIndexOf('.', newEnd);
+        if (i != -1)
+        {
+            return fileName.substring(i + 1, newEnd);
+        } else
+        {
             // no extension, no content type
             return null;
         }
     }
-    
-    public String getContentTypeFor(String fileName) {
-        String extn=getExtension( fileName );
-        if (extn!=null) {
+
+    public void addContentType(String extn, String type)
+    {
+        map.put(extn, type.toLowerCase());
+    }
+
+    public Enumeration getExtensions()
+    {
+        return map.keys();
+    }
+
+    public String getContentType(String extn)
+    {
+        String type = (String) map.get(extn.toLowerCase());
+        if (type == null) type = (String) defaultMap.get(extn);
+        return type;
+    }
+
+    public void removeContentType(String extn)
+    {
+        map.remove(extn.toLowerCase());
+    }
+
+    public String getContentTypeFor(String fileName)
+    {
+        String extn = getExtension(fileName);
+        if (extn != null)
+        {
             return getContentType(extn);
-        } else {
+        } else
+        {
             // no extension, no content type
             return null;
         }

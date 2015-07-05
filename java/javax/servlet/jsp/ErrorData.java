@@ -13,7 +13,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-*/ 
+*/
 package javax.servlet.jsp;
 
 /**
@@ -27,7 +27,8 @@ package javax.servlet.jsp;
  * @since 2.0
  */
 
-public final class ErrorData {
+public final class ErrorData
+{
 
     private Throwable throwable;
     private int statusCode;
@@ -37,18 +38,18 @@ public final class ErrorData {
     /**
      * Creates a new ErrorData object.
      *
-     * @param throwable The Throwable that is the cause of the error
-     * @param statusCode The status code of the error
-     * @param uri The request URI
+     * @param throwable   The Throwable that is the cause of the error
+     * @param statusCode  The status code of the error
+     * @param uri         The request URI
      * @param servletName The name of the servlet invoked
      */
-    public ErrorData( Throwable throwable, int statusCode, String uri, 
-	String servletName )
+    public ErrorData(Throwable throwable, int statusCode, String uri,
+                     String servletName)
     {
-	this.throwable = throwable;
-	this.statusCode = statusCode;
-	this.uri = uri;
-	this.servletName = servletName;
+        this.throwable = throwable;
+        this.statusCode = statusCode;
+        this.uri = uri;
+        this.servletName = servletName;
     }
 
     /**
@@ -56,8 +57,9 @@ public final class ErrorData {
      *
      * @return The Throwable that caused the error
      */
-    public Throwable getThrowable() {
-	return this.throwable;
+    public Throwable getThrowable()
+    {
+        return this.throwable;
     }
 
     /**
@@ -65,8 +67,9 @@ public final class ErrorData {
      *
      * @return The status code of the error
      */
-    public int getStatusCode() {
-	return this.statusCode;
+    public int getStatusCode()
+    {
+        return this.statusCode;
     }
 
     /**
@@ -74,8 +77,9 @@ public final class ErrorData {
      *
      * @return The request URI
      */
-    public String getRequestURI() {
-	return this.uri;
+    public String getRequestURI()
+    {
+        return this.uri;
     }
 
     /**
@@ -83,7 +87,8 @@ public final class ErrorData {
      *
      * @return The name of the servlet invoked
      */
-    public String getServletName() {
-	return this.servletName;
+    public String getServletName()
+    {
+        return this.servletName;
     }
 }

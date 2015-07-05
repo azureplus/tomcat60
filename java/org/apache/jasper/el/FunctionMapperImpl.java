@@ -19,16 +19,19 @@ package org.apache.jasper.el;
 import javax.servlet.jsp.el.FunctionMapper;
 import java.lang.reflect.Method;
 
-public final class FunctionMapperImpl extends javax.el.FunctionMapper {
-	
-	private final FunctionMapper fnMapper;
+public final class FunctionMapperImpl extends javax.el.FunctionMapper
+{
 
-	public FunctionMapperImpl(FunctionMapper fnMapper) {
-		this.fnMapper = fnMapper;
-	}
+    private final FunctionMapper fnMapper;
 
-	public Method resolveFunction(String prefix, String localName) {
-		return this.fnMapper.resolveFunction(prefix, localName);
-	}
+    public FunctionMapperImpl(FunctionMapper fnMapper)
+    {
+        this.fnMapper = fnMapper;
+    }
+
+    public Method resolveFunction(String prefix, String localName)
+    {
+        return this.fnMapper.resolveFunction(prefix, localName);
+    }
 
 }

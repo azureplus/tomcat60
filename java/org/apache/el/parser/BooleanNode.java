@@ -23,17 +23,20 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public class BooleanNode extends SimpleNode {
+public class BooleanNode extends SimpleNode
+{
     /**
      * @param i
      */
-    public BooleanNode(int i) {
+    public BooleanNode(int i)
+    {
         super(i);
     }
+
     public Class getType(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return Boolean.class;
     }
 }

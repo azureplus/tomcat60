@@ -19,9 +19,8 @@
 package org.apache.tomcat.util.modeler;
 
 
-import java.io.Serializable;
-
 import javax.management.MBeanFeatureInfo;
+import java.io.Serializable;
 
 
 /**
@@ -31,30 +30,32 @@ import javax.management.MBeanFeatureInfo;
  * <code>ModelMBean</code> beans exposed for management.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class FeatureInfo implements Serializable {
+public class FeatureInfo implements Serializable
+{
     static final long serialVersionUID = -911529176124712296L;
-    
+
     protected String description = null;
     protected String name = null;
     protected MBeanFeatureInfo info = null;
-    
+
     // all have type except Constructor
     protected String type = null;
 
-    
+
     // ------------------------------------------------------------- Properties
 
     /**
      * The human-readable description of this feature.
      */
-    public String getDescription() {
+    public String getDescription()
+    {
         return (this.description);
     }
 
-    public void setDescription(String description) {
+    public void setDescription(String description)
+    {
         this.description = description;
     }
 
@@ -63,22 +64,26 @@ public class FeatureInfo implements Serializable {
      * The name of this feature, which must be unique among features in the
      * same collection.
      */
-    public String getName() {
+    public String getName()
+    {
         return (this.name);
     }
 
-    public void setName(String name) {
+    public void setName(String name)
+    {
         this.name = name;
     }
 
     /**
      * The fully qualified Java class name of this element.
      */
-    public String getType() {
+    public String getType()
+    {
         return (this.type);
     }
 
-    public void setType(String type) {
+    public void setType(String type)
+    {
         this.type = type;
     }
 

@@ -62,9 +62,33 @@ public class Request
         implements HttpServletRequest
 {
 
+    protected static final TimeZone GMT_ZONE = TimeZone.getTimeZone("GMT");
+    /**
+     * Descriptive information about this Request implementation.
+     */
+    protected static final String info =
+            "org.apache.coyote.catalina.CoyoteRequest/1.0";
     private final static boolean ALLOW_EMPTY_QUERY_STRING;
-
     private static final Log log = LogFactory.getLog(Request.class);
+
+
+    // ------------------------------------------------------------- Properties
+    /**
+     * The string manager for this package.
+     */
+    protected static StringManager sm =
+            StringManager.getManager(Constants.Package);
+    /**
+     * The default Locale if none are specified.
+     */
+    protected static Locale defaultLocale = Locale.getDefault();
+    /**
+     * Post data buffer.
+     */
+    protected static int CACHED_POST_LEN = 8192;
+
+
+    // ----------------------------------------------------- Variables
 
     static
     {
@@ -77,59 +101,10 @@ public class Request
                 Boolean.toString(Globals.STRICT_SERVLET_COMPLIANCE)));
     }
 
-
-    // ----------------------------------------------------------- Constructors
-    public Request()
-    {
-
-        formats[0].setTimeZone(GMT_ZONE);
-        formats[1].setTimeZone(GMT_ZONE);
-        formats[2].setTimeZone(GMT_ZONE);
-
-    }
-
-
-    // ------------------------------------------------------------- Properties
-
-
     /**
      * Coyote request.
      */
     protected org.apache.coyote.Request coyoteRequest;
-
-    /**
-     * Set the Coyote request.
-     *
-     * @param coyoteRequest The Coyote request
-     */
-    public void setCoyoteRequest(org.apache.coyote.Request coyoteRequest)
-    {
-        this.coyoteRequest = coyoteRequest;
-        inputBuffer.setRequest(coyoteRequest);
-    }
-
-    /**
-     * Get the Coyote request.
-     */
-    public org.apache.coyote.Request getCoyoteRequest()
-    {
-        return (this.coyoteRequest);
-    }
-
-
-    // ----------------------------------------------------- Variables
-
-
-    protected static final TimeZone GMT_ZONE = TimeZone.getTimeZone("GMT");
-
-
-    /**
-     * The string manager for this package.
-     */
-    protected static StringManager sm =
-            StringManager.getManager(Constants.Package);
-
-
     /**
      * The set of cookies associated with this Request.
      */
@@ -147,39 +122,177 @@ public class Request
             new SimpleDateFormat("EEEEEE, dd-MMM-yy HH:mm:ss zzz", Locale.US),
             new SimpleDateFormat("EEE MMMM d HH:mm:ss yyyy", Locale.US)
     };
-
-
-    /**
-     * The default Locale if none are specified.
-     */
-    protected static Locale defaultLocale = Locale.getDefault();
-
-
     /**
      * The attributes associated with this Request, keyed by attribute name.
      */
     protected HashMap attributes = new HashMap();
-
-
     /**
      * Flag that indicates if SSL attributes have been parsed to improve
      * performance for applications (usually frameworks) that make multiple
      * calls to {@link Request#getAttributeNames()}.
      */
     protected boolean sslAttributesParsed = false;
-
-    /**
-     * List of read only attributes for this Request.
-     */
-    private HashMap readOnlyAttributes = new HashMap();
-
-
     /**
      * The preferred Locales assocaited with this Request.
      */
     protected ArrayList locales = new ArrayList();
+    /**
+     * Authentication type.
+     */
+    protected String authType = null;
+    /**
+     * Associated event.
+     */
+    protected CometEventImpl event = null;
+    /**
+     * Comet state
+     */
+    protected boolean comet = false;
+    /**
+     * The current dispatcher type.
+     */
+    protected Object dispatcherType = null;
+    /**
+     * The associated input buffer.
+     */
+    protected InputBuffer inputBuffer = new InputBuffer();
+    /**
+     * ServletInputStream.
+     */
+    protected CoyoteInputStream inputStream =
+            new CoyoteInputStream(inputBuffer);
+    /**
+     * Reader.
+     */
+    protected CoyoteReader reader = new CoyoteReader(inputBuffer);
+    /**
+     * Using stream flag.
+     */
+    protected boolean usingInputStream = false;
+    /**
+     * Using writer flag.
+     */
+    protected boolean usingReader = false;
+    /**
+     * User principal.
+     */
+    protected Principal userPrincipal = null;
+    /**
+     * Session parsed flag.
+     */
+    protected boolean sessionParsed = false;
+    /**
+     * Request parameters parsed flag.
+     */
+    protected boolean parametersParsed = false;
+    /**
+     * Cookies parsed flag.
+     */
+    protected boolean cookiesParsed = false;
+    /**
+     * Secure flag.
+     */
+    protected boolean secure = false;
+    /**
+     * The Subject associated with the current AccessControllerContext
+     */
+    protected transient Subject subject = null;
+    protected byte[] postData = null;
+    /**
+     * Hash map used in the getParametersMap method.
+     */
+    protected ParameterMap parameterMap = new ParameterMap();
+    /**
+     * The currently active session for this request.
+     */
+    protected Session session = null;
+    /**
+     * The current request dispatcher path.
+     */
+    protected Object requestDispatcherPath = null;
+    /**
+     * Was the requested session ID received in a cookie?
+     */
+    protected boolean requestedSessionCookie = false;
+    /**
+     * The requested session ID (if any) for this request.
+     */
+    protected String requestedSessionId = null;
+    /**
+     * Was the requested session ID received in a URL?
+     */
+    protected boolean requestedSessionURL = false;
+    /**
+     * Parse locales.
+     */
+    protected boolean localesParsed = false;
+    /**
+     * Local port
+     */
+    protected int localPort = -1;
+    /**
+     * Remote address.
+     */
+    protected String remoteAddr = null;
+    /**
+     * Remote host.
+     */
+    protected String remoteHost = null;
+    /**
+     * Remote port
+     */
+    protected int remotePort = -1;
+    /**
+     * Local address
+     */
+    protected String localAddr = null;
+    /**
+     * Local address
+     */
+    protected String localName = null;
+    /**
+     * Path parameters
+     */
+    protected Map<String, String> pathParameters = new HashMap<String, String>();
+    /**
+     * Associated Catalina connector.
+     */
+    protected Connector connector;
+    /**
+     * Associated context.
+     */
+    protected Context context = null;
+    /**
+     * Filter chain associated with the request.
+     */
+    protected FilterChain filterChain = null;
+    /**
+     * Mapping data.
+     */
+    protected MappingData mappingData = new MappingData();
+    /**
+     * The facade associated with this request.
+     */
+    protected RequestFacade facade = null;
 
 
+    // --------------------------------------------------------- Public Methods
+    /**
+     * The response with which this request is associated.
+     */
+    protected org.apache.catalina.connector.Response response = null;
+    /**
+     * URI byte to char converter (not recycled).
+     */
+    protected B2CConverter URIConverter = null;
+    /**
+     * Associated wrapper.
+     */
+    protected Wrapper wrapper = null;
+    /**
+     * List of read only attributes for this Request.
+     */
+    private HashMap readOnlyAttributes = new HashMap();
     /**
      * Internal notes associated with this request by Catalina components
      * and event listeners.
@@ -187,194 +300,64 @@ public class Request
     private transient HashMap notes = new HashMap();
 
 
-    /**
-     * Authentication type.
-     */
-    protected String authType = null;
-
-
-    /**
-     * Associated event.
-     */
-    protected CometEventImpl event = null;
-
-
-    /**
-     * Comet state
-     */
-    protected boolean comet = false;
-
-
-    /**
-     * The current dispatcher type.
-     */
-    protected Object dispatcherType = null;
-
-
-    /**
-     * The associated input buffer.
-     */
-    protected InputBuffer inputBuffer = new InputBuffer();
-
-
-    /**
-     * ServletInputStream.
-     */
-    protected CoyoteInputStream inputStream =
-            new CoyoteInputStream(inputBuffer);
-
-
-    /**
-     * Reader.
-     */
-    protected CoyoteReader reader = new CoyoteReader(inputBuffer);
-
-
-    /**
-     * Using stream flag.
-     */
-    protected boolean usingInputStream = false;
-
-
-    /**
-     * Using writer flag.
-     */
-    protected boolean usingReader = false;
-
-
-    /**
-     * User principal.
-     */
-    protected Principal userPrincipal = null;
-
-
-    /**
-     * Session parsed flag.
-     */
-    protected boolean sessionParsed = false;
-
-
-    /**
-     * Request parameters parsed flag.
-     */
-    protected boolean parametersParsed = false;
-
-
-    /**
-     * Cookies parsed flag.
-     */
-    protected boolean cookiesParsed = false;
-
-
-    /**
-     * Secure flag.
-     */
-    protected boolean secure = false;
-
-
-    /**
-     * The Subject associated with the current AccessControllerContext
-     */
-    protected transient Subject subject = null;
-
-
-    /**
-     * Post data buffer.
-     */
-    protected static int CACHED_POST_LEN = 8192;
-    protected byte[] postData = null;
-
-
-    /**
-     * Hash map used in the getParametersMap method.
-     */
-    protected ParameterMap parameterMap = new ParameterMap();
-
-
-    /**
-     * The currently active session for this request.
-     */
-    protected Session session = null;
-
-
-    /**
-     * The current request dispatcher path.
-     */
-    protected Object requestDispatcherPath = null;
-
-
-    /**
-     * Was the requested session ID received in a cookie?
-     */
-    protected boolean requestedSessionCookie = false;
-
-
-    /**
-     * The requested session ID (if any) for this request.
-     */
-    protected String requestedSessionId = null;
-
-
-    /**
-     * Was the requested session ID received in a URL?
-     */
-    protected boolean requestedSessionURL = false;
-
-
-    /**
-     * Parse locales.
-     */
-    protected boolean localesParsed = false;
-
-
+    // -------------------------------------------------------- Request Methods
     /**
      * The string parser we will use for parsing request lines.
      */
     private StringParser parser = new StringParser();
 
+    // ----------------------------------------------------------- Constructors
+    public Request()
+    {
+
+        formats[0].setTimeZone(GMT_ZONE);
+        formats[1].setTimeZone(GMT_ZONE);
+        formats[2].setTimeZone(GMT_ZONE);
+
+    }
 
     /**
-     * Local port
+     * Test if a given name is one of the special Servlet-spec SSL attributes.
      */
-    protected int localPort = -1;
+    static boolean isSSLAttribute(String name)
+    {
+        return Globals.CERTIFICATES_ATTR.equals(name) ||
+                Globals.CIPHER_SUITE_ATTR.equals(name) ||
+                Globals.KEY_SIZE_ATTR.equals(name) ||
+                Globals.SSL_SESSION_ID_ATTR.equals(name);
+    }
+
+    protected static final boolean isAlpha(String value)
+    {
+        for (int i = 0; i < value.length(); i++)
+        {
+            char c = value.charAt(i);
+            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
-     * Remote address.
+     * Get the Coyote request.
      */
-    protected String remoteAddr = null;
-
+    public org.apache.coyote.Request getCoyoteRequest()
+    {
+        return (this.coyoteRequest);
+    }
 
     /**
-     * Remote host.
+     * Set the Coyote request.
+     *
+     * @param coyoteRequest The Coyote request
      */
-    protected String remoteHost = null;
-
-
-    /**
-     * Remote port
-     */
-    protected int remotePort = -1;
-
-    /**
-     * Local address
-     */
-    protected String localAddr = null;
-
-
-    /**
-     * Local address
-     */
-    protected String localName = null;
-
-
-    /**
-     * Path parameters
-     */
-    protected Map<String, String> pathParameters = new HashMap<String, String>();
-
-
-    // --------------------------------------------------------- Public Methods
-
+    public void setCoyoteRequest(org.apache.coyote.Request coyoteRequest)
+    {
+        this.coyoteRequest = coyoteRequest;
+        inputBuffer.setRequest(coyoteRequest);
+    }
 
     protected void addPathParameter(String name, String value)
     {
@@ -435,7 +418,8 @@ public class Request
             try
             {
                 session.endAccess();
-            } catch (Throwable t)
+            }
+            catch (Throwable t)
             {
                 ExceptionUtils.handleThrowable(t);
                 log.warn(sm.getString("coyoteRequest.sessionEndAccessFail"), t);
@@ -479,7 +463,6 @@ public class Request
         pathParameters.clear();
     }
 
-
     /**
      * Clear cached encoders (to save memory for Comet requests).
      */
@@ -487,7 +470,6 @@ public class Request
     {
         inputBuffer.clearEncoders();
     }
-
 
     /**
      * Clear cached encoders (to save memory for Comet requests).
@@ -497,15 +479,6 @@ public class Request
     {
         return (inputBuffer.realReadBytes(null, 0, 0) > 0);
     }
-
-
-    // -------------------------------------------------------- Request Methods
-
-
-    /**
-     * Associated Catalina connector.
-     */
-    protected Connector connector;
 
     /**
      * Return the Connector through which this Request was received.
@@ -525,12 +498,6 @@ public class Request
         this.connector = connector;
     }
 
-
-    /**
-     * Associated context.
-     */
-    protected Context context = null;
-
     /**
      * Return the Context within which this Request is being processed.
      */
@@ -538,7 +505,6 @@ public class Request
     {
         return (this.context);
     }
-
 
     /**
      * Set the Context within which this Request is being processed.  This
@@ -552,12 +518,6 @@ public class Request
     {
         this.context = context;
     }
-
-
-    /**
-     * Filter chain associated with the request.
-     */
-    protected FilterChain filterChain = null;
 
     /**
      * Get filter chain associated with the request.
@@ -577,7 +537,6 @@ public class Request
         this.filterChain = filterChain;
     }
 
-
     /**
      * Return the Host within which this Request is being processed.
      */
@@ -588,7 +547,6 @@ public class Request
         return (Host) getContext().getParent();
         //return ((Host) mappingData.host);
     }
-
 
     /**
      * Set the Host within which this Request is being processed.  This
@@ -602,13 +560,6 @@ public class Request
         mappingData.host = host;
     }
 
-
-    /**
-     * Descriptive information about this Request implementation.
-     */
-    protected static final String info =
-            "org.apache.coyote.catalina.CoyoteRequest/1.0";
-
     /**
      * Return descriptive information about this Request implementation and
      * the corresponding version number, in the format
@@ -619,12 +570,6 @@ public class Request
         return (info);
     }
 
-
-    /**
-     * Mapping data.
-     */
-    protected MappingData mappingData = new MappingData();
-
     /**
      * Return mapping data.
      */
@@ -632,12 +577,6 @@ public class Request
     {
         return (mappingData);
     }
-
-
-    /**
-     * The facade associated with this request.
-     */
-    protected RequestFacade facade = null;
 
     /**
      * Return the <code>ServletRequest</code> for which this object
@@ -651,12 +590,6 @@ public class Request
         }
         return (facade);
     }
-
-
-    /**
-     * The response with which this request is associated.
-     */
-    protected org.apache.catalina.connector.Response response = null;
 
     /**
      * Return the Response with which this Request is associated.
@@ -698,12 +631,6 @@ public class Request
         // Ignore
     }
 
-
-    /**
-     * URI byte to char converter (not recycled).
-     */
-    protected B2CConverter URIConverter = null;
-
     /**
      * Return the URI converter.
      */
@@ -723,10 +650,7 @@ public class Request
     }
 
 
-    /**
-     * Associated wrapper.
-     */
-    protected Wrapper wrapper = null;
+    // ------------------------------------------------- Request Public Methods
 
     /**
      * Return the Wrapper within which this Request is being processed.
@@ -735,7 +659,6 @@ public class Request
     {
         return (this.wrapper);
     }
-
 
     /**
      * Set the Wrapper within which this Request is being processed.  This
@@ -748,10 +671,6 @@ public class Request
     {
         this.wrapper = wrapper;
     }
-
-
-    // ------------------------------------------------- Request Public Methods
-
 
     /**
      * Create and return a ServletInputStream to read the content
@@ -769,7 +688,6 @@ public class Request
         return inputStream;
     }
 
-
     /**
      * Perform whatever actions are required to flush and close the input
      * stream or reader, in a single operation.
@@ -780,7 +698,6 @@ public class Request
     {
         // The reader and input stream don't need to be closed
     }
-
 
     /**
      * Return the object bound with the specified name to the internal notes
@@ -793,7 +710,6 @@ public class Request
         return (notes.get(name));
     }
 
-
     /**
      * Return an Iterator containing the String names of all notes bindings
      * that exist for this request.
@@ -802,7 +718,6 @@ public class Request
     {
         return (notes.keySet().iterator());
     }
-
 
     /**
      * Remove any object bound to the specified name in the internal notes
@@ -815,7 +730,6 @@ public class Request
         notes.remove(name);
     }
 
-
     /**
      * Bind an object to a specified name in the internal notes associated
      * with this request, replacing any existing binding for this name.
@@ -827,114 +741,6 @@ public class Request
     {
         notes.put(name, value);
     }
-
-
-    /**
-     * Set the content length associated with this Request.
-     *
-     * @param length The new content length
-     */
-    public void setContentLength(int length)
-    {
-        // Not used
-    }
-
-
-    /**
-     * Set the content type (and optionally the character encoding)
-     * associated with this Request.  For example,
-     * <code>text/html; charset=ISO-8859-4</code>.
-     *
-     * @param type The new content type
-     */
-    public void setContentType(String type)
-    {
-        // Not used
-    }
-
-
-    /**
-     * Set the protocol name and version associated with this Request.
-     *
-     * @param protocol Protocol name and version
-     */
-    public void setProtocol(String protocol)
-    {
-        // Not used
-    }
-
-
-    /**
-     * Set the IP address of the remote client associated with this Request.
-     *
-     * @param remoteAddr The remote IP address
-     */
-    public void setRemoteAddr(String remoteAddr)
-    {
-        this.remoteAddr = remoteAddr;
-    }
-
-
-    /**
-     * Set the fully qualified name of the remote client associated with this
-     * Request.
-     *
-     * @param remoteHost The remote host name
-     */
-    public void setRemoteHost(String remoteHost)
-    {
-        this.remoteHost = remoteHost;
-    }
-
-
-    /**
-     * Set the name of the scheme associated with this request.  Typical values
-     * are <code>http</code>, <code>https</code>, and <code>ftp</code>.
-     *
-     * @param scheme The scheme
-     */
-    public void setScheme(String scheme)
-    {
-        // Not used
-    }
-
-
-    /**
-     * Set the value to be returned by <code>isSecure()</code>
-     * for this Request.
-     *
-     * @param secure The new isSecure value
-     */
-    public void setSecure(boolean secure)
-    {
-        this.secure = secure;
-    }
-
-
-    /**
-     * Set the name of the server (virtual host) to process this request.
-     *
-     * @param name The server name
-     */
-    public void setServerName(String name)
-    {
-        coyoteRequest.serverName().setString(name);
-    }
-
-
-    /**
-     * Set the port number of the server to process this request.
-     *
-     * @param port The server port
-     */
-    public void setServerPort(int port)
-    {
-        coyoteRequest.setServerPort(port);
-    }
-
-
-    // ------------------------------------------------- ServletRequest Methods
-
 
     /**
      * Return the specified request attribute if it exists; otherwise, return
@@ -1002,18 +808,6 @@ public class Request
         return attr;
     }
 
-
-    /**
-     * Test if a given name is one of the special Servlet-spec SSL attributes.
-     */
-    static boolean isSSLAttribute(String name)
-    {
-        return Globals.CERTIFICATES_ATTR.equals(name) ||
-                Globals.CIPHER_SUITE_ATTR.equals(name) ||
-                Globals.KEY_SIZE_ATTR.equals(name) ||
-                Globals.SSL_SESSION_ID_ATTR.equals(name);
-    }
-
     /**
      * Return the names of all request attributes for this Request, or an
      * empty <code>Enumeration</code> if there are none. Note that the attribute
@@ -1049,7 +843,6 @@ public class Request
         return new Enumerator(attributes.keySet(), true);
     }
 
-
     /**
      * Return the character encoding for this Request.
      */
@@ -1058,6 +851,29 @@ public class Request
         return (coyoteRequest.getCharacterEncoding());
     }
 
+    /**
+     * Overrides the name of the character encoding used in the body of
+     * this request.  This method must be called prior to reading request
+     * parameters or reading input using <code>getReader()</code>.
+     *
+     * @param enc The character encoding to be used
+     * @throws UnsupportedEncodingException if the specified encoding
+     *                                      is not supported
+     * @since Servlet 2.3
+     */
+    public void setCharacterEncoding(String enc)
+            throws UnsupportedEncodingException
+    {
+
+        if (usingReader)
+            return;
+
+        // Confirm that the encoding name is valid
+        B2CConverter.getCharset(enc);
+
+        // Save the validated encoding
+        coyoteRequest.setCharacterEncoding(enc);
+    }
 
     /**
      * Return the content length for this Request.
@@ -1067,6 +883,15 @@ public class Request
         return (coyoteRequest.getContentLength());
     }
 
+    /**
+     * Set the content length associated with this Request.
+     *
+     * @param length The new content length
+     */
+    public void setContentLength(int length)
+    {
+        // Not used
+    }
 
     /**
      * Return the content type for this Request.
@@ -1076,6 +901,20 @@ public class Request
         return (coyoteRequest.getContentType());
     }
 
+
+    // ------------------------------------------------- ServletRequest Methods
+
+    /**
+     * Set the content type (and optionally the character encoding)
+     * associated with this Request.  For example,
+     * <code>text/html; charset=ISO-8859-4</code>.
+     *
+     * @param type The new content type
+     */
+    public void setContentType(String type)
+    {
+        // Not used
+    }
 
     /**
      * Return the servlet input stream for this Request.  The default
@@ -1102,7 +941,6 @@ public class Request
 
     }
 
-
     /**
      * Return the preferred Locale that the client will accept content in,
      * based on the value for the first <code>Accept-Language</code> header
@@ -1125,7 +963,6 @@ public class Request
 
     }
 
-
     /**
      * Return the set of preferred Locales that the client will accept
      * content in, based on the values for any <code>Accept-Language</code>
@@ -1146,7 +983,6 @@ public class Request
 
     }
 
-
     /**
      * Return the value of the specified request parameter, if any; otherwise,
      * return <code>null</code>.  If there is more than one value defined,
@@ -1163,7 +999,6 @@ public class Request
         return coyoteRequest.getParameters().getParameter(name);
 
     }
-
 
     /**
      * Returns a <code>Map</code> of the parameters of this request.
@@ -1194,7 +1029,6 @@ public class Request
 
     }
 
-
     /**
      * Return the names of all defined request parameters for this request.
      */
@@ -1207,7 +1041,6 @@ public class Request
         return coyoteRequest.getParameters().getParameterNames();
 
     }
-
 
     /**
      * Return the defined values for the specified request parameter, if any;
@@ -1225,7 +1058,6 @@ public class Request
 
     }
 
-
     /**
      * Return the protocol and version used to make this Request.
      */
@@ -1234,6 +1066,15 @@ public class Request
         return coyoteRequest.protocol().toString();
     }
 
+    /**
+     * Set the protocol name and version associated with this Request.
+     *
+     * @param protocol Protocol name and version
+     */
+    public void setProtocol(String protocol)
+    {
+        // Not used
+    }
 
     /**
      * Read the Reader wrapping the input stream for this Request.  The
@@ -1261,7 +1102,6 @@ public class Request
 
     }
 
-
     /**
      * Return the real path of the specified virtual path.
      *
@@ -1282,14 +1122,14 @@ public class Request
             try
             {
                 return (servletContext.getRealPath(path));
-            } catch (IllegalArgumentException e)
+            }
+            catch (IllegalArgumentException e)
             {
                 return (null);
             }
         }
 
     }
-
 
     /**
      * Return the remote IP address making this Request.
@@ -1305,6 +1145,15 @@ public class Request
         return remoteAddr;
     }
 
+    /**
+     * Set the IP address of the remote client associated with this Request.
+     *
+     * @param remoteAddr The remote IP address
+     */
+    public void setRemoteAddr(String remoteAddr)
+    {
+        this.remoteAddr = remoteAddr;
+    }
 
     /**
      * Return the remote host name making this Request.
@@ -1324,6 +1173,17 @@ public class Request
             }
         }
         return remoteHost;
+    }
+
+    /**
+     * Set the fully qualified name of the remote client associated with this
+     * Request.
+     *
+     * @param remoteHost The remote host name
+     */
+    public void setRemoteHost(String remoteHost)
+    {
+        this.remoteHost = remoteHost;
     }
 
     /**
@@ -1370,7 +1230,6 @@ public class Request
         }
         return localAddr;
     }
-
 
     /**
      * Returns the Internet Protocol (IP) port number of the interface
@@ -1436,7 +1295,6 @@ public class Request
 
     }
 
-
     /**
      * Return the scheme used to make this Request.
      */
@@ -1445,6 +1303,16 @@ public class Request
         return (coyoteRequest.scheme().toString());
     }
 
+    /**
+     * Set the name of the scheme associated with this request.  Typical values
+     * are <code>http</code>, <code>https</code>, and <code>ftp</code>.
+     *
+     * @param scheme The scheme
+     */
+    public void setScheme(String scheme)
+    {
+        // Not used
+    }
 
     /**
      * Return the server name responding to this Request.
@@ -1454,6 +1322,15 @@ public class Request
         return (coyoteRequest.serverName().toString());
     }
 
+    /**
+     * Set the name of the server (virtual host) to process this request.
+     *
+     * @param name The server name
+     */
+    public void setServerName(String name)
+    {
+        coyoteRequest.serverName().setString(name);
+    }
 
     /**
      * Return the server port responding to this Request.
@@ -1463,6 +1340,15 @@ public class Request
         return (coyoteRequest.getServerPort());
     }
 
+    /**
+     * Set the port number of the server to process this request.
+     *
+     * @param port The server port
+     */
+    public void setServerPort(int port)
+    {
+        coyoteRequest.setServerPort(port);
+    }
 
     /**
      * Was this request received on a secure connection?
@@ -1472,6 +1358,16 @@ public class Request
         return (secure);
     }
 
+    /**
+     * Set the value to be returned by <code>isSecure()</code>
+     * for this Request.
+     *
+     * @param secure The new isSecure value
+     */
+    public void setSecure(boolean secure)
+    {
+        this.secure = secure;
+    }
 
     /**
      * Remove the specified request attribute if it exists.
@@ -1523,7 +1419,8 @@ public class Request
             try
             {
                 listener.attributeRemoved(event);
-            } catch (Throwable t)
+            }
+            catch (Throwable t)
             {
                 context.getLogger().error(sm.getString("coyoteRequest.attributeEvent"), t);
                 // Error valve will pick this execption up and display it to user
@@ -1532,6 +1429,8 @@ public class Request
         }
     }
 
+
+    // ---------------------------------------------------- HttpRequest Methods
 
     /**
      * Set the specified request attribute to the specified value.
@@ -1585,7 +1484,8 @@ public class Request
             try
             {
                 canonicalPath = new File(value.toString()).getCanonicalPath();
-            } catch (IOException e)
+            }
+            catch (IOException e)
             {
                 throw new SecurityException(sm.getString(
                         "coyoteRequest.sendfileNotCanonical", value), e);
@@ -1639,7 +1539,8 @@ public class Request
                 {
                     listener.attributeAdded(event);
                 }
-            } catch (Throwable t)
+            }
+            catch (Throwable t)
             {
                 context.getLogger().error(sm.getString("coyoteRequest.attributeEvent"), t);
                 // Error valve will pick this execption up and display it to user
@@ -1647,35 +1548,6 @@ public class Request
             }
         }
     }
-
-
-    /**
-     * Overrides the name of the character encoding used in the body of
-     * this request.  This method must be called prior to reading request
-     * parameters or reading input using <code>getReader()</code>.
-     *
-     * @param enc The character encoding to be used
-     * @throws UnsupportedEncodingException if the specified encoding
-     *                                      is not supported
-     * @since Servlet 2.3
-     */
-    public void setCharacterEncoding(String enc)
-            throws UnsupportedEncodingException
-    {
-
-        if (usingReader)
-            return;
-
-        // Confirm that the encoding name is valid
-        B2CConverter.getCharset(enc);
-
-        // Save the validated encoding
-        coyoteRequest.setCharacterEncoding(enc);
-    }
-
-
-    // ---------------------------------------------------- HttpRequest Methods
-
 
     /**
      * Add a Cookie to the set of Cookies associated with this Request.
@@ -1705,7 +1577,6 @@ public class Request
 
     }
 
-
     /**
      * Add a Header to the set of Headers associated with this Request.
      *
@@ -1717,7 +1588,6 @@ public class Request
         // Not used
     }
 
-
     /**
      * Add a Locale to the set of preferred Locales for this Request.  The
      * first added Locale will be the first one returned by getLocales().
@@ -1728,7 +1598,6 @@ public class Request
     {
         locales.add(locale);
     }
-
 
     /**
      * Add a parameter name and corresponding set of values to this Request.
@@ -1743,7 +1612,6 @@ public class Request
         coyoteRequest.getParameters().addParameterValues(name, values);
     }
 
-
     /**
      * Clear the collection of Cookies associated with this Request.
      */
@@ -1753,7 +1621,6 @@ public class Request
         cookies = null;
     }
 
-
     /**
      * Clear the collection of Headers associated with this Request.
      */
@@ -1761,7 +1628,6 @@ public class Request
     {
         // Not used
     }
-
 
     /**
      * Clear the collection of Locales associated with this Request.
@@ -1771,7 +1637,6 @@ public class Request
         locales.clear();
     }
 
-
     /**
      * Clear the collection of parameters associated with this Request.
      */
@@ -1780,6 +1645,71 @@ public class Request
         // Not used
     }
 
+    /**
+     * Set a flag indicating whether or not the requested session ID for this
+     * request came in through a cookie.  This is normally called by the
+     * HTTP Connector, when it parses the request headers.
+     *
+     * @param flag The new flag
+     */
+    public void setRequestedSessionCookie(boolean flag)
+    {
+
+        this.requestedSessionCookie = flag;
+
+    }
+
+    /**
+     * Set a flag indicating whether or not the requested session ID for this
+     * request came in through a URL.  This is normally called by the
+     * HTTP Connector, when it parses the request headers.
+     *
+     * @param flag The new flag
+     */
+    public void setRequestedSessionURL(boolean flag)
+    {
+
+        this.requestedSessionURL = flag;
+
+    }
+
+    /**
+     * Get the decoded request URI.
+     *
+     * @return the URL decoded request URI
+     */
+    public String getDecodedRequestURI()
+    {
+        return (coyoteRequest.decodedURI().toString());
+    }
+
+    /**
+     * Set the decoded request URI.
+     *
+     * @param uri The decoded request URI
+     */
+    public void setDecodedRequestURI(String uri)
+    {
+        // Not used
+    }
+
+    /**
+     * Get the decoded request URI.
+     *
+     * @return the URL decoded request URI
+     */
+    public MessageBytes getDecodedRequestURIMB()
+    {
+        return (coyoteRequest.decodedURI());
+    }
+
+    /**
+     * Return the authentication type used for this Request.
+     */
+    public String getAuthType()
+    {
+        return (authType);
+    }
 
     /**
      * Set the authentication type used for this request, if any; otherwise
@@ -1793,6 +1723,14 @@ public class Request
         this.authType = type;
     }
 
+    /**
+     * Return the portion of the request URI used to select the Context
+     * of the Request.
+     */
+    public String getContextPath()
+    {
+        return (mappingData.contextPath.toString());
+    }
 
     /**
      * Set the context path for this Request.  This will normally be called
@@ -1814,201 +1752,6 @@ public class Request
 
     }
 
-
-    /**
-     * Set the HTTP request method used for this Request.
-     *
-     * @param method The request method
-     */
-    public void setMethod(String method)
-    {
-        // Not used
-    }
-
-
-    /**
-     * Set the query string for this Request.  This will normally be called
-     * by the HTTP Connector, when it parses the request headers.
-     *
-     * @param query The query string
-     */
-    public void setQueryString(String query)
-    {
-        // Not used
-    }
-
-
-    /**
-     * Set the path information for this Request.  This will normally be called
-     * when the associated Context is mapping the Request to a particular
-     * Wrapper.
-     *
-     * @param path The path information
-     */
-    public void setPathInfo(String path)
-    {
-        mappingData.pathInfo.setString(path);
-    }
-
-
-    /**
-     * Set a flag indicating whether or not the requested session ID for this
-     * request came in through a cookie.  This is normally called by the
-     * HTTP Connector, when it parses the request headers.
-     *
-     * @param flag The new flag
-     */
-    public void setRequestedSessionCookie(boolean flag)
-    {
-
-        this.requestedSessionCookie = flag;
-
-    }
-
-
-    /**
-     * Set the requested session ID for this request.  This is normally called
-     * by the HTTP Connector, when it parses the request headers.
-     *
-     * @param id The new session id
-     */
-    public void setRequestedSessionId(String id)
-    {
-
-        this.requestedSessionId = id;
-
-    }
-
-
-    /**
-     * Set a flag indicating whether or not the requested session ID for this
-     * request came in through a URL.  This is normally called by the
-     * HTTP Connector, when it parses the request headers.
-     *
-     * @param flag The new flag
-     */
-    public void setRequestedSessionURL(boolean flag)
-    {
-
-        this.requestedSessionURL = flag;
-
-    }
-
-
-    /**
-     * Set the unparsed request URI for this Request.  This will normally be
-     * called by the HTTP Connector, when it parses the request headers.
-     *
-     * @param uri The request URI
-     */
-    public void setRequestURI(String uri)
-    {
-        // Not used
-    }
-
-
-    /**
-     * Set the decoded request URI.
-     *
-     * @param uri The decoded request URI
-     */
-    public void setDecodedRequestURI(String uri)
-    {
-        // Not used
-    }
-
-
-    /**
-     * Get the decoded request URI.
-     *
-     * @return the URL decoded request URI
-     */
-    public String getDecodedRequestURI()
-    {
-        return (coyoteRequest.decodedURI().toString());
-    }
-
-
-    /**
-     * Get the decoded request URI.
-     *
-     * @return the URL decoded request URI
-     */
-    public MessageBytes getDecodedRequestURIMB()
-    {
-        return (coyoteRequest.decodedURI());
-    }
-
-
-    /**
-     * Set the servlet path for this Request.  This will normally be called
-     * when the associated Context is mapping the Request to a particular
-     * Wrapper.
-     *
-     * @param path The servlet path
-     */
-    public void setServletPath(String path)
-    {
-        if (path != null)
-            mappingData.wrapperPath.setString(path);
-    }
-
-
-    /**
-     * Set the Principal who has been authenticated for this Request.  This
-     * value is also used to calculate the value to be returned by the
-     * <code>getRemoteUser()</code> method.
-     *
-     * @param principal The user Principal
-     */
-    public void setUserPrincipal(Principal principal)
-    {
-
-        if (Globals.IS_SECURITY_ENABLED)
-        {
-            HttpSession session = getSession(false);
-            if ((subject != null) &&
-                    (!subject.getPrincipals().contains(principal)))
-            {
-                subject.getPrincipals().add(principal);
-            } else if (session != null &&
-                    session.getAttribute(Globals.SUBJECT_ATTR) == null)
-            {
-                subject = new Subject();
-                subject.getPrincipals().add(principal);
-            }
-            if (session != null)
-            {
-                session.setAttribute(Globals.SUBJECT_ATTR, subject);
-            }
-        }
-
-        this.userPrincipal = principal;
-    }
-
-
-    // --------------------------------------------- HttpServletRequest Methods
-
-
-    /**
-     * Return the authentication type used for this Request.
-     */
-    public String getAuthType()
-    {
-        return (authType);
-    }
-
-
-    /**
-     * Return the portion of the request URI used to select the Context
-     * of the Request.
-     */
-    public String getContextPath()
-    {
-        return (mappingData.contextPath.toString());
-    }
-
-
     /**
      * Get the context path.
      *
@@ -2018,7 +1761,6 @@ public class Request
     {
         return (mappingData.contextPath);
     }
-
 
     /**
      * Return the set of Cookies received with this Request.
@@ -2033,7 +1775,6 @@ public class Request
 
     }
 
-
     /**
      * Set the set of cookies recieved with this Request.
      */
@@ -2043,7 +1784,6 @@ public class Request
         this.cookies = cookies;
 
     }
-
 
     /**
      * Return the value of the specified date header, if any; otherwise
@@ -2071,6 +1811,8 @@ public class Request
     }
 
 
+    // --------------------------------------------- HttpServletRequest Methods
+
     /**
      * Return the first value of the specified header, if any; otherwise,
      * return <code>null</code>
@@ -2081,7 +1823,6 @@ public class Request
     {
         return coyoteRequest.getHeader(name);
     }
-
 
     /**
      * Return all of the values of the specified header, if any; otherwise,
@@ -2094,7 +1835,6 @@ public class Request
         return coyoteRequest.getMimeHeaders().values(name);
     }
 
-
     /**
      * Return the names of all headers received with this request.
      */
@@ -2102,7 +1842,6 @@ public class Request
     {
         return coyoteRequest.getMimeHeaders().names();
     }
-
 
     /**
      * Return the value of the specified header as an integer, or -1 if there
@@ -2126,7 +1865,6 @@ public class Request
 
     }
 
-
     /**
      * Return the HTTP request method used in this Request.
      */
@@ -2135,6 +1873,15 @@ public class Request
         return coyoteRequest.method().toString();
     }
 
+    /**
+     * Set the HTTP request method used for this Request.
+     *
+     * @param method The request method
+     */
+    public void setMethod(String method)
+    {
+        // Not used
+    }
 
     /**
      * Return the path information associated with this Request.
@@ -2144,6 +1891,17 @@ public class Request
         return (mappingData.pathInfo.toString());
     }
 
+    /**
+     * Set the path information for this Request.  This will normally be called
+     * when the associated Context is mapping the Request to a particular
+     * Wrapper.
+     *
+     * @param path The path information
+     */
+    public void setPathInfo(String path)
+    {
+        mappingData.pathInfo.setString(path);
+    }
 
     /**
      * Get the path info.
@@ -2154,7 +1912,6 @@ public class Request
     {
         return (mappingData.pathInfo);
     }
-
 
     /**
      * Return the extra path information for this request, translated
@@ -2176,7 +1933,6 @@ public class Request
 
     }
 
-
     /**
      * Return the query string associated with this request.
      */
@@ -2191,6 +1947,16 @@ public class Request
         return queryString;
     }
 
+    /**
+     * Set the query string for this Request.  This will normally be called
+     * by the HTTP Connector, when it parses the request headers.
+     *
+     * @param query The query string
+     */
+    public void setQueryString(String query)
+    {
+        // Not used
+    }
 
     /**
      * Return the name of the remote user that has been authenticated
@@ -2209,7 +1975,6 @@ public class Request
 
     }
 
-
     /**
      * Get the request path.
      *
@@ -2220,7 +1985,6 @@ public class Request
         return (mappingData.requestPath);
     }
 
-
     /**
      * Return the session identifier included in this request, if any.
      */
@@ -2229,6 +1993,18 @@ public class Request
         return (requestedSessionId);
     }
 
+    /**
+     * Set the requested session ID for this request.  This is normally called
+     * by the HTTP Connector, when it parses the request headers.
+     *
+     * @param id The new session id
+     */
+    public void setRequestedSessionId(String id)
+    {
+
+        this.requestedSessionId = id;
+
+    }
 
     /**
      * Return the request URI for this request.
@@ -2238,6 +2014,16 @@ public class Request
         return coyoteRequest.requestURI().toString();
     }
 
+    /**
+     * Set the unparsed request URI for this Request.  This will normally be
+     * called by the HTTP Connector, when it parses the request headers.
+     *
+     * @param uri The request URI
+     */
+    public void setRequestURI(String uri)
+    {
+        // Not used
+    }
 
     /**
      * Reconstructs the URL the client used to make the request.
@@ -2279,7 +2065,6 @@ public class Request
 
     }
 
-
     /**
      * Return the portion of the request URI used to select the servlet
      * that will process this request.
@@ -2289,6 +2074,18 @@ public class Request
         return (mappingData.wrapperPath.toString());
     }
 
+    /**
+     * Set the servlet path for this Request.  This will normally be called
+     * when the associated Context is mapping the Request to a particular
+     * Wrapper.
+     *
+     * @param path The servlet path
+     */
+    public void setServletPath(String path)
+    {
+        if (path != null)
+            mappingData.wrapperPath.setString(path);
+    }
 
     /**
      * Get the servlet path.
@@ -2398,7 +2195,8 @@ public class Request
         try
         {
             session = manager.findSession(requestedSessionId);
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             session = null;
         }
@@ -2468,6 +2266,37 @@ public class Request
         }
     }
 
+    /**
+     * Set the Principal who has been authenticated for this Request.  This
+     * value is also used to calculate the value to be returned by the
+     * <code>getRemoteUser()</code> method.
+     *
+     * @param principal The user Principal
+     */
+    public void setUserPrincipal(Principal principal)
+    {
+
+        if (Globals.IS_SECURITY_ENABLED)
+        {
+            HttpSession session = getSession(false);
+            if ((subject != null) &&
+                    (!subject.getPrincipals().contains(principal)))
+            {
+                subject.getPrincipals().add(principal);
+            } else if (session != null &&
+                    session.getAttribute(Globals.SUBJECT_ATTR) == null)
+            {
+                subject = new Subject();
+                subject.getPrincipals().add(principal);
+            }
+            if (session != null)
+            {
+                session.setAttribute(Globals.SUBJECT_ATTR, subject);
+            }
+        }
+
+        this.userPrincipal = principal;
+    }
 
     /**
      * Return the session associated with this Request, creating one
@@ -2477,7 +2306,6 @@ public class Request
     {
         return doGetSession(true);
     }
-
 
     /**
      * Change the ID of the session that this request is associated with. There
@@ -2526,7 +2354,6 @@ public class Request
         }
     }
 
-
     /**
      * Return the session associated with this Request, creating one
      * if necessary and requested.
@@ -2537,7 +2364,6 @@ public class Request
     {
         return doGetSession(create);
     }
-
 
     /**
      * Get the event associated with the request.
@@ -2553,7 +2379,6 @@ public class Request
         return event;
     }
 
-
     /**
      * Return true if the current request is handling Comet traffic.
      */
@@ -2561,7 +2386,6 @@ public class Request
     {
         return comet;
     }
-
 
     /**
      * Set comet state.
@@ -2592,13 +2416,12 @@ public class Request
         coyoteRequest.action(ActionCode.ACTION_COMET_CLOSE, getEvent());
     }
 
+    // ------------------------------------------------------ Protected Methods
+
     public void setCometTimeout(long timeout)
     {
         coyoteRequest.action(ActionCode.ACTION_COMET_SETTIMEOUT, new Long(timeout));
     }
-
-    // ------------------------------------------------------ Protected Methods
-
 
     protected Session doGetSession(boolean create)
     {
@@ -2624,7 +2447,8 @@ public class Request
             try
             {
                 session = manager.findSession(requestedSessionId);
-            } catch (IOException e)
+            }
+            catch (IOException e)
             {
                 session = null;
             }
@@ -2779,7 +2603,8 @@ public class Request
                 String comment = scookie.getComment().toString();
                 cookie.setComment(version == 1 ? unescape(comment) : null);
                 cookies[idx++] = cookie;
-            } catch (IllegalArgumentException e)
+            }
+            catch (IllegalArgumentException e)
             {
                 // Ignore bad cookie
             }
@@ -2883,7 +2708,8 @@ public class Request
                     {
                         return;
                     }
-                } catch (IOException e)
+                }
+                catch (IOException e)
                 {
                     // Client disconnect
                     if (context.getLogger().isDebugEnabled())
@@ -2903,7 +2729,8 @@ public class Request
                 try
                 {
                     formData = readChunkedPostBody();
-                } catch (IOException e)
+                }
+                catch (IOException e)
                 {
                     // Client disconnect or chunkedPostTooLarge error
                     if (context.getLogger().isDebugEnabled())
@@ -2920,7 +2747,8 @@ public class Request
                 }
             }
             success = true;
-        } finally
+        }
+        finally
         {
             if (!success)
             {
@@ -2929,7 +2757,6 @@ public class Request
         }
 
     }
-
 
     /**
      * Read post body in an array.
@@ -2951,7 +2778,6 @@ public class Request
         return len;
 
     }
-
 
     /**
      * Read chunked post body.
@@ -2994,7 +2820,6 @@ public class Request
         }
     }
 
-
     /**
      * Parse request locales.
      */
@@ -3012,7 +2837,6 @@ public class Request
         }
 
     }
-
 
     /**
      * Parse accept-language header value.
@@ -3072,7 +2896,8 @@ public class Request
                     {
                         quality = 0.0;
                     }
-                } catch (NumberFormatException e)
+                }
+                catch (NumberFormatException e)
                 {
                     quality = 0.0;
                 }
@@ -3143,20 +2968,6 @@ public class Request
             }
         }
 
-    }
-
-
-    protected static final boolean isAlpha(String value)
-    {
-        for (int i = 0; i < value.length(); i++)
-        {
-            char c = value.charAt(i);
-            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
-            {
-                return false;
-            }
-        }
-        return true;
     }
 
 }

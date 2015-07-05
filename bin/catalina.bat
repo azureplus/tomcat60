@@ -245,7 +245,9 @@ goto execCmd
 :doStop
 shift
 set ACTION=stop
-set CATALINA_OPTS=
+
+#set CATALINA_OPTS=
+set CATALINA_OPTS= -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000
 goto execCmd
 
 :doVersion

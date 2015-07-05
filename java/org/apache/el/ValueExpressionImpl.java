@@ -33,7 +33,7 @@ import java.io.ObjectOutput;
 
 /**
  * An <code>Expression</code> that can get or set a value.
- *
+ * <p/>
  * <p>
  * In previous incarnations of this API, expressions could only be read.
  * <code>ValueExpression</code> objects can now be used both to retrieve a
@@ -45,7 +45,7 @@ import java.io.ObjectOutput;
  * details. Expressions that cannot be used as l-values must always return
  * <code>true</code> from <code>isReadOnly()</code>.
  * </p>
- *
+ * <p/>
  * <p>
  * <code>The {@link ExpressionFactory#createValueExpression} method
  * can be used to parse an expression string and return a concrete instance
@@ -53,7 +53,7 @@ import java.io.ObjectOutput;
  * The {@link FunctionMapper} is used at parse time, not evaluation time,
  * so one is not needed to evaluate an expression using this class.
  * However, the {@link ELContext} is needed at evaluation time.</p>
- *
+ * <p/>
  * <p>The {@link #getValue}, {@link #setValue}, {@link #isReadOnly} and
  * {@link #getType} methods will evaluate the expression each time they are
  * called. The {@link ELResolver} in the <code>ELContext</code> is used to
@@ -67,20 +67,19 @@ import java.io.ObjectOutput;
  * {@link ELResolver#getType} method, depending on which was called on
  * the <code>ValueExpression</code>.
  * </p>
- *
+ * <p/>
  * <p>See the notes about comparison, serialization and immutability in
  * the {@link Expression} javadocs.
  *
+ * @author Jacob Hookom [jacob@hookom.net]
  * @see javax.el.ELResolver
  * @see javax.el.Expression
  * @see javax.el.ExpressionFactory
  * @see javax.el.ValueExpression
- *
- * @author Jacob Hookom [jacob@hookom.net]
- *
  */
 public final class ValueExpressionImpl extends ValueExpression implements
-        Externalizable {
+        Externalizable
+{
 
     private Class expectedType;
 
@@ -92,7 +91,8 @@ public final class ValueExpressionImpl extends ValueExpression implements
 
     private transient Node node;
 
-    public ValueExpressionImpl() {
+    public ValueExpressionImpl()
+    {
 
     }
 
@@ -100,7 +100,8 @@ public final class ValueExpressionImpl extends ValueExpression implements
      *
      */
     public ValueExpressionImpl(String expr, Node node, FunctionMapper fnMapper,
-            VariableMapper varMapper, Class expectedType) {
+                               VariableMapper varMapper, Class expectedType)
+    {
         this.expr = expr;
         this.node = node;
         this.fnMapper = fnMapper;
@@ -113,7 +114,8 @@ public final class ValueExpressionImpl extends ValueExpression implements
      *
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         return (obj instanceof ValueExpressionImpl && obj.hashCode() == this
                 .hashCode());
     }
@@ -123,7 +125,8 @@ public final class ValueExpressionImpl extends ValueExpression implements
      *
      * @see javax.el.ValueExpression#getExpectedType()
      */
-    public Class getExpectedType() {
+    public Class getExpectedType()
+    {
         return this.expectedType;
     }
 
@@ -132,17 +135,19 @@ public final class ValueExpressionImpl extends ValueExpression implements
      * evaluation.
      *
      * @return the <code>expectedType</code> passed to the
-     *         <code>ExpressionFactory.createValueExpression</code> method
-     *         that created this <code>ValueExpression</code>.
-     *
+     * <code>ExpressionFactory.createValueExpression</code> method
+     * that created this <code>ValueExpression</code>.
      * @see javax.el.Expression#getExpressionString()
      */
-    public String getExpressionString() {
+    public String getExpressionString()
+    {
         return this.expr;
     }
 
-    private Node getNode() throws ELException {
-        if (this.node == null) {
+    private Node getNode() throws ELException
+    {
+        if (this.node == null)
+        {
             this.node = ExpressionBuilder.createNode(this.expr);
         }
         return this.node;
@@ -154,7 +159,8 @@ public final class ValueExpressionImpl extends ValueExpression implements
      * @see javax.el.ValueExpression#getType(javax.el.ELContext)
      */
     public Class getType(ELContext context) throws PropertyNotFoundException,
-            ELException {
+            ELException
+    {
         EvaluationContext ctx = new EvaluationContext(context, this.fnMapper,
                 this.varMapper);
         return this.getNode().getType(ctx);
@@ -166,11 +172,13 @@ public final class ValueExpressionImpl extends ValueExpression implements
      * @see javax.el.ValueExpression#getValue(javax.el.ELContext)
      */
     public Object getValue(ELContext context) throws PropertyNotFoundException,
-            ELException {
+            ELException
+    {
         EvaluationContext ctx = new EvaluationContext(context, this.fnMapper,
                 this.varMapper);
         Object value = this.getNode().getValue(ctx);
-        if (this.expectedType != null) {
+        if (this.expectedType != null)
+        {
             return ELSupport.coerceToType(value, this.expectedType);
         }
         return value;
@@ -181,7 +189,8 @@ public final class ValueExpressionImpl extends ValueExpression implements
      *
      * @see java.lang.Object#hashCode()
      */
-    public int hashCode() {
+    public int hashCode()
+    {
         return this.getNode().hashCode();
     }
 
@@ -190,10 +199,14 @@ public final class ValueExpressionImpl extends ValueExpression implements
      *
      * @see javax.el.ValueExpression#isLiteralText()
      */
-    public boolean isLiteralText() {
-        try {
+    public boolean isLiteralText()
+    {
+        try
+        {
             return this.getNode() instanceof AstLiteralExpression;
-        } catch (ELException ele) {
+        }
+        catch (ELException ele)
+        {
             return false;
         }
     }
@@ -204,17 +217,20 @@ public final class ValueExpressionImpl extends ValueExpression implements
      * @see javax.el.ValueExpression#isReadOnly(javax.el.ELContext)
      */
     public boolean isReadOnly(ELContext context)
-            throws PropertyNotFoundException, ELException {
+            throws PropertyNotFoundException, ELException
+    {
         EvaluationContext ctx = new EvaluationContext(context, this.fnMapper,
                 this.varMapper);
         return this.getNode().isReadOnly(ctx);
     }
 
     public void readExternal(ObjectInput in) throws IOException,
-            ClassNotFoundException {
+            ClassNotFoundException
+    {
         this.expr = in.readUTF();
         String type = in.readUTF();
-        if (!"".equals(type)) {
+        if (!"".equals(type))
+        {
             this.expectedType = ReflectionUtil.forName(type);
         }
         this.fnMapper = (FunctionMapper) in.readObject();
@@ -229,13 +245,15 @@ public final class ValueExpressionImpl extends ValueExpression implements
      */
     public void setValue(ELContext context, Object value)
             throws PropertyNotFoundException, PropertyNotWritableException,
-            ELException {
+            ELException
+    {
         EvaluationContext ctx = new EvaluationContext(context, this.fnMapper,
                 this.varMapper);
         this.getNode().setValue(ctx, value);
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
         out.writeUTF(this.expr);
         out.writeUTF((this.expectedType != null) ? this.expectedType.getName()
                 : "");
@@ -243,7 +261,8 @@ public final class ValueExpressionImpl extends ValueExpression implements
         out.writeObject(this.varMapper);
     }
 
-    public String toString() {
-        return "ValueExpression["+this.expr+"]";
+    public String toString()
+    {
+        return "ValueExpression[" + this.expr + "]";
     }
 }

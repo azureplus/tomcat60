@@ -24,13 +24,15 @@ import java.lang.reflect.InvocationTargetException;
  * Comment
  *
  * @author <a href="mailto:bill@jboss.org">Bill Burke</a>
- *
  */
-public interface AnnotationProcessor {
+public interface AnnotationProcessor
+{
     public void postConstruct(Object instance)
-        throws IllegalAccessException, InvocationTargetException;
+            throws IllegalAccessException, InvocationTargetException;
+
     public void preDestroy(Object instance)
-        throws IllegalAccessException, InvocationTargetException;
+            throws IllegalAccessException, InvocationTargetException;
+
     public void processAnnotations(Object instance)
-        throws IllegalAccessException, InvocationTargetException, NamingException;
+            throws IllegalAccessException, InvocationTargetException, NamingException;
 }

@@ -24,26 +24,26 @@ import java.util.regex.Pattern;
  * Catalina servlet engine.  It is useful in the following types of scenarios:
  * <ul>
  * <li>You wish to use Interceptors that see every single request processed
- *     by this particular virtual host.
+ * by this particular virtual host.
  * <li>You wish to run Catalina in with a standalone HTTP connector, but still
- *     want support for multiple virtual hosts.
+ * want support for multiple virtual hosts.
  * </ul>
  * In general, you would not use a Host when deploying Catalina connected
  * to a web server (such as Apache), because the Connector will have
  * utilized the web server's facilities to determine which Context (or
  * perhaps even which Wrapper) should be utilized to process this request.
- * <p>
+ * <p/>
  * The parent Container attached to a Host is generally an Engine, but may
  * be some other implementation, or may be omitted if it is not necessary.
- * <p>
+ * <p/>
  * The child containers attached to a Host are generally implementations
  * of Context (representing an individual servlet context).
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface Host extends Container {
+public interface Host extends Container
+{
 
 
     // ----------------------------------------------------- Manifest Constants
@@ -83,8 +83,8 @@ public interface Host extends Container {
 
 
     /**
-     * Return the value of the auto deploy flag.  If true, it indicates that 
-     * this host's child webapps should be discovred and automatically 
+     * Return the value of the auto deploy flag.  If true, it indicates that
+     * this host's child webapps should be discovred and automatically
      * deployed dynamically.
      */
     public boolean getAutoDeploy();
@@ -92,7 +92,7 @@ public interface Host extends Container {
 
     /**
      * Set the auto deploy flag value for this host.
-     * 
+     *
      * @param autoDeploy The new auto deploy flag
      */
     public void setAutoDeploy(boolean autoDeploy);
@@ -104,7 +104,7 @@ public interface Host extends Container {
      */
     public String getConfigClass();
 
-    
+
     /**
      * Set the Java class name of the context configuration class
      * for new web applications.
@@ -113,10 +113,10 @@ public interface Host extends Container {
      */
     public void setConfigClass(String configClass);
 
-        
+
     /**
-     * Return the value of the deploy on startup flag.  If true, it indicates 
-     * that this host's child webapps should be discovred and automatically 
+     * Return the value of the deploy on startup flag.  If true, it indicates
+     * that this host's child webapps should be discovred and automatically
      * deployed.
      */
     public boolean getDeployOnStartup();
@@ -124,7 +124,7 @@ public interface Host extends Container {
 
     /**
      * Set the deploy on startup flag value for this host.
-     * 
+     *
      * @param deployOnStartup The new deploy on startup flag
      */
     public void setDeployOnStartup(boolean deployOnStartup);
@@ -142,8 +142,7 @@ public interface Host extends Container {
      * this Container represents.
      *
      * @param name Virtual host name
-     *
-     * @exception IllegalArgumentException if name is null
+     * @throws IllegalArgumentException if name is null
      */
     public void setName(String name);
 
@@ -158,6 +157,15 @@ public interface Host extends Container {
      */
     public boolean getXmlNamespaceAware();
 
+    /**
+     * Controls whether the parsing of the web.xml file for Contexts of this
+     * Host will be performed by a namespace aware parser. If <code>false</code>
+     * it may still be enabled per Context using
+     * {@link Context#setXmlNamespaceAware(boolean)}.
+     *
+     * @param xmlNamespaceAware true to enable namespace awareness
+     */
+    public void setXmlNamespaceAware(boolean xmlNamespaceAware);
 
     /**
      * Will the parsing of the web.xml file and *.tld files for Contexts of this
@@ -169,7 +177,6 @@ public interface Host extends Container {
      */
     public boolean getXmlValidation();
 
-
     /**
      * Controls whether the parsing of the web.xml file and *.tld files for
      * Contexts of this Host will be performed by a validating parser. If
@@ -180,18 +187,6 @@ public interface Host extends Container {
      */
     public void setXmlValidation(boolean xmlValidation);
 
-
-    /**
-     * Controls whether the parsing of the web.xml file for Contexts of this
-     * Host will be performed by a namespace aware parser. If <code>false</code>
-     * it may still be enabled per Context using
-     * {@link Context#setXmlNamespaceAware(boolean)}.
-     *
-     * @param xmlNamespaceAware true to enable namespace awareness
-     */
-    public void setXmlNamespaceAware(boolean xmlNamespaceAware);
-
-
     /**
      * Return the regular expression that defines the files and directories in
      * the host's {@link #getAppBase()} that will be ignored by the automatic
@@ -199,6 +194,12 @@ public interface Host extends Container {
      */
     public String getDeployIgnore();
 
+    /**
+     * Set the regular expression that defines the files and directories in
+     * the host's {@link #getAppBase()} that will be ignored by the automatic
+     * deployment process.
+     */
+    public void setDeployIgnore(String deployIgnore);
 
     /**
      * Return the compiled regular expression that defines the files and
@@ -208,16 +209,7 @@ public interface Host extends Container {
     public Pattern getDeployIgnorePattern();
 
 
-    /**
-     * Set the regular expression that defines the files and directories in
-     * the host's {@link #getAppBase()} that will be ignored by the automatic
-     * deployment process.
-     */
-    public void setDeployIgnore(String deployIgnore);
-
-
     // --------------------------------------------------------- Public Methods
-
 
     /**
      * Add an alias name that should be mapped to this same Host.

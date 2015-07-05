@@ -27,10 +27,10 @@ package org.apache.catalina;
  * this servlet is put into service.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface ContainerServlet {
+public interface ContainerServlet
+{
 
 
     // ------------------------------------------------------------- Properties

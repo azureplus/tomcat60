@@ -28,11 +28,11 @@ import java.util.StringTokenizer;
  * of a JAR file, or the requirement for such an optional package.  It is
  * used to support the requirements of the Servlet Specification, version
  * 2.3, related to providing shared extensions to all webapps.
- * <p>
+ * <p/>
  * In addition, static utility methods are available to scan a manifest
  * and return an array of either available or required optional modules
  * documented in that manifest.
- * <p>
+ * <p/>
  * For more information about optional packages, see the document
  * <em>Optional Package Versioning</em> in the documentation bundle for your
  * Java2 Standard Edition package, in file
@@ -41,10 +41,10 @@ import java.util.StringTokenizer;
  * @author Craig McClanahan
  * @author Justyna Horwat
  * @author Greg Murray
- *
  */
 
-public final class Extension {
+public final class Extension
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -54,118 +54,120 @@ public final class Extension {
      * The name of the optional package being made available, or required.
      */
     private String extensionName = null;
-    
-
-    public String getExtensionName() {
-        return (this.extensionName);
-    }
-
-    public void setExtensionName(String extensionName) {
-        this.extensionName = extensionName;
-    }
-
     /**
      * The URL from which the most recent version of this optional package
      * can be obtained if it is not already installed.
      */
     private String implementationURL = null;
-
-    public String getImplementationURL() {
-        return (this.implementationURL);
-    }
-
-    public void setImplementationURL(String implementationURL) {
-        this.implementationURL = implementationURL;
-    }
-
-
     /**
      * The name of the company or organization that produced this
      * implementation of this optional package.
      */
     private String implementationVendor = null;
-
-    public String getImplementationVendor() {
-        return (this.implementationVendor);
-    }
-
-    public void setImplementationVendor(String implementationVendor) {
-        this.implementationVendor = implementationVendor;
-    }
-
-
     /**
      * The unique identifier of the company that produced the optional
      * package contained in this JAR file.
      */
     private String implementationVendorId = null;
-
-    public String getImplementationVendorId() {
-        return (this.implementationVendorId);
-    }
-
-    public void setImplementationVendorId(String implementationVendorId) {
-        this.implementationVendorId = implementationVendorId;
-    }
-
-
     /**
      * The version number (dotted decimal notation) for this implementation
      * of the optional package.
      */
     private String implementationVersion = null;
-
-    public String getImplementationVersion() {
-        return (this.implementationVersion);
-    }
-
-    public void setImplementationVersion(String implementationVersion) {
-        this.implementationVersion = implementationVersion;
-    }
-
-
     /**
      * The name of the company or organization that originated the
      * specification to which this optional package conforms.
      */
     private String specificationVendor = null;
-
-    public String getSpecificationVendor() {
-        return (this.specificationVendor);
-    }
-
-    public void setSpecificationVendor(String specificationVendor) {
-        this.specificationVendor = specificationVendor;
-    }
-
-
     /**
      * The version number (dotted decimal notation) of the specification
      * to which this optional package conforms.
      */
     private String specificationVersion = null;
-
-    public String getSpecificationVersion() {
-        return (this.specificationVersion);
-    }
-
-    public void setSpecificationVersion(String specificationVersion) {
-        this.specificationVersion = specificationVersion;
-    }
-
-
     /**
      * fulfilled is true if all the required extension dependencies have been
      * satisfied
      */
     private boolean fulfilled = false;
 
-    public void setFulfilled(boolean fulfilled) {
-        this.fulfilled = fulfilled;
+    public String getExtensionName()
+    {
+        return (this.extensionName);
     }
-    
-    public boolean isFulfilled() {
+
+    public void setExtensionName(String extensionName)
+    {
+        this.extensionName = extensionName;
+    }
+
+    public String getImplementationURL()
+    {
+        return (this.implementationURL);
+    }
+
+    public void setImplementationURL(String implementationURL)
+    {
+        this.implementationURL = implementationURL;
+    }
+
+    public String getImplementationVendor()
+    {
+        return (this.implementationVendor);
+    }
+
+    public void setImplementationVendor(String implementationVendor)
+    {
+        this.implementationVendor = implementationVendor;
+    }
+
+    public String getImplementationVendorId()
+    {
+        return (this.implementationVendorId);
+    }
+
+    public void setImplementationVendorId(String implementationVendorId)
+    {
+        this.implementationVendorId = implementationVendorId;
+    }
+
+    public String getImplementationVersion()
+    {
+        return (this.implementationVersion);
+    }
+
+    public void setImplementationVersion(String implementationVersion)
+    {
+        this.implementationVersion = implementationVersion;
+    }
+
+    public String getSpecificationVendor()
+    {
+        return (this.specificationVendor);
+    }
+
+    public void setSpecificationVendor(String specificationVendor)
+    {
+        this.specificationVendor = specificationVendor;
+    }
+
+    public String getSpecificationVersion()
+    {
+        return (this.specificationVersion);
+    }
+
+    public void setSpecificationVersion(String specificationVersion)
+    {
+        this.specificationVersion = specificationVersion;
+    }
+
+    public boolean isFulfilled()
+    {
         return fulfilled;
+    }
+
+    public void setFulfilled(boolean fulfilled)
+    {
+        this.fulfilled = fulfilled;
     }
 
     // --------------------------------------------------------- Public Methods
@@ -179,7 +181,8 @@ public final class Extension {
      *
      * @param required Extension of the required optional package
      */
-    public boolean isCompatibleWith(Extension required) {
+    public boolean isCompatibleWith(Extension required)
+    {
 
         // Extension Name must match
         if (extensionName == null)
@@ -188,14 +191,16 @@ public final class Extension {
             return (false);
 
         // If specified, available specification version must be >= required
-        if (required.getSpecificationVersion() != null) {
+        if (required.getSpecificationVersion() != null)
+        {
             if (!isNewer(specificationVersion,
-                         required.getSpecificationVersion()))
+                    required.getSpecificationVersion()))
                 return (false);
         }
 
         // If specified, Implementation Vendor ID must match
-        if (required.getImplementationVendorId() != null) {
+        if (required.getImplementationVendorId() != null)
+        {
             if (implementationVendorId == null)
                 return (false);
             if (!implementationVendorId.equals(required
@@ -204,9 +209,10 @@ public final class Extension {
         }
 
         // If specified, Implementation version must be >= required
-        if (required.getImplementationVersion() != null) {
+        if (required.getImplementationVersion() != null)
+        {
             if (!isNewer(implementationVersion,
-                         required.getImplementationVersion()))
+                    required.getImplementationVersion()))
                 return (false);
         }
 
@@ -218,31 +224,38 @@ public final class Extension {
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("Extension[");
         sb.append(extensionName);
-        if (implementationURL != null) {
+        if (implementationURL != null)
+        {
             sb.append(", implementationURL=");
             sb.append(implementationURL);
         }
-        if (implementationVendor != null) {
+        if (implementationVendor != null)
+        {
             sb.append(", implementationVendor=");
             sb.append(implementationVendor);
         }
-        if (implementationVendorId != null) {
+        if (implementationVendorId != null)
+        {
             sb.append(", implementationVendorId=");
             sb.append(implementationVendorId);
         }
-        if (implementationVersion != null) {
+        if (implementationVersion != null)
+        {
             sb.append(", implementationVersion=");
             sb.append(implementationVersion);
         }
-        if (specificationVendor != null) {
+        if (specificationVendor != null)
+        {
             sb.append(", specificationVendor=");
             sb.append(specificationVendor);
         }
-        if (specificationVersion != null) {
+        if (specificationVersion != null)
+        {
             sb.append(", specificationVersion=");
             sb.append(specificationVersion);
         }
@@ -255,18 +268,17 @@ public final class Extension {
     // -------------------------------------------------------- Private Methods
 
 
-
     /**
      * Return <code>true</code> if the first version number is greater than
      * or equal to the second; otherwise return <code>false</code>.
      *
-     * @param first First version number (dotted decimal)
+     * @param first  First version number (dotted decimal)
      * @param second Second version number (dotted decimal)
-     *
-     * @exception NumberFormatException on a malformed version number
+     * @throws NumberFormatException on a malformed version number
      */
     private boolean isNewer(String first, String second)
-        throws NumberFormatException {
+            throws NumberFormatException
+    {
 
         if ((first == null) || (second == null))
             return (false);
@@ -277,7 +289,8 @@ public final class Extension {
         StringTokenizer sTok = new StringTokenizer(second, ".", true);
         int fVersion = 0;
         int sVersion = 0;
-        while (fTok.hasMoreTokens() || sTok.hasMoreTokens()) {
+        while (fTok.hasMoreTokens() || sTok.hasMoreTokens())
+        {
             if (fTok.hasMoreTokens())
                 fVersion = Integer.parseInt(fTok.nextToken());
             else

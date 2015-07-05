@@ -29,19 +29,20 @@ import java.util.Map;
  * the simple approach will normally be sufficient. However, for the other
  * headers, while simple code meets 99.9% of cases, there are often some edge
  * cases that make things far more complicated.
- *
+ * <p/>
  * The purpose of this parser is to let the parser worry about the edge cases.
  * It provides tolerant (where safe to do so) parsing of HTTP header values
  * assuming that wrapped header lines have already been unwrapped. (The Tomcat
  * header processing code does the unwrapping.)
- *
+ * <p/>
  * Provides parsing of the following HTTP header values as per RFC 2616:
  * - Authorization for DIGEST authentication
  * - MediaType (used for Content-Type header)
- *
+ * <p/>
  * Support for additional headers will be provided as required.
  */
-public class HttpParser {
+public class HttpParser
+{
 
     @SuppressWarnings("unused")  // Unused due to buggy client implementations
     private static final Integer FIELD_TYPE_TOKEN = Integer.valueOf(0);
@@ -50,14 +51,15 @@ public class HttpParser {
     private static final Integer FIELD_TYPE_LHEX = Integer.valueOf(3);
     private static final Integer FIELD_TYPE_QUOTED_TOKEN = Integer.valueOf(4);
 
-    private static final Map<String,Integer> fieldTypes =
+    private static final Map<String, Integer> fieldTypes =
             new HashMap<String, Integer>();
 
     // Arrays used by isToken(), isHex()
     private static final boolean isToken[] = new boolean[128];
     private static final boolean isHex[] = new boolean[128];
 
-    static {
+    static
+    {
         // Digest field types.
         // Note: These are more relaxed than RFC2617. This adheres to the
         //       recommendation of RFC2616 that servers are tolerant of buggy
@@ -78,22 +80,28 @@ public class HttpParser {
         fieldTypes.put("nc", FIELD_TYPE_LHEX);
 
         // Setup the flag arrays
-        for (int i = 0; i < 128; i++) {
-            if (i < 32) {
+        for (int i = 0; i < 128; i++)
+        {
+            if (i < 32)
+            {
                 isToken[i] = false;
-            } else if (i == '(' || i == ')' || i == '<' || i == '>'  || i == '@'  ||
-                       i == ',' || i == ';' || i == ':' || i == '\\' || i == '\"' ||
-                       i == '/' || i == '[' || i == ']' || i == '?'  || i == '='  ||
-                       i == '{' || i == '}' || i == ' ' || i == '\t') {
+            } else if (i == '(' || i == ')' || i == '<' || i == '>' || i == '@' ||
+                    i == ',' || i == ';' || i == ':' || i == '\\' || i == '\"' ||
+                    i == '/' || i == '[' || i == ']' || i == '?' || i == '=' ||
+                    i == '{' || i == '}' || i == ' ' || i == '\t')
+            {
                 isToken[i] = false;
-            } else {
+            } else
+            {
                 isToken[i] = true;
             }
 
             if (i >= '0' && i <= '9' || i >= 'A' && i <= 'F' ||
-                    i >= 'a' && i <= 'f') {
+                    i >= 'a' && i <= 'f')
+            {
                 isHex[i] = true;
-            } else {
+            } else
+            {
                 isHex[i] = false;
             }
         }
@@ -104,40 +112,45 @@ public class HttpParser {
      * 2617 section 3.2.2.
      *
      * @param input The header value to parse
-     *
-     * @return  A map of directives and values as {@link String}s or
-     *          <code>null</code> if a parsing error occurs. Although the
-     *          values returned are {@link String}s they will have been
-     *          validated to ensure that they conform to RFC 2617.
-     *
+     * @return A map of directives and values as {@link String}s or
+     * <code>null</code> if a parsing error occurs. Although the
+     * values returned are {@link String}s they will have been
+     * validated to ensure that they conform to RFC 2617.
      * @throws IllegalArgumentException If the header does not conform to RFC
      *                                  2617
-     * @throws IOException If an error occurs while reading the input
+     * @throws IOException              If an error occurs while reading the input
      */
-    public static Map<String,String> parseAuthorizationDigest (
-            StringReader input) throws IllegalArgumentException, IOException {
+    public static Map<String, String> parseAuthorizationDigest(
+            StringReader input) throws IllegalArgumentException, IOException
+    {
 
-        Map<String,String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<String, String>();
 
-        if (skipConstant(input, "Digest") != SkipConstantResult.FOUND) {
+        if (skipConstant(input, "Digest") != SkipConstantResult.FOUND)
+        {
             return null;
         }
         // All field names are valid tokens
         String field = readToken(input);
-        if (field == null) {
+        if (field == null)
+        {
             return null;
         }
-        while (!field.equals("")) {
-            if (skipConstant(input, "=") != SkipConstantResult.FOUND) {
+        while (!field.equals(""))
+        {
+            if (skipConstant(input, "=") != SkipConstantResult.FOUND)
+            {
                 return null;
             }
             String value = null;
             Integer type = fieldTypes.get(field.toLowerCase(Locale.ENGLISH));
-            if (type == null) {
+            if (type == null)
+            {
                 // auth-param = token "=" ( token | quoted-string )
                 type = FIELD_TYPE_TOKEN_OR_QUOTED_STRING;
             }
-            switch (type.intValue()) {
+            switch (type.intValue())
+            {
                 case 0:
                     // FIELD_TYPE_TOKEN
                     value = readToken(input);
@@ -164,16 +177,19 @@ public class HttpParser {
                             "TODO i18n: Unsupported type");
             }
 
-            if (value == null) {
+            if (value == null)
+            {
                 return null;
             }
             result.put(field, value);
 
-            if (skipConstant(input, ",") == SkipConstantResult.NOT_FOUND) {
+            if (skipConstant(input, ",") == SkipConstantResult.NOT_FOUND)
+            {
                 return null;
             }
             field = readToken(input);
-            if (field == null) {
+            if (field == null)
+            {
                 return null;
             }
         }
@@ -182,45 +198,54 @@ public class HttpParser {
     }
 
     public static MediaType parseMediaType(StringReader input)
-            throws IOException {
+            throws IOException
+    {
 
         // Type (required)
         String type = readToken(input);
-        if (type == null || type.length() == 0) {
+        if (type == null || type.length() == 0)
+        {
             return null;
         }
 
-        if (skipConstant(input, "/") == SkipConstantResult.NOT_FOUND) {
+        if (skipConstant(input, "/") == SkipConstantResult.NOT_FOUND)
+        {
             return null;
         }
 
         // Subtype (required)
         String subtype = readToken(input);
-        if (subtype == null || subtype.length() == 0) {
+        if (subtype == null || subtype.length() == 0)
+        {
             return null;
         }
 
-        LinkedHashMap<String,String> parameters =
+        LinkedHashMap<String, String> parameters =
                 new LinkedHashMap<String, String>();
 
         SkipConstantResult lookForSemiColon = skipConstant(input, ";");
-        if (lookForSemiColon == SkipConstantResult.NOT_FOUND) {
+        if (lookForSemiColon == SkipConstantResult.NOT_FOUND)
+        {
             return null;
         }
-        while (lookForSemiColon == SkipConstantResult.FOUND) {
+        while (lookForSemiColon == SkipConstantResult.FOUND)
+        {
             String attribute = readToken(input);
 
             String value = "";
-            if (skipConstant(input, "=") == SkipConstantResult.FOUND) {
+            if (skipConstant(input, "=") == SkipConstantResult.FOUND)
+            {
                 value = readTokenOrQuotedString(input, true);
             }
 
-            if (attribute != null) {
+            if (attribute != null)
+            {
                 parameters.put(attribute.toLowerCase(Locale.ENGLISH), value);
             }
 
             lookForSemiColon = skipConstant(input, ";");
-            if (lookForSemiColon == SkipConstantResult.NOT_FOUND) {
+            if (lookForSemiColon == SkipConstantResult.NOT_FOUND)
+            {
                 return null;
             }
         }
@@ -228,79 +253,102 @@ public class HttpParser {
         return new MediaType(type, subtype, parameters);
     }
 
-    public static String unquote(String input) {
-        if (input == null || input.length() < 2 || input.charAt(0) != '"') {
+    public static String unquote(String input)
+    {
+        if (input == null || input.length() < 2 || input.charAt(0) != '"')
+        {
             return input;
         }
 
         StringBuilder result = new StringBuilder();
-        for (int i = 1 ; i < (input.length() - 1); i++) {
+        for (int i = 1; i < (input.length() - 1); i++)
+        {
             char c = input.charAt(i);
-            if (input.charAt(i) == '\\') {
+            if (input.charAt(i) == '\\')
+            {
                 i++;
                 result.append(input.charAt(i));
-            } else {
+            } else
+            {
                 result.append(c);
             }
         }
         return result.toString();
     }
 
-    private static boolean isToken(int c) {
+    private static boolean isToken(int c)
+    {
         // Fast for correct values, slower for incorrect ones
-        try {
+        try
+        {
             return isToken[c];
-        } catch (ArrayIndexOutOfBoundsException ex) {
+        }
+        catch (ArrayIndexOutOfBoundsException ex)
+        {
             return false;
         }
     }
 
-    private static boolean isHex(int c) {
+    private static boolean isHex(int c)
+    {
         // Fast for correct values, slower for incorrect ones
-        try {
+        try
+        {
             return isHex[c];
-        } catch (ArrayIndexOutOfBoundsException ex) {
+        }
+        catch (ArrayIndexOutOfBoundsException ex)
+        {
             return false;
         }
     }
 
     // Skip any LWS and return the next char
     private static int skipLws(StringReader input, boolean withReset)
-            throws IOException {
+            throws IOException
+    {
 
-        if (withReset) {
+        if (withReset)
+        {
             input.mark(1);
         }
         int c = input.read();
 
-        while (c == 32 || c == 9 || c == 10 || c == 13) {
-            if (withReset) {
+        while (c == 32 || c == 9 || c == 10 || c == 13)
+        {
+            if (withReset)
+            {
                 input.mark(1);
             }
             c = input.read();
         }
 
-        if (withReset) {
+        if (withReset)
+        {
             input.reset();
         }
         return c;
     }
 
     private static SkipConstantResult skipConstant(StringReader input,
-            String constant) throws IOException {
+                                                   String constant) throws IOException
+    {
         int len = constant.length();
 
         int c = skipLws(input, false);
 
-        for (int i = 0; i < len; i++) {
-            if (i == 0 && c == -1) {
+        for (int i = 0; i < len; i++)
+        {
+            if (i == 0 && c == -1)
+            {
                 return SkipConstantResult.EOF;
             }
-            if (c != constant.charAt(i)) {
+            if (c != constant.charAt(i))
+            {
                 input.skip(-(i + 1));
                 return SkipConstantResult.NOT_FOUND;
             }
-            if (i != (len - 1)) {
+            if (i != (len - 1))
+            {
                 c = input.read();
             }
         }
@@ -308,64 +356,77 @@ public class HttpParser {
     }
 
     /**
-     * @return  the token if one was found, the empty string if no data was
-     *          available to read or <code>null</code> if data other than a
-     *          token was found
+     * @return the token if one was found, the empty string if no data was
+     * available to read or <code>null</code> if data other than a
+     * token was found
      */
-    private static String readToken(StringReader input) throws IOException {
+    private static String readToken(StringReader input) throws IOException
+    {
         StringBuilder result = new StringBuilder();
 
         int c = skipLws(input, false);
 
-        while (c != -1 && isToken(c)) {
+        while (c != -1 && isToken(c))
+        {
             result.append((char) c);
             c = input.read();
         }
         // Skip back so non-token character is available for next read
         input.skip(-1);
 
-        if (c != -1 && result.length() == 0) {
+        if (c != -1 && result.length() == 0)
+        {
             return null;
-        } else {
+        } else
+        {
             return result.toString();
         }
     }
 
     /**
      * @return the quoted string if one was found, null if data other than a
-     *         quoted string was found or null if the end of data was reached
-     *         before the quoted string was terminated
+     * quoted string was found or null if the end of data was reached
+     * before the quoted string was terminated
      */
     private static String readQuotedString(StringReader input,
-            boolean returnQuoted) throws IOException {
+                                           boolean returnQuoted) throws IOException
+    {
 
         int c = skipLws(input, false);
 
-        if (c != '"') {
+        if (c != '"')
+        {
             return null;
         }
 
         StringBuilder result = new StringBuilder();
-        if (returnQuoted) {
+        if (returnQuoted)
+        {
             result.append('\"');
         }
         c = input.read();
 
-        while (c != '"') {
-            if (c == -1) {
+        while (c != '"')
+        {
+            if (c == -1)
+            {
                 return null;
-            } else if (c == '\\') {
+            } else if (c == '\\')
+            {
                 c = input.read();
-                if (returnQuoted) {
+                if (returnQuoted)
+                {
                     result.append('\\');
                 }
                 result.append(c);
-            } else {
+            } else
+            {
                 result.append((char) c);
             }
             c = input.read();
         }
-        if (returnQuoted) {
+        if (returnQuoted)
+        {
             result.append('\"');
         }
 
@@ -373,14 +434,17 @@ public class HttpParser {
     }
 
     private static String readTokenOrQuotedString(StringReader input,
-            boolean returnQuoted) throws IOException {
+                                                  boolean returnQuoted) throws IOException
+    {
 
         // Go back so first non-LWS character is available to be read again
         int c = skipLws(input, true);
 
-        if (c == '"') {
+        if (c == '"')
+        {
             return readQuotedString(input, returnQuoted);
-        } else {
+        } else
+        {
             return readToken(input);
         }
     }
@@ -394,43 +458,53 @@ public class HttpParser {
      * should be tokens.
      *
      * @return the token if one was found, null if data other than a token or
-     *         quoted token was found or null if the end of data was reached
-     *         before a quoted token was terminated
+     * quoted token was found or null if the end of data was reached
+     * before a quoted token was terminated
      */
     private static String readQuotedToken(StringReader input)
-            throws IOException {
+            throws IOException
+    {
 
         StringBuilder result = new StringBuilder();
         boolean quoted = false;
 
         int c = skipLws(input, false);
 
-        if (c == '"') {
+        if (c == '"')
+        {
             quoted = true;
-        } else if (c == -1 || !isToken(c)) {
+        } else if (c == -1 || !isToken(c))
+        {
             return null;
-        } else {
+        } else
+        {
             result.append((char) c);
         }
         c = input.read();
 
-        while (c != -1 && isToken(c)) {
+        while (c != -1 && isToken(c))
+        {
             result.append((char) c);
             c = input.read();
         }
 
-        if (quoted) {
-            if (c != '"') {
+        if (quoted)
+        {
+            if (c != '"')
+            {
                 return null;
             }
-        } else {
+        } else
+        {
             // Skip back so non-token character is available for next read
             input.skip(-1);
         }
 
-        if (c != -1 && result.length() == 0) {
+        if (c != -1 && result.length() == 0)
+        {
             return null;
-        } else {
+        } else
+        {
             return result.toString();
         }
     }
@@ -440,60 +514,73 @@ public class HttpParser {
      * parsing method for LHEX permits optional surrounding double quotes. Some
      * buggy clients (libwww-perl for DIGEST auth) are known to send quoted LHEX
      * when the specification requires just LHEX.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * LHEX are, literally, lower-case hexadecimal digits. This implementation
      * allows for upper-case digits as well, converting the returned value to
      * lower-case.
      *
-     * @return  the sequence of LHEX (minus any surrounding quotes) if any was
-     *          found, or <code>null</code> if data other LHEX was found
+     * @return the sequence of LHEX (minus any surrounding quotes) if any was
+     * found, or <code>null</code> if data other LHEX was found
      */
     private static String readLhex(StringReader input)
-            throws IOException {
+            throws IOException
+    {
 
         StringBuilder result = new StringBuilder();
         boolean quoted = false;
 
         int c = skipLws(input, false);
 
-        if (c == '"') {
+        if (c == '"')
+        {
             quoted = true;
-        } else if (c == -1 || !isHex(c)) {
+        } else if (c == -1 || !isHex(c))
+        {
             return null;
-        } else {
-            if ('A' <= c && c <= 'F') {
+        } else
+        {
+            if ('A' <= c && c <= 'F')
+            {
                 c -= ('A' - 'a');
             }
             result.append((char) c);
         }
         c = input.read();
 
-        while (c != -1 && isHex(c)) {
-            if ('A' <= c && c <= 'F') {
+        while (c != -1 && isHex(c))
+        {
+            if ('A' <= c && c <= 'F')
+            {
                 c -= ('A' - 'a');
             }
             result.append((char) c);
             c = input.read();
         }
 
-        if (quoted) {
-            if (c != '"') {
+        if (quoted)
+        {
+            if (c != '"')
+            {
                 return null;
             }
-        } else {
+        } else
+        {
             // Skip back so non-hex character is available for next read
             input.skip(-1);
         }
 
-        if (c != -1 && result.length() == 0) {
+        if (c != -1 && result.length() == 0)
+        {
             return null;
-        } else {
+        } else
+        {
             return result.toString();
         }
     }
 
-    private static enum SkipConstantResult {
+    private static enum SkipConstantResult
+    {
         FOUND,
         NOT_FOUND,
         EOF

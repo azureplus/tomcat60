@@ -38,24 +38,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Peter Rossbach (pr@webapp.de)
  */
 
-public class JspCServletContext implements ServletContext {
+public class JspCServletContext implements ServletContext
+{
 
 
     // ----------------------------------------------------- Instance Variables
 
 
     /**
+     * Servlet context initialization parameters.
+     */
+    private final ConcurrentHashMap<String, String> myParameters;
+    /**
      * Servlet context attributes.
      */
     protected Hashtable myAttributes;
-
-
-    /**
-     * Servlet context initialization parameters.
-     */
-    private final ConcurrentHashMap<String,String> myParameters;
-
-
     /**
      * The log writer we will write log messages to.
      */
@@ -74,13 +71,14 @@ public class JspCServletContext implements ServletContext {
     /**
      * Create a new instance of this ServletContext implementation.
      *
-     * @param aLogWriter PrintWriter which is used for <code>log()</code> calls
+     * @param aLogWriter       PrintWriter which is used for <code>log()</code> calls
      * @param aResourceBaseURL Resource base URL
      */
-    public JspCServletContext(PrintWriter aLogWriter, URL aResourceBaseURL) {
+    public JspCServletContext(PrintWriter aLogWriter, URL aResourceBaseURL)
+    {
 
         myAttributes = new Hashtable();
-        myParameters = new ConcurrentHashMap<String,String>();
+        myParameters = new ConcurrentHashMap<String, String>();
         myLogWriter = aLogWriter;
         myResourceBaseURL = aResourceBaseURL;
 
@@ -95,7 +93,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param name Name of the requested attribute
      */
-    public Object getAttribute(String name) {
+    public Object getAttribute(String name)
+    {
 
         return (myAttributes.get(name));
 
@@ -105,7 +104,8 @@ public class JspCServletContext implements ServletContext {
     /**
      * Return an enumeration of context attribute names.
      */
-    public Enumeration getAttributeNames() {
+    public Enumeration getAttributeNames()
+    {
 
         return (myAttributes.keys());
 
@@ -117,7 +117,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param uripath Server-relative path starting with '/'
      */
-    public ServletContext getContext(String uripath) {
+    public ServletContext getContext(String uripath)
+    {
 
         return (null);
 
@@ -127,7 +128,8 @@ public class JspCServletContext implements ServletContext {
     /**
      * Return the context path.
      */
-    public String getContextPath() {
+    public String getContextPath()
+    {
 
         return (null);
 
@@ -139,7 +141,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param name Name of the requested parameter
      */
-    public String getInitParameter(String name) {
+    public String getInitParameter(String name)
+    {
         return myParameters.get(name);
     }
 
@@ -148,7 +151,8 @@ public class JspCServletContext implements ServletContext {
      * Return an enumeration of the names of context initialization
      * parameters.
      */
-    public Enumeration getInitParameterNames() {
+    public Enumeration getInitParameterNames()
+    {
         return myParameters.keys();
     }
 
@@ -156,7 +160,8 @@ public class JspCServletContext implements ServletContext {
     /**
      * Return the Servlet API major version number.
      */
-    public int getMajorVersion() {
+    public int getMajorVersion()
+    {
 
         return (2);
 
@@ -168,7 +173,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param file Filename whose MIME type is requested
      */
-    public String getMimeType(String file) {
+    public String getMimeType(String file)
+    {
 
         return (null);
 
@@ -178,7 +184,8 @@ public class JspCServletContext implements ServletContext {
     /**
      * Return the Servlet API minor version number.
      */
-    public int getMinorVersion() {
+    public int getMinorVersion()
+    {
 
         return (3);
 
@@ -190,7 +197,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param name Name of the requested servlet
      */
-    public RequestDispatcher getNamedDispatcher(String name) {
+    public RequestDispatcher getNamedDispatcher(String name)
+    {
 
         return (null);
 
@@ -203,16 +211,20 @@ public class JspCServletContext implements ServletContext {
      *
      * @param path The context-relative virtual path to resolve
      */
-    public String getRealPath(String path) {
+    public String getRealPath(String path)
+    {
 
         if (!myResourceBaseURL.getProtocol().equals("file"))
             return (null);
         if (!path.startsWith("/"))
             return (null);
-        try {
+        try
+        {
             return
-                (getResource(path).getFile().replace('/', File.separatorChar));
-        } catch (Throwable t) {
+                    (getResource(path).getFile().replace('/', File.separatorChar));
+        }
+        catch (Throwable t)
+        {
             return (null);
         }
 
@@ -224,7 +236,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param path Context-relative path for which to acquire a dispatcher
      */
-    public RequestDispatcher getRequestDispatcher(String path) {
+    public RequestDispatcher getRequestDispatcher(String path)
+    {
 
         return (null);
 
@@ -236,26 +249,35 @@ public class JspCServletContext implements ServletContext {
      * specified context-relative path.
      *
      * @param path Context-relative path of the desired resource
-     *
-     * @exception MalformedURLException if the resource path is
-     *  not properly formed
+     * @throws MalformedURLException if the resource path is
+     *                               not properly formed
      */
-    public URL getResource(String path) throws MalformedURLException {
+    public URL getResource(String path) throws MalformedURLException
+    {
 
         if (!path.startsWith("/"))
             throw new MalformedURLException("Path '" + path +
-                                            "' does not start with '/'");
+                    "' does not start with '/'");
         URL url = new URL(myResourceBaseURL, path.substring(1));
         InputStream is = null;
-        try {
+        try
+        {
             is = url.openStream();
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             url = null;
-        } finally {
-            if (is != null) {
-                try {
+        }
+        finally
+        {
+            if (is != null)
+            {
+                try
+                {
                     is.close();
-                } catch (Throwable t2) {
+                }
+                catch (Throwable t2)
+                {
                     // Ignore
                 }
             }
@@ -271,11 +293,15 @@ public class JspCServletContext implements ServletContext {
      *
      * @param path Context-relative path of the desired resource
      */
-    public InputStream getResourceAsStream(String path) {
+    public InputStream getResourceAsStream(String path)
+    {
 
-        try {
+        try
+        {
             return (getResource(path).openStream());
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             return (null);
         }
 
@@ -288,7 +314,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param path Context-relative base path
      */
-    public Set getResourcePaths(String path) {
+    public Set getResourcePaths(String path)
+    {
 
         Set thePaths = new HashSet();
         if (!path.endsWith("/"))
@@ -300,7 +327,8 @@ public class JspCServletContext implements ServletContext {
         if (!theBaseDir.exists() || !theBaseDir.isDirectory())
             return (thePaths);
         String theFiles[] = theBaseDir.list();
-        for (int i = 0; i < theFiles.length; i++) {
+        for (int i = 0; i < theFiles.length; i++)
+        {
             File testFile = new File(basePath + File.separator + theFiles[i]);
             if (testFile.isFile())
                 thePaths.add(path + theFiles[i]);
@@ -315,7 +343,8 @@ public class JspCServletContext implements ServletContext {
     /**
      * Return descriptive information about this server.
      */
-    public String getServerInfo() {
+    public String getServerInfo()
+    {
 
         return ("JspCServletContext/1.0");
 
@@ -326,10 +355,10 @@ public class JspCServletContext implements ServletContext {
      * Return a null reference for the specified servlet name.
      *
      * @param name Name of the requested servlet
-     *
      * @deprecated This method has been deprecated with no replacement
      */
-    public Servlet getServlet(String name) throws ServletException {
+    public Servlet getServlet(String name) throws ServletException
+    {
 
         return (null);
 
@@ -339,7 +368,8 @@ public class JspCServletContext implements ServletContext {
     /**
      * Return the name of this servlet context.
      */
-    public String getServletContextName() {
+    public String getServletContextName()
+    {
 
         return (getServerInfo());
 
@@ -351,7 +381,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @deprecated This method has been deprecated with no replacement
      */
-    public Enumeration getServletNames() {
+    public Enumeration getServletNames()
+    {
 
         return (new Vector().elements());
 
@@ -363,7 +394,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @deprecated This method has been deprecated with no replacement
      */
-    public Enumeration getServlets() {
+    public Enumeration getServlets()
+    {
 
         return (new Vector().elements());
 
@@ -375,7 +407,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param message The message to be logged
      */
-    public void log(String message) {
+    public void log(String message)
+    {
 
         myLogWriter.println(message);
 
@@ -386,11 +419,11 @@ public class JspCServletContext implements ServletContext {
      * Log the specified message and exception.
      *
      * @param exception The exception to be logged
-     * @param message The message to be logged
-     *
+     * @param message   The message to be logged
      * @deprecated Use log(String,Throwable) instead
      */
-    public void log(Exception exception, String message) {
+    public void log(Exception exception, String message)
+    {
 
         log(message, exception);
 
@@ -400,10 +433,11 @@ public class JspCServletContext implements ServletContext {
     /**
      * Log the specified message and exception.
      *
-     * @param message The message to be logged
+     * @param message   The message to be logged
      * @param exception The exception to be logged
      */
-    public void log(String message, Throwable exception) {
+    public void log(String message, Throwable exception)
+    {
 
         myLogWriter.println(message);
         exception.printStackTrace(myLogWriter);
@@ -416,7 +450,8 @@ public class JspCServletContext implements ServletContext {
      *
      * @param name Name of the attribute to remove
      */
-    public void removeAttribute(String name) {
+    public void removeAttribute(String name)
+    {
 
         myAttributes.remove(name);
 
@@ -426,17 +461,19 @@ public class JspCServletContext implements ServletContext {
     /**
      * Set or replace the specified context attribute.
      *
-     * @param name Name of the context attribute to set
+     * @param name  Name of the context attribute to set
      * @param value Corresponding attribute value
      */
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(String name, Object value)
+    {
 
         myAttributes.put(name, value);
 
     }
 
 
-    public boolean setInitParameter(String name, String value) {
+    public boolean setInitParameter(String name, String value)
+    {
         return myParameters.putIfAbsent(name, value) == null;
     }
 }

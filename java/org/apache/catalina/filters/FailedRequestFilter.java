@@ -16,45 +16,48 @@
  */
 package org.apache.catalina.filters;
 
-import java.io.IOException;
+import org.apache.catalina.CometEvent;
+import org.apache.catalina.CometFilter;
+import org.apache.catalina.CometFilterChain;
+import org.apache.catalina.Globals;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.Globals;
-import org.apache.catalina.CometEvent;
-import org.apache.catalina.CometFilter;
-import org.apache.catalina.CometFilterChain;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import java.io.IOException;
 
 /**
  * Filter that will reject requests if there was a failure during parameter
  * parsing. This filter can be used to ensure that none parameter values
  * submitted by client are lost.
- *
- * <p>
+ * <p/>
+ * <p/>
  * Note that it has side effect that it triggers parameter parsing and thus
  * consumes the body for POST requests. Parameter parsing does check content
  * type of the request, so there should not be problems with addresses that use
  * <code>request.getInputStream()</code> and <code>request.getReader()</code>,
  * if requests parsed by them do not use standard value for content mime-type.
  */
-public class FailedRequestFilter extends FilterBase implements CometFilter {
+public class FailedRequestFilter extends FilterBase implements CometFilter
+{
 
     private static final Log log = LogFactory.getLog(FailedRequestFilter.class);
 
     @Override
-    protected Log getLogger() {
+    protected Log getLogger()
+    {
         return log;
     }
 
     public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain chain) throws IOException, ServletException {
-        if (!isGoodRequest(request)) {
+                         FilterChain chain) throws IOException, ServletException
+    {
+        if (!isGoodRequest(request))
+        {
             ((HttpServletResponse) response)
                     .sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -63,9 +66,11 @@ public class FailedRequestFilter extends FilterBase implements CometFilter {
     }
 
     public void doFilterEvent(CometEvent event, CometFilterChain chain)
-            throws IOException, ServletException {
+            throws IOException, ServletException
+    {
         if (event.getEventType() == CometEvent.EventType.BEGIN
-                && !isGoodRequest(event.getHttpServletRequest())) {
+                && !isGoodRequest(event.getHttpServletRequest()))
+        {
             event.getHttpServletResponse().sendError(
                     HttpServletResponse.SC_BAD_REQUEST);
             event.close();
@@ -74,18 +79,21 @@ public class FailedRequestFilter extends FilterBase implements CometFilter {
         chain.doFilterEvent(event);
     }
 
-    private boolean isGoodRequest(ServletRequest request) {
+    private boolean isGoodRequest(ServletRequest request)
+    {
         // Trigger parsing of parameters
         request.getParameter("none");
         // Detect failure
-        if (request.getAttribute(Globals.PARAMETER_PARSE_FAILED_ATTR) != null) {
+        if (request.getAttribute(Globals.PARAMETER_PARSE_FAILED_ATTR) != null)
+        {
             return false;
         }
         return true;
     }
 
     @Override
-    protected boolean isConfigProblemFatal() {
+    protected boolean isConfigProblemFatal()
+    {
         return true;
     }
 

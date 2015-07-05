@@ -19,11 +19,10 @@
 package org.apache.tomcat.util.modeler;
 
 
-import java.util.HashSet;
-
 import javax.management.AttributeChangeNotification;
 import javax.management.Notification;
 import javax.management.NotificationFilter;
+import java.util.HashSet;
 
 
 /**
@@ -33,32 +32,13 @@ import javax.management.NotificationFilter;
  * supplied by the application.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class BaseAttributeFilter implements NotificationFilter {
+public class BaseAttributeFilter implements NotificationFilter
+{
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    /**
-     * Construct a new filter that accepts only the specified attribute
-     * name.
-     *
-     * @param name Name of the attribute to be accepted by this filter, or
-     *  <code>null</code> to accept all attribute names
-     */
-    public BaseAttributeFilter(String name) {
-
-        super();
-        if (name != null)
-            addAttribute(name);
-
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
 
 
     /**
@@ -68,17 +48,38 @@ public class BaseAttributeFilter implements NotificationFilter {
     private HashSet names = new HashSet();
 
 
-    // --------------------------------------------------------- Public Methods
+    // ----------------------------------------------------- Instance Variables
 
+
+    /**
+     * Construct a new filter that accepts only the specified attribute
+     * name.
+     *
+     * @param name Name of the attribute to be accepted by this filter, or
+     *             <code>null</code> to accept all attribute names
+     */
+    public BaseAttributeFilter(String name)
+    {
+
+        super();
+        if (name != null)
+            addAttribute(name);
+
+    }
+
+
+    // --------------------------------------------------------- Public Methods
 
     /**
      * Add a new attribute name to the set of names accepted by this filter.
      *
      * @param name Name of the attribute to be accepted
      */
-    public void addAttribute(String name) {
+    public void addAttribute(String name)
+    {
 
-        synchronized (names) {
+        synchronized (names)
+        {
             names.add(name);
         }
 
@@ -89,9 +90,11 @@ public class BaseAttributeFilter implements NotificationFilter {
      * Clear all accepted names from this filter, so that it will accept
      * all attribute names.
      */
-    public void clear() {
+    public void clear()
+    {
 
-        synchronized (names) {
+        synchronized (names)
+        {
             names.clear();
         }
 
@@ -103,9 +106,11 @@ public class BaseAttributeFilter implements NotificationFilter {
      * filter accepts all attribute names, a zero length array will be
      * returned.
      */
-    public String[] getNames() {
+    public String[] getNames()
+    {
 
-        synchronized (names) {
+        synchronized (names)
+        {
             return ((String[]) names.toArray(new String[names.size()]));
         }
 
@@ -118,21 +123,23 @@ public class BaseAttributeFilter implements NotificationFilter {
      * <ul>
      * <li>This is an attribute change notification</li>
      * <li>Either the set of accepted names is empty (implying that all
-     *     attribute names are of interest) or the set of accepted names
-     *     includes the name of the attribute in this notification</li>
+     * attribute names are of interest) or the set of accepted names
+     * includes the name of the attribute in this notification</li>
      * </ul>
      */
-    public boolean isNotificationEnabled(Notification notification) {
+    public boolean isNotificationEnabled(Notification notification)
+    {
 
         if (notification == null)
             return (false);
         if (!(notification instanceof AttributeChangeNotification))
             return (false);
         AttributeChangeNotification acn =
-            (AttributeChangeNotification) notification;
+                (AttributeChangeNotification) notification;
         if (!AttributeChangeNotification.ATTRIBUTE_CHANGE.equals(acn.getType()))
             return (false);
-        synchronized (names) {
+        synchronized (names)
+        {
             if (names.size() < 1)
                 return (true);
             else
@@ -148,9 +155,11 @@ public class BaseAttributeFilter implements NotificationFilter {
      *
      * @param name Name of the attribute to be removed
      */
-    public void removeAttribute(String name) {
+    public void removeAttribute(String name)
+    {
 
-        synchronized (names) {
+        synchronized (names)
+        {
             names.remove(name);
         }
 

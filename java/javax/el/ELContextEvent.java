@@ -22,16 +22,19 @@ import java.util.EventObject;
 /**
  *
  */
-public class ELContextEvent extends EventObject {
+public class ELContextEvent extends EventObject
+{
 
     /**
      * @param source
      */
-    public ELContextEvent(ELContext source) {
+    public ELContextEvent(ELContext source)
+    {
         super(source);
     }
-    
-    public ELContext getELContext() {
+
+    public ELContext getELContext()
+    {
         return (ELContext) this.getSource();
     }
 

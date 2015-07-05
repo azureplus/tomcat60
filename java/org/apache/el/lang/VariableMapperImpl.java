@@ -26,30 +26,36 @@ import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VariableMapperImpl extends VariableMapper implements Externalizable {
+public class VariableMapperImpl extends VariableMapper implements Externalizable
+{
 
     private static final long serialVersionUID = 1L;
 
     private Map<String, ValueExpression> vars = new HashMap<String, ValueExpression>();
 
-    public VariableMapperImpl() {
+    public VariableMapperImpl()
+    {
         super();
     }
 
-    public ValueExpression resolveVariable(String variable) {
+    public ValueExpression resolveVariable(String variable)
+    {
         return this.vars.get(variable);
     }
 
     public ValueExpression setVariable(String variable,
-            ValueExpression expression) {
+                                       ValueExpression expression)
+    {
         return this.vars.put(variable, expression);
     }
 
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
+    {
         this.vars = (Map<String, ValueExpression>) in.readObject();
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
         out.writeObject(this.vars);
     }
 }

@@ -23,20 +23,18 @@ import org.apache.catalina.tribes.group.ChannelInterceptorBase;
 import org.apache.catalina.tribes.group.InterceptorPayload;
 import org.apache.catalina.tribes.io.ChannelData;
 import org.apache.catalina.tribes.io.XByteBuffer;
+
 import java.text.DecimalFormat;
-import org.apache.catalina.tribes.membership.MemberImpl;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-
 /**
- *
- *
  * @author Filip Hanik
  * @version 1.0
  */
-public class ThroughputInterceptor extends ChannelInterceptorBase {
+public class ThroughputInterceptor extends ChannelInterceptorBase
+{
     protected static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(ThroughputInterceptor.class);
 
     double mbTx = 0;
@@ -54,22 +52,29 @@ public class ThroughputInterceptor extends ChannelInterceptorBase {
     DecimalFormat df = new DecimalFormat("#0.00");
 
 
-    public void sendMessage(Member[] destination, ChannelMessage msg, InterceptorPayload payload) throws ChannelException {
-        if ( access.addAndGet(1) == 1 ) txStart = System.currentTimeMillis();
-        long bytes = XByteBuffer.getDataPackageLength(((ChannelData)msg).getDataPackageLength());
-        try {
+    public void sendMessage(Member[] destination, ChannelMessage msg, InterceptorPayload payload) throws
+            ChannelException
+    {
+        if (access.addAndGet(1) == 1) txStart = System.currentTimeMillis();
+        long bytes = XByteBuffer.getDataPackageLength(((ChannelData) msg).getDataPackageLength());
+        try
+        {
             super.sendMessage(destination, msg, payload);
-        }catch ( ChannelException x ) {
+        }
+        catch (ChannelException x)
+        {
             msgTxErr.addAndGet(1);
             access.addAndGet(-1);
             throw x;
-        } 
-        mbTx += ((double)(bytes*destination.length))/(1024d*1024d);
-        mbAppTx += ((double)(bytes))/(1024d*1024d);
-        if ( access.addAndGet(-1) == 0 ) {
+        }
+        mbTx += ((double) (bytes * destination.length)) / (1024d * 1024d);
+        mbAppTx += ((double) (bytes)) / (1024d * 1024d);
+        if (access.addAndGet(-1) == 0)
+        {
             long stop = System.currentTimeMillis();
-            timeTx += ( (double) (stop - txStart)) / 1000d;
-            if ((msgTxCnt.get() / interval) >= lastCnt) {
+            timeTx += ((double) (stop - txStart)) / 1000d;
+            if ((msgTxCnt.get() / interval) >= lastCnt)
+            {
                 lastCnt++;
                 report(timeTx);
             }
@@ -77,17 +82,19 @@ public class ThroughputInterceptor extends ChannelInterceptorBase {
         msgTxCnt.addAndGet(1);
     }
 
-    public void messageReceived(ChannelMessage msg) {
-        if ( rxStart == 0 ) rxStart = System.currentTimeMillis();
-        long bytes = XByteBuffer.getDataPackageLength(((ChannelData)msg).getDataPackageLength());
-        mbRx += ((double)bytes)/(1024d*1024d);
+    public void messageReceived(ChannelMessage msg)
+    {
+        if (rxStart == 0) rxStart = System.currentTimeMillis();
+        long bytes = XByteBuffer.getDataPackageLength(((ChannelData) msg).getDataPackageLength());
+        mbRx += ((double) bytes) / (1024d * 1024d);
         msgRxCnt.addAndGet(1);
-        if ( msgRxCnt.get() % interval == 0 ) report(timeTx);
+        if (msgRxCnt.get() % interval == 0) report(timeTx);
         super.messageReceived(msg);
-        
+
     }
-    
-    public void report(double timeTx) {
+
+    public void report(double timeTx)
+    {
         StringBuffer buf = new StringBuffer("ThroughputInterceptor Report[\n\tTx Msg:");
         buf.append(msgTxCnt).append(" messages\n\tSent:");
         buf.append(df.format(mbTx));
@@ -96,25 +103,27 @@ public class ThroughputInterceptor extends ChannelInterceptorBase {
         buf.append(" MB (application)\n\tTime:");
         buf.append(df.format(timeTx));
         buf.append(" seconds\n\tTx Speed:");
-        buf.append(df.format(mbTx/timeTx));
+        buf.append(df.format(mbTx / timeTx));
         buf.append(" MB/sec (total)\n\tTxSpeed:");
-        buf.append(df.format(mbAppTx/timeTx));
+        buf.append(df.format(mbAppTx / timeTx));
         buf.append(" MB/sec (application)\n\tError Msg:");
         buf.append(msgTxErr).append("\n\tRx Msg:");
         buf.append(msgRxCnt);
         buf.append(" messages\n\tRx Speed:");
-        buf.append(df.format(mbRx/((double)((System.currentTimeMillis()-rxStart)/1000))));
+        buf.append(df.format(mbRx / ((double) ((System.currentTimeMillis() - rxStart) / 1000))));
         buf.append(" MB/sec (since 1st msg)\n\tReceived:");
         buf.append(df.format(mbRx)).append(" MB]\n");
-        if ( log.isInfoEnabled() ) log.info(buf);
-    }
-    
-    public void setInterval(int interval) {
-        this.interval = interval;
+        if (log.isInfoEnabled()) log.info(buf);
     }
 
-    public int getInterval() {
+    public int getInterval()
+    {
         return interval;
+    }
+
+    public void setInterval(int interval)
+    {
+        this.interval = interval;
     }
 
 }

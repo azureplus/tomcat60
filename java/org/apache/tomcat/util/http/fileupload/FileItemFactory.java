@@ -25,8 +25,6 @@ package org.apache.tomcat.util.http.fileupload;
  * by the default file upload implementation.</p>
  *
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- * 
- *
  */
 public interface FileItemFactory
 {
@@ -41,7 +39,6 @@ public interface FileItemFactory
      *                    <code>false</code> otherwise.
      * @param fileName    The name of the uploaded file, if any, as supplied
      *                    by the browser or other client.
-     *
      * @return The newly created file item.
      */
     FileItem createItem(
@@ -49,5 +46,5 @@ public interface FileItemFactory
             String contentType,
             boolean isFormField,
             String fileName
-            );
+    );
 }

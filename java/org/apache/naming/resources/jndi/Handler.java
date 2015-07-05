@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.apache.naming.resources.jndi;
 
@@ -21,19 +21,20 @@ import org.apache.naming.resources.DirContextURLStreamHandler;
 
 /**
  * Stream handler to a JNDI directory context.
- * 
- * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  *
+ * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  */
-public class Handler 
-    extends DirContextURLStreamHandler {
-    
-    
+public class Handler
+        extends DirContextURLStreamHandler
+{
+
+
     // ----------------------------------------------------------- Constructors
-    
-    
-    public Handler() {
+
+
+    public Handler()
+    {
     }
-    
-    
+
+
 }

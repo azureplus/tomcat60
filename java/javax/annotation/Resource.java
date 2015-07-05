@@ -26,15 +26,23 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Resource {
-    public enum AuthenticationType {
+public @interface Resource
+{
+    public String name() default "";
+
+    public Class type() default Object.class;
+
+    public AuthenticationType authenticationType() default AuthenticationType.CONTAINER;
+
+    public boolean shareable() default true;
+
+    public String description() default "";
+
+    public String mappedName() default "";
+
+    public enum AuthenticationType
+    {
         CONTAINER,
         APPLICATION
     }
-    public String name() default "";
-    public Class type() default Object.class;
-    public AuthenticationType authenticationType() default AuthenticationType.CONTAINER;
-    public boolean shareable() default true;
-    public String description() default "";
-    public String mappedName() default "";
 }

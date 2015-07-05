@@ -20,7 +20,8 @@ package org.apache.tomcat.util.descriptor;
  * Defines constants for well-known Public and System identifiers documented by
  * the Servlet and JSP specifications.
  */
-public final class XmlIdentifiers {
+public final class XmlIdentifiers
+{
 
     // from W3C
     public static final String XML_2001_XSD = "http://www.w3.org/2001/xml.xsd";
@@ -68,6 +69,7 @@ public final class XmlIdentifiers {
     public static final String WEBSERVICES_12_XSD =
             "http://java.sun.com/xml/ns/javaee/javaee_web_services_1_2.xsd";
 
-    private XmlIdentifiers() {
+    private XmlIdentifiers()
+    {
     }
 }

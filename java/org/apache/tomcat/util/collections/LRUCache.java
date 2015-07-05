@@ -22,27 +22,17 @@ import java.util.Hashtable;
 /**
  * This class implements a Generic LRU Cache
  *
- *
  * @author Ignacio J. Ortega
- *
  * @deprecated
  */
 
 public class LRUCache
 {
-    class CacheNode
-    {
-
-        CacheNode prev;
-        CacheNode next;
-        Object value;
-        Object key;
-
-        CacheNode()
-        {
-        }
-    }
-
+    private int cacheSize;
+    private Hashtable nodes;
+    private int currentSize;
+    private CacheNode first;
+    private CacheNode last;
 
     public LRUCache(int i)
     {
@@ -53,13 +43,12 @@ public class LRUCache
 
     public Object get(Object key)
     {
-        CacheNode node = (CacheNode)nodes.get(key);
-        if(node != null)
+        CacheNode node = (CacheNode) nodes.get(key);
+        if (node != null)
         {
             moveToHead(node);
             return node.value;
-        }
-        else
+        } else
         {
             return null;
         }
@@ -67,16 +56,15 @@ public class LRUCache
 
     public void put(Object key, Object value)
     {
-        CacheNode node = (CacheNode)nodes.get(key);
-        if(node == null)
+        CacheNode node = (CacheNode) nodes.get(key);
+        if (node == null)
         {
-            if(currentSize >= cacheSize)
+            if (currentSize >= cacheSize)
             {
-                if(last != null)
+                if (last != null)
                     nodes.remove(last.key);
                 removeLast();
-            }
-            else
+            } else
             {
                 currentSize++;
             }
@@ -88,13 +76,17 @@ public class LRUCache
         nodes.put(key, node);
     }
 
-    public Object remove(Object key) {
-        CacheNode node = (CacheNode)nodes.get(key);
-        if (node != null) {
-            if (node.prev != null) {
+    public Object remove(Object key)
+    {
+        CacheNode node = (CacheNode) nodes.get(key);
+        if (node != null)
+        {
+            if (node.prev != null)
+            {
                 node.prev.next = node.next;
             }
-            if (node.next != null) {
+            if (node.next != null)
+            {
                 node.next.prev = node.prev;
             }
             if (last == node)
@@ -113,9 +105,9 @@ public class LRUCache
 
     private void removeLast()
     {
-        if(last != null)
+        if (last != null)
         {
-            if(last.prev != null)
+            if (last.prev != null)
                 last.prev.next = null;
             else
                 first = null;
@@ -125,28 +117,35 @@ public class LRUCache
 
     private void moveToHead(CacheNode node)
     {
-        if(node == first)
+        if (node == first)
             return;
-        if(node.prev != null)
+        if (node.prev != null)
             node.prev.next = node.next;
-        if(node.next != null)
+        if (node.next != null)
             node.next.prev = node.prev;
-        if(last == node)
+        if (last == node)
             last = node.prev;
-        if(first != null)
+        if (first != null)
         {
             node.next = first;
             first.prev = node;
         }
         first = node;
         node.prev = null;
-        if(last == null)
+        if (last == null)
             last = first;
     }
 
-    private int cacheSize;
-    private Hashtable nodes;
-    private int currentSize;
-    private CacheNode first;
-    private CacheNode last;
+    class CacheNode
+    {
+
+        CacheNode prev;
+        CacheNode next;
+        Object value;
+        Object key;
+
+        CacheNode()
+        {
+        }
+    }
 }

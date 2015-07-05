@@ -18,6 +18,14 @@
 
 package org.apache.catalina.manager.host;
 
+import org.apache.catalina.Container;
+import org.apache.catalina.Host;
+import org.apache.catalina.util.RequestUtil;
+import org.apache.catalina.util.ServerInfo;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,111 +35,213 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.Host;
-import org.apache.catalina.util.RequestUtil;
-import org.apache.catalina.util.ServerInfo;
-
 /**
-* Servlet that enables remote management of the virtual hosts deployed
-* on the server.  Normally, this functionality will be protected by a security
-* constraint in the web application deployment descriptor.  However, 
-* this requirement can be relaxed during testing.
-* <p>
-* The difference between the <code>HostManagerServlet</code> and this
-* Servlet is that this Servlet prints out a HTML interface which
-* makes it easier to administrate.
-* <p>
-* However if you use a software that parses the output of
-* <code>HostManagerServlet</code> you won't be able to upgrade
-* to this Servlet since the output are not in the
-* same format as from <code>HostManagerServlet</code>
-*
-* @author Bip Thelin
-* @author Malcolm Edgar
-* @author Glenn L. Nielsen
-* @author Peter Rossbach
-*
-*/
-public final class HTMLHostManagerServlet extends HostManagerServlet {
+ * Servlet that enables remote management of the virtual hosts deployed
+ * on the server.  Normally, this functionality will be protected by a security
+ * constraint in the web application deployment descriptor.  However,
+ * this requirement can be relaxed during testing.
+ * <p/>
+ * The difference between the <code>HostManagerServlet</code> and this
+ * Servlet is that this Servlet prints out a HTML interface which
+ * makes it easier to administrate.
+ * <p/>
+ * However if you use a software that parses the output of
+ * <code>HostManagerServlet</code> you won't be able to upgrade
+ * to this Servlet since the output are not in the
+ * same format as from <code>HostManagerServlet</code>
+ *
+ * @author Bip Thelin
+ * @author Malcolm Edgar
+ * @author Glenn L. Nielsen
+ * @author Peter Rossbach
+ */
+public final class HTMLHostManagerServlet extends HostManagerServlet
+{
 
     // --------------------------------------------------------- Public Methods
+
+    private static final String HOSTS_HEADER_SECTION =
+            "<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n" +
+                    "<tr>\n" +
+                    " <td colspan=\"5\" class=\"title\">{0}</td>\n" +
+                    "</tr>\n" +
+                    "<tr>\n" +
+                    " <td class=\"header-left\"><small>{0}</small></td>\n" +
+                    " <td class=\"header-center\"><small>{1}</small></td>\n" +
+                    " <td class=\"header-center\"><small>{2}</small></td>\n" +
+                    "</tr>\n";
+    private static final String HOSTS_ROW_DETAILS_SECTION =
+            "<tr>\n" +
+                    " <td class=\"row-left\"><small><a href=\"http://{0}\">{0}</a>" +
+                    "</small></td>\n" +
+                    " <td class=\"row-center\"><small>{1}</small></td>\n";
+    private static final String MANAGER_HOST_ROW_BUTTON_SECTION =
+            " <td class=\"row-left\">\n" +
+                    "  <small>\n" +
+                    "  &nbsp;{1}&nbsp;\n" +
+                    "  &nbsp;{3}&nbsp;\n" +
+                    "  &nbsp;{5}&nbsp;\n" +
+                    "  </small>\n" +
+                    " </td>\n" +
+                    "</tr>\n";
+    private static final String HOSTS_ROW_BUTTON_SECTION =
+            " <td class=\"row-left\" NOWRAP>\n" +
+                    "  <small>\n" +
+                    "  &nbsp;<a href=\"{0}\" onclick=\"return(confirm(''{1} {6}\\n\\nAre you sure?''))\">{1}</a>&nbsp;\n" +
+                    "  &nbsp;<a href=\"{2}\" onclick=\"return(confirm(''{3} {6}\\n\\nAre you sure?''))\">{3}</a>&nbsp;\n" +
+                    "  &nbsp;<a href=\"{4}\" onclick=\"return(confirm(''{5} {6}\\n\\nAre you sure?''))\">{5}</a>&nbsp;\n" +
+                    "  </small>\n" +
+                    " </td>\n" +
+                    "</tr>\n";
+    private static final String ADD_SECTION_START =
+            "</table>\n" +
+                    "<br>\n" +
+                    "<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n" +
+                    "<tr>\n" +
+                    " <td colspan=\"2\" class=\"title\">{0}</td>\n" +
+                    "</tr>\n" +
+                    "<tr>\n" +
+                    " <td colspan=\"2\" class=\"header-left\"><small>{1}</small></td>\n" +
+                    "</tr>\n" +
+                    "<tr>\n" +
+                    " <td colspan=\"2\">\n" +
+                    "<form method=\"post\" action=\"{2}\">\n" +
+                    "<table cellspacing=\"0\" cellpadding=\"3\">\n" +
+                    "<tr>\n" +
+                    " <td class=\"row-right\">\n" +
+                    "  <small>{3}</small>\n" +
+                    " </td>\n" +
+                    " <td class=\"row-left\">\n" +
+                    "  <input type=\"text\" name=\"name\" size=\"20\">\n" +
+                    " </td>\n" +
+                    "</tr>\n" +
+                    "<tr>\n" +
+                    " <td class=\"row-right\">\n" +
+                    "  <small>{4}</small>\n" +
+                    " </td>\n" +
+                    " <td class=\"row-left\">\n" +
+                    "  <input type=\"text\" name=\"aliases\" size=\"64\">\n" +
+                    " </td>\n" +
+                    "</tr>\n" +
+                    "<tr>\n" +
+                    " <td class=\"row-right\">\n" +
+                    "  <small>{5}</small>\n" +
+                    " </td>\n" +
+                    " <td class=\"row-left\">\n" +
+                    "  <input type=\"text\" name=\"appBase\" size=\"64\">\n" +
+                    " </td>\n" +
+                    "</tr>\n";
+    private static final String ADD_SECTION_BOOLEAN =
+            "<tr>\n" +
+                    " <td class=\"row-right\">\n" +
+                    "  <small>{0}</small>\n" +
+                    " </td>\n" +
+                    " <td class=\"row-left\">\n" +
+                    "  <input type=\"checkbox\" name=\"{1}\" {2}>\n" +
+                    " </td>\n" +
+                    "</tr>\n";
+    private static final String ADD_SECTION_END =
+            "<tr>\n" +
+                    " <td class=\"row-right\">\n" +
+                    "  &nbsp;\n" +
+                    " </td>\n" +
+                    " <td class=\"row-left\">\n" +
+                    "  <input type=\"submit\" value=\"{0}\">\n" +
+                    " </td>\n" +
+                    "</tr>\n" +
+                    "</table>\n" +
+                    "</form>\n" +
+                    "</td>\n" +
+                    "</tr>\n" +
+                    "</table>\n" +
+                    "<br>\n" +
+                    "\n";
+
+
+    // ------------------------------------------------------ Private Constants
+
+    // These HTML sections are broken in relatively small sections, because of
+    // limited number of subsitutions MessageFormat can process
+    // (maximium of 10).
 
     /**
      * Process a GET request for the specified resource.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet-specified error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet-specified error occurs
      */
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Identify the request parameters that we need
         String command = request.getPathInfo();
 
         String name = request.getParameter("name");
- 
+
         // Prepare our output writer to generate the response message
         response.setContentType("text/html; charset=" + Constants.CHARSET);
 
         String message = "";
         // Process the requested command
-        if (command == null) {
-        } else if (command.equals("/add")) {
+        if (command == null)
+        {
+        } else if (command.equals("/add"))
+        {
             message = add(request, name);
-        } else if (command.equals("/remove")) {
+        } else if (command.equals("/remove"))
+        {
             message = remove(name);
-        } else if (command.equals("/list")) {
-        } else if (command.equals("/start")) {
+        } else if (command.equals("/list"))
+        {
+        } else if (command.equals("/start"))
+        {
             message = start(name);
-        } else if (command.equals("/stop")) {
+        } else if (command.equals("/stop"))
+        {
             message = stop(name);
-        } else {
+        } else
+        {
             message =
-                sm.getString("hostManagerServlet.unknownCommand", command);
+                    sm.getString("hostManagerServlet.unknownCommand", command);
         }
 
         list(request, response, message);
     }
 
-    
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
+            throws IOException, ServletException
+    {
         doGet(request, response);
     }
-    
-    
+
     /**
      * Add a host using the specified parameters.
      *
      * @param name host name
      */
-    protected String add(HttpServletRequest request,String name) {
+    protected String add(HttpServletRequest request, String name)
+    {
 
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        super.add(request,printWriter,name,true);
+        super.add(request, printWriter, name, true);
 
         return stringWriter.toString();
     }
-
 
     /**
      * Remove the specified host.
      *
      * @param name host name
      */
-    protected String remove(String name) {
+    protected String remove(String name)
+    {
 
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
@@ -141,13 +251,13 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         return stringWriter.toString();
     }
 
-    
     /**
      * Start the host with the specified name.
      *
      * @param name Host name
      */
-    protected String start(String name) {
+    protected String start(String name)
+    {
 
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
@@ -157,13 +267,13 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         return stringWriter.toString();
     }
 
-    
     /**
      * Stop the host with the specified name.
      *
      * @param name Host name
      */
-    protected String stop(String name) {
+    protected String stop(String name)
+    {
 
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
@@ -173,18 +283,18 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         return stringWriter.toString();
     }
 
-    
     /**
      * Render a HTML list of the currently active Contexts in our virtual host,
      * and memory and server status information.
      *
-     * @param request The request
+     * @param request  The request
      * @param response The response
-     * @param message a message to display
+     * @param message  a message to display
      */
     public void list(HttpServletRequest request,
                      HttpServletResponse response,
-                     String message) throws IOException {
+                     String message) throws IOException
+    {
 
         PrintWriter writer = response.getWriter();
 
@@ -196,14 +306,16 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         args[0] = request.getContextPath();
         args[1] = sm.getString("htmlHostManagerServlet.title");
         writer.print(MessageFormat.format
-                     (Constants.BODY_HEADER_SECTION, args));
+                (Constants.BODY_HEADER_SECTION, args));
 
         // Message Section
         args = new Object[3];
         args[0] = sm.getString("htmlHostManagerServlet.messageLabel");
-        if (message == null || message.length() == 0) {
+        if (message == null || message.length() == 0)
+        {
             args[1] = "OK";
-        } else {
+        } else
+        {
             args[1] = RequestUtil.filter(message);
         }
         writer.print(MessageFormat.format(Constants.MESSAGE_SECTION, args));
@@ -214,18 +326,18 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         args[1] = response.encodeURL(request.getContextPath() + "/html/list");
         args[2] = sm.getString("htmlHostManagerServlet.list");
         args[3] = response.encodeURL
-            (request.getContextPath() + "/" +
-             sm.getString("htmlHostManagerServlet.helpHtmlManagerFile"));
+                (request.getContextPath() + "/" +
+                        sm.getString("htmlHostManagerServlet.helpHtmlManagerFile"));
         args[4] = sm.getString("htmlHostManagerServlet.helpHtmlManager");
         args[5] = response.encodeURL
-            (request.getContextPath() + "/" +
-             sm.getString("htmlHostManagerServlet.helpManagerFile"));
+                (request.getContextPath() + "/" +
+                        sm.getString("htmlHostManagerServlet.helpManagerFile"));
         args[6] = sm.getString("htmlHostManagerServlet.helpManager");
         args[7] = response.encodeURL("/manager/status");
         args[8] = sm.getString("statusServlet.title");
         writer.print(MessageFormat.format(Constants.MANAGER_SECTION, args));
 
-         // Hosts Header Section
+        // Hosts Header Section
         args = new Object[3];
         args[0] = sm.getString("htmlHostManagerServlet.hostName");
         args[1] = sm.getString("htmlHostManagerServlet.hostAliases");
@@ -239,10 +351,11 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         for (int i = 0; i < children.length; i++)
             hostNames[i] = children[i].getName();
 
-        TreeMap<String,String> sortedHostNamesMap =
-            new TreeMap<String,String>();
+        TreeMap<String, String> sortedHostNamesMap =
+                new TreeMap<String, String>();
 
-        for (int i = 0; i < hostNames.length; i++) {
+        for (int i = 0; i < hostNames.length; i++)
+        {
             String displayPath = hostNames[i];
             sortedHostNamesMap.put(displayPath, hostNames[i]);
         }
@@ -251,58 +364,66 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         String hostsStop = sm.getString("htmlHostManagerServlet.hostsStop");
         String hostsRemove = sm.getString("htmlHostManagerServlet.hostsRemove");
 
-        Iterator<Map.Entry<String,String>> iterator =
-            sortedHostNamesMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String,String> entry = iterator.next();
+        Iterator<Map.Entry<String, String>> iterator =
+                sortedHostNamesMap.entrySet().iterator();
+        while (iterator.hasNext())
+        {
+            Map.Entry<String, String> entry = iterator.next();
             String hostName = (String) entry.getKey();
             Host host = (Host) engine.findChild(hostName);
 
-            if (host != null ) {
+            if (host != null)
+            {
                 args = new Object[2];
                 args[0] = RequestUtil.filter(hostName);
                 String[] aliases = host.findAliases();
                 StringBuffer buf = new StringBuffer();
-                if (aliases.length > 0) {
+                if (aliases.length > 0)
+                {
                     buf.append(aliases[0]);
-                    for (int j = 1; j < aliases.length; j++) {
+                    for (int j = 1; j < aliases.length; j++)
+                    {
                         buf.append(", ").append(aliases[j]);
                     }
                 }
 
-                if (buf.length() == 0) {
+                if (buf.length() == 0)
+                {
                     buf.append("&nbsp;");
                     args[1] = buf.toString();
-                } else {
+                } else
+                {
                     args[1] = RequestUtil.filter(buf.toString());
                 }
 
                 writer.print
-                    (MessageFormat.format(HOSTS_ROW_DETAILS_SECTION, args));
+                        (MessageFormat.format(HOSTS_ROW_DETAILS_SECTION, args));
 
                 args = new Object[7];
                 args[0] = response.encodeURL
-                    (request.getContextPath() +
-                     "/html/start?name=" +
-                     URLEncoder.encode(hostName, "UTF-8"));
+                        (request.getContextPath() +
+                                "/html/start?name=" +
+                                URLEncoder.encode(hostName, "UTF-8"));
                 args[1] = hostsStart;
                 args[2] = response.encodeURL
-                    (request.getContextPath() +
-                     "/html/stop?name=" +
-                     URLEncoder.encode(hostName, "UTF-8"));
+                        (request.getContextPath() +
+                                "/html/stop?name=" +
+                                URLEncoder.encode(hostName, "UTF-8"));
                 args[3] = hostsStop;
                 args[4] = response.encodeURL
-                    (request.getContextPath() +
-                     "/html/remove?name=" +
-                     URLEncoder.encode(hostName, "UTF-8"));
+                        (request.getContextPath() +
+                                "/html/remove?name=" +
+                                URLEncoder.encode(hostName, "UTF-8"));
                 args[5] = hostsRemove;
                 args[6] = RequestUtil.filter(hostName);
-                if (host == this.host) {
+                if (host == this.host)
+                {
                     writer.print(MessageFormat.format(
-                        MANAGER_HOST_ROW_BUTTON_SECTION, args));
-                } else {
+                            MANAGER_HOST_ROW_BUTTON_SECTION, args));
+                } else
+                {
                     writer.print(MessageFormat.format(
-                        HOSTS_ROW_BUTTON_SECTION, args));
+                            HOSTS_ROW_BUTTON_SECTION, args));
                 }
 
             }
@@ -317,7 +438,7 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         args[4] = sm.getString("htmlHostManagerServlet.addAliases");
         args[5] = sm.getString("htmlHostManagerServlet.addAppBase");
         writer.print(MessageFormat.format(ADD_SECTION_START, args));
- 
+
         args = new Object[3];
         args[0] = sm.getString("htmlHostManagerServlet.addAutoDeploy");
         args[1] = "autoDeploy";
@@ -348,7 +469,7 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         args[1] = "manager";
         args[2] = "checked";
         writer.print(MessageFormat.format(ADD_SECTION_BOOLEAN, args));
-        
+
         args = new Object[1];
         args[0] = sm.getString("htmlHostManagerServlet.addButton");
         writer.print(MessageFormat.format(ADD_SECTION_END, args));
@@ -363,7 +484,7 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         args[5] = sm.getString("htmlHostManagerServlet.serverOSVersion");
         args[6] = sm.getString("htmlHostManagerServlet.serverOSArch");
         writer.print(MessageFormat.format
-                     (Constants.SERVER_HEADER_SECTION, args));
+                (Constants.SERVER_HEADER_SECTION, args));
 
         // Server Row Section
         args = new Object[6];
@@ -382,115 +503,5 @@ public final class HTMLHostManagerServlet extends HostManagerServlet {
         writer.flush();
         writer.close();
     }
-
-    
-    // ------------------------------------------------------ Private Constants
-
-    // These HTML sections are broken in relatively small sections, because of
-    // limited number of subsitutions MessageFormat can process
-    // (maximium of 10).
-
-    private static final String HOSTS_HEADER_SECTION =
-        "<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n" +
-        "<tr>\n" +
-        " <td colspan=\"5\" class=\"title\">{0}</td>\n" +
-        "</tr>\n" +
-        "<tr>\n" +
-        " <td class=\"header-left\"><small>{0}</small></td>\n" +
-        " <td class=\"header-center\"><small>{1}</small></td>\n" +
-        " <td class=\"header-center\"><small>{2}</small></td>\n" +
-        "</tr>\n";
-
-    private static final String HOSTS_ROW_DETAILS_SECTION =
-        "<tr>\n" +
-        " <td class=\"row-left\"><small><a href=\"http://{0}\">{0}</a>" +
-        "</small></td>\n" +
-        " <td class=\"row-center\"><small>{1}</small></td>\n";
-
-    private static final String MANAGER_HOST_ROW_BUTTON_SECTION =
-        " <td class=\"row-left\">\n" +
-        "  <small>\n" +
-        "  &nbsp;{1}&nbsp;\n" +
-        "  &nbsp;{3}&nbsp;\n" +
-        "  &nbsp;{5}&nbsp;\n" +
-        "  </small>\n" +
-        " </td>\n" +
-        "</tr>\n";
-
-    private static final String HOSTS_ROW_BUTTON_SECTION =
-        " <td class=\"row-left\" NOWRAP>\n" +
-        "  <small>\n" +
-        "  &nbsp;<a href=\"{0}\" onclick=\"return(confirm(''{1} {6}\\n\\nAre you sure?''))\">{1}</a>&nbsp;\n" +
-        "  &nbsp;<a href=\"{2}\" onclick=\"return(confirm(''{3} {6}\\n\\nAre you sure?''))\">{3}</a>&nbsp;\n" +
-        "  &nbsp;<a href=\"{4}\" onclick=\"return(confirm(''{5} {6}\\n\\nAre you sure?''))\">{5}</a>&nbsp;\n" +
-        "  </small>\n" +
-        " </td>\n" +
-        "</tr>\n";
-
-    private static final String ADD_SECTION_START =
-        "</table>\n" +
-        "<br>\n" +
-        "<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">\n" +
-        "<tr>\n" +
-        " <td colspan=\"2\" class=\"title\">{0}</td>\n" +
-        "</tr>\n" +
-        "<tr>\n" +
-        " <td colspan=\"2\" class=\"header-left\"><small>{1}</small></td>\n" +
-        "</tr>\n" +
-        "<tr>\n" +
-        " <td colspan=\"2\">\n" +
-        "<form method=\"post\" action=\"{2}\">\n" +
-        "<table cellspacing=\"0\" cellpadding=\"3\">\n" +
-        "<tr>\n" +
-        " <td class=\"row-right\">\n" +
-        "  <small>{3}</small>\n" +
-        " </td>\n" +
-        " <td class=\"row-left\">\n" +
-        "  <input type=\"text\" name=\"name\" size=\"20\">\n" +
-        " </td>\n" +
-        "</tr>\n" +
-        "<tr>\n" +
-        " <td class=\"row-right\">\n" +
-        "  <small>{4}</small>\n" +
-        " </td>\n" +
-        " <td class=\"row-left\">\n" +
-        "  <input type=\"text\" name=\"aliases\" size=\"64\">\n" +
-        " </td>\n" +
-        "</tr>\n" +
-        "<tr>\n" +
-        " <td class=\"row-right\">\n" +
-        "  <small>{5}</small>\n" +
-        " </td>\n" +
-        " <td class=\"row-left\">\n" +
-        "  <input type=\"text\" name=\"appBase\" size=\"64\">\n" +
-        " </td>\n" +
-        "</tr>\n" ;
-    
-        private static final String ADD_SECTION_BOOLEAN =
-        "<tr>\n" +
-        " <td class=\"row-right\">\n" +
-        "  <small>{0}</small>\n" +
-        " </td>\n" +
-        " <td class=\"row-left\">\n" +
-        "  <input type=\"checkbox\" name=\"{1}\" {2}>\n" +
-        " </td>\n" +
-        "</tr>\n" ;
-        
-        private static final String ADD_SECTION_END =
-        "<tr>\n" +
-        " <td class=\"row-right\">\n" +
-        "  &nbsp;\n" +
-        " </td>\n" +
-        " <td class=\"row-left\">\n" +
-        "  <input type=\"submit\" value=\"{0}\">\n" +
-        " </td>\n" +
-        "</tr>\n" +
-         "</table>\n" +
-        "</form>\n" +
-        "</td>\n" +
-        "</tr>\n" +
-        "</table>\n" +
-        "<br>\n" +
-        "\n";
 
 }

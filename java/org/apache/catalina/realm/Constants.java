@@ -22,16 +22,15 @@ package org.apache.catalina.realm;
 /**
  * Manifest constants for this Java package.
  *
- *
  * @author Craig R. McClanahan
- *
  */
 
-public final class Constants {
+public final class Constants
+{
 
     public static final String Package = "org.apache.catalina.realm";
-    
-        // Authentication methods for login configuration
+
+    // Authentication methods for login configuration
     public static final String FORM_METHOD = "FORM";
 
     // Form based authentication constants

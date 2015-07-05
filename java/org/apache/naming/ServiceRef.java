@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -32,7 +32,8 @@ import java.util.Vector;
  */
 
 public class ServiceRef
-    extends Reference {
+        extends Reference
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -41,27 +42,27 @@ public class ServiceRef
     /**
      * Default factory for this reference.
      */
-    public static final String DEFAULT_FACTORY = 
-        org.apache.naming.factory.Constants.DEFAULT_SERVICE_FACTORY;
+    public static final String DEFAULT_FACTORY =
+            org.apache.naming.factory.Constants.DEFAULT_SERVICE_FACTORY;
 
 
     /**
      * Service Classname address type.
      */
-    public static final String SERVICE_INTERFACE  = "serviceInterface";
+    public static final String SERVICE_INTERFACE = "serviceInterface";
 
 
     /**
      * ServiceQname address type.
      */
-    public static final String SERVICE_NAMESPACE  = "service namespace";
+    public static final String SERVICE_NAMESPACE = "service namespace";
     public static final String SERVICE_LOCAL_PART = "service local part";
 
 
     /**
      * Wsdl Location address type.
      */
-    public static final String WSDL      = "wsdl";
+    public static final String WSDL = "wsdl";
 
 
     /**
@@ -90,35 +91,42 @@ public class ServiceRef
 
     // ----------------------------------------------------------- Constructors
 
-    public ServiceRef(String refname, String serviceInterface, String[] serviceQname, 
-                       String wsdl, String jaxrpcmapping) {
+    public ServiceRef(String refname, String serviceInterface, String[] serviceQname,
+                      String wsdl, String jaxrpcmapping)
+    {
         this(refname, serviceInterface, serviceQname, wsdl, jaxrpcmapping,
-                        null, null);
+                null, null);
     }
 
 
-    public ServiceRef(String refname, String serviceInterface, String[] serviceQname, 
-                       String wsdl, String jaxrpcmapping,
-                       String factory, String factoryLocation) {
+    public ServiceRef(String refname, String serviceInterface, String[] serviceQname,
+                      String wsdl, String jaxrpcmapping,
+                      String factory, String factoryLocation)
+    {
         super(serviceInterface, factory, factoryLocation);
         StringRefAddr refAddr = null;
-        if (serviceInterface != null) {
+        if (serviceInterface != null)
+        {
             refAddr = new StringRefAddr(SERVICE_INTERFACE, serviceInterface);
             add(refAddr);
         }
-        if (serviceQname[0] != null) {
+        if (serviceQname[0] != null)
+        {
             refAddr = new StringRefAddr(SERVICE_NAMESPACE, serviceQname[0]);
             add(refAddr);
         }
-        if (serviceQname[1] != null) {
+        if (serviceQname[1] != null)
+        {
             refAddr = new StringRefAddr(SERVICE_LOCAL_PART, serviceQname[1]);
             add(refAddr);
         }
-        if (wsdl != null) {
+        if (wsdl != null)
+        {
             refAddr = new StringRefAddr(WSDL, wsdl);
             add(refAddr);
         }
-        if (jaxrpcmapping != null) {
+        if (jaxrpcmapping != null)
+        {
             refAddr = new StringRefAddr(JAXRPCMAPPING, jaxrpcmapping);
             add(refAddr);
         }
@@ -134,34 +142,42 @@ public class ServiceRef
     /**
      * Add and Get Handlers classes.
      */
-    public HandlerRef getHandler() {
+    public HandlerRef getHandler()
+    {
         return handlers.remove(0);
     }
 
 
-    public int getHandlersSize() {
+    public int getHandlersSize()
+    {
         return handlers.size();
     }
 
 
-    public void addHandler(HandlerRef handler) {
+    public void addHandler(HandlerRef handler)
+    {
         handlers.add(handler);
     }
 
 
     /**
-     * Retrieves the class name of the factory of the object to which this 
+     * Retrieves the class name of the factory of the object to which this
      * reference refers.
      */
-    public String getFactoryClassName() {
+    public String getFactoryClassName()
+    {
         String factory = super.getFactoryClassName();
-        if (factory != null) {
+        if (factory != null)
+        {
             return factory;
-        } else {
+        } else
+        {
             factory = System.getProperty(Context.OBJECT_FACTORIES);
-            if (factory != null) {
+            if (factory != null)
+            {
                 return null;
-            } else {
+            } else
+            {
                 return DEFAULT_FACTORY;
             }
         }
@@ -174,7 +190,8 @@ public class ServiceRef
     /**
      * Return a String rendering of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ServiceRef[");
         sb.append("className=");
@@ -184,7 +201,8 @@ public class ServiceRef
         sb.append(",factoryClassName=");
         sb.append(getFactoryClassName());
         Enumeration refAddrs = getAll();
-        while (refAddrs.hasMoreElements()) {
+        while (refAddrs.hasMoreElements())
+        {
             RefAddr refAddr = (RefAddr) refAddrs.nextElement();
             sb.append(",{type=");
             sb.append(refAddr.getType());

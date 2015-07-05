@@ -39,7 +39,7 @@ import java.lang.reflect.Constructor;
 
 /**
  * The JSP engine (a.k.a Jasper).
- *
+ * <p/>
  * The servlet container is responsible for providing a
  * URLClassLoader for the web application context Jasper
  * is being used in. Jasper will try get the Tomcat
@@ -53,7 +53,8 @@ import java.lang.reflect.Constructor;
  * @author Kin-man Chung
  * @author Glenn Nielsen
  */
-public class JspServlet extends HttpServlet implements PeriodicEventListener {
+public class JspServlet extends HttpServlet implements PeriodicEventListener
+{
 
     // Logger
     private Log log = LogFactory.getLog(JspServlet.class);
@@ -67,39 +68,46 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
     /*
      * Initializes this JspServlet.
      */
-    public void init(ServletConfig config) throws ServletException {
-        
+    public void init(ServletConfig config) throws ServletException
+    {
+
         super.init(config);
         this.config = config;
         this.context = config.getServletContext();
-        
+
         // Initialize the JSP Runtime Context
         // Check for a custom Options implementation
-        String engineOptionsName = 
-            config.getInitParameter("engineOptionsClass");
-        if (engineOptionsName != null) {
+        String engineOptionsName =
+                config.getInitParameter("engineOptionsClass");
+        if (engineOptionsName != null)
+        {
             // Instantiate the indicated Options implementation
-            try {
+            try
+            {
                 ClassLoader loader = Thread.currentThread()
                         .getContextClassLoader();
                 Class engineOptionsClass = loader.loadClass(engineOptionsName);
-                Class[] ctorSig = { ServletConfig.class, ServletContext.class };
+                Class[] ctorSig = {ServletConfig.class, ServletContext.class};
                 Constructor ctor = engineOptionsClass.getConstructor(ctorSig);
-                Object[] args = { config, context };
+                Object[] args = {config, context};
                 options = (Options) ctor.newInstance(args);
-            } catch (Throwable e) {
+            }
+            catch (Throwable e)
+            {
                 // Need to localize this.
                 log.warn("Failed to load engineOptionsClass", e);
                 // Use the default Options implementation
                 options = new EmbeddedServletOptions(config, context);
             }
-        } else {
+        } else
+        {
             // Use the default Options implementation
             options = new EmbeddedServletOptions(config, context);
         }
         rctxt = new JspRuntimeContext(context, options);
-        
-        if (log.isDebugEnabled()) {
+
+        if (log.isDebugEnabled())
+        {
             log.debug(Localizer.getMessage("jsp.message.scratch.dir.is",
                     options.getScratchDir().toString()));
             log.debug(Localizer.getMessage("jsp.message.dont.modify.servlets"));
@@ -111,39 +119,39 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
      * Returns the number of JSPs for which JspServletWrappers exist, i.e.,
      * the number of JSPs that have been loaded into the webapp with which
      * this JspServlet is associated.
-     *
+     * <p/>
      * <p>This info may be used for monitoring purposes.
      *
      * @return The number of JSPs that have been loaded into the webapp with
      * which this JspServlet is associated
      */
-    public int getJspCount() {
+    public int getJspCount()
+    {
         return this.rctxt.getJspCount();
     }
 
+    /**
+     * Gets the number of JSPs that have been reloaded.
+     * <p/>
+     * <p>This info may be used for monitoring purposes.
+     *
+     * @return The number of JSPs (in the webapp with which this JspServlet is
+     * associated) that have been reloaded
+     */
+    public int getJspReloadCount()
+    {
+        return this.rctxt.getJspReloadCount();
+    }
 
     /**
      * Resets the JSP reload counter.
      *
      * @param count Value to which to reset the JSP reload counter
      */
-    public void setJspReloadCount(int count) {
+    public void setJspReloadCount(int count)
+    {
         this.rctxt.setJspReloadCount(count);
     }
-
-
-    /**
-     * Gets the number of JSPs that have been reloaded.
-     *
-     * <p>This info may be used for monitoring purposes.
-     *
-     * @return The number of JSPs (in the webapp with which this JspServlet is
-     * associated) that have been reloaded
-     */
-    public int getJspReloadCount() {
-        return this.rctxt.getJspReloadCount();
-    }
-
 
     /**
      * <p>Look for a <em>precompilation request</em> as described in
@@ -154,83 +162,98 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
      * <code>request.setCharacterEncoding()</code> first.</p>
      *
      * @param request The servlet requset we are processing
-     *
-     * @exception ServletException if an invalid parameter value for the
-     *  <code>jsp_precompile</code> parameter name is specified
+     * @throws ServletException if an invalid parameter value for the
+     *                          <code>jsp_precompile</code> parameter name is specified
      */
-    boolean preCompile(HttpServletRequest request) throws ServletException {
+    boolean preCompile(HttpServletRequest request) throws ServletException
+    {
 
         String queryString = request.getQueryString();
-        if (queryString == null) {
+        if (queryString == null)
+        {
             return (false);
         }
         int start = queryString.indexOf(Constants.PRECOMPILE);
-        if (start < 0) {
+        if (start < 0)
+        {
             return (false);
         }
         queryString =
-            queryString.substring(start + Constants.PRECOMPILE.length());
-        if (queryString.length() == 0) {
+                queryString.substring(start + Constants.PRECOMPILE.length());
+        if (queryString.length() == 0)
+        {
             return (true);             // ?jsp_precompile
         }
-        if (queryString.startsWith("&")) {
+        if (queryString.startsWith("&"))
+        {
             return (true);             // ?jsp_precompile&foo=bar...
         }
-        if (!queryString.startsWith("=")) {
+        if (!queryString.startsWith("="))
+        {
             return (false);            // part of some other name or value
         }
         int limit = queryString.length();
         int ampersand = queryString.indexOf("&");
-        if (ampersand > 0) {
+        if (ampersand > 0)
+        {
             limit = ampersand;
         }
         String value = queryString.substring(1, limit);
-        if (value.equals("true")) {
+        if (value.equals("true"))
+        {
             return (true);             // ?jsp_precompile=true
-        } else if (value.equals("false")) {
-	    // Spec says if jsp_precompile=false, the request should not
-	    // be delivered to the JSP page; the easiest way to implement
-	    // this is to set the flag to true, and precompile the page anyway.
-	    // This still conforms to the spec, since it says the
-	    // precompilation request can be ignored.
+        } else if (value.equals("false"))
+        {
+            // Spec says if jsp_precompile=false, the request should not
+            // be delivered to the JSP page; the easiest way to implement
+            // this is to set the flag to true, and precompile the page anyway.
+            // This still conforms to the spec, since it says the
+            // precompilation request can be ignored.
             return (true);             // ?jsp_precompile=false
-        } else {
+        } else
+        {
             throw new ServletException("Cannot have request parameter " +
-                                       Constants.PRECOMPILE + " set to " +
-                                       value);
+                    Constants.PRECOMPILE + " set to " +
+                    value);
         }
 
     }
-    
 
-    public void service (HttpServletRequest request, 
-    			 HttpServletResponse response)
-                throws ServletException, IOException {
+
+    public void service(HttpServletRequest request,
+                        HttpServletResponse response)
+            throws ServletException, IOException
+    {
 
         String jspUri = null;
 
         String jspFile = (String) request.getAttribute(Constants.JSP_FILE);
-        if (jspFile != null) {
+        if (jspFile != null)
+        {
             // JSP is specified via <jsp-file> in <servlet> declaration
             jspUri = jspFile;
-        } else {
+        } else
+        {
             /*
              * Check to see if the requested JSP has been the target of a
              * RequestDispatcher.include()
              */
             jspUri = (String) request.getAttribute(Constants.INC_SERVLET_PATH);
-            if (jspUri != null) {
+            if (jspUri != null)
+            {
                 /*
-		 * Requested JSP has been target of
+         * Requested JSP has been target of
                  * RequestDispatcher.include(). Its path is assembled from the
                  * relevant javax.servlet.include.* request attributes
                  */
                 String pathInfo = (String) request.getAttribute(
-                                    "javax.servlet.include.path_info");
-                if (pathInfo != null) {
+                        "javax.servlet.include.path_info");
+                if (pathInfo != null)
+                {
                     jspUri += pathInfo;
                 }
-            } else {
+            } else
+            {
                 /*
                  * Requested JSP has not been the target of a 
                  * RequestDispatcher.include(). Reconstruct its path from the
@@ -238,13 +261,15 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
                  */
                 jspUri = request.getServletPath();
                 String pathInfo = request.getPathInfo();
-                if (pathInfo != null) {
+                if (pathInfo != null)
+                {
                     jspUri += pathInfo;
                 }
             }
         }
 
-        if (log.isDebugEnabled()) {	    
+        if (log.isDebugEnabled())
+        {
             log.debug("JspEngine --> " + jspUri);
             log.debug("\t     ServletPath: " + request.getServletPath());
             log.debug("\t        PathInfo: " + request.getPathInfo());
@@ -253,23 +278,34 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
             log.debug("\t     QueryString: " + request.getQueryString());
         }
 
-        try {
+        try
+        {
             boolean precompile = preCompile(request);
             serviceJspFile(request, response, jspUri, null, precompile);
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e)
+        {
             throw e;
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             throw e;
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             throw e;
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             throw new ServletException(e);
         }
 
     }
 
-    public void destroy() {
-        if (log.isDebugEnabled()) {
+    public void destroy()
+    {
+        if (log.isDebugEnabled())
+        {
             log.debug("JspServlet.destroy()");
         }
 
@@ -277,7 +313,8 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
     }
 
 
-    public void periodicEvent() {
+    public void periodicEvent()
+    {
         rctxt.checkCompile();
     }
 
@@ -286,30 +323,38 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
     private void serviceJspFile(HttpServletRequest request,
                                 HttpServletResponse response, String jspUri,
                                 Throwable exception, boolean precompile)
-        throws ServletException, IOException {
+            throws ServletException, IOException
+    {
 
         JspServletWrapper wrapper = rctxt.getWrapper(jspUri);
-        if (wrapper == null) {
-            synchronized(this) {
+        if (wrapper == null)
+        {
+            synchronized (this)
+            {
                 wrapper = rctxt.getWrapper(jspUri);
-                if (wrapper == null) {
+                if (wrapper == null)
+                {
                     // Check if the requested JSP page exists, to avoid
                     // creating unnecessary directories and files.
-                    if (null == context.getResource(jspUri)) {
+                    if (null == context.getResource(jspUri))
+                    {
                         handleMissingResource(request, response, jspUri);
                         return;
                     }
                     boolean isErrorPage = exception != null;
                     wrapper = new JspServletWrapper(config, options, jspUri,
-                                                    isErrorPage, rctxt);
-                    rctxt.addWrapper(jspUri,wrapper);
+                            isErrorPage, rctxt);
+                    rctxt.addWrapper(jspUri, wrapper);
                 }
             }
         }
 
-        try {
+        try
+        {
             wrapper.service(request, response, precompile);
-        } catch (FileNotFoundException fnfe) {
+        }
+        catch (FileNotFoundException fnfe)
+        {
             handleMissingResource(request, response, jspUri);
         }
 
@@ -317,25 +362,31 @@ public class JspServlet extends HttpServlet implements PeriodicEventListener {
 
 
     private void handleMissingResource(HttpServletRequest request,
-            HttpServletResponse response, String jspUri)
-            throws ServletException, IOException {
+                                       HttpServletResponse response, String jspUri)
+            throws ServletException, IOException
+    {
 
         String includeRequestUri =
-            (String)request.getAttribute("javax.servlet.include.request_uri");
+                (String) request.getAttribute("javax.servlet.include.request_uri");
 
-        if (includeRequestUri != null) {
+        if (includeRequestUri != null)
+        {
             // This file was included. Throw an exception as
             // a response.sendError() will be ignored
             String msg =
-                Localizer.getMessage("jsp.error.file.not.found",jspUri);
+                    Localizer.getMessage("jsp.error.file.not.found", jspUri);
             // Strictly, filtering this is an application
             // responsibility but just in case...
             throw new ServletException(SecurityUtil.filter(msg));
-        } else {
-            try {
+        } else
+        {
+            try
+            {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND,
                         request.getRequestURI());
-            } catch (IllegalStateException ise) {
+            }
+            catch (IllegalStateException ise)
+            {
                 log.error(Localizer.getMessage("jsp.error.file.not.found",
                         jspUri));
             }

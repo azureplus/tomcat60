@@ -25,11 +25,11 @@ package org.apache.catalina.deploy;
  * in the deployment descriptor.</p>
  *
  * @author Mark Thomas
- *
  * @since Tomcat 5.5
  */
 
-public class SecurityRoleRef {
+public class SecurityRoleRef
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -39,29 +39,30 @@ public class SecurityRoleRef {
      * The (required) role name.
      */
     private String name = null;
-
-    public String getName() {
-        return (this.name);
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
     /**
      * The optional role link.
      */
     private String link = null;
 
-    public String getLink() {
+    public String getName()
+    {
+        return (this.name);
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getLink()
+    {
         return (this.link);
     }
 
-    public void setLink(String link) {
+    public void setLink(String link)
+    {
         this.link = link;
     }
-
 
 
     // --------------------------------------------------------- Public Methods
@@ -70,12 +71,14 @@ public class SecurityRoleRef {
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("SecurityRoleRef[");
         sb.append("name=");
         sb.append(name);
-        if (link != null) {
+        if (link != null)
+        {
             sb.append(", link=");
             sb.append(link);
         }

@@ -24,9 +24,9 @@ package org.apache.catalina.tribes;
  *
  * @author Bip Thelin
  * @author Filip Hanik
- *
  */
 
-public final class Constants {
+public final class Constants
+{
     public static final String Package = "org.apache.catalina.tribes";
 }

@@ -27,18 +27,19 @@ import org.apache.tools.ant.BuildException;
  * supported by the Tomcat manager application.
  *
  * @author Vivek Chopra
- *
  */
-public class ServerinfoTask extends AbstractCatalinaTask {
+public class ServerinfoTask extends AbstractCatalinaTask
+{
 
     // Public Methods
 
     /**
      * Execute the requested operation.
      *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
 
         super.execute();
         execute("/serverinfo");

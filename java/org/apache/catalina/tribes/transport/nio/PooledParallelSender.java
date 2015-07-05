@@ -16,8 +16,6 @@
  */
 package org.apache.catalina.tribes.transport.nio;
 
-import java.io.IOException;
-
 import org.apache.catalina.tribes.ChannelException;
 import org.apache.catalina.tribes.ChannelMessage;
 import org.apache.catalina.tribes.Member;
@@ -25,61 +23,81 @@ import org.apache.catalina.tribes.transport.DataSender;
 import org.apache.catalina.tribes.transport.MultiPointSender;
 import org.apache.catalina.tribes.transport.PooledSender;
 
+import java.io.IOException;
+
 /**
  * <p>Title: </p>
- *
+ * <p/>
  * <p>Description: </p>
- *
+ * <p/>
  * <p>Company: </p>
  *
  * @author not attributable
  * @version 1.0
  */
-public class PooledParallelSender extends PooledSender implements MultiPointSender {
+public class PooledParallelSender extends PooledSender implements MultiPointSender
+{
     protected boolean connected = true;
-    public PooledParallelSender() {
+
+    public PooledParallelSender()
+    {
         super();
     }
-    
-    public void sendMessage(Member[] destination, ChannelMessage message) throws ChannelException {
-        if ( !connected ) throw new ChannelException("Sender not connected.");
-        ParallelNioSender sender = (ParallelNioSender)getSender();
-        if (sender == null) {
+
+    public void sendMessage(Member[] destination, ChannelMessage message) throws ChannelException
+    {
+        if (!connected) throw new ChannelException("Sender not connected.");
+        ParallelNioSender sender = (ParallelNioSender) getSender();
+        if (sender == null)
+        {
             ChannelException cx = new ChannelException("Unable to retrieve a data sender, time out error.");
-            for (int i = 0; i < destination.length; i++) cx.addFaultyMember(destination[i], new NullPointerException("Unable to retrieve a sender from the sender pool"));
+            for (int i = 0; i < destination.length; i++)
+                cx.addFaultyMember(destination[i], new NullPointerException("Unable to retrieve a sender from the sender pool"));
             throw cx;
-        } else {
-            try {
+        } else
+        {
+            try
+            {
                 sender.sendMessage(destination, message);
                 sender.keepalive();
-            } catch (ChannelException x) {
+            }
+            catch (ChannelException x)
+            {
                 sender.disconnect();
                 throw x;
-            } finally {
+            }
+            finally
+            {
                 returnSender(sender);
                 if (!connected) disconnect();
             }
         }
     }
 
-    public DataSender getNewDataSender() {
-        try {
+    public DataSender getNewDataSender()
+    {
+        try
+        {
             ParallelNioSender sender = new ParallelNioSender();
-            sender.transferProperties(this,sender);
+            sender.transferProperties(this, sender);
             return sender;
-        } catch ( IOException x ) {
-            throw new RuntimeException("Unable to open NIO selector.",x);
+        }
+        catch (IOException x)
+        {
+            throw new RuntimeException("Unable to open NIO selector.", x);
         }
     }
-    
-    public synchronized void disconnect() {
+
+    public synchronized void disconnect()
+    {
         this.connected = false;
         super.disconnect();
     }
 
-    public synchronized void connect() throws IOException {
+    public synchronized void connect() throws IOException
+    {
         this.connected = true;
         super.connect();
     }
-   
+
 }

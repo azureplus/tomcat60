@@ -31,49 +31,58 @@ import java.util.Arrays;
 
 /**
  * Utilities for Managing Serialization and Reflection
- * 
- * @author Jacob Hookom [jacob@hookom.net]
  *
+ * @author Jacob Hookom [jacob@hookom.net]
  */
-public class ReflectionUtil {
+public class ReflectionUtil
+{
 
     protected static final String[] EMPTY_STRING = new String[0];
 
-    protected static final String[] PRIMITIVE_NAMES = new String[] { "boolean",
-            "byte", "char", "double", "float", "int", "long", "short", "void" };
+    protected static final String[] PRIMITIVE_NAMES = new String[]{"boolean",
+            "byte", "char", "double", "float", "int", "long", "short", "void"};
 
-    protected static final Class[] PRIMITIVES = new Class[] { boolean.class,
+    protected static final Class[] PRIMITIVES = new Class[]{boolean.class,
             byte.class, char.class, double.class, float.class, int.class,
-            long.class, short.class, Void.TYPE };
+            long.class, short.class, Void.TYPE};
 
     /**
-     * 
+     *
      */
-    private ReflectionUtil() {
+    private ReflectionUtil()
+    {
         super();
     }
 
-    public static Class forName(String name) throws ClassNotFoundException {
-        if (null == name || "".equals(name)) {
+    public static Class forName(String name) throws ClassNotFoundException
+    {
+        if (null == name || "".equals(name))
+        {
             return null;
         }
         Class c = forNamePrimitive(name);
-        if (c == null) {
-            if (name.endsWith("[]")) {
+        if (c == null)
+        {
+            if (name.endsWith("[]"))
+            {
                 String nc = name.substring(0, name.length() - 2);
                 c = Class.forName(nc, true, Thread.currentThread().getContextClassLoader());
                 c = Array.newInstance(c, 0).getClass();
-            } else {
+            } else
+            {
                 c = Class.forName(name, true, Thread.currentThread().getContextClassLoader());
             }
         }
         return c;
     }
 
-    protected static Class forNamePrimitive(String name) {
-        if (name.length() <= 8) {
+    protected static Class forNamePrimitive(String name)
+    {
+        if (name.length() <= 8)
+        {
             int p = Arrays.binarySearch(PRIMITIVE_NAMES, name);
-            if (p >= 0) {
+            if (p >= 0)
+            {
                 return PRIMITIVES[p];
             }
         }
@@ -83,11 +92,13 @@ public class ReflectionUtil {
     /**
      * Converts an array of Class names to Class types
      */
-    public static Class[] toTypeArray(String[] s) throws ClassNotFoundException {
+    public static Class[] toTypeArray(String[] s) throws ClassNotFoundException
+    {
         if (s == null)
             return null;
         Class[] c = new Class[s.length];
-        for (int i = 0; i < s.length; i++) {
+        for (int i = 0; i < s.length; i++)
+        {
             c[i] = forName(s[i]);
         }
         return c;
@@ -96,11 +107,13 @@ public class ReflectionUtil {
     /**
      * Converts an array of Class types to Class names
      */
-    public static String[] toTypeNameArray(Class[] c) {
+    public static String[] toTypeNameArray(Class[] c)
+    {
         if (c == null)
             return null;
         String[] s = new String[c.length];
-        for (int i = 0; i < c.length; i++) {
+        for (int i = 0; i < c.length; i++)
+        {
             s[i] = c[i].getName();
         }
         return s;
@@ -108,15 +121,18 @@ public class ReflectionUtil {
 
     /**
      * Returns a method based on the criteria
-     * @param base the object that owns the method
-     * @param property the name of the method
+     *
+     * @param base       the object that owns the method
+     * @param property   the name of the method
      * @param paramTypes the parameter types to use
      * @return the method specified
      * @throws MethodNotFoundException
      */
     public static Method getMethod(Object base, Object property,
-            Class[] paramTypes) throws MethodNotFoundException {
-        if (base == null || property == null) {
+                                   Class[] paramTypes) throws MethodNotFoundException
+    {
+        if (base == null || property == null)
+        {
             throw new MethodNotFoundException(MessageFactory.get(
                     "error.method.notfound", base, property,
                     paramString(paramTypes)));
@@ -126,9 +142,12 @@ public class ReflectionUtil {
                 : property.toString();
 
         Method method = null;
-        try {
+        try
+        {
             method = base.getClass().getMethod(methodName, paramTypes);
-        } catch (NoSuchMethodException nsme) {
+        }
+        catch (NoSuchMethodException nsme)
+        {
             throw new MethodNotFoundException(MessageFactory.get(
                     "error.method.notfound", base, property,
                     paramString(paramTypes)));
@@ -136,13 +155,17 @@ public class ReflectionUtil {
         return method;
     }
 
-    protected static final String paramString(Class[] types) {
-        if (types != null) {
+    protected static final String paramString(Class[] types)
+    {
+        if (types != null)
+        {
             StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < types.length; i++) {
+            for (int i = 0; i < types.length; i++)
+            {
                 sb.append(types[i].getName()).append(", ");
             }
-            if (sb.length() > 2) {
+            if (sb.length() > 2)
+            {
                 sb.setLength(sb.length() - 2);
             }
             return sb.toString();
@@ -152,18 +175,25 @@ public class ReflectionUtil {
 
 
     public static PropertyDescriptor getPropertyDescriptor(Object base,
-            Object property) throws ELException, PropertyNotFoundException {
+                                                           Object property) throws ELException,
+            PropertyNotFoundException
+    {
         String name = ELSupport.coerceToString(property);
         PropertyDescriptor p = null;
-        try {
+        try
+        {
             PropertyDescriptor[] desc = Introspector.getBeanInfo(
                     base.getClass()).getPropertyDescriptors();
-            for (int i = 0; i < desc.length; i++) {
-                if (desc[i].getName().equals(name)) {
+            for (int i = 0; i < desc.length; i++)
+            {
+                if (desc[i].getName().equals(name))
+                {
                     return desc[i];
                 }
             }
-        } catch (IntrospectionException ie) {
+        }
+        catch (IntrospectionException ie)
+        {
             throw new ELException(ie);
         }
         throw new PropertyNotFoundException(MessageFactory.get(

@@ -16,16 +16,15 @@
  */
 package org.apache.catalina.ant.jmx;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.tools.ant.BuildException;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
-import org.apache.tools.ant.BuildException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Create new MBean at <em>JMX</em> JSR 160 MBeans Server. 
+ * Create new MBean at <em>JMX</em> JSR 160 MBeans Server.
  * <ul>
  * <li>Create Mbeans</li>
  * <li>Create Mbeans with parameter</li>
@@ -34,7 +33,7 @@ import org.apache.tools.ant.BuildException;
  * <p>
  * Examples:
  * <br/>
- * create a new Mbean at jmx.server connection 
+ * create a new Mbean at jmx.server connection
  * <pre>
  *   &lt;jmx:create
  *           ref="jmx.server"
@@ -55,30 +54,31 @@ import org.apache.tools.ant.BuildException;
  * These tasks require Ant 1.6 or later interface.
  *
  * @author Peter Rossbach
- *
  * @since 5.5.12
  */
-public class JMXAccessorCreateTask extends JMXAccessorTask {
+public class JMXAccessorCreateTask extends JMXAccessorTask
+{
     // ----------------------------------------------------- Instance Variables
-
-    private String className;
-    private String classLoader;
-    private List args=new ArrayList();
-
-    // ----------------------------------------------------- Instance Info
 
     /**
      * Descriptive information describing this implementation.
      */
     private static final String info = "org.apache.catalina.ant.JMXAccessorCreateTask/1.0";
+    private String className;
+    private String classLoader;
+
+    // ----------------------------------------------------- Instance Info
+    private List args = new ArrayList();
 
     /**
      * Return descriptive information about this implementation and the
      * corresponding version number, in the format
      * <code>&lt;description&gt;/&lt;version&gt;</code>.
+     *
      * @return Returns the class info.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -89,119 +89,139 @@ public class JMXAccessorCreateTask extends JMXAccessorTask {
     /**
      * @return Returns the classLoader.
      */
-    public String getClassLoader() {
+    public String getClassLoader()
+    {
         return classLoader;
     }
-    
+
     /**
      * @param classLoaderName The classLoader to set.
      */
-    public void setClassLoader(String classLoaderName) {
+    public void setClassLoader(String classLoaderName)
+    {
         this.classLoader = classLoaderName;
     }
-    
+
     /**
      * @return Returns the className.
      */
-    public String getClassName() {
+    public String getClassName()
+    {
         return className;
     }
-    
+
     /**
      * @param className The className to set.
      */
-    public void setClassName(String className) {
+    public void setClassName(String className)
+    {
         this.className = className;
     }
-    
-    public void addArg(Arg arg ) {
+
+    public void addArg(Arg arg)
+    {
         args.add(arg);
     }
 
     /**
      * @return Returns the args.
      */
-    public List getArgs() {
+    public List getArgs()
+    {
         return args;
     }
+
     /**
      * @param args The args to set.
      */
-    public void setArgs(List args) {
+    public void setArgs(List args)
+    {
         this.args = args;
     }
 
     // ------------------------------------------------------ protected Methods
-    
+
     /**
      * Execute the specified command, based on the configured properties. The
      * input stream will be closed upon completion of this task, whether it was
      * executed successfully or not.
-     * 
-     * @exception Exception
-     *                if an error occurs
+     *
+     * @throws Exception if an error occurs
      */
     public String jmxExecute(MBeanServerConnection jmxServerConnection)
-        throws Exception {
+            throws Exception
+    {
 
-        if (getName() == null) {
+        if (getName() == null)
+        {
             throw new BuildException("Must specify a 'name'");
         }
-        if ((className == null)) {
+        if ((className == null))
+        {
             throw new BuildException(
                     "Must specify a 'className' for get");
         }
         return jmxCreate(jmxServerConnection, getName());
-     }
-    
+    }
+
     /**
      * create new Mbean and when set from ClassLoader Objectname
+     *
      * @param jmxServerConnection
      * @param name
      * @return The value of the given named attribute
      * @throws Exception
      */
     protected String jmxCreate(MBeanServerConnection jmxServerConnection,
-            String name) throws Exception {
+                               String name) throws Exception
+    {
         String error = null;
         Object argsA[] = null;
         String sigA[] = null;
-        if (args != null) {
-           argsA = new Object[ args.size()];
-           sigA = new String[args.size()];
-           for( int i=0; i<args.size(); i++ ) {
-               Arg arg=(Arg)args.get(i);
-               if( arg.type==null) {
-                   arg.type="java.lang.String";
-                   sigA[i]=arg.getType();
-                   argsA[i]=arg.getValue();
-               } else {
-                   sigA[i]=arg.getType();
-                   argsA[i]=convertStringToType(arg.getValue(),arg.getType());
-               }                
-           }
+        if (args != null)
+        {
+            argsA = new Object[args.size()];
+            sigA = new String[args.size()];
+            for (int i = 0; i < args.size(); i++)
+            {
+                Arg arg = (Arg) args.get(i);
+                if (arg.type == null)
+                {
+                    arg.type = "java.lang.String";
+                    sigA[i] = arg.getType();
+                    argsA[i] = arg.getValue();
+                } else
+                {
+                    sigA[i] = arg.getType();
+                    argsA[i] = convertStringToType(arg.getValue(), arg.getType());
+                }
+            }
         }
-        if (classLoader != null && !"".equals(classLoader)) {
-            if (isEcho()) {
+        if (classLoader != null && !"".equals(classLoader))
+        {
+            if (isEcho())
+            {
                 handleOutput("create MBean " + name + " from class "
                         + className + " with classLoader " + classLoader);
             }
-            if(args == null)
+            if (args == null)
                 jmxServerConnection.createMBean(className, new ObjectName(name), new ObjectName(classLoader));
             else
-                jmxServerConnection.createMBean(className, new ObjectName(name), new ObjectName(classLoader),argsA,sigA);
-                
-        } else {
-            if (isEcho()) {
+                jmxServerConnection.createMBean(className, new ObjectName(name), new ObjectName(classLoader), argsA, sigA);
+
+        } else
+        {
+            if (isEcho())
+            {
                 handleOutput("create MBean " + name + " from class "
                         + className);
             }
-            if(args == null)
+            if (args == null)
                 jmxServerConnection.createMBean(className, new ObjectName(name));
             else
-                jmxServerConnection.createMBean(className, new ObjectName(name),argsA,sigA);
+                jmxServerConnection.createMBean(className, new ObjectName(name), argsA, sigA);
         }
         return error;
     }
-    
+
 }

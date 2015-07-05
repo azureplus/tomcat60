@@ -16,40 +16,53 @@
  */
 package javax.el;
 
-class Util {
+class Util
+{
 
     /*
      * This method duplicates code in org.apache.el.util.ReflectionUtil. When
      * making changes keep the code in sync.
      */
-    static boolean isAssignableFrom(Class<?> src, Class<?> target) {
+    static boolean isAssignableFrom(Class<?> src, Class<?> target)
+    {
         // src will always be an object
         // Short-cut. null is always assignable to an object and in EL null
         // can always be coerced to a valid value for a primitive
-        if (src == null) {
+        if (src == null)
+        {
             return true;
         }
 
         Class<?> targetClass;
-        if (target.isPrimitive()) {
-            if (target == Boolean.TYPE) {
+        if (target.isPrimitive())
+        {
+            if (target == Boolean.TYPE)
+            {
                 targetClass = Boolean.class;
-            } else if (target == Character.TYPE) {
+            } else if (target == Character.TYPE)
+            {
                 targetClass = Character.class;
-            } else if (target == Byte.TYPE) {
+            } else if (target == Byte.TYPE)
+            {
                 targetClass = Byte.class;
-            } else if (target == Short.TYPE) {
+            } else if (target == Short.TYPE)
+            {
                 targetClass = Short.class;
-            } else if (target == Integer.TYPE) {
+            } else if (target == Integer.TYPE)
+            {
                 targetClass = Integer.class;
-            } else if (target == Long.TYPE) {
+            } else if (target == Long.TYPE)
+            {
                 targetClass = Long.class;
-            } else if (target == Float.TYPE) {
+            } else if (target == Float.TYPE)
+            {
                 targetClass = Float.class;
-            } else {
+            } else
+            {
                 targetClass = Double.class;
             }
-        } else {
+        } else
+        {
             targetClass = target;
         }
         return targetClass.isAssignableFrom(src);

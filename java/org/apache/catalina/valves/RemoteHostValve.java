@@ -19,10 +19,11 @@
 package org.apache.catalina.valves;
 
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
+
+import javax.servlet.ServletException;
+import java.io.IOException;
 
 
 /**
@@ -31,11 +32,11 @@ import org.apache.catalina.connector.Response;
  * server connector port number.
  *
  * @author Craig R. McClanahan
- *
  */
 
 public final class RemoteHostValve
-    extends RequestFilterValve {
+        extends RequestFilterValve
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -45,7 +46,7 @@ public final class RemoteHostValve
      * The descriptive information related to this implementation.
      */
     private static final String info =
-        "org.apache.catalina.valves.RemoteHostValve/1.0";
+            "org.apache.catalina.valves.RemoteHostValve/1.0";
 
 
     /**
@@ -62,7 +63,8 @@ public final class RemoteHostValve
     /**
      * Return descriptive information about this Valve implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -74,7 +76,8 @@ public final class RemoteHostValve
      * property compared in the filtering method. The port will be appended
      * using a ";" as a separator.
      */
-    public boolean getAddConnectorPort() {
+    public boolean getAddConnectorPort()
+    {
         return addConnectorPort;
     }
 
@@ -86,7 +89,8 @@ public final class RemoteHostValve
      *
      * @param addConnectorPort The new flag
      */
-    public void setAddConnectorPort(boolean addConnectorPort) {
+    public void setAddConnectorPort(boolean addConnectorPort)
+    {
         this.addConnectorPort = addConnectorPort;
     }
 
@@ -100,19 +104,21 @@ public final class RemoteHostValve
      * <code>process()</code> method to perform the actual filtering.
      * This method must be implemented by a concrete subclass.
      *
-     * @param request The servlet request to be processed
+     * @param request  The servlet request to be processed
      * @param response The servlet response to be created
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet error occurs
      */
     public void invoke(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         String property;
-        if (addConnectorPort) {
+        if (addConnectorPort)
+        {
             property = request.getRequest().getRemoteHost() + ";" + request.getConnector().getPort();
-        } else {
+        } else
+        {
             property = request.getRequest().getRemoteHost();
         }
         process(property, request, response);

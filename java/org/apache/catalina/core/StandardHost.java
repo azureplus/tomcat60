@@ -41,43 +41,31 @@ import java.util.regex.Pattern;
  *
  * @author Craig R. McClanahan
  * @author Remy Maucherat
- *
  */
 
 public class StandardHost
-    extends ContainerBase
-    implements Host  
- {
+        extends ContainerBase
+        implements Host
+{
     /* Why do we implement deployer and delegate to deployer ??? */
 
-    private static org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog( StandardHost.class );
-    
-    // ----------------------------------------------------------- Constructors
-
-
     /**
-     * Create a new StandardHost component with the default basic Valve.
+     * The descriptive information string for this implementation.
      */
-    public StandardHost() {
+    private static final String info =
+            "org.apache.catalina.core.StandardHost/1.0";
 
-        super();
-        pipeline.setBasic(new StandardHostValve());
-
-    }
+    // ----------------------------------------------------------- Constructors
+    private static org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(StandardHost.class);
 
 
     // ----------------------------------------------------- Instance Variables
-
-
+    private final Object aliasesLock = new Object();
     /**
      * The set of aliases for this Host.
      */
     private String[] aliases = new String[0];
-    
-    private final Object aliasesLock = new Object();
-
-
     /**
      * The application root for this Host.
      */
@@ -95,7 +83,7 @@ public class StandardHost
      * for deployed web applications.
      */
     private String configClass =
-        "org.apache.catalina.startup.ContextConfig";
+            "org.apache.catalina.startup.ContextConfig";
 
 
     /**
@@ -103,7 +91,7 @@ public class StandardHost
      * deployed web applications.
      */
     private String contextClass =
-        "org.apache.catalina.core.StandardContext";
+            "org.apache.catalina.core.StandardContext";
 
 
     /**
@@ -119,81 +107,75 @@ public class StandardHost
 
 
     /**
-     * The Java class name of the default error reporter implementation class 
+     * The Java class name of the default error reporter implementation class
      * for deployed web applications.
      */
     private String errorReportValveClass =
-        "org.apache.catalina.valves.ErrorReportValve";
+            "org.apache.catalina.valves.ErrorReportValve";
 
     /**
      * The object name for the errorReportValve.
      */
     private ObjectName errorReportValveObjectName = null;
-
-    /**
-     * The descriptive information string for this implementation.
-     */
-    private static final String info =
-        "org.apache.catalina.core.StandardHost/1.0";
-
-
     /**
      * The live deploy flag for this Host.
      */
     private boolean liveDeploy = true;
-
-
     /**
      * Unpack WARs property.
      */
     private boolean unpackWARs = true;
-
-
     /**
      * Work Directory base for applications.
      */
     private String workDir = null;
-
-
     /**
      * Attribute value used to turn on/off XML validation
      */
-     private boolean xmlValidation = false;
-
-
+    private boolean xmlValidation = false;
     /**
      * Attribute value used to turn on/off XML namespace awarenes.
      */
-     private boolean xmlNamespaceAware = false;
-
-     /**
-      * Track the class loaders for the child web applications so memory leaks
-      * can be detected.
-      */
-     private Map<ClassLoader, String> childClassLoaders =
-         new WeakHashMap<ClassLoader, String>();
-
-     /**
-      * Any file or directory in {@link #appBase} that this pattern matches will
-      * be ignored by the automatic deployment process (both
-      * {@link #deployOnStartup} and {@link #autoDeploy}).
-      */
-     private Pattern deployIgnore = null;
+    private boolean xmlNamespaceAware = false;
+    /**
+     * Track the class loaders for the child web applications so memory leaks
+     * can be detected.
+     */
+    private Map<ClassLoader, String> childClassLoaders =
+            new WeakHashMap<ClassLoader, String>();
+    /**
+     * Any file or directory in {@link #appBase} that this pattern matches will
+     * be ignored by the automatic deployment process (both
+     * {@link #deployOnStartup} and {@link #autoDeploy}).
+     */
+    private Pattern deployIgnore = null;
+    private boolean initialized = false;
 
 
     // ------------------------------------------------------------- Properties
 
 
     /**
+     * Create a new StandardHost component with the default basic Valve.
+     */
+    public StandardHost()
+    {
+
+        super();
+        pipeline.setBasic(new StandardHostValve());
+
+    }
+
+    /**
      * Return the application root for this Host.  This can be an absolute
      * pathname, a relative pathname, or a URL.
      */
-    public String getAppBase() {
+    public String getAppBase()
+    {
 
         return (this.appBase);
 
     }
-
 
     /**
      * Set the application root for this Host.  This can be an absolute
@@ -201,7 +183,8 @@ public class StandardHost
      *
      * @param appBase The new application root
      */
-    public void setAppBase(String appBase) {
+    public void setAppBase(String appBase)
+    {
 
         String oldAppBase = this.appBase;
         this.appBase = appBase;
@@ -209,43 +192,42 @@ public class StandardHost
 
     }
 
-
     /**
-     * Return the value of the auto deploy flag.  If true, it indicates that 
+     * Return the value of the auto deploy flag.  If true, it indicates that
      * this host's child webapps will be dynamically deployed.
      */
-    public boolean getAutoDeploy() {
+    public boolean getAutoDeploy()
+    {
 
         return (this.autoDeploy);
 
     }
 
-
     /**
      * Set the auto deploy flag value for this host.
-     * 
+     *
      * @param autoDeploy The new auto deploy flag
      */
-    public void setAutoDeploy(boolean autoDeploy) {
+    public void setAutoDeploy(boolean autoDeploy)
+    {
 
         boolean oldAutoDeploy = this.autoDeploy;
         this.autoDeploy = autoDeploy;
-        support.firePropertyChange("autoDeploy", oldAutoDeploy, 
-                                   this.autoDeploy);
+        support.firePropertyChange("autoDeploy", oldAutoDeploy,
+                this.autoDeploy);
 
     }
-
 
     /**
      * Return the Java class name of the context configuration class
      * for new web applications.
      */
-    public String getConfigClass() {
+    public String getConfigClass()
+    {
 
         return (this.configClass);
 
     }
-
 
     /**
      * Set the Java class name of the context configuration class
@@ -253,26 +235,26 @@ public class StandardHost
      *
      * @param configClass The new context configuration class
      */
-    public void setConfigClass(String configClass) {
+    public void setConfigClass(String configClass)
+    {
 
         String oldConfigClass = this.configClass;
         this.configClass = configClass;
         support.firePropertyChange("configClass",
-                                   oldConfigClass, this.configClass);
+                oldConfigClass, this.configClass);
 
     }
-
 
     /**
      * Return the Java class name of the Context implementation class
      * for new web applications.
      */
-    public String getContextClass() {
+    public String getContextClass()
+    {
 
         return (this.contextClass);
 
     }
-
 
     /**
      * Set the Java class name of the Context implementation class
@@ -280,95 +262,95 @@ public class StandardHost
      *
      * @param contextClass The new context implementation class
      */
-    public void setContextClass(String contextClass) {
+    public void setContextClass(String contextClass)
+    {
 
         String oldContextClass = this.contextClass;
         this.contextClass = contextClass;
         support.firePropertyChange("contextClass",
-                                   oldContextClass, this.contextClass);
+                oldContextClass, this.contextClass);
 
     }
 
-
     /**
-     * Return the value of the deploy on startup flag.  If true, it indicates 
-     * that this host's child webapps should be discovred and automatically 
+     * Return the value of the deploy on startup flag.  If true, it indicates
+     * that this host's child webapps should be discovred and automatically
      * deployed at startup time.
      */
-    public boolean getDeployOnStartup() {
+    public boolean getDeployOnStartup()
+    {
 
         return (this.deployOnStartup);
 
     }
 
-
     /**
      * Set the deploy on startup flag value for this host.
-     * 
+     *
      * @param deployOnStartup The new deploy on startup flag
      */
-    public void setDeployOnStartup(boolean deployOnStartup) {
+    public void setDeployOnStartup(boolean deployOnStartup)
+    {
 
         boolean oldDeployOnStartup = this.deployOnStartup;
         this.deployOnStartup = deployOnStartup;
-        support.firePropertyChange("deployOnStartup", oldDeployOnStartup, 
-                                   this.deployOnStartup);
+        support.firePropertyChange("deployOnStartup", oldDeployOnStartup,
+                this.deployOnStartup);
 
     }
-
 
     /**
      * Deploy XML Context config files flag accessor.
      */
-    public boolean isDeployXML() {
+    public boolean isDeployXML()
+    {
 
         return (deployXML);
 
     }
 
-
     /**
      * Deploy XML Context config files flag mutator.
      */
-    public void setDeployXML(boolean deployXML) {
+    public void setDeployXML(boolean deployXML)
+    {
 
         this.deployXML = deployXML;
 
     }
 
-
     /**
-     * Return the value of the live deploy flag.  If true, it indicates that 
+     * Return the value of the live deploy flag.  If true, it indicates that
      * a background thread should be started that looks for web application
      * context files, WAR files, or unpacked directories being dropped in to
      * the <code>appBase</code> directory, and deploys new ones as they are
      * encountered.
      */
-    public boolean getLiveDeploy() {
+    public boolean getLiveDeploy()
+    {
         return (this.autoDeploy);
     }
 
-
     /**
      * Set the live deploy flag value for this host.
-     * 
+     *
      * @param liveDeploy The new live deploy flag
      */
-    public void setLiveDeploy(boolean liveDeploy) {
+    public void setLiveDeploy(boolean liveDeploy)
+    {
         setAutoDeploy(liveDeploy);
     }
-
 
     /**
      * Return the Java class name of the error report valve class
      * for new web applications.
      */
-    public String getErrorReportValveClass() {
+    public String getErrorReportValveClass()
+    {
 
         return (this.errorReportValveClass);
 
     }
-
 
     /**
      * Set the Java class name of the error report valve class
@@ -376,41 +358,41 @@ public class StandardHost
      *
      * @param errorReportValveClass The new error report valve class
      */
-    public void setErrorReportValveClass(String errorReportValveClass) {
+    public void setErrorReportValveClass(String errorReportValveClass)
+    {
 
         String oldErrorReportValveClassClass = this.errorReportValveClass;
         this.errorReportValveClass = errorReportValveClass;
         support.firePropertyChange("errorReportValveClass",
-                                   oldErrorReportValveClassClass, 
-                                   this.errorReportValveClass);
+                oldErrorReportValveClassClass,
+                this.errorReportValveClass);
 
     }
-    
-    
+
     /**
      * Return the canonical, fully qualified, name of the virtual host
      * this Container represents.
      */
-    public String getName() {
+    public String getName()
+    {
 
         return (name);
 
     }
-
 
     /**
      * Set the canonical, fully qualified, name of the virtual host
      * this Container represents.
      *
      * @param name Virtual host name
-     *
-     * @exception IllegalArgumentException if name is null
+     * @throws IllegalArgumentException if name is null
      */
-    public void setName(String name) {
+    public void setName(String name)
+    {
 
         if (name == null)
             throw new IllegalArgumentException
-                (sm.getString("standardHost.nullName"));
+                    (sm.getString("standardHost.nullName"));
 
         name = name.toLowerCase();      // Internally all names are lower case
 
@@ -420,126 +402,133 @@ public class StandardHost
 
     }
 
-
     /**
      * Unpack WARs flag accessor.
      */
-    public boolean isUnpackWARs() {
+    public boolean isUnpackWARs()
+    {
 
         return (unpackWARs);
 
     }
 
-
     /**
      * Unpack WARs flag mutator.
      */
-    public void setUnpackWARs(boolean unpackWARs) {
+    public void setUnpackWARs(boolean unpackWARs)
+    {
 
         this.unpackWARs = unpackWARs;
 
     }
 
-    
-    public void setXmlValidation(boolean xmlValidation){
-        this.xmlValidation = xmlValidation;
-    }
-
-    
-    public boolean getXmlValidation(){
+    public boolean getXmlValidation()
+    {
         return xmlValidation;
     }
 
-    
-    public boolean getXmlNamespaceAware(){
+    public void setXmlValidation(boolean xmlValidation)
+    {
+        this.xmlValidation = xmlValidation;
+    }
+
+    public boolean getXmlNamespaceAware()
+    {
         return xmlNamespaceAware;
     }
 
+    public void setXmlNamespaceAware(boolean xmlNamespaceAware)
+    {
+        this.xmlNamespaceAware = xmlNamespaceAware;
+    }
 
-    public void setXmlNamespaceAware(boolean xmlNamespaceAware){
-        this.xmlNamespaceAware=xmlNamespaceAware;
-    }    
-
-    
     /**
      * Host work directory base.
      */
-    public String getWorkDir() {
+    public String getWorkDir()
+    {
 
         return (workDir);
     }
 
-
     /**
      * Host work directory base.
      */
-    public void setWorkDir(String workDir) {
+    public void setWorkDir(String workDir)
+    {
 
         this.workDir = workDir;
     }
-
 
     /**
      * Return the regular expression that defines the files and directories in
      * the host's {@link #appBase} that will be ignored by the automatic
      * deployment process.
      */
-    public String getDeployIgnore() {
-        if (deployIgnore == null) {
+    public String getDeployIgnore()
+    {
+        if (deployIgnore == null)
+        {
             return null;
-        } 
+        }
         return this.deployIgnore.toString();
     }
-
-
-    /**
-     * Return the compiled regular expression that defines the files and
-     * directories in the host's {@link #appBase} that will be ignored by the
-     * automatic deployment process.
-     */
-    public Pattern getDeployIgnorePattern() {
-        return this.deployIgnore;
-    }
-
 
     /**
      * Set the regular expression that defines the files and directories in
      * the host's {@link #appBase} that will be ignored by the automatic
      * deployment process.
      */
-    public void setDeployIgnore(String deployIgnore) {
+    public void setDeployIgnore(String deployIgnore)
+    {
         String oldDeployIgnore;
-        if (this.deployIgnore == null) {
+        if (this.deployIgnore == null)
+        {
             oldDeployIgnore = null;
-        } else {
+        } else
+        {
             oldDeployIgnore = this.deployIgnore.toString();
         }
-        if (deployIgnore == null) {
+        if (deployIgnore == null)
+        {
             this.deployIgnore = null;
-        } else {
+        } else
+        {
             this.deployIgnore = Pattern.compile(deployIgnore);
         }
         support.firePropertyChange("deployIgnore",
-                                   oldDeployIgnore, 
-                                   deployIgnore);
+                oldDeployIgnore,
+                deployIgnore);
     }
 
 
     // --------------------------------------------------------- Public Methods
 
+    /**
+     * Return the compiled regular expression that defines the files and
+     * directories in the host's {@link #appBase} that will be ignored by the
+     * automatic deployment process.
+     */
+    public Pattern getDeployIgnorePattern()
+    {
+        return this.deployIgnore;
+    }
 
     /**
      * Add an alias name that should be mapped to this same Host.
      *
      * @param alias The alias to be added
      */
-    public void addAlias(String alias) {
+    public void addAlias(String alias)
+    {
 
         alias = alias.toLowerCase();
 
-        synchronized (aliasesLock) {
+        synchronized (aliasesLock)
+        {
             // Skip duplicate aliases
-            for (int i = 0; i < aliases.length; i++) {
+            for (int i = 0; i < aliases.length; i++)
+            {
                 if (aliases[i].equals(alias))
                     return;
             }
@@ -555,68 +544,54 @@ public class StandardHost
 
     }
 
-
     /**
      * Add a child Container, only if the proposed child is an implementation
      * of Context.
      *
      * @param child Child container to be added
      */
-    public void addChild(Container child) {
+    public void addChild(Container child)
+    {
 
-        if (child instanceof Lifecycle) {
+        if (child instanceof Lifecycle)
+        {
             ((Lifecycle) child).addLifecycleListener(
                     new MemoryLeakTrackingListener());
         }
 
         if (!(child instanceof Context))
             throw new IllegalArgumentException
-                (sm.getString("standardHost.notContext"));
+                    (sm.getString("standardHost.notContext"));
         super.addChild(child);
 
     }
 
-
-    /**
-     * Used to ensure the regardless of {@link Context} implementation, a record
-     * is kept of the class loader used every time a context starts.
-     */
-    private class MemoryLeakTrackingListener implements LifecycleListener {
-
-        public void lifecycleEvent(LifecycleEvent event) {
-            if (event.getType().equals(Lifecycle.AFTER_START_EVENT)) {
-                if (event.getSource() instanceof Context) {
-                    Context context = ((Context) event.getSource());
-                    childClassLoaders.put(context.getLoader().getClassLoader(),
-                            context.getServletContext().getContextPath());
-                }
-            }
-        }
-    }
-    
-    
     /**
      * Attempt to identify the contexts that have a class loader memory leak.
      * This is usually triggered on context reload. Note: This method attempts
      * to force a full garbage collection. This should be used with extreme
      * caution on a production system.
      */
-    public String[] findReloadedContextMemoryLeaks() {
-        
+    public String[] findReloadedContextMemoryLeaks()
+    {
+
         System.gc();
-        
+
         List<String> result = new ArrayList<String>();
-        
+
         for (Map.Entry<ClassLoader, String> entry :
-                childClassLoaders.entrySet()) {
+                childClassLoaders.entrySet())
+        {
             ClassLoader cl = entry.getKey();
-            if (cl instanceof WebappClassLoader) {
-                if (!((WebappClassLoader) cl).isStarted()) {
+            if (cl instanceof WebappClassLoader)
+            {
+                if (!((WebappClassLoader) cl).isStarted())
+                {
                     result.add(entry.getValue());
                 }
             }
         }
-        
+
         return result.toArray(new String[result.size()]);
     }
 
@@ -624,9 +599,11 @@ public class StandardHost
      * Return the set of alias names for this Host.  If none are defined,
      * a zero length array is returned.
      */
-    public String[] findAliases() {
+    public String[] findAliases()
+    {
 
-        synchronized (aliasesLock) {
+        synchronized (aliasesLock)
+        {
             return (this.aliases);
         }
 
@@ -638,7 +615,8 @@ public class StandardHost
      * the corresponding version number, in the format
      * <code>&lt;description&gt;/&lt;version&gt;</code>.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -651,7 +629,8 @@ public class StandardHost
      *
      * @param uri Request URI to be mapped
      */
-    public Context map(String uri) {
+    public Context map(String uri)
+    {
 
         if (log.isDebugEnabled())
             log.debug("Mapping request URI '" + uri + "'");
@@ -663,7 +642,8 @@ public class StandardHost
             log.trace("  Trying the longest context path prefix");
         Context context = null;
         String mapuri = uri;
-        while (true) {
+        while (true)
+        {
             context = (Context) findChild(mapuri);
             if (context != null)
                 break;
@@ -674,14 +654,16 @@ public class StandardHost
         }
 
         // If no Context matches, select the default Context
-        if (context == null) {
+        if (context == null)
+        {
             if (log.isTraceEnabled())
                 log.trace("  Trying the default context");
             context = (Context) findChild("");
         }
 
         // Complain if no Context has been selected
-        if (context == null) {
+        if (context == null)
+        {
             log.error(sm.getString("standardHost.mappingError", uri));
             return (null);
         }
@@ -699,16 +681,20 @@ public class StandardHost
      *
      * @param alias Alias name to be removed
      */
-    public void removeAlias(String alias) {
+    public void removeAlias(String alias)
+    {
 
         alias = alias.toLowerCase();
 
-        synchronized (aliasesLock) {
+        synchronized (aliasesLock)
+        {
 
             // Make sure this alias is currently present
             int n = -1;
-            for (int i = 0; i < aliases.length; i++) {
-                if (aliases[i].equals(alias)) {
+            for (int i = 0; i < aliases.length; i++)
+            {
+                if (aliases[i].equals(alias))
+                {
                     n = i;
                     break;
                 }
@@ -719,7 +705,8 @@ public class StandardHost
             // Remove the specified alias
             int j = 0;
             String results[] = new String[aliases.length - 1];
-            for (int i = 0; i < aliases.length; i++) {
+            for (int i = 0; i < aliases.length; i++)
+            {
                 if (i != n)
                     results[j++] = aliases[i];
             }
@@ -736,10 +723,12 @@ public class StandardHost
     /**
      * Return a String representation of this component.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer();
-        if (getParent() != null) {
+        if (getParent() != null)
+        {
             sb.append(getParent().toString());
             sb.append(".");
         }
@@ -754,58 +743,72 @@ public class StandardHost
     /**
      * Start this host.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents it from being started
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents it from being started
      */
-    public synchronized void start() throws LifecycleException {
-        if( started ) {
+    public synchronized void start() throws LifecycleException
+    {
+        if (started)
+        {
             return;
         }
-        if( ! initialized )
+        if (!initialized)
             init();
 
         // Look for a realm - that may have been configured earlier. 
         // If the realm is added after context - it'll set itself.
-        if( realm == null ) {
-            ObjectName realmName=null;
-            try {
-                realmName=new ObjectName( domain + ":type=Realm,host=" + getName());
-                if( mserver.isRegistered(realmName ) ) {
-                    mserver.invoke(realmName, "init", 
-                            new Object[] {},
-                            new String[] {}
-                    );            
+        if (realm == null)
+        {
+            ObjectName realmName = null;
+            try
+            {
+                realmName = new ObjectName(domain + ":type=Realm,host=" + getName());
+                if (mserver.isRegistered(realmName))
+                {
+                    mserver.invoke(realmName, "init",
+                            new Object[]{},
+                            new String[]{}
+                    );
                 }
-            } catch( Throwable t ) {
+            }
+            catch (Throwable t)
+            {
                 log.debug("No realm for this host " + realmName);
             }
         }
-            
+
         // Set error report valve
         if ((errorReportValveClass != null)
-            && (!errorReportValveClass.equals(""))) {
-            try {
+                && (!errorReportValveClass.equals("")))
+        {
+            try
+            {
                 boolean found = false;
-                if(errorReportValveObjectName != null) {
-                    ObjectName[] names = 
-                        ((StandardPipeline)pipeline).getValveObjectNames();
-                    for (int i=0; !found && i<names.length; i++)
-                        if(errorReportValveObjectName.equals(names[i]))
-                            found = true ;
-                    }
-                    if(!found) {          	
-                        Valve valve = (Valve) Class.forName(errorReportValveClass)
-                        .newInstance();
-                        addValve(valve);
-                        errorReportValveObjectName = ((ValveBase)valve).getObjectName() ;
-                    }
-            } catch (Throwable t) {
+                if (errorReportValveObjectName != null)
+                {
+                    ObjectName[] names =
+                            ((StandardPipeline) pipeline).getValveObjectNames();
+                    for (int i = 0; !found && i < names.length; i++)
+                        if (errorReportValveObjectName.equals(names[i]))
+                            found = true;
+                }
+                if (!found)
+                {
+                    Valve valve = (Valve) Class.forName(errorReportValveClass)
+                            .newInstance();
+                    addValve(valve);
+                    errorReportValveObjectName = ((ValveBase) valve).getObjectName();
+                }
+            }
+            catch (Throwable t)
+            {
                 log.error(sm.getString
-                    ("standardHost.invalidErrorReportValveClass", 
-                     errorReportValveClass), t);
+                        ("standardHost.invalidErrorReportValveClass",
+                                errorReportValveClass), t);
             }
         }
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled())
+        {
             if (xmlValidation)
                 log.debug(sm.getString("standardHost.validationEnabled"));
             else
@@ -817,104 +820,139 @@ public class StandardHost
 
 
     // -------------------- JMX  --------------------
+
     /**
-      * Return the MBean Names of the Valves assoicated with this Host
-      *
-      * @exception Exception if an MBean cannot be created or registered
-      */
-     public String [] getValveNames()
-         throws Exception
+     * Return the MBean Names of the Valves assoicated with this Host
+     *
+     * @throws Exception if an MBean cannot be created or registered
+     */
+    public String[] getValveNames()
+            throws Exception
     {
-         Valve [] valves = this.getValves();
-         String [] mbeanNames = new String[valves.length];
-         for (int i = 0; i < valves.length; i++) {
-             if( valves[i] == null ) continue;
-             if( ((ValveBase)valves[i]).getObjectName() == null ) continue;
-             mbeanNames[i] = ((ValveBase)valves[i]).getObjectName().toString();
-         }
+        Valve[] valves = this.getValves();
+        String[] mbeanNames = new String[valves.length];
+        for (int i = 0; i < valves.length; i++)
+        {
+            if (valves[i] == null) continue;
+            if (((ValveBase) valves[i]).getObjectName() == null) continue;
+            mbeanNames[i] = ((ValveBase) valves[i]).getObjectName().toString();
+        }
 
-         return mbeanNames;
+        return mbeanNames;
 
-     }
+    }
 
-    public String[] getAliases() {
-        synchronized (aliasesLock) {
+    public String[] getAliases()
+    {
+        synchronized (aliasesLock)
+        {
             return aliases;
         }
     }
 
-    private boolean initialized=false;
-    
-    public void init() {
-        if( initialized ) return;
-        initialized=true;
-        
+    public void init()
+    {
+        if (initialized) return;
+        initialized = true;
+
         // already registered.
-        if( getParent() == null ) {
-            try {
+        if (getParent() == null)
+        {
+            try
+            {
                 // Register with the Engine
-                ObjectName serviceName=new ObjectName(domain + 
-                                        ":type=Engine");
+                ObjectName serviceName = new ObjectName(domain +
+                        ":type=Engine");
 
                 HostConfig deployer = new HostConfig();
-                addLifecycleListener(deployer);                
-                if( mserver.isRegistered( serviceName )) {
-                    if(log.isDebugEnabled())
-                        log.debug("Registering "+ serviceName +" with the Engine");
-                    mserver.invoke( serviceName, "addChild",
-                            new Object[] { this },
-                            new String[] { "org.apache.catalina.Container" } );
+                addLifecycleListener(deployer);
+                if (mserver.isRegistered(serviceName))
+                {
+                    if (log.isDebugEnabled())
+                        log.debug("Registering " + serviceName + " with the Engine");
+                    mserver.invoke(serviceName, "addChild",
+                            new Object[]{this},
+                            new String[]{"org.apache.catalina.Container"});
                 }
-            } catch( Exception ex ) {
-                log.error("Host registering failed!",ex);
+            }
+            catch (Exception ex)
+            {
+                log.error("Host registering failed!", ex);
             }
         }
-        
-        if( oname==null ) {
+
+        if (oname == null)
+        {
             // not registered in JMX yet - standalone mode
-            try {
-                StandardEngine engine=(StandardEngine)parent;
-                domain=engine.getName();
-                if(log.isDebugEnabled())
-                    log.debug( "Register host " + getName() + " with domain "+ domain );
-                oname=new ObjectName(domain + ":type=Host,host=" +
+            try
+            {
+                StandardEngine engine = (StandardEngine) parent;
+                domain = engine.getName();
+                if (log.isDebugEnabled())
+                    log.debug("Register host " + getName() + " with domain " + domain);
+                oname = new ObjectName(domain + ":type=Host,host=" +
                         this.getName());
                 controller = oname;
                 Registry.getRegistry(null, null)
-                    .registerComponent(this, oname, null);
-            } catch( Throwable t ) {
-                log.error("Host registering failed!", t );
+                        .registerComponent(this, oname, null);
+            }
+            catch (Throwable t)
+            {
+                log.error("Host registering failed!", t);
             }
         }
     }
 
-    public void destroy() throws Exception {
+    public void destroy() throws Exception
+    {
         // destroy our child containers, if any
         Container children[] = findChildren();
         super.destroy();
-        for (int i = 0; i < children.length; i++) {
-            if(children[i] instanceof StandardContext)
-                ((StandardContext)children[i]).destroy();
+        for (int i = 0; i < children.length; i++)
+        {
+            if (children[i] instanceof StandardContext)
+                ((StandardContext) children[i]).destroy();
         }
-      
+
     }
-    
-    public ObjectName preRegister(MBeanServer server, ObjectName oname ) 
-        throws Exception
+
+    public ObjectName preRegister(MBeanServer server, ObjectName oname)
+            throws Exception
     {
-        ObjectName res=super.preRegister(server, oname);
-        String name=oname.getKeyProperty("host");
-        if( name != null )
-            setName( name );
-        return res;        
+        ObjectName res = super.preRegister(server, oname);
+        String name = oname.getKeyProperty("host");
+        if (name != null)
+            setName(name);
+        return res;
     }
-    
+
     public ObjectName createObjectName(String domain, ObjectName parent)
-        throws Exception
+            throws Exception
     {
-        if( log.isDebugEnabled())
-            log.debug("Create ObjectName " + domain + " " + parent );
-        return new ObjectName( domain + ":type=Host,host=" + getName());
+        if (log.isDebugEnabled())
+            log.debug("Create ObjectName " + domain + " " + parent);
+        return new ObjectName(domain + ":type=Host,host=" + getName());
+    }
+
+    /**
+     * Used to ensure the regardless of {@link Context} implementation, a record
+     * is kept of the class loader used every time a context starts.
+     */
+    private class MemoryLeakTrackingListener implements LifecycleListener
+    {
+
+        public void lifecycleEvent(LifecycleEvent event)
+        {
+            if (event.getType().equals(Lifecycle.AFTER_START_EVENT))
+            {
+                if (event.getSource() instanceof Context)
+                {
+                    Context context = ((Context) event.getSource());
+                    childClassLoaders.put(context.getLoader().getClassLoader(),
+                            context.getServletContext().getContextPath());
+                }
+            }
+        }
     }
 
 }

@@ -20,57 +20,62 @@ package org.apache.catalina.tribes.transport;
 import org.apache.catalina.tribes.io.ListenCallback;
 
 
-
-
 /**
  * @author Filip Hanik
- *
  */
 public abstract class AbstractRxTask implements Runnable
-{ 
-    
+{
+
     public static final int OPTION_DIRECT_BUFFER = ReceiverBase.OPTION_DIRECT_BUFFER;
-    
+    protected boolean useBufferPool = true;
     private ListenCallback callback;
     private RxTaskPool pool;
     private boolean doRun = true;
     private int options;
-    protected boolean useBufferPool = true;
 
-    public AbstractRxTask(ListenCallback callback) {
+    public AbstractRxTask(ListenCallback callback)
+    {
         this.callback = callback;
     }
 
-    public void setTaskPool(RxTaskPool pool) {
-        this.pool = pool;
-    }
-
-    public void setOptions(int options) {
-        this.options = options;
-    }
-
-    public void setCallback(ListenCallback callback) {
-        this.callback = callback;
-    }
-
-    public void setDoRun(boolean doRun) {
-        this.doRun = doRun;
-    }
-
-    public RxTaskPool getTaskPool() {
+    public RxTaskPool getTaskPool()
+    {
         return pool;
     }
 
-    public int getOptions() {
+    public void setTaskPool(RxTaskPool pool)
+    {
+        this.pool = pool;
+    }
+
+    public int getOptions()
+    {
         return options;
     }
 
-    public ListenCallback getCallback() {
+    public void setOptions(int options)
+    {
+        this.options = options;
+    }
+
+    public ListenCallback getCallback()
+    {
         return callback;
     }
 
-    public boolean isDoRun() {
+    public void setCallback(ListenCallback callback)
+    {
+        this.callback = callback;
+    }
+
+    public boolean isDoRun()
+    {
         return doRun;
+    }
+
+    public void setDoRun(boolean doRun)
+    {
+        this.doRun = doRun;
     }
 
     public void close()
@@ -78,12 +83,14 @@ public abstract class AbstractRxTask implements Runnable
         doRun = false;
         notify();
     }
-    
-    public void setUseBufferPool(boolean usebufpool) {
-        useBufferPool = usebufpool;
-    }
-    
-    public boolean getUseBufferPool() {
+
+    public boolean getUseBufferPool()
+    {
         return useBufferPool;
+    }
+
+    public void setUseBufferPool(boolean usebufpool)
+    {
+        useBufferPool = usebufpool;
     }
 }

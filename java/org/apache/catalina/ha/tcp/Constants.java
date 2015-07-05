@@ -23,10 +23,10 @@ package org.apache.catalina.ha.tcp;
  * package.
  *
  * @author Peter Rossbach
- *
  */
 
-public class Constants {
+public class Constants
+{
 
     public static final String Package = "org.apache.catalina.ha.tcp";
 

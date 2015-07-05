@@ -49,42 +49,44 @@ another components' job.
 */
 
 /**
- *
  * @author Costin Manolache
  */
-public class GeneratorApache2 implements WebXml2Jk.MappingGenerator {
+public class GeneratorApache2 implements WebXml2Jk.MappingGenerator
+{
     WebXml2Jk wxml;
     String vhost;
     String cpath;
     String worker;
     PrintWriter out;
-    
-    public void setWebXmlReader(WebXml2Jk wxml ) {
-        this.wxml=wxml;
-        vhost=wxml.vhost;
-        cpath=wxml.cpath;
-        worker=wxml.worker;
+
+    public void setWebXmlReader(WebXml2Jk wxml)
+    {
+        this.wxml = wxml;
+        vhost = wxml.vhost;
+        cpath = wxml.cpath;
+        worker = wxml.worker;
     }
 
-    public void generateStart() throws IOException {
-        File base=wxml.getJkDir();
-        File outF=new File(base, "jk2.conf");
-        out=new PrintWriter( new FileWriter( outF ));
+    public void generateStart() throws IOException
+    {
+        File base = wxml.getJkDir();
+        File outF = new File(base, "jk2.conf");
+        out = new PrintWriter(new FileWriter(outF));
 
-        out.println("# Must be included in a virtual host context for " + vhost );
+        out.println("# Must be included in a virtual host context for " + vhost);
 
         out.println("Alias " + cpath + " \"" + wxml.docBase + "\"");
         out.println("<Directory \"" + wxml.docBase + "\" >");
         out.println("  Options Indexes FollowSymLinks");
-        generateMimeMapping( out );
-        generateWelcomeFiles( out);
+        generateMimeMapping(out);
+        generateWelcomeFiles(out);
 
         // If we use this instead of extension mapping for jsp we can avoid most
         // jsp security problems.
         out.println("  AddHandler jakarta-servlet2 .jsp");
         out.println("</Directory>");
         out.println();
-        
+
         out.println("<Location \"" + cpath + "/WEB-INF\" >");
         out.println("  AllowOverride None");
         out.println("  Deny from all");
@@ -97,98 +99,113 @@ public class GeneratorApache2 implements WebXml2Jk.MappingGenerator {
         out.println();
     }
 
-    private void generateWelcomeFiles( PrintWriter out ) {
-        Vector wf= wxml.getWellcomeFiles();
+    private void generateWelcomeFiles(PrintWriter out)
+    {
+        Vector wf = wxml.getWellcomeFiles();
         out.print("  DirectoryIndex ");
-        for( int i=0; i<wf.size(); i++ ) {
-            out.print( " " + (String)wf.elementAt(i));
+        for (int i = 0; i < wf.size(); i++)
+        {
+            out.print(" " + (String) wf.elementAt(i));
         }
         out.println();
     }
-    
-    private void generateMimeMapping( PrintWriter out ) {
-        Node webN=wxml.getWebXmlNode();
-        for( Node mapN=WebXml2Jk.getChild( webN, "mime-mapping" );
-             mapN != null; mapN = WebXml2Jk.getNext( mapN ) ) {
-            String ext=WebXml2Jk.getChildContent( mapN, "extension" );
-            String type=WebXml2Jk.getChildContent( mapN, "mime-type" );
 
-            out.println("  AddType " + type + " " + ext );
+    private void generateMimeMapping(PrintWriter out)
+    {
+        Node webN = wxml.getWebXmlNode();
+        for (Node mapN = WebXml2Jk.getChild(webN, "mime-mapping");
+             mapN != null; mapN = WebXml2Jk.getNext(mapN))
+        {
+            String ext = WebXml2Jk.getChildContent(mapN, "extension");
+            String type = WebXml2Jk.getChildContent(mapN, "mime-type");
+
+            out.println("  AddType " + type + " " + ext);
         }
-        
+
 
     }
 
-    public void generateEnd() {
+    public void generateEnd()
+    {
         out.close();
     }
-    
-    public void generateServletMapping( String servlet, String url ) {
-        out.println( "<Location \"" + cpath + url + "\" >");
-        out.println( "  SetHandler jakarta-servlet2" );
-        out.println( "  JkUriSet group " + worker );
-        out.println( "  JkUriSet servlet " +  servlet);
-        out.println( "  JkUriSet host " +  vhost );
-        out.println( "  JkUriSet context " +  cpath );
-        out.println( "</Location>");
+
+    public void generateServletMapping(String servlet, String url)
+    {
+        out.println("<Location \"" + cpath + url + "\" >");
+        out.println("  SetHandler jakarta-servlet2");
+        out.println("  JkUriSet group " + worker);
+        out.println("  JkUriSet servlet " + servlet);
+        out.println("  JkUriSet host " + vhost);
+        out.println("  JkUriSet context " + cpath);
+        out.println("</Location>");
         out.println();
     }
 
-    public void generateFilterMapping( String servlet, String url ) {
-        out.println( "<Location \"" + cpath + url + "\" >");
-        out.println( "  SetHandler jakarta-servlet2" );
-        out.println( "  JkUriSet group " + worker );
-        out.println( "  JkUriSet servlet " +  servlet);
-        out.println( "  JkUriSet host " +  vhost );
-        out.println( "  JkUriSet context " +  cpath );
-        out.println( "</Location>");
+    public void generateFilterMapping(String servlet, String url)
+    {
+        out.println("<Location \"" + cpath + url + "\" >");
+        out.println("  SetHandler jakarta-servlet2");
+        out.println("  JkUriSet group " + worker);
+        out.println("  JkUriSet servlet " + servlet);
+        out.println("  JkUriSet host " + vhost);
+        out.println("  JkUriSet context " + cpath);
+        out.println("</Location>");
         out.println();
     }
 
-    public void generateLoginConfig( String loginPage,
-                                     String errPage, String authM ) {
-        out.println( "<Location \"" + cpath + loginPage + "\" >");
-        out.println( "  SetHandler jakarta-servlet2" );
-        out.println( "  JkUriSet group " + worker );
-        out.println( "  JkUriSet host " +  vhost );
-        out.println( "  JkUriSet context " +  cpath );
-        out.println( "</Location>");
+    public void generateLoginConfig(String loginPage,
+                                    String errPage, String authM)
+    {
+        out.println("<Location \"" + cpath + loginPage + "\" >");
+        out.println("  SetHandler jakarta-servlet2");
+        out.println("  JkUriSet group " + worker);
+        out.println("  JkUriSet host " + vhost);
+        out.println("  JkUriSet context " + cpath);
+        out.println("</Location>");
         out.println();
     }
 
-    public void generateErrorPage( int err, String location ) {
-        
+    public void generateErrorPage(int err, String location)
+    {
+
     }
 
     // XXX Only if BASIC/DIGEST and 'integrated auth'
-    public void generateConstraints( Vector urls, Vector methods, Vector roles, boolean isSSL ) {
-        for( int i=0; i<urls.size(); i++ ) {
-            String url=(String)urls.elementAt(i);
+    public void generateConstraints(Vector urls, Vector methods, Vector roles, boolean isSSL)
+    {
+        for (int i = 0; i < urls.size(); i++)
+        {
+            String url = (String) urls.elementAt(i);
 
-            out.println( "<Location \"" + cpath + url + "\" >");
+            out.println("<Location \"" + cpath + url + "\" >");
 
-            if( methods.size() > 0 ) {
+            if (methods.size() > 0)
+            {
                 out.print("  <Limit ");
-                for( int j=0; j<methods.size(); j++ ) {
-                    String m=(String)methods.elementAt(j);
-                    out.print( " " +  m);
+                for (int j = 0; j < methods.size(); j++)
+                {
+                    String m = (String) methods.elementAt(j);
+                    out.print(" " + m);
                 }
-                out.println(  " >" );
+                out.println(" >");
             }
 
-            out.println( "    AuthType basic" );
-            out.print( "    Require group " );
-            for( int j=0; j<roles.size(); j++ ) {
-                String role=(String)roles.elementAt(j);
-                out.print( " " +  role);
+            out.println("    AuthType basic");
+            out.print("    Require group ");
+            for (int j = 0; j < roles.size(); j++)
+            {
+                String role = (String) roles.elementAt(j);
+                out.print(" " + role);
             }
             out.println();
 
-            if( methods.size() > 0 ) {
+            if (methods.size() > 0)
+            {
                 out.println("  </Limit>");
             }
-            
-            out.println( "</Location>");
+
+            out.println("</Location>");
         }
     }
 }

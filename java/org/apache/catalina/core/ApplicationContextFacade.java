@@ -45,26 +45,30 @@ import java.util.Set;
  *
  * @author Remy Maucherat
  * @author Jean-Francois Arcand
- *
  */
 
 public final class ApplicationContextFacade
-    implements ServletContext {
-        
+        implements ServletContext
+{
+
     // ---------------------------------------------------------- Attributes
     /**
      * Cache Class object used for reflection.
      */
     private HashMap classCache;
-    
-    
+
+
     /**
      * Cache method object.
      */
     private HashMap objectCache;
-    
-    
+
+
     // ----------------------------------------------------------- Constructors
+    /**
+     * Wrapped application context.
+     */
+    private ApplicationContext context = null;
 
 
     /**
@@ -73,17 +77,21 @@ public final class ApplicationContextFacade
      *
      * @param context The associated Context instance
      */
-    public ApplicationContextFacade(ApplicationContext context) {
+    public ApplicationContextFacade(ApplicationContext context)
+    {
         super();
         this.context = context;
-        
+
         classCache = new HashMap();
         objectCache = new HashMap();
         initClassCache();
     }
-    
-    
-    private void initClassCache(){
+
+
+    // ----------------------------------------------------- Instance Variables
+
+    private void initClassCache()
+    {
         Class[] clazz = new Class[]{String.class};
         classCache.put("getContext", clazz);
         classCache.put("getMimeType", clazz);
@@ -102,386 +110,488 @@ public final class ApplicationContextFacade
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * Wrapped application context.
-     */
-    private ApplicationContext context = null;
-    
-
-
     // ------------------------------------------------- ServletContext Methods
 
-
-    public ServletContext getContext(String uripath) {
+    public ServletContext getContext(String uripath)
+    {
         ServletContext theContext = null;
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             theContext = (ServletContext)
-                doPrivileged("getContext", new Object[]{uripath});
-        } else {
+                    doPrivileged("getContext", new Object[]{uripath});
+        } else
+        {
             theContext = context.getContext(uripath);
         }
         if ((theContext != null) &&
-            (theContext instanceof ApplicationContext)){
-            theContext = ((ApplicationContext)theContext).getFacade();
+                (theContext instanceof ApplicationContext))
+        {
+            theContext = ((ApplicationContext) theContext).getFacade();
         }
         return (theContext);
     }
 
 
-    public int getMajorVersion() {
+    public int getMajorVersion()
+    {
         return context.getMajorVersion();
     }
 
 
-    public int getMinorVersion() {
+    public int getMinorVersion()
+    {
         return context.getMinorVersion();
     }
 
 
-    public String getMimeType(String file) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            return (String)doPrivileged("getMimeType", new Object[]{file});
-        } else {
+    public String getMimeType(String file)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            return (String) doPrivileged("getMimeType", new Object[]{file});
+        } else
+        {
             return context.getMimeType(file);
         }
     }
 
 
-    public Set getResourcePaths(String path) {
-        if (SecurityUtil.isPackageProtectionEnabled()){
-            return (Set)doPrivileged("getResourcePaths", new Object[]{path});
-        } else {
+    public Set getResourcePaths(String path)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            return (Set) doPrivileged("getResourcePaths", new Object[]{path});
+        } else
+        {
             return context.getResourcePaths(path);
         }
     }
 
 
     public URL getResource(String path)
-        throws MalformedURLException {
-        if (Globals.IS_SECURITY_ENABLED) {
-            try {
-                return (URL) invokeMethod(context, "getResource", 
-                                          new Object[]{path});
-            } catch(Throwable t) {
-                if (t instanceof MalformedURLException){
-                    throw (MalformedURLException)t;
+            throws MalformedURLException
+    {
+        if (Globals.IS_SECURITY_ENABLED)
+        {
+            try
+            {
+                return (URL) invokeMethod(context, "getResource",
+                        new Object[]{path});
+            }
+            catch (Throwable t)
+            {
+                if (t instanceof MalformedURLException)
+                {
+                    throw (MalformedURLException) t;
                 }
                 return null;
             }
-        } else {
+        } else
+        {
             return context.getResource(path);
         }
     }
 
 
-    public InputStream getResourceAsStream(String path) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            return (InputStream) doPrivileged("getResourceAsStream", 
-                                              new Object[]{path});
-        } else {
+    public InputStream getResourceAsStream(String path)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            return (InputStream) doPrivileged("getResourceAsStream",
+                    new Object[]{path});
+        } else
+        {
             return context.getResourceAsStream(path);
         }
     }
 
 
-    public RequestDispatcher getRequestDispatcher(final String path) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            return (RequestDispatcher) doPrivileged("getRequestDispatcher", 
-                                                    new Object[]{path});
-        } else {
+    public RequestDispatcher getRequestDispatcher(final String path)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            return (RequestDispatcher) doPrivileged("getRequestDispatcher",
+                    new Object[]{path});
+        } else
+        {
             return context.getRequestDispatcher(path);
         }
     }
 
 
-    public RequestDispatcher getNamedDispatcher(String name) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            return (RequestDispatcher) doPrivileged("getNamedDispatcher", 
-                                                    new Object[]{name});
-        } else {
+    public RequestDispatcher getNamedDispatcher(String name)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            return (RequestDispatcher) doPrivileged("getNamedDispatcher",
+                    new Object[]{name});
+        } else
+        {
             return context.getNamedDispatcher(name);
         }
     }
 
 
     public Servlet getServlet(String name)
-        throws ServletException {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            try {
-                return (Servlet) invokeMethod(context, "getServlet", 
-                                              new Object[]{name});
-            } catch (Throwable t) {
-                if (t instanceof ServletException) {
+            throws ServletException
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            try
+            {
+                return (Servlet) invokeMethod(context, "getServlet",
+                        new Object[]{name});
+            }
+            catch (Throwable t)
+            {
+                if (t instanceof ServletException)
+                {
                     throw (ServletException) t;
                 }
                 return null;
             }
-        } else {
+        } else
+        {
             return context.getServlet(name);
         }
     }
 
 
-    public Enumeration getServlets() {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public Enumeration getServlets()
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return (Enumeration) doPrivileged("getServlets", null);
-        } else {
+        } else
+        {
             return context.getServlets();
         }
     }
 
 
-    public Enumeration getServletNames() {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public Enumeration getServletNames()
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return (Enumeration) doPrivileged("getServletNames", null);
-        } else {
+        } else
+        {
             return context.getServletNames();
         }
-   }
+    }
 
 
-    public void log(String msg) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            doPrivileged("log", new Object[]{msg} );
-        } else {
+    public void log(String msg)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            doPrivileged("log", new Object[]{msg});
+        } else
+        {
             context.log(msg);
         }
     }
 
 
-    public void log(Exception exception, String msg) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            doPrivileged("log", new Class[]{Exception.class, String.class}, 
-                         new Object[]{exception,msg});
-        } else {
+    public void log(Exception exception, String msg)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            doPrivileged("log", new Class[]{Exception.class, String.class},
+                    new Object[]{exception, msg});
+        } else
+        {
             context.log(exception, msg);
         }
     }
 
 
-    public void log(String message, Throwable throwable) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            doPrivileged("log", new Class[]{String.class, Throwable.class}, 
-                         new Object[]{message, throwable});
-        } else {
+    public void log(String message, Throwable throwable)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            doPrivileged("log", new Class[]{String.class, Throwable.class},
+                    new Object[]{message, throwable});
+        } else
+        {
             context.log(message, throwable);
         }
     }
 
 
-    public String getRealPath(String path) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public String getRealPath(String path)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return (String) doPrivileged("getRealPath", new Object[]{path});
-        } else {
+        } else
+        {
             return context.getRealPath(path);
         }
     }
 
 
-    public String getServerInfo() {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public String getServerInfo()
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return (String) doPrivileged("getServerInfo", null);
-        } else {
+        } else
+        {
             return context.getServerInfo();
         }
     }
 
 
-    public String getInitParameter(String name) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            return (String) doPrivileged("getInitParameter", 
-                                         new Object[]{name});
-        } else {
+    public String getInitParameter(String name)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            return (String) doPrivileged("getInitParameter",
+                    new Object[]{name});
+        } else
+        {
             return context.getInitParameter(name);
         }
     }
 
 
-    public Enumeration getInitParameterNames() {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public Enumeration getInitParameterNames()
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return (Enumeration) doPrivileged("getInitParameterNames", null);
-        } else {
+        } else
+        {
             return context.getInitParameterNames();
         }
     }
 
 
-    public Object getAttribute(String name) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public Object getAttribute(String name)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return doPrivileged("getAttribute", new Object[]{name});
-        } else {
+        } else
+        {
             return context.getAttribute(name);
         }
-     }
+    }
 
 
-    public Enumeration getAttributeNames() {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public Enumeration getAttributeNames()
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return (Enumeration) doPrivileged("getAttributeNames", null);
-        } else {
+        } else
+        {
             return context.getAttributeNames();
         }
     }
 
 
-    public void setAttribute(String name, Object object) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
-            doPrivileged("setAttribute", new Object[]{name,object});
-        } else {
+    public void setAttribute(String name, Object object)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            doPrivileged("setAttribute", new Object[]{name, object});
+        } else
+        {
             context.setAttribute(name, object);
         }
     }
 
 
-    public void removeAttribute(String name) {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public void removeAttribute(String name)
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             doPrivileged("removeAttribute", new Object[]{name});
-        } else {
+        } else
+        {
             context.removeAttribute(name);
         }
     }
 
 
-    public String getServletContextName() {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+    public String getServletContextName()
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return (String) doPrivileged("getServletContextName", null);
-        } else {
+        } else
+        {
             return context.getServletContextName();
         }
     }
 
-       
-    public String getContextPath() {
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+
+    public String getContextPath()
+    {
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
             return (String) doPrivileged("getContextPath", null);
-        } else {
+        } else
+        {
             return context.getContextPath();
         }
     }
 
     /**
-     * Use reflection to invoke the requested method. Cache the method object 
+     * Use reflection to invoke the requested method. Cache the method object
      * to speed up the process
+     *
      * @param methodName The method to call.
-     * @param params The arguments passed to the called method.
+     * @param params     The arguments passed to the called method.
      */
-    private Object doPrivileged(final String methodName, final Object[] params){
-        try{
+    private Object doPrivileged(final String methodName, final Object[] params)
+    {
+        try
+        {
             return invokeMethod(context, methodName, params);
-        }catch(Throwable t){
+        }
+        catch (Throwable t)
+        {
             throw new RuntimeException(t.getMessage(), t);
         }
     }
 
-    
+
     /**
-     * Use reflection to invoke the requested method. Cache the method object 
+     * Use reflection to invoke the requested method. Cache the method object
      * to speed up the process
+     *
      * @param appContext The AppliationContext object on which the method
      *                   will be invoked
      * @param methodName The method to call.
-     * @param params The arguments passed to the called method.
+     * @param params     The arguments passed to the called method.
      */
     private Object invokeMethod(ApplicationContext appContext,
-                                final String methodName, 
-                                Object[] params) 
-        throws Throwable{
+                                final String methodName,
+                                Object[] params)
+            throws Throwable
+    {
 
-        try{
-            Method method = (Method)objectCache.get(methodName);
-            if (method == null){
+        try
+        {
+            Method method = (Method) objectCache.get(methodName);
+            if (method == null)
+            {
                 method = appContext.getClass()
-                    .getMethod(methodName, (Class[])classCache.get(methodName));
+                        .getMethod(methodName, (Class[]) classCache.get(methodName));
                 objectCache.put(methodName, method);
             }
-            
-            return executeMethod(method,appContext,params);
-        } catch (Exception ex){
+
+            return executeMethod(method, appContext, params);
+        }
+        catch (Exception ex)
+        {
             handleException(ex, methodName);
             return null;
-        } finally {
+        }
+        finally
+        {
             params = null;
         }
     }
-    
-    /**
-     * Use reflection to invoke the requested method. Cache the method object 
-     * to speed up the process
-     * @param methodName The method to invoke.
-     * @param clazz The class where the method is.
-     * @param params The arguments passed to the called method.
-     */    
-    private Object doPrivileged(final String methodName, 
-                                final Class[] clazz,
-                                Object[] params){
 
-        try{
+    /**
+     * Use reflection to invoke the requested method. Cache the method object
+     * to speed up the process
+     *
+     * @param methodName The method to invoke.
+     * @param clazz      The class where the method is.
+     * @param params     The arguments passed to the called method.
+     */
+    private Object doPrivileged(final String methodName,
+                                final Class[] clazz,
+                                Object[] params)
+    {
+
+        try
+        {
             Method method = context.getClass()
-                    .getMethod(methodName, (Class[])clazz);
-            return executeMethod(method,context,params);
-        } catch (Exception ex){
-            try{
+                    .getMethod(methodName, (Class[]) clazz);
+            return executeMethod(method, context, params);
+        }
+        catch (Exception ex)
+        {
+            try
+            {
                 handleException(ex, methodName);
-            }catch (Throwable t){
+            }
+            catch (Throwable t)
+            {
                 throw new RuntimeException(t.getMessage());
             }
             return null;
-        } finally {
+        }
+        finally
+        {
             params = null;
         }
     }
-    
-    
+
+
     /**
      * Executes the method of the specified <code>ApplicationContext</code>
-     * @param method The method object to be invoked.
+     *
+     * @param method  The method object to be invoked.
      * @param context The AppliationContext object on which the method
-     *                   will be invoked
-     * @param params The arguments passed to the called method.
+     *                will be invoked
+     * @param params  The arguments passed to the called method.
      */
-    private Object executeMethod(final Method method, 
+    private Object executeMethod(final Method method,
                                  final ApplicationContext context,
-                                 final Object[] params) 
-            throws PrivilegedActionException, 
-                   IllegalAccessException,
-                   InvocationTargetException {
-                                     
-        if (SecurityUtil.isPackageProtectionEnabled()){
-           return AccessController.doPrivileged(new PrivilegedExceptionAction(){
-                public Object run() throws IllegalAccessException, InvocationTargetException{
-                    return method.invoke(context,  params);
+                                 final Object[] params)
+            throws PrivilegedActionException,
+            IllegalAccessException,
+            InvocationTargetException
+    {
+
+        if (SecurityUtil.isPackageProtectionEnabled())
+        {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction()
+            {
+                public Object run() throws IllegalAccessException, InvocationTargetException
+                {
+                    return method.invoke(context, params);
                 }
             });
-        } else {
+        } else
+        {
             return method.invoke(context, params);
-        }        
+        }
     }
 
-    
+
     /**
-     *
      * Throw the real exception.
+     *
      * @param ex The current exception
      */
     private void handleException(Exception ex, String methodName)
-	    throws Throwable {
+            throws Throwable
+    {
 
         Throwable realException;
-        
-        if (ex instanceof PrivilegedActionException) {
+
+        if (ex instanceof PrivilegedActionException)
+        {
             ex = ((PrivilegedActionException) ex).getException();
         }
-        
-        if (ex instanceof InvocationTargetException) {
+
+        if (ex instanceof InvocationTargetException)
+        {
             realException =
-                ((InvocationTargetException) ex).getTargetException();
-        } else {
+                    ((InvocationTargetException) ex).getTargetException();
+        } else
+        {
             realException = ex;
-        }   
-        
+        }
+
         throw realException;
     }
 }

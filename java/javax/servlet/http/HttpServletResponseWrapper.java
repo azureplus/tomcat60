@@ -20,41 +20,42 @@ import javax.servlet.ServletResponseWrapper;
 import java.io.IOException;
 
 /**
- * 
  * Provides a convenient implementation of the HttpServletResponse interface that
  * can be subclassed by developers wishing to adapt the response from a Servlet.
  * This class implements the Wrapper or Decorator pattern. Methods default to
  * calling through to the wrapped response object.
- * 
- * @author 	Various
  *
-  * @since	v 2.3
- *
- * @see 	javax.servlet.http.HttpServletResponse
- *
+ * @author Various
+ * @since v 2.3
+ * @see javax.servlet.http.HttpServletResponse
  */
 
-public class HttpServletResponseWrapper extends ServletResponseWrapper implements HttpServletResponse {
+public class HttpServletResponseWrapper extends ServletResponseWrapper implements HttpServletResponse
+{
 
 
-    /** 
-    * Constructs a response adaptor wrapping the given response.
-    * @throws java.lang.IllegalArgumentException if the response is null
-    */
-    public HttpServletResponseWrapper(HttpServletResponse response) {
-	    super(response);
+    /**
+     * Constructs a response adaptor wrapping the given response.
+     *
+     * @throws java.lang.IllegalArgumentException if the response is null
+     */
+    public HttpServletResponseWrapper(HttpServletResponse response)
+    {
+        super(response);
     }
-    
-    private HttpServletResponse _getHttpServletResponse() {
-	return (HttpServletResponse) super.getResponse();
+
+    private HttpServletResponse _getHttpServletResponse()
+    {
+        return (HttpServletResponse) super.getResponse();
     }
-    
+
     /**
      * The default behavior of this method is to call addCookie(Cookie cookie)
      * on the wrapped response object.
      */
-    public void addCookie(Cookie cookie) {
-	this._getHttpServletResponse().addCookie(cookie);
+    public void addCookie(Cookie cookie)
+    {
+        this._getHttpServletResponse().addCookie(cookie);
     }
 
     /**
@@ -62,49 +63,55 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      * on the wrapped response object.
      */
 
- 
-    public boolean containsHeader(String name) {
-	return this._getHttpServletResponse().containsHeader(name);
+
+    public boolean containsHeader(String name)
+    {
+        return this._getHttpServletResponse().containsHeader(name);
     }
-    
+
     /**
      * The default behavior of this method is to call encodeURL(String url)
      * on the wrapped response object.
      */
-    public String encodeURL(String url) {
-	return this._getHttpServletResponse().encodeURL(url);
+    public String encodeURL(String url)
+    {
+        return this._getHttpServletResponse().encodeURL(url);
     }
 
     /**
      * The default behavior of this method is to return encodeRedirectURL(String url)
      * on the wrapped response object.
      */
-    public String encodeRedirectURL(String url) {
-	return this._getHttpServletResponse().encodeRedirectURL(url);
+    public String encodeRedirectURL(String url)
+    {
+        return this._getHttpServletResponse().encodeRedirectURL(url);
     }
 
     /**
      * The default behavior of this method is to call encodeUrl(String url)
      * on the wrapped response object.
      */
-    public String encodeUrl(String url) {
-	return this._getHttpServletResponse().encodeUrl(url);
+    public String encodeUrl(String url)
+    {
+        return this._getHttpServletResponse().encodeUrl(url);
     }
-    
+
     /**
      * The default behavior of this method is to return encodeRedirectUrl(String url)
      * on the wrapped response object.
      */
-    public String encodeRedirectUrl(String url) {
-	return this._getHttpServletResponse().encodeRedirectUrl(url);
+    public String encodeRedirectUrl(String url)
+    {
+        return this._getHttpServletResponse().encodeRedirectUrl(url);
     }
-    
+
     /**
      * The default behavior of this method is to call sendError(int sc, String msg)
      * on the wrapped response object.
      */
-    public void sendError(int sc, String msg) throws IOException {
-	this._getHttpServletResponse().sendError(sc, msg);
+    public void sendError(int sc, String msg) throws IOException
+    {
+        this._getHttpServletResponse().sendError(sc, msg);
     }
 
     /**
@@ -113,64 +120,72 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      */
 
 
-    public void sendError(int sc) throws IOException {
-	this._getHttpServletResponse().sendError(sc);
+    public void sendError(int sc) throws IOException
+    {
+        this._getHttpServletResponse().sendError(sc);
     }
 
     /**
      * The default behavior of this method is to return sendRedirect(String location)
      * on the wrapped response object.
      */
-    public void sendRedirect(String location) throws IOException {
-	this._getHttpServletResponse().sendRedirect(location);
+    public void sendRedirect(String location) throws IOException
+    {
+        this._getHttpServletResponse().sendRedirect(location);
     }
-    
+
     /**
      * The default behavior of this method is to call setDateHeader(String name, long date)
      * on the wrapped response object.
      */
-    public void setDateHeader(String name, long date) {
-	this._getHttpServletResponse().setDateHeader(name, date);
+    public void setDateHeader(String name, long date)
+    {
+        this._getHttpServletResponse().setDateHeader(name, date);
     }
-    
+
     /**
      * The default behavior of this method is to call addDateHeader(String name, long date)
      * on the wrapped response object.
      */
-   public void addDateHeader(String name, long date) {
-	this._getHttpServletResponse().addDateHeader(name, date);
+    public void addDateHeader(String name, long date)
+    {
+        this._getHttpServletResponse().addDateHeader(name, date);
     }
-    
+
     /**
      * The default behavior of this method is to return setHeader(String name, String value)
      * on the wrapped response object.
      */
-    public void setHeader(String name, String value) {
-	this._getHttpServletResponse().setHeader(name, value);
+    public void setHeader(String name, String value)
+    {
+        this._getHttpServletResponse().setHeader(name, value);
     }
-    
+
     /**
      * The default behavior of this method is to return addHeader(String name, String value)
      * on the wrapped response object.
      */
-     public void addHeader(String name, String value) {
-	this._getHttpServletResponse().addHeader(name, value);
+    public void addHeader(String name, String value)
+    {
+        this._getHttpServletResponse().addHeader(name, value);
     }
-    
+
     /**
      * The default behavior of this method is to call setIntHeader(String name, int value)
      * on the wrapped response object.
      */
-    public void setIntHeader(String name, int value) {
-	this._getHttpServletResponse().setIntHeader(name, value);
+    public void setIntHeader(String name, int value)
+    {
+        this._getHttpServletResponse().setIntHeader(name, value);
     }
-    
+
     /**
      * The default behavior of this method is to call addIntHeader(String name, int value)
      * on the wrapped response object.
      */
-    public void addIntHeader(String name, int value) {
-	this._getHttpServletResponse().addIntHeader(name, value);
+    public void addIntHeader(String name, int value)
+    {
+        this._getHttpServletResponse().addIntHeader(name, value);
     }
 
     /**
@@ -179,17 +194,19 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      */
 
 
-    public void setStatus(int sc) {
-	this._getHttpServletResponse().setStatus(sc);
+    public void setStatus(int sc)
+    {
+        this._getHttpServletResponse().setStatus(sc);
     }
-    
+
     /**
      * The default behavior of this method is to call setStatus(int sc, String sm)
      * on the wrapped response object.
      */
-     public void setStatus(int sc, String sm) {
-	this._getHttpServletResponse().setStatus(sc, sm);
+    public void setStatus(int sc, String sm)
+    {
+        this._getHttpServletResponse().setStatus(sc, sm);
     }
 
-   
+
 }

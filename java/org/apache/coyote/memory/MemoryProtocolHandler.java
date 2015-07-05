@@ -32,48 +32,57 @@ import java.util.Iterator;
  * @author Remy Maucherat
  */
 public class MemoryProtocolHandler
-    implements ProtocolHandler {
+        implements ProtocolHandler
+{
 
 
     // ------------------------------------------------------------- Properties
 
 
     /**
-     * Pass config info.
-     */
-    public void setAttribute(String name, Object value) {
-    }
-
-    public Object getAttribute(String name) {
-        return null;
-    }
-
-    public Iterator getAttributeNames() { return null ; }
-    /**
      * Associated adapter.
      */
     protected Adapter adapter = null;
 
     /**
-     * The adapter, used to call the connector.
+     * Pass config info.
      */
-    public void setAdapter(Adapter adapter) {
-        this.adapter = adapter;
+    public void setAttribute(String name, Object value)
+    {
     }
 
-    public Adapter getAdapter() {
+    public Object getAttribute(String name)
+    {
+        return null;
+    }
+
+    public Iterator getAttributeNames()
+    {
+        return null;
+    }
+
+    public Adapter getAdapter()
+    {
         return (adapter);
+    }
+
+    /**
+     * The adapter, used to call the connector.
+     */
+    public void setAdapter(Adapter adapter)
+    {
+        this.adapter = adapter;
     }
 
 
     // ------------------------------------------------ ProtocolHandler Methods
 
-
     /**
      * Init the protocol.
      */
     public void init()
-        throws Exception {
+            throws Exception
+    {
     }
 
 
@@ -81,20 +90,24 @@ public class MemoryProtocolHandler
      * Start the protocol.
      */
     public void start()
-        throws Exception {
+            throws Exception
+    {
     }
 
 
-    public void pause() 
-        throws Exception {
+    public void pause()
+            throws Exception
+    {
     }
 
-    public void resume() 
-        throws Exception {
+    public void resume()
+            throws Exception
+    {
     }
 
     public void destroy()
-        throws Exception {
+            throws Exception
+    {
     }
 
 
@@ -106,7 +119,8 @@ public class MemoryProtocolHandler
      */
     public void process(Request request, ByteChunk input,
                         Response response, ByteChunk output)
-        throws Exception {
+            throws Exception
+    {
 
         InputBuffer inputBuffer = new ByteChunkInputBuffer(input);
         OutputBuffer outputBuffer = new ByteChunkOutputBuffer(output);
@@ -122,16 +136,19 @@ public class MemoryProtocolHandler
 
 
     protected class ByteChunkInputBuffer
-        implements InputBuffer {
+            implements InputBuffer
+    {
 
         protected ByteChunk input = null;
 
-        public ByteChunkInputBuffer(ByteChunk input) {
+        public ByteChunkInputBuffer(ByteChunk input)
+        {
             this.input = input;
         }
 
-        public int doRead(ByteChunk chunk, Request request) 
-            throws IOException {
+        public int doRead(ByteChunk chunk, Request request)
+                throws IOException
+        {
             return input.substract(chunk);
         }
 
@@ -142,16 +159,19 @@ public class MemoryProtocolHandler
 
 
     protected class ByteChunkOutputBuffer
-        implements OutputBuffer {
+            implements OutputBuffer
+    {
 
         protected ByteChunk output = null;
 
-        public ByteChunkOutputBuffer(ByteChunk output) {
+        public ByteChunkOutputBuffer(ByteChunk output)
+        {
             this.output = output;
         }
 
-        public int doWrite(ByteChunk chunk, Response response) 
-            throws IOException {
+        public int doWrite(ByteChunk chunk, Response response)
+                throws IOException
+        {
             output.append(chunk);
             return chunk.getLength();
         }

@@ -21,7 +21,7 @@ package org.apache.catalina.session;
  * reached and the server is refusing to create any new sessions.
  */
 public class TooManyActiveSessionsException
-    extends IllegalStateException
+        extends IllegalStateException
 {
     private static final long serialVersionUID = 1L;
 
@@ -33,7 +33,7 @@ public class TooManyActiveSessionsException
     /**
      * Creates a new TooManyActiveSessionsException.
      *
-     * @param message A description for the exception.
+     * @param message   A description for the exception.
      * @param maxActive The maximum number of active sessions allowed by the
      *                  session manager.
      */

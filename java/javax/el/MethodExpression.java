@@ -20,9 +20,12 @@ package javax.el;
 /**
  *
  */
-public abstract class MethodExpression extends Expression {
+public abstract class MethodExpression extends Expression
+{
 
-    public abstract MethodInfo getMethodInfo(ELContext context) throws NullPointerException, PropertyNotFoundException, MethodNotFoundException, ELException;
-    
-    public abstract Object invoke(ELContext context, Object[] params) throws NullPointerException, PropertyNotFoundException, MethodNotFoundException, ELException;
+    public abstract MethodInfo getMethodInfo(ELContext context) throws NullPointerException, PropertyNotFoundException,
+            MethodNotFoundException, ELException;
+
+    public abstract Object invoke(ELContext context, Object[] params) throws NullPointerException,
+            PropertyNotFoundException, MethodNotFoundException, ELException;
 }

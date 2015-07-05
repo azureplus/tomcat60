@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -26,11 +26,11 @@ import javax.naming.StringRefAddr;
  * Represents a reference address to a resource.
  *
  * @author Remy Maucherat
- *
  */
 
 public class ResourceLinkRef
-    extends Reference {
+        extends Reference
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -39,8 +39,8 @@ public class ResourceLinkRef
     /**
      * Default factory for this reference.
      */
-    public static final String DEFAULT_FACTORY = 
-        org.apache.naming.factory.Constants.DEFAULT_RESOURCE_LINK_FACTORY;
+    public static final String DEFAULT_FACTORY =
+            org.apache.naming.factory.Constants.DEFAULT_RESOURCE_LINK_FACTORY;
 
 
     /**
@@ -54,26 +54,29 @@ public class ResourceLinkRef
 
     /**
      * ResourceLink Reference.
-     * 
+     *
      * @param resourceClass Resource class
-     * @param globalName Global name
+     * @param globalName    Global name
      */
-    public ResourceLinkRef(String resourceClass, String globalName) {
+    public ResourceLinkRef(String resourceClass, String globalName)
+    {
         this(resourceClass, globalName, null, null);
     }
 
 
     /**
      * ResourceLink Reference.
-     * 
+     *
      * @param resourceClass Resource class
-     * @param globalName Global name
+     * @param globalName    Global name
      */
-    public ResourceLinkRef(String resourceClass, String globalName, 
-                           String factory, String factoryLocation) {
+    public ResourceLinkRef(String resourceClass, String globalName,
+                           String factory, String factoryLocation)
+    {
         super(resourceClass, factory, factoryLocation);
         StringRefAddr refAddr = null;
-        if (globalName != null) {
+        if (globalName != null)
+        {
             refAddr = new StringRefAddr(GLOBALNAME, globalName);
             add(refAddr);
         }
@@ -87,18 +90,23 @@ public class ResourceLinkRef
 
 
     /**
-     * Retrieves the class name of the factory of the object to which this 
+     * Retrieves the class name of the factory of the object to which this
      * reference refers.
      */
-    public String getFactoryClassName() {
+    public String getFactoryClassName()
+    {
         String factory = super.getFactoryClassName();
-        if (factory != null) {
+        if (factory != null)
+        {
             return factory;
-        } else {
+        } else
+        {
             factory = System.getProperty(Context.OBJECT_FACTORIES);
-            if (factory != null) {
+            if (factory != null)
+            {
                 return null;
-            } else {
+            } else
+            {
                 return DEFAULT_FACTORY;
             }
         }

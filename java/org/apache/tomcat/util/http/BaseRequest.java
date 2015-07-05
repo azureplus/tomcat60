@@ -23,19 +23,19 @@
 
 package org.apache.tomcat.util.http;
 
+import org.apache.tomcat.util.buf.MessageBytes;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
 import java.util.HashMap;
 import java.util.Iterator;
-
-import org.apache.tomcat.util.buf.MessageBytes;
 
 /**
  * A general-purpose object for representing an HTTP
  * request.
  */
-public class BaseRequest {
+public class BaseRequest
+{
 
     // scheme constants
     public static final String SCHEME_HTTP = "http";
@@ -59,14 +59,16 @@ public class BaseRequest {
     MessageBytes contentType = MessageBytes.newInstance();
     MimeHeaders headers = new MimeHeaders();
     Cookies cookies = new Cookies();
-    HashMap<String,Object> attributes = new HashMap<String,Object>();
+    HashMap<String, Object> attributes = new HashMap<String, Object>();
 
     MessageBytes tomcatInstanceId = MessageBytes.newInstance();
-    
+    private Object notes[] = new Object[16];
+
     /**
      * Recycles this object and readies it further use.
      */
-    public void recycle() {
+    public void recycle()
+    {
         method.recycle();
         protocol.recycle();
         requestURI.recycle();
@@ -90,179 +92,224 @@ public class BaseRequest {
 
     /**
      * Get the method.
+     *
      * @return the method
      */
-    public MessageBytes method() {
+    public MessageBytes method()
+    {
         return method;
     }
 
     /**
      * Get the protocol
+     *
      * @return the protocol
      */
-    public MessageBytes protocol() {
+    public MessageBytes protocol()
+    {
         return protocol;
     }
 
     /**
      * Get the request uri
+     *
      * @return the request uri
      */
-    public MessageBytes requestURI() {
+    public MessageBytes requestURI()
+    {
         return requestURI;
     }
 
     /**
      * Get the remote address
+     *
      * @return the remote address
      */
-    public MessageBytes remoteAddr() {
+    public MessageBytes remoteAddr()
+    {
         return remoteAddr;
     }
 
     /**
      * Get the remote host
+     *
      * @return the remote host
      */
-    public MessageBytes remoteHost() {
+    public MessageBytes remoteHost()
+    {
         return remoteHost;
     }
 
     /**
      * Get the server name
+     *
      * @return the server name
      */
-    public MessageBytes serverName() {
+    public MessageBytes serverName()
+    {
         return serverName;
     }
 
     /**
      * Get the server port
+     *
      * @return the server port
      */
-    public int getServerPort() {
+    public int getServerPort()
+    {
         return serverPort;
     }
 
     /**
      * Set the server port
+     *
      * @param i the server port
      */
-    public void setServerPort(int i) {
+    public void setServerPort(int i)
+    {
         serverPort = i;
     }
 
     /**
      * Get the remote user
+     *
      * @return the remote user
      */
-    public MessageBytes remoteUser() {
+    public MessageBytes remoteUser()
+    {
         return remoteUser;
     }
 
     /**
      * Get the auth type
+     *
      * @return the auth type
      */
-    public MessageBytes authType() {
+    public MessageBytes authType()
+    {
         return authType;
     }
 
     /**
      * Get the query string
+     *
      * @return the query string
      */
-    public MessageBytes queryString() {
+    public MessageBytes queryString()
+    {
         return queryString;
     }
 
     /**
      * Get the authorization credentials
+     *
      * @return the authorization credentials
      */
-    public MessageBytes authorization() {
+    public MessageBytes authorization()
+    {
         return authorization;
     }
 
     /**
      * Get the scheme
+     *
      * @return the scheme
      */
-    public String getScheme() {
+    public String getScheme()
+    {
         return scheme;
     }
 
     /**
      * Set the scheme.
+     *
      * @param s the scheme
      */
-    public void setScheme(String s) {
+    public void setScheme(String s)
+    {
         scheme = s;
     }
 
     /**
      * Get whether the request is secure or not.
+     *
      * @return <code>true</code> if the request is secure.
      */
-    public boolean getSecure() {
+    public boolean getSecure()
+    {
         return secure;
     }
 
     /**
      * Set whether the request is secure or not.
+     *
      * @param b <code>true</code> if the request is secure.
      */
-    public void setSecure(boolean b) {
+    public void setSecure(boolean b)
+    {
         secure = b;
     }
 
     /**
      * Get the content length
+     *
      * @return the content length
      */
-    public int getContentLength() {
+    public int getContentLength()
+    {
         return contentLength;
     }
 
     /**
      * Set the content length
+     *
      * @param i the content length
      */
-    public void setContentLength(int i) {
+    public void setContentLength(int i)
+    {
         contentLength = i;
     }
 
     /**
      * Get the content type
+     *
      * @return the content type
      */
-    public MessageBytes contentType() {
+    public MessageBytes contentType()
+    {
         return contentType;
     }
 
     /**
      * Get this request's headers
+     *
      * @return request headers
      */
-    public MimeHeaders headers() {
+    public MimeHeaders headers()
+    {
         return headers;
     }
 
     /**
      * Get cookies.
+     *
      * @return request cookies.
      */
-    public Cookies cookies() {
+    public Cookies cookies()
+    {
         return cookies;
     }
 
     /**
      * Set an attribute on the request
-     * @param name attribute name
+     *
+     * @param name  attribute name
      * @param value attribute value
      */
-    public void setAttribute(String name, Object value) {
-        if (name == null || value == null) {
+    public void setAttribute(String name, Object value)
+    {
+        if (name == null || value == null)
+        {
             return;
         }
         attributes.put(name, value);
@@ -270,11 +317,14 @@ public class BaseRequest {
 
     /**
      * Get an attribute on the request
+     *
      * @param name attribute name
      * @return attribute value
      */
-    public Object getAttribute(String name) {
-        if (name == null) {
+    public Object getAttribute(String name)
+    {
+        if (name == null)
+        {
             return null;
         }
 
@@ -283,41 +333,47 @@ public class BaseRequest {
 
     /**
      * Get iterator over attribute names
+     *
      * @return iterator over attribute names
      */
-    public Iterator getAttributeNames() {
+    public Iterator getAttributeNames()
+    {
         return attributes.keySet().iterator();
     }
 
     /**
      * Get the host id ( or jvmRoute )
+     *
      * @return the jvm route
      */
-    public MessageBytes instanceId() {
+    public MessageBytes instanceId()
+    {
         return tomcatInstanceId;
     }
 
     // backward compat - jvmRoute is the id of this tomcat instance,
     // used by a load balancer on the server side to implement sticky
     // sessions, and on the tomcat side to format the session ids.
-    public MessageBytes jvmRoute() {
+    public MessageBytes jvmRoute()
+    {
         return tomcatInstanceId;
     }
 
-    private Object notes[]=new Object[16];
-    
-    public final Object getNote(int id) {
+    public final Object getNote(int id)
+    {
         return notes[id];
     }
 
-    public final void setNote(int id, Object cr) {
-        notes[id]=cr;
+    public final void setNote(int id, Object cr)
+    {
+        notes[id] = cr;
     }
-    
+
     /**
      * ** SLOW ** for debugging only!
      */
-    public String toString() {
+    public String toString()
+    {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
@@ -342,5 +398,5 @@ public class BaseRequest {
         pw.println("jvmRoute        = " + tomcatInstanceId.toString());
         return sw.toString();
     }
-    
+
 }

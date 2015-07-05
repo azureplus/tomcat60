@@ -19,18 +19,13 @@
 package org.apache.tomcat.util.http.fileupload;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 
 /**
  * <p> This class represents a file or form item that was received within a
  * <code>multipart/form-data</code> POST request.
- *
+ * <p/>
  * <p> After retrieving an instance of this class from a {@link
  * org.apache.tomcat.util.http.fileupload.FileUpload FileUpload} instance (see
  * {@link org.apache.tomcat.util.http.fileupload.FileUpload
@@ -39,7 +34,7 @@ import java.io.UnsupportedEncodingException;
  * request an {@link java.io.InputStream InputStream} with
  * {@link #getInputStream()} and process the file without attempting to load
  * it into memory, which may come handy with large files.
- *
+ * <p/>
  * <p> While this interface does not extend
  * <code>javax.activation.DataSource</code> per se (to avoid a seldom used
  * dependency), several of the defined methods are specifically defined with
@@ -51,11 +46,9 @@ import java.io.UnsupportedEncodingException;
  * @author <a href="mailto:sean@informage.net">Sean Legassick</a>
  * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- *
- *
  */
 public interface FileItem
-    extends Serializable
+        extends Serializable
 {
 
 
@@ -67,12 +60,11 @@ public interface FileItem
      * used to retrieve the contents of the file.
      *
      * @return An {@link java.io.InputStream InputStream} that can be
-     *         used to retrieve the contents of the file.
-     *
-     * @exception IOException if an error occurs.
+     * used to retrieve the contents of the file.
+     * @throws IOException if an error occurs.
      */
     InputStream getInputStream()
-        throws IOException;
+            throws IOException;
 
 
     /**
@@ -80,7 +72,7 @@ public interface FileItem
      * not defined.
      *
      * @return The content type passed by the browser or <code>null</code> if
-     *         not defined.
+     * not defined.
      */
     String getContentType();
 
@@ -104,7 +96,7 @@ public interface FileItem
      * from memory.
      *
      * @return <code>true</code> if the file contents will be read from memory;
-     *         <code>false</code> otherwise.
+     * <code>false</code> otherwise.
      */
     boolean isInMemory();
 
@@ -131,14 +123,12 @@ public interface FileItem
      * contents of the item.
      *
      * @param encoding The character encoding to use.
-     *
      * @return The contents of the item, as a string.
-     *
-     * @exception UnsupportedEncodingException if the requested character
-     *                                         encoding is not available.
+     * @throws UnsupportedEncodingException if the requested character
+     *                                      encoding is not available.
      */
     String getString(String encoding)
-        throws UnsupportedEncodingException;
+            throws UnsupportedEncodingException;
 
 
     /**
@@ -156,7 +146,7 @@ public interface FileItem
      * is not concerned with whether or not the item is stored in memory, or on
      * disk in a temporary location. They just want to write the uploaded item
      * to a file.
-     * <p>
+     * <p/>
      * This method is not guaranteed to succeed if called more than once for
      * the same item. This allows a particular implementation to use, for
      * example, file renaming, where possible, rather than copying all of the
@@ -164,8 +154,7 @@ public interface FileItem
      *
      * @param file The <code>File</code> into which the uploaded item should
      *             be stored.
-     *
-     * @exception Exception if an error occurs.
+     * @throws Exception if an error occurs.
      */
     void write(File file) throws Exception;
 
@@ -202,7 +191,7 @@ public interface FileItem
      * a simple form field.
      *
      * @return <code>true</code> if the instance represents a simple form
-     *         field; <code>false</code> if it represents an uploaded file.
+     * field; <code>false</code> if it represents an uploaded file.
      */
     boolean isFormField();
 
@@ -222,9 +211,8 @@ public interface FileItem
      * be used for storing the contents of the file.
      *
      * @return An {@link java.io.OutputStream OutputStream} that can be used
-     *         for storing the contensts of the file.
-     *
-     * @exception IOException if an error occurs.
+     * for storing the contensts of the file.
+     * @throws IOException if an error occurs.
      */
     OutputStream getOutputStream() throws IOException;
 

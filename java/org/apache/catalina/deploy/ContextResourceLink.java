@@ -28,53 +28,59 @@ import java.io.Serializable;
  *
  * @author Remy Maucherat
  * @author Peter Rossbach (Peter Rossbach (pero@apache.org))
- *
  */
 
-public class ContextResourceLink extends ResourceBase implements Serializable {
+public class ContextResourceLink extends ResourceBase implements Serializable
+{
 
 
     // ------------------------------------------------------------- Properties
 
-   /**
+    /**
      * The global name of this resource.
      */
     private String global = null;
+    private String factory = null;
 
-    public String getGlobal() {
+    public String getGlobal()
+    {
         return (this.global);
     }
 
-    public void setGlobal(String global) {
+    public void setGlobal(String global)
+    {
         this.global = global;
     }
 
-    private String factory = null;
-
-    public String getFactory() {
+    public String getFactory()
+    {
         return factory;
     }
 
-    public void setFactory(String factory) {
+    public void setFactory(String factory)
+    {
         this.factory = factory;
-    }    
-    
+    }
+
     // --------------------------------------------------------- Public Methods
 
 
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ContextResourceLink[");
         sb.append("name=");
         sb.append(getName());
-        if (getType() != null) {
+        if (getType() != null)
+        {
             sb.append(", type=");
             sb.append(getType());
         }
-        if (getGlobal() != null) {
+        if (getGlobal() != null)
+        {
             sb.append(", global=");
             sb.append(getGlobal());
         }

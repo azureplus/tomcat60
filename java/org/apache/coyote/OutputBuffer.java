@@ -22,21 +22,22 @@ import java.io.IOException;
 
 /**
  * Output buffer.
- *
+ * <p/>
  * This class is used internally by the protocol implementation. All writes from higher level code should happen
  * via Resonse.doWrite().
- * 
+ *
  * @author Remy Maucherat
  */
-public interface OutputBuffer {
+public interface OutputBuffer
+{
 
-    /** Write the response. The caller ( tomcat ) owns the chunks.
+    /**
+     * Write the response. The caller ( tomcat ) owns the chunks.
      *
-     * @param chunk data to write
+     * @param chunk    data to write
      * @param response used to allow buffers that can be shared by multiple responses.
-     * 
      * @throws IOException
      */
     public int doWrite(ByteChunk chunk, Response response)
-        throws IOException;
+            throws IOException;
 }

@@ -19,9 +19,8 @@
 package org.apache.tomcat.util.modeler;
 
 
-import java.io.Serializable;
-
 import javax.management.MBeanConstructorInfo;
+import java.io.Serializable;
 
 
 /**
@@ -30,11 +29,13 @@ import javax.management.MBeanConstructorInfo;
  *
  * @author Craig R. McClanahan
  */
-public class ConstructorInfo extends OperationInfo implements Serializable {
+public class ConstructorInfo extends OperationInfo implements Serializable
+{
     static final long serialVersionUID = -5735336213417238238L;
     // ------------------------------------------------------------- Properties
 
-    public ConstructorInfo() {
+    public ConstructorInfo()
+    {
     }
 
     // --------------------------------------------------------- Public Methods
@@ -44,13 +45,15 @@ public class ConstructorInfo extends OperationInfo implements Serializable {
      * Create and return a <code>ModelMBeanConstructorInfo</code> object that
      * corresponds to the attribute described by this instance.
      */
-    public MBeanConstructorInfo createConstructorInfo() {
+    public MBeanConstructorInfo createConstructorInfo()
+    {
         // Return our cached information (if any)
-        if (info == null) {
-            info = new MBeanConstructorInfo(getName(), getDescription(), 
+        if (info == null)
+        {
+            info = new MBeanConstructorInfo(getName(), getDescription(),
                     getMBeanParameterInfo());
         }
-        return (MBeanConstructorInfo)info;
+        return (MBeanConstructorInfo) info;
     }
 
 }

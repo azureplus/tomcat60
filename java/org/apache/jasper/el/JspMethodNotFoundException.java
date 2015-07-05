@@ -18,9 +18,11 @@ package org.apache.jasper.el;
 
 import javax.el.MethodNotFoundException;
 
-public class JspMethodNotFoundException extends MethodNotFoundException {
+public class JspMethodNotFoundException extends MethodNotFoundException
+{
 
-    public JspMethodNotFoundException(String mark, MethodNotFoundException e) {
+    public JspMethodNotFoundException(String mark, MethodNotFoundException e)
+    {
         super(mark + " " + e.getMessage(), e.getCause());
     }
 }

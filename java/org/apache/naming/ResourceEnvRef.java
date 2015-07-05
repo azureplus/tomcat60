@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -25,11 +25,11 @@ import javax.naming.Reference;
  * Represents a reference address to a resource environment.
  *
  * @author Remy Maucherat
- *
  */
 
 public class ResourceEnvRef
-    extends Reference {
+        extends Reference
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -38,8 +38,8 @@ public class ResourceEnvRef
     /**
      * Default factory for this reference.
      */
-    public static final String DEFAULT_FACTORY = 
-        org.apache.naming.factory.Constants.DEFAULT_RESOURCE_ENV_FACTORY;
+    public static final String DEFAULT_FACTORY =
+            org.apache.naming.factory.Constants.DEFAULT_RESOURCE_ENV_FACTORY;
 
 
     // ----------------------------------------------------------- Constructors
@@ -47,23 +47,25 @@ public class ResourceEnvRef
 
     /**
      * Resource env reference.
-     * 
+     *
      * @param resourceType Type
      */
-    public ResourceEnvRef(String resourceType) {
+    public ResourceEnvRef(String resourceType)
+    {
         super(resourceType);
     }
 
 
     /**
      * Resource env reference.
-     * 
-     * @param resourceType Type
-     * @param factory The factory class
+     *
+     * @param resourceType    Type
+     * @param factory         The factory class
      * @param factoryLocation The factory location
      */
     public ResourceEnvRef(String resourceType, String factory,
-                          String factoryLocation) {
+                          String factoryLocation)
+    {
         super(resourceType, factory, factoryLocation);
     }
 
@@ -75,18 +77,23 @@ public class ResourceEnvRef
 
 
     /**
-     * Retrieves the class name of the factory of the object to which this 
+     * Retrieves the class name of the factory of the object to which this
      * reference refers.
      */
-    public String getFactoryClassName() {
+    public String getFactoryClassName()
+    {
         String factory = super.getFactoryClassName();
-        if (factory != null) {
+        if (factory != null)
+        {
             return factory;
-        } else {
+        } else
+        {
             factory = System.getProperty(Context.OBJECT_FACTORIES);
-            if (factory != null) {
+            if (factory != null)
+            {
                 return null;
-            } else {
+            } else
+            {
                 return DEFAULT_FACTORY;
             }
         }

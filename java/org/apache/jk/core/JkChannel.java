@@ -27,7 +27,8 @@ import java.io.IOException;
  * @author Bill Barker
  */
 
-public interface JkChannel {
+public interface JkChannel
+{
 
 
     /**
@@ -37,17 +38,19 @@ public interface JkChannel {
 
     /**
      * Send a message back to the client.
+     *
      * @param msg The message to send.
-     * @param ep The connection point for this request.
+     * @param ep  The connection point for this request.
      */
     public int send(Msg msg, MsgContext ep) throws IOException;
 
     /**
      * Recieve a message from the client.
+     *
      * @param msg The place to recieve the data into.
-     * @param ep The connection point for this request.
+     * @param ep  The connection point for this request.
      */
-    public  int receive(Msg msg, MsgContext ep) throws IOException;
+    public int receive(Msg msg, MsgContext ep) throws IOException;
 
     /**
      * Flush the data to the client.

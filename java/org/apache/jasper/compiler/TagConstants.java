@@ -17,7 +17,8 @@
 
 package org.apache.jasper.compiler;
 
-public interface TagConstants {
+public interface TagConstants
+{
 
     public static final String JSP_URI = "http://java.sun.com/JSP/Page";
 

@@ -24,59 +24,70 @@ import java.util.Map;
 /**
  *
  */
-public abstract class ELContext {
+public abstract class ELContext
+{
 
     private Locale locale;
-    
+
     private Map<Class<?>, Object> map;
-    
+
     private boolean resolved;
-    
+
     /**
-     * 
+     *
      */
-    public ELContext() {
+    public ELContext()
+    {
         this.resolved = false;
     }
-    
-    public Object getContext(Class key) {
-        if (this.map == null) {
+
+    public Object getContext(Class key)
+    {
+        if (this.map == null)
+        {
             return null;
         }
         return this.map.get(key);
     }
-    
-    public void putContext(Class key, Object contextObject) throws NullPointerException {
-        if (key == null || contextObject == null) {
+
+    public void putContext(Class key, Object contextObject) throws NullPointerException
+    {
+        if (key == null || contextObject == null)
+        {
             throw new NullPointerException();
         }
-        
-        if (this.map == null) {
+
+        if (this.map == null)
+        {
             this.map = new HashMap<Class<?>, Object>();
         }
-        
+
         this.map.put(key, contextObject);
     }
-    
-    public void setPropertyResolved(boolean resolved) {
-        this.resolved = resolved;
-    }
-    
-    public boolean isPropertyResolved() {
+
+    public boolean isPropertyResolved()
+    {
         return this.resolved;
     }
-    
+
+    public void setPropertyResolved(boolean resolved)
+    {
+        this.resolved = resolved;
+    }
+
     public abstract ELResolver getELResolver();
 
     public abstract FunctionMapper getFunctionMapper();
-    
+
     public abstract VariableMapper getVariableMapper();
-    
-    public Locale getLocale() {
+
+    public Locale getLocale()
+    {
         return this.locale;
     }
-    
-    public void setLocale(Locale locale) {
+
+    public void setLocale(Locale locale)
+    {
         this.locale = locale;
     }
 }

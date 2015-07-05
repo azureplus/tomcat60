@@ -16,7 +16,9 @@
  */
 package javax.mail.internet;
 
-public class InternetAddress {
-    public InternetAddress(String from) {
+public class InternetAddress
+{
+    public InternetAddress(String from)
+    {
     }
 }

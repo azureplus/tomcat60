@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -23,10 +23,10 @@ package org.apache.naming;
  * Represents a binding in a NamingContext.
  *
  * @author Remy Maucherat
- *
  */
 
-public class NamingEntry {
+public class NamingEntry
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -35,45 +35,45 @@ public class NamingEntry {
     public static final int ENTRY = 0;
     public static final int LINK_REF = 1;
     public static final int REFERENCE = 2;
-    
+
     public static final int CONTEXT = 10;
 
 
     // ----------------------------------------------------------- Constructors
+    /**
+     * The type instance variable is used to avoid unsing RTTI when doing
+     * lookups.
+     */
+    public int type;
 
 
-    public NamingEntry(String name, Object value, int type) {
+    // ----------------------------------------------------- Instance Variables
+    public String name;
+    public Object value;
+    public NamingEntry(String name, Object value, int type)
+    {
         this.name = name;
         this.value = value;
         this.type = type;
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The type instance variable is used to avoid unsing RTTI when doing
-     * lookups.
-     */
-    public int type;
-    public String name;
-    public Object value;
-
-
     // --------------------------------------------------------- Object Methods
 
-
-    public boolean equals(Object obj) {
-        if ((obj != null) && (obj instanceof NamingEntry)) {
+    public boolean equals(Object obj)
+    {
+        if ((obj != null) && (obj instanceof NamingEntry))
+        {
             return name.equals(((NamingEntry) obj).name);
-        } else {
+        } else
+        {
             return false;
         }
     }
 
 
-    public int hashCode() {
+    public int hashCode()
+    {
         return name.hashCode();
     }
 

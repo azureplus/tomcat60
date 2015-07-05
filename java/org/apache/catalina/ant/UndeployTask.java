@@ -30,10 +30,10 @@ import java.net.URLEncoder;
  * the Tomcat manager application.
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
-public class UndeployTask extends AbstractCatalinaTask {
+public class UndeployTask extends AbstractCatalinaTask
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -43,11 +43,13 @@ public class UndeployTask extends AbstractCatalinaTask {
      */
     protected String path = null;
 
-    public String getPath() {
+    public String getPath()
+    {
         return (this.path);
     }
 
-    public void setPath(String path) {
+    public void setPath(String path)
+    {
         this.path = path;
     }
 
@@ -58,22 +60,27 @@ public class UndeployTask extends AbstractCatalinaTask {
     /**
      * Execute the requested operation.
      *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
 
         super.execute();
-        if (path == null) {
+        if (path == null)
+        {
             throw new BuildException
-                ("Must specify 'path' attribute");
+                    ("Must specify 'path' attribute");
         }
 
-        try {
+        try
+        {
             execute("/undeploy?path=" +
                     URLEncoder.encode(this.path, getCharset()));
-        } catch (UnsupportedEncodingException e) {
+        }
+        catch (UnsupportedEncodingException e)
+        {
             throw new BuildException
-                ("Invalid 'charset' attribute: " + getCharset());
+                    ("Invalid 'charset' attribute: " + getCharset());
         }
     }
 

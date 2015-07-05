@@ -49,47 +49,13 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Craig R. McClanahan
  * @author Remy Maucherat
- *
  */
 
 public class ApplicationContext
-    implements ServletContext {
+        implements ServletContext
+{
 
     // ----------------------------------------------------------- Constructors
-
-
-    /**
-     * Construct a new instance of this class, associated with the specified
-     * Context instance.
-     *
-     * @param context The associated Context instance
-     */
-    public ApplicationContext(String basePath, StandardContext context) {
-        super();
-        this.context = context;
-        this.basePath = basePath;
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The context attributes for this context.
-     */
-    protected Map attributes = new ConcurrentHashMap();
-
-
-    /**
-     * List of read only attributes for this context.
-     */
-    private Map readOnlyAttributes = new ConcurrentHashMap();
-
-
-    /**
-     * The Context instance with which we are associated.
-     */
-    private StandardContext context = null;
 
 
     /**
@@ -99,6 +65,24 @@ public class ApplicationContext
     private static final ArrayList empty = new ArrayList();
 
 
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * The string manager for this package.
+     */
+    private static final StringManager sm =
+            StringManager.getManager(Constants.Package);
+    /**
+     * The context attributes for this context.
+     */
+    protected Map attributes = new ConcurrentHashMap();
+    /**
+     * List of read only attributes for this context.
+     */
+    private Map readOnlyAttributes = new ConcurrentHashMap();
+    /**
+     * The Context instance with which we are associated.
+     */
+    private StandardContext context = null;
     /**
      * The facade around this object.
      */
@@ -108,47 +92,88 @@ public class ApplicationContext
     /**
      * The merged context initialization parameters for this Context.
      */
-    private Map<String,String> parameters =
-        new ConcurrentHashMap<String,String>();
-
-
-    /**
-     * The string manager for this package.
-     */
-    private static final StringManager sm =
-      StringManager.getManager(Constants.Package);
-
-
+    private Map<String, String> parameters =
+            new ConcurrentHashMap<String, String>();
     /**
      * Base path.
      */
     private String basePath = null;
-
-
     /**
      * Thread local data used during request dispatch.
      */
     private ThreadLocal<DispatchData> dispatchData =
-        new ThreadLocal<DispatchData>();
+            new ThreadLocal<DispatchData>();
+
+
+    /**
+     * Construct a new instance of this class, associated with the specified
+     * Context instance.
+     *
+     * @param context The associated Context instance
+     */
+    public ApplicationContext(String basePath, StandardContext context)
+    {
+        super();
+        this.context = context;
+        this.basePath = basePath;
+    }
 
 
     // --------------------------------------------------------- Public Methods
 
-
     /**
-     * Return the resources object that is mapped to a specified path.
-     * The path must begin with a "/" and is interpreted as relative to the
-     * current context root.
+     * List resource paths (recursively), and store all of them in the given
+     * Set.
      */
-    public DirContext getResources() {
+    private static void listCollectionPaths
+    (Set set, DirContext resources, String path)
+            throws NamingException
+    {
 
-        return context.getResources();
+        Enumeration childPaths = resources.listBindings(path);
+        while (childPaths.hasMoreElements())
+        {
+            Binding binding = (Binding) childPaths.nextElement();
+            String name = binding.getName();
+            StringBuffer childPath = new StringBuffer(path);
+            if (!"/".equals(path) && !path.endsWith("/"))
+                childPath.append("/");
+            childPath.append(name);
+            Object object = binding.getObject();
+            if (object instanceof DirContext)
+            {
+                childPath.append("/");
+            }
+            set.add(childPath.toString());
+        }
 
     }
 
 
     // ------------------------------------------------- ServletContext Methods
 
+    /**
+     * Get full path, based on the host name and the context path.
+     */
+    private static String getJNDIUri(String hostName, String path)
+    {
+        if (!path.startsWith("/"))
+            return "/" + hostName + "/" + path;
+        else
+            return "/" + hostName + path;
+    }
+
+    /**
+     * Return the resources object that is mapped to a specified path.
+     * The path must begin with a "/" and is interpreted as relative to the
+     * current context root.
+     */
+    public DirContext getResources()
+    {
+
+        return context.getResources();
+
+    }
 
     /**
      * Return the value of the specified context attribute, if any;
@@ -156,23 +181,23 @@ public class ApplicationContext
      *
      * @param name Name of the context attribute to return
      */
-    public Object getAttribute(String name) {
+    public Object getAttribute(String name)
+    {
 
         return (attributes.get(name));
 
     }
 
-
     /**
      * Return an enumeration of the names of the context attributes
      * associated with this context.
      */
-    public Enumeration getAttributeNames() {
+    public Enumeration getAttributeNames()
+    {
 
         return new Enumerator(attributes.keySet(), true);
 
     }
-
 
     /**
      * Return a <code>ServletContext</code> object that corresponds to a
@@ -184,17 +209,20 @@ public class ApplicationContext
      *
      * @param uri Absolute URI of a resource on the server
      */
-    public ServletContext getContext(String uri) {
+    public ServletContext getContext(String uri)
+    {
 
         // Validate the format of the specified argument
         if ((uri == null) || (!uri.startsWith("/")))
             return (null);
 
         Context child = null;
-        try {
+        try
+        {
             Host host = (Host) context.getParent();
             String mapuri = uri;
-            while (true) {
+            while (true)
+            {
                 child = (Context) host.findChild(mapuri);
                 if (child != null)
                     break;
@@ -203,33 +231,37 @@ public class ApplicationContext
                     break;
                 mapuri = mapuri.substring(0, slash);
             }
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             return (null);
         }
 
         if (child == null)
             return (null);
 
-        if (context.getCrossContext()) {
+        if (context.getCrossContext())
+        {
             // If crossContext is enabled, can always return the context
             return child.getServletContext();
-        } else if (child == context) {
+        } else if (child == context)
+        {
             // Can still return the current context
             return context.getServletContext();
-        } else {
+        } else
+        {
             // Nothing to return
             return (null);
         }
     }
 
-
     /**
      * Return the main path associated with this context.
      */
-    public String getContextPath() {
+    public String getContextPath()
+    {
         return context.getPath();
     }
-
 
     /**
      * Return the value of the specified initialization parameter, or
@@ -237,19 +269,24 @@ public class ApplicationContext
      *
      * @param name Name of the initialization parameter to retrieve
      */
-    public String getInitParameter(final String name) {
+    public String getInitParameter(final String name)
+    {
         // Special handling for XML settings as the context setting must
         // always override anything that might have been set by an application.
         if (Globals.JASPER_XML_VALIDATION_TLD_INIT_PARAM.equals(name) &&
-                context.getTldValidation()) {
+                context.getTldValidation())
+        {
             return "true";
         }
         if (Globals.JASPER_XML_VALIDATION_INIT_PARAM.equals(name) &&
-                context.getXmlValidation()) {
+                context.getXmlValidation())
+        {
             return "true";
         }
-        if (Globals.JASPER_XML_BLOCK_EXTERNAL_INIT_PARAM.equals(name)) {
-            if (!context.getXmlBlockExternal()) {
+        if (Globals.JASPER_XML_BLOCK_EXTERNAL_INIT_PARAM.equals(name))
+        {
+            if (!context.getXmlBlockExternal())
+            {
                 // System admin has explicitly changed the default
                 return "false";
             }
@@ -257,9 +294,10 @@ public class ApplicationContext
         return parameters.get(name);
     }
 
-
-    public boolean setInitParameter(String name, String value) {
-        if (parameters.containsKey(name)) {
+    public boolean setInitParameter(String name, String value)
+    {
+        if (parameters.containsKey(name))
+        {
             return false;
         }
 
@@ -267,48 +305,50 @@ public class ApplicationContext
         return true;
     }
 
-
     /**
      * Return the names of the context's initialization parameters, or an
      * empty enumeration if the context has no initialization parameters.
      */
-    public Enumeration<String> getInitParameterNames() {
+    public Enumeration<String> getInitParameterNames()
+    {
         Set<String> names = new HashSet<String>();
         names.addAll(parameters.keySet());
         // Special handling for XML settings as these attributes will always be
         // available if they have been set on the context
-        if (context.getTldValidation()) {
+        if (context.getTldValidation())
+        {
             names.add(Globals.JASPER_XML_VALIDATION_TLD_INIT_PARAM);
         }
-        if (context.getXmlValidation()) {
+        if (context.getXmlValidation())
+        {
             names.add(Globals.JASPER_XML_VALIDATION_INIT_PARAM);
         }
-        if (!context.getXmlBlockExternal()) {
+        if (!context.getXmlBlockExternal())
+        {
             names.add(Globals.JASPER_XML_BLOCK_EXTERNAL_INIT_PARAM);
         }
         return Collections.enumeration(names);
     }
 
-
     /**
      * Return the major version of the Java Servlet API that we implement.
      */
-    public int getMajorVersion() {
+    public int getMajorVersion()
+    {
 
         return (Constants.MAJOR_VERSION);
 
     }
 
-
     /**
      * Return the minor version of the Java Servlet API that we implement.
      */
-    public int getMinorVersion() {
+    public int getMinorVersion()
+    {
 
         return (Constants.MINOR_VERSION);
 
     }
-
 
     /**
      * Return the MIME type of the specified file, or <code>null</code> if
@@ -316,7 +356,8 @@ public class ApplicationContext
      *
      * @param file Filename for which to identify a MIME type
      */
-    public String getMimeType(String file) {
+    public String getMimeType(String file)
+    {
 
         if (file == null)
             return (null);
@@ -330,14 +371,14 @@ public class ApplicationContext
 
     }
 
-
     /**
      * Return a <code>RequestDispatcher</code> object that acts as a
      * wrapper for the named servlet.
      *
      * @param name Name of the servlet for which a dispatcher is requested
      */
-    public RequestDispatcher getNamedDispatcher(String name) {
+    public RequestDispatcher getNamedDispatcher(String name)
+    {
 
         // Validate the name argument
         if (name == null)
@@ -352,19 +393,20 @@ public class ApplicationContext
 
     }
 
-
     /**
      * Return the real path for a given virtual path, if possible; otherwise
      * return <code>null</code>.
      *
      * @param path The path to the desired resource
      */
-    public String getRealPath(String path) {
+    public String getRealPath(String path)
+    {
 
         if (!context.isFilesystemBased())
             return null;
 
-        if (path == null) {
+        if (path == null)
+        {
             return null;
         }
 
@@ -373,7 +415,6 @@ public class ApplicationContext
 
     }
 
-
     /**
      * Return a <code>RequestDispatcher</code> instance that acts as a
      * wrapper for the resource at the given path.  The path must begin
@@ -381,20 +422,22 @@ public class ApplicationContext
      *
      * @param path The path to the desired resource.
      */
-    public RequestDispatcher getRequestDispatcher(String path) {
+    public RequestDispatcher getRequestDispatcher(String path)
+    {
 
         // Validate the path argument
         if (path == null)
             return (null);
         if (!path.startsWith("/"))
             throw new IllegalArgumentException
-                (sm.getString
-                 ("applicationContext.requestDispatcher.iae", path));
+                    (sm.getString
+                            ("applicationContext.requestDispatcher.iae", path));
 
         // Get query string
         String queryString = null;
         int pos = path.indexOf('?');
-        if (pos >= 0) {
+        if (pos >= 0)
+        {
             queryString = path.substring(pos + 1);
             path = path.substring(0, pos);
         }
@@ -407,7 +450,8 @@ public class ApplicationContext
 
         // Use the thread local URI and mapping data
         DispatchData dd = dispatchData.get();
-        if (dd == null) {
+        if (dd == null)
+        {
             dd = new DispatchData();
             dispatchData.set(dd);
         }
@@ -420,19 +464,22 @@ public class ApplicationContext
 
         // Map the URI
         CharChunk uriCC = uriMB.getCharChunk();
-        try {
+        try
+        {
             uriCC.append(context.getPath(), 0, context.getPath().length());
             /*
              * Ignore any trailing path params (separated by ';') for mapping
              * purposes
              */
             int semicolon = path.indexOf(';');
-            if (pos >= 0 && semicolon > pos) {
+            if (pos >= 0 && semicolon > pos)
+            {
                 semicolon = -1;
             }
             uriCC.append(path, 0, semicolon > 0 ? semicolon : pos);
             context.getMapper().map(uriMB, mappingData);
-            if (mappingData.wrapper == null) {
+            if (mappingData.wrapper == null)
+            {
                 return (null);
             }
             /*
@@ -440,10 +487,13 @@ public class ApplicationContext
              * ignored for mapping purposes, so that they're reflected in the
              * RequestDispatcher's requestURI
              */
-            if (semicolon > 0) {
+            if (semicolon > 0)
+            {
                 uriCC.append(path, semicolon, pos - semicolon);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             // Should never happen
             log(sm.getString("applicationContext.mapping.error"), e);
             return (null);
@@ -457,12 +507,10 @@ public class ApplicationContext
 
         // Construct a RequestDispatcher to process this request
         return new ApplicationDispatcher
-            (wrapper, uriCC.toString(), wrapperPath, pathInfo,
-             queryString, null);
+                (wrapper, uriCC.toString(), wrapperPath, pathInfo,
+                        queryString, null);
 
     }
-
-
 
     /**
      * Return the URL to the resource that is mapped to a specified path.
@@ -470,12 +518,12 @@ public class ApplicationContext
      * current context root.
      *
      * @param path The path to the desired resource
-     *
-     * @exception MalformedURLException if the path is not given
-     *  in the correct form
+     * @throws MalformedURLException if the path is not given
+     *                               in the correct form
      */
     public URL getResource(String path)
-        throws MalformedURLException {
+            throws MalformedURLException
+    {
 
         if (path == null)
             throw new MalformedURLException(sm.getString("applicationContext.requestDispatcher.iae", path));
@@ -489,32 +537,44 @@ public class ApplicationContext
             return (null);
 
         String libPath = "/WEB-INF/lib/";
-        if ((path.startsWith(libPath)) && (path.endsWith(".jar"))) {
+        if ((path.startsWith(libPath)) && (path.endsWith(".jar")))
+        {
             File jarFile = null;
-            if (context.isFilesystemBased()) {
+            if (context.isFilesystemBased())
+            {
                 jarFile = new File(basePath, path);
-            } else {
+            } else
+            {
                 jarFile = new File(context.getWorkPath(), path);
             }
-            if (jarFile.exists()) {
+            if (jarFile.exists())
+            {
                 return jarFile.toURL();
-            } else {
+            } else
+            {
                 return null;
             }
-        } else {
+        } else
+        {
 
             DirContext resources = context.getResources();
-            if (resources != null) {
+            if (resources != null)
+            {
                 String fullPath = context.getName() + path;
                 String hostName = context.getParent().getName();
-                try {
+                try
+                {
                     resources.lookup(path);
                     return new URL
-                        ("jndi", "", 0, getJNDIUri(hostName, fullPath),
-                         new DirContextURLStreamHandler(resources));
-                } catch (NamingException e) {
+                            ("jndi", "", 0, getJNDIUri(hostName, fullPath),
+                                    new DirContextURLStreamHandler(resources));
+                }
+                catch (NamingException e)
+                {
                     // Ignore
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     // Unexpected
                     log(sm.getString("applicationContext.lookup.error", path,
                             getContextPath()), e);
@@ -526,7 +586,6 @@ public class ApplicationContext
 
     }
 
-
     /**
      * Return the requested resource as an <code>InputStream</code>.  The
      * path must be specified according to the rules described under
@@ -535,7 +594,8 @@ public class ApplicationContext
      *
      * @param path The path to the desired resource.
      */
-    public InputStream getResourceAsStream(String path) {
+    public InputStream getResourceAsStream(String path)
+    {
 
         if (path == null)
             return (null);
@@ -548,14 +608,20 @@ public class ApplicationContext
             return (null);
 
         DirContext resources = context.getResources();
-        if (resources != null) {
-            try {
+        if (resources != null)
+        {
+            try
+            {
                 Object resource = resources.lookup(path);
                 if (resource instanceof Resource)
                     return (((Resource) resource).streamContent());
-            } catch (NamingException e) {
+            }
+            catch (NamingException e)
+            {
                 // Ignore
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 // Unexpected
                 log(sm.getString("applicationContext.lookup.error", path,
                         getContextPath()), e);
@@ -565,7 +631,6 @@ public class ApplicationContext
 
     }
 
-
     /**
      * Return a Set containing the resource paths of resources member of the
      * specified collection. Each path will be a String starting with
@@ -573,15 +638,18 @@ public class ApplicationContext
      *
      * @param path Collection path
      */
-    public Set getResourcePaths(String path) {
+    public Set getResourcePaths(String path)
+    {
 
         // Validate the path argument
-        if (path == null) {
+        if (path == null)
+        {
             return null;
         }
-        if (!path.startsWith("/")) {
+        if (!path.startsWith("/"))
+        {
             throw new IllegalArgumentException
-                (sm.getString("applicationContext.resourcePaths.iae", path));
+                    (sm.getString("applicationContext.resourcePaths.iae", path));
         }
 
         path = RequestUtil.normalize(path);
@@ -589,26 +657,30 @@ public class ApplicationContext
             return (null);
 
         DirContext resources = context.getResources();
-        if (resources != null) {
+        if (resources != null)
+        {
             return (getResourcePathsInternal(resources, path));
         }
         return (null);
 
     }
 
-
     /**
      * Internal implementation of getResourcesPath() logic.
      *
      * @param resources Directory context to search
-     * @param path Collection path
+     * @param path      Collection path
      */
-    private Set getResourcePathsInternal(DirContext resources, String path) {
+    private Set getResourcePathsInternal(DirContext resources, String path)
+    {
 
         ResourceSet set = new ResourceSet();
-        try {
+        try
+        {
             listCollectionPaths(set, resources, path);
-        } catch (NamingException e) {
+        }
+        catch (NamingException e)
+        {
             return (null);
         }
         set.setLocked(true);
@@ -616,100 +688,99 @@ public class ApplicationContext
 
     }
 
-
     /**
      * Return the name and version of the servlet container.
      */
-    public String getServerInfo() {
+    public String getServerInfo()
+    {
 
         return (ServerInfo.getServerInfo());
 
     }
 
-
     /**
      * @deprecated As of Java Servlet API 2.1, with no direct replacement.
      */
-    public Servlet getServlet(String name) {
+    public Servlet getServlet(String name)
+    {
 
         return (null);
 
     }
 
-
     /**
      * Return the display name of this web application.
      */
-    public String getServletContextName() {
+    public String getServletContextName()
+    {
 
         return (context.getDisplayName());
 
     }
 
+    /**
+     * @deprecated As of Java Servlet API 2.1, with no direct replacement.
+     */
+    public Enumeration getServletNames()
+    {
+        return (new Enumerator(empty));
+    }
 
     /**
      * @deprecated As of Java Servlet API 2.1, with no direct replacement.
      */
-    public Enumeration getServletNames() {
+    public Enumeration getServlets()
+    {
         return (new Enumerator(empty));
     }
-
-
-    /**
-     * @deprecated As of Java Servlet API 2.1, with no direct replacement.
-     */
-    public Enumeration getServlets() {
-        return (new Enumerator(empty));
-    }
-
 
     /**
      * Writes the specified message to a servlet log file.
      *
      * @param message Message to be written
      */
-    public void log(String message) {
+    public void log(String message)
+    {
 
         context.getLogger().info(message);
 
     }
 
-
     /**
      * Writes the specified exception and message to a servlet log file.
      *
      * @param exception Exception to be reported
-     * @param message Message to be written
-     *
+     * @param message   Message to be written
      * @deprecated As of Java Servlet API 2.1, use
-     *  <code>log(String, Throwable)</code> instead
+     * <code>log(String, Throwable)</code> instead
      */
-    public void log(Exception exception, String message) {
+    public void log(Exception exception, String message)
+    {
 
         context.getLogger().error(message, exception);
 
     }
 
-
     /**
      * Writes the specified message and exception to a servlet log file.
      *
-     * @param message Message to be written
+     * @param message   Message to be written
      * @param throwable Exception to be reported
      */
-    public void log(String message, Throwable throwable) {
+    public void log(String message, Throwable throwable)
+    {
 
         context.getLogger().error(message, throwable);
 
     }
-
 
     /**
      * Remove the context attribute with the specified name, if any.
      *
      * @param name Name of the context attribute to be removed
      */
-    public void removeAttribute(String name) {
+    public void removeAttribute(String name)
+    {
 
         Object value = null;
         boolean found = false;
@@ -719,10 +790,12 @@ public class ApplicationContext
         if (readOnlyAttributes.containsKey(name))
             return;
         found = attributes.containsKey(name);
-        if (found) {
+        if (found)
+        {
             value = attributes.get(name);
             attributes.remove(name);
-        } else {
+        } else
+        {
             return;
         }
 
@@ -731,22 +804,26 @@ public class ApplicationContext
         if ((listeners == null) || (listeners.length == 0))
             return;
         ServletContextAttributeEvent event =
-          new ServletContextAttributeEvent(context.getServletContext(),
-                                            name, value);
-        for (int i = 0; i < listeners.length; i++) {
+                new ServletContextAttributeEvent(context.getServletContext(),
+                        name, value);
+        for (int i = 0; i < listeners.length; i++)
+        {
             if (!(listeners[i] instanceof ServletContextAttributeListener))
                 continue;
             ServletContextAttributeListener listener =
-                (ServletContextAttributeListener) listeners[i];
-            try {
+                    (ServletContextAttributeListener) listeners[i];
+            try
+            {
                 context.fireContainerEvent("beforeContextAttributeRemoved",
-                                           listener);
+                        listener);
                 listener.attributeRemoved(event);
                 context.fireContainerEvent("afterContextAttributeRemoved",
-                                           listener);
-            } catch (Throwable t) {
+                        listener);
+            }
+            catch (Throwable t)
+            {
                 context.fireContainerEvent("afterContextAttributeRemoved",
-                                           listener);
+                        listener);
                 // FIXME - should we do anything besides log these?
                 log(sm.getString("applicationContext.attributeEvent"), t);
             }
@@ -754,23 +831,24 @@ public class ApplicationContext
 
     }
 
-
     /**
      * Bind the specified value with the specified context attribute name,
      * replacing any existing value for that name.
      *
-     * @param name Attribute name to be bound
+     * @param name  Attribute name to be bound
      * @param value New attribute value to be bound
      */
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(String name, Object value)
+    {
 
         // Name cannot be null
         if (name == null)
             throw new IllegalArgumentException
-                (sm.getString("applicationContext.setAttribute.namenull"));
+                    (sm.getString("applicationContext.setAttribute.namenull"));
 
         // Null value is the same as removeAttribute()
-        if (value == null) {
+        if (value == null)
+        {
             removeAttribute(name);
             return;
         }
@@ -794,39 +872,45 @@ public class ApplicationContext
         ServletContextAttributeEvent event = null;
         if (replaced)
             event =
-                new ServletContextAttributeEvent(context.getServletContext(),
-                                                 name, oldValue);
+                    new ServletContextAttributeEvent(context.getServletContext(),
+                            name, oldValue);
         else
             event =
-                new ServletContextAttributeEvent(context.getServletContext(),
-                                                 name, value);
+                    new ServletContextAttributeEvent(context.getServletContext(),
+                            name, value);
 
-        for (int i = 0; i < listeners.length; i++) {
+        for (int i = 0; i < listeners.length; i++)
+        {
             if (!(listeners[i] instanceof ServletContextAttributeListener))
                 continue;
             ServletContextAttributeListener listener =
-                (ServletContextAttributeListener) listeners[i];
-            try {
-                if (replaced) {
+                    (ServletContextAttributeListener) listeners[i];
+            try
+            {
+                if (replaced)
+                {
                     context.fireContainerEvent
-                        ("beforeContextAttributeReplaced", listener);
+                            ("beforeContextAttributeReplaced", listener);
                     listener.attributeReplaced(event);
                     context.fireContainerEvent("afterContextAttributeReplaced",
-                                               listener);
-                } else {
+                            listener);
+                } else
+                {
                     context.fireContainerEvent("beforeContextAttributeAdded",
-                                               listener);
+                            listener);
                     listener.attributeAdded(event);
                     context.fireContainerEvent("afterContextAttributeAdded",
-                                               listener);
+                            listener);
                 }
-            } catch (Throwable t) {
+            }
+            catch (Throwable t)
+            {
                 if (replaced)
                     context.fireContainerEvent("afterContextAttributeReplaced",
-                                               listener);
+                            listener);
                 else
                     context.fireContainerEvent("afterContextAttributeAdded",
-                                               listener);
+                            listener);
                 // FIXME - should we do anything besides log these?
                 log(sm.getString("applicationContext.attributeEvent"), t);
             }
@@ -834,106 +918,75 @@ public class ApplicationContext
 
     }
 
-
     // -------------------------------------------------------- Package Methods
-    protected StandardContext getContext() {
+    protected StandardContext getContext()
+    {
         return this.context;
     }
 
-    protected Map getReadonlyAttributes() {
+    protected Map getReadonlyAttributes()
+    {
         return this.readOnlyAttributes;
     }
+
     /**
      * Clear all application-created attributes.
      */
-    protected void clearAttributes() {
+    protected void clearAttributes()
+    {
 
         // Create list of attributes to be removed
         ArrayList list = new ArrayList();
         Iterator iter = attributes.keySet().iterator();
-        while (iter.hasNext()) {
+        while (iter.hasNext())
+        {
             list.add(iter.next());
         }
 
         // Remove application originated attributes
         // (read only attributes will be left in place)
         Iterator keys = list.iterator();
-        while (keys.hasNext()) {
+        while (keys.hasNext())
+        {
             String key = (String) keys.next();
             removeAttribute(key);
         }
 
     }
 
-
     /**
      * Return the facade associated with this ApplicationContext.
      */
-    protected ServletContext getFacade() {
+    protected ServletContext getFacade()
+    {
 
         return (this.facade);
 
     }
 
-
     /**
      * Set an attribute as read only.
      */
-    void setAttributeReadOnly(String name) {
+    void setAttributeReadOnly(String name)
+    {
 
         if (attributes.containsKey(name))
             readOnlyAttributes.put(name, name);
 
     }
 
-
-    /**
-     * List resource paths (recursively), and store all of them in the given
-     * Set.
-     */
-    private static void listCollectionPaths
-        (Set set, DirContext resources, String path)
-        throws NamingException {
-
-        Enumeration childPaths = resources.listBindings(path);
-        while (childPaths.hasMoreElements()) {
-            Binding binding = (Binding) childPaths.nextElement();
-            String name = binding.getName();
-            StringBuffer childPath = new StringBuffer(path);
-            if (!"/".equals(path) && !path.endsWith("/"))
-                childPath.append("/");
-            childPath.append(name);
-            Object object = binding.getObject();
-            if (object instanceof DirContext) {
-                childPath.append("/");
-            }
-            set.add(childPath.toString());
-        }
-
-    }
-
-
-    /**
-     * Get full path, based on the host name and the context path.
-     */
-    private static String getJNDIUri(String hostName, String path) {
-        if (!path.startsWith("/"))
-            return "/" + hostName + "/" + path;
-        else
-            return "/" + hostName + path;
-    }
-
-
     /**
      * Internal class used as thread-local storage when doing path
      * mapping during dispatch.
      */
-    private static final class DispatchData {
+    private static final class DispatchData
+    {
 
         public MessageBytes uriMB;
         public MappingData mappingData;
 
-        public DispatchData() {
+        public DispatchData()
+        {
             uriMB = MessageBytes.newInstance();
             CharChunk uriCC = uriMB.getCharChunk();
             uriCC.setLimit(-1);

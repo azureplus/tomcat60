@@ -30,15 +30,14 @@ import org.apache.catalina.tribes.group.InterceptorPayload;
  * @author Rainer Jung
  * @author Peter Rossbach
  * @author Filip Hanik
- *
- *
  */
 
-public class LinkObject {
+public class LinkObject
+{
 
     private ChannelMessage msg;
     private LinkObject next;
-    private byte[] key ;
+    private byte[] key;
     private Member[] destination;
     private InterceptorPayload payload;
 
@@ -48,7 +47,8 @@ public class LinkObject {
      *
      * @param payload The data object.
      */
-    public LinkObject(ChannelMessage msg, Member[] destination, InterceptorPayload payload) {
+    public LinkObject(ChannelMessage msg, Member[] destination, InterceptorPayload payload)
+    {
         this.msg = msg;
         this.next = null;
         this.key = msg.getUniqueId();
@@ -58,49 +58,61 @@ public class LinkObject {
 
     /**
      * Set the next element.
+     *
      * @param next The next element.
      */
-    public void append(LinkObject next) {
+    public void append(LinkObject next)
+    {
         this.next = next;
     }
 
     /**
      * Get the next element.
+     *
      * @return The next element.
      */
-    public LinkObject next() {
+    public LinkObject next()
+    {
         return next;
     }
-    
-    public void setNext(LinkObject next) {
+
+    public void setNext(LinkObject next)
+    {
         this.next = next;
     }
 
     /**
      * Get the data object from the element.
+     *
      * @return The data object from the element.
      */
-    public ChannelMessage data() {
+    public ChannelMessage data()
+    {
         return msg;
     }
 
     /**
      * Get the unique message id
+     *
      * @return the unique message id
      */
-    public byte[] getKey() {
+    public byte[] getKey()
+    {
         return key;
     }
 
-    public ErrorHandler getHandler() {
-        return payload!=null?payload.getErrorHandler():null;
+    public ErrorHandler getHandler()
+    {
+        return payload != null ? payload.getErrorHandler() : null;
     }
 
-    public InterceptorPayload getPayload() {
+    public InterceptorPayload getPayload()
+    {
         return payload;
     }
 
-    public Member[] getDestination() {
+    public Member[] getDestination()
+    {
         return destination;
     }
 

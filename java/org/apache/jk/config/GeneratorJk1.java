@@ -47,67 +47,78 @@ another components' job.
 */
 
 /**
- *
  * @author Costin Manolache
  */
-public class GeneratorJk1 implements WebXml2Jk.MappingGenerator {
+public class GeneratorJk1 implements WebXml2Jk.MappingGenerator
+{
     WebXml2Jk wxml;
     String vhost;
     String cpath;
     String worker;
     PrintWriter out;
-    
-    public void setWebXmlReader(WebXml2Jk wxml ) {
-        this.wxml=wxml;
-        vhost=wxml.vhost;
-        cpath=wxml.cpath;
-        worker=wxml.worker;
+
+    public void setWebXmlReader(WebXml2Jk wxml)
+    {
+        this.wxml = wxml;
+        vhost = wxml.vhost;
+        cpath = wxml.cpath;
+        worker = wxml.worker;
     }
 
-    public void generateStart( ) throws IOException  {
-        File base=wxml.getJkDir();
-        File outF=new File(base, "jk.conf");
-        out=new PrintWriter( new FileWriter( outF ));
-        
-        out.println("# This must be included in the virtual host section for " + vhost );
+    public void generateStart() throws IOException
+    {
+        File base = wxml.getJkDir();
+        File outF = new File(base, "jk.conf");
+        out = new PrintWriter(new FileWriter(outF));
+
+        out.println("# This must be included in the virtual host section for " + vhost);
     }
 
-    public void generateEnd() {
+    public void generateEnd()
+    {
         out.close();
     }
 
-    
-    public void generateServletMapping( String servlet, String url ) {
-        out.println( "JkMount " + cpath + url + " " + worker);
+
+    public void generateServletMapping(String servlet, String url)
+    {
+        out.println("JkMount " + cpath + url + " " + worker);
     }
 
-    public void generateFilterMapping( String servlet, String url ) {
-        out.println( "JkMount " + cpath + url + " " + worker);
+    public void generateFilterMapping(String servlet, String url)
+    {
+        out.println("JkMount " + cpath + url + " " + worker);
     }
 
-    public void generateLoginConfig( String loginPage,
-                                        String errPage, String authM ) {
-        out.println( "JkMount " + cpath + loginPage + " " + worker);
+    public void generateLoginConfig(String loginPage,
+                                    String errPage, String authM)
+    {
+        out.println("JkMount " + cpath + loginPage + " " + worker);
     }
 
-    public void generateErrorPage( int err, String location ) {
+    public void generateErrorPage(int err, String location)
+    {
 
     }
 
-    public void generateMimeMapping( String ext, String type ) {
+    public void generateMimeMapping(String ext, String type)
+    {
 
     }
-    
-    public void generateWelcomeFiles( Vector wf ) {
+
+    public void generateWelcomeFiles(Vector wf)
+    {
 
     }
-                                            
-    
-    public void generateConstraints( Vector urls, Vector methods, Vector roles, boolean isSSL ) {
-        for( int i=0; i<urls.size(); i++ ) {
-            String url=(String)urls.elementAt(i);
 
-            out.println( "JkMount " + cpath + url + " " + worker);
+
+    public void generateConstraints(Vector urls, Vector methods, Vector roles, boolean isSSL)
+    {
+        for (int i = 0; i < urls.size(); i++)
+        {
+            String url = (String) urls.elementAt(i);
+
+            out.println("JkMount " + cpath + url + " " + worker);
         }
     }
 }

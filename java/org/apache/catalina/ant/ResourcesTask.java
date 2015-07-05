@@ -30,10 +30,10 @@ import java.net.URLEncoder;
  * the Tomcat manager application.
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
-public class ResourcesTask extends AbstractCatalinaTask {
+public class ResourcesTask extends AbstractCatalinaTask
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -45,11 +45,13 @@ public class ResourcesTask extends AbstractCatalinaTask {
      */
     protected String type = null;
 
-    public String getType() {
+    public String getType()
+    {
         return (this.type);
     }
 
-    public void setType(String type) {
+    public void setType(String type)
+    {
         this.type = type;
     }
 
@@ -60,20 +62,26 @@ public class ResourcesTask extends AbstractCatalinaTask {
     /**
      * Execute the requested operation.
      *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
 
         super.execute();
-        if (type != null) {
-            try {
+        if (type != null)
+        {
+            try
+            {
                 execute("/resources?type=" +
                         URLEncoder.encode(type, getCharset()));
-            } catch (UnsupportedEncodingException e) {
-                throw new BuildException
-                    ("Invalid 'charset' attribute: " + getCharset());
             }
-        } else {
+            catch (UnsupportedEncodingException e)
+            {
+                throw new BuildException
+                        ("Invalid 'charset' attribute: " + getCharset());
+            }
+        } else
+        {
             execute("/resources");
         }
 

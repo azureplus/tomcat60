@@ -17,35 +17,35 @@
 
 package org.apache.coyote.http11.filters;
 
-import java.io.IOException;
-
-import org.apache.tomcat.util.buf.ByteChunk;
-import org.apache.tomcat.util.res.StringManager;
 import org.apache.coyote.InputBuffer;
 import org.apache.coyote.Request;
 import org.apache.coyote.http11.InputFilter;
+import org.apache.tomcat.util.buf.ByteChunk;
+import org.apache.tomcat.util.res.StringManager;
+
+import java.io.IOException;
 
 /**
  * Identity input filter.
- * 
+ *
  * @author Remy Maucherat
  */
-public class IdentityInputFilter implements InputFilter {
+public class IdentityInputFilter implements InputFilter
+{
 
+    protected static final String ENCODING_NAME = "identity";
+
+
+    // -------------------------------------------------------------- Constants
+    protected static final ByteChunk ENCODING = new ByteChunk();
     private static final StringManager sm = StringManager.getManager(
             IdentityInputFilter.class.getPackage().getName());
 
 
-    // -------------------------------------------------------------- Constants
-
-    protected static final String ENCODING_NAME = "identity";
-    protected static final ByteChunk ENCODING = new ByteChunk();
-
-
     // ----------------------------------------------------- Static Initializer
 
-
-    static {
+    static
+    {
         ENCODING.setBytes(ENCODING_NAME.getBytes(), 0, ENCODING_NAME.length());
     }
 
@@ -83,7 +83,8 @@ public class IdentityInputFilter implements InputFilter {
     /**
      * Get content length.
      */
-    public long getContentLength() {
+    public long getContentLength()
+    {
         return contentLength;
     }
 
@@ -91,7 +92,8 @@ public class IdentityInputFilter implements InputFilter {
     /**
      * Get remaining bytes.
      */
-    public long getRemaining() {
+    public long getRemaining()
+    {
         return remaining;
     }
 
@@ -101,35 +103,42 @@ public class IdentityInputFilter implements InputFilter {
 
     /**
      * Read bytes.
-     * 
+     *
      * @return If the filter does request length control, this value is
      * significant; it should be the number of bytes consumed from the buffer,
-     * up until the end of the current request body, or the buffer length, 
+     * up until the end of the current request body, or the buffer length,
      * whichever is greater. If the filter does not do request body length
      * control, the returned value should be -1.
      */
     public int doRead(ByteChunk chunk, Request req)
-        throws IOException {
+            throws IOException
+    {
 
         int result = -1;
 
-        if (contentLength >= 0) {
-            if (remaining > 0) {
+        if (contentLength >= 0)
+        {
+            if (remaining > 0)
+            {
                 int nRead = buffer.doRead(chunk, req);
-                if (nRead > remaining) {
+                if (nRead > remaining)
+                {
                     // The chunk is longer than the number of bytes remaining
                     // in the body; changing the chunk length to the number
                     // of bytes remaining
-                    chunk.setBytes(chunk.getBytes(), chunk.getStart(), 
-                                   (int) remaining);
+                    chunk.setBytes(chunk.getBytes(), chunk.getStart(),
+                            (int) remaining);
                     result = (int) remaining;
-                } else {
+                } else
+                {
                     result = nRead;
                 }
-                if (nRead > 0) {
+                if (nRead > 0)
+                {
                     remaining = remaining - nRead;
                 }
-            } else {
+            } else
+            {
                 // No more bytes left to be read : return -1 and clear the 
                 // buffer
                 chunk.recycle();
@@ -148,32 +157,38 @@ public class IdentityInputFilter implements InputFilter {
     /**
      * Read the content length from the request.
      */
-    public void setRequest(Request request) {
+    public void setRequest(Request request)
+    {
         contentLength = request.getContentLengthLong();
         remaining = contentLength;
     }
 
 
-    public long end() throws IOException {
+    public long end() throws IOException
+    {
 
         final int maxSwallowSize = org.apache.coyote.Constants.MAX_SWALLOW_SIZE;
         final boolean maxSwallowSizeExceeded = (maxSwallowSize > -1 && remaining > maxSwallowSize);
         long swallowed = 0;
 
         // Consume extra bytes.
-        while (remaining > 0) {
+        while (remaining > 0)
+        {
 
             int nread = buffer.doRead(endChunk, null);
-            if (nread > 0 ) {
+            if (nread > 0)
+            {
                 swallowed += nread;
                 remaining = remaining - nread;
-                if (maxSwallowSizeExceeded && swallowed > maxSwallowSize) {
+                if (maxSwallowSizeExceeded && swallowed > maxSwallowSize)
+                {
                     // Note: We do not fail early so the client has a chance to
                     // read the response before the connection is closed. See:
                     // http://httpd.apache.org/docs/2.0/misc/fin_wait_2.html#appendix
                     throw new IOException(sm.getString("inputFilter.maxSwallow"));
                 }
-            } else { // errors are handled higher up.
+            } else
+            { // errors are handled higher up.
                 remaining = 0;
             }
         }
@@ -187,15 +202,17 @@ public class IdentityInputFilter implements InputFilter {
     /**
      * Amount of bytes still available in a buffer.
      */
-    public int available() {
+    public int available()
+    {
         return 0;
     }
-    
+
 
     /**
      * Set the next buffer in the filter pipeline.
      */
-    public void setBuffer(InputBuffer buffer) {
+    public void setBuffer(InputBuffer buffer)
+    {
         this.buffer = buffer;
     }
 
@@ -203,7 +220,8 @@ public class IdentityInputFilter implements InputFilter {
     /**
      * Make the filter ready to process the next request.
      */
-    public void recycle() {
+    public void recycle()
+    {
         contentLength = -1;
         remaining = 0;
         endChunk.recycle();
@@ -211,10 +229,11 @@ public class IdentityInputFilter implements InputFilter {
 
 
     /**
-     * Return the name of the associated encoding; Here, the value is 
+     * Return the name of the associated encoding; Here, the value is
      * "identity".
      */
-    public ByteChunk getEncodingName() {
+    public ByteChunk getEncodingName()
+    {
         return ENCODING;
     }
 

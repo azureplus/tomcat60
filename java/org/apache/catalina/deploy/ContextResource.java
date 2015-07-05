@@ -27,10 +27,10 @@ import java.io.Serializable;
  *
  * @author Craig R. McClanahan
  * @author Peter Rossbach (pero@apache.org)
- *
  */
 
-public class ContextResource extends ResourceBase implements Serializable {
+public class ContextResource extends ResourceBase implements Serializable
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -41,26 +41,29 @@ public class ContextResource extends ResourceBase implements Serializable {
      * (<code>Application</code> or <code>Container</code>).
      */
     private String auth = null;
-
-    public String getAuth() {
-        return (this.auth);
-    }
-
-    public void setAuth(String auth) {
-        this.auth = auth;
-    }
-
     /**
      * The sharing scope of this resource factory (<code>Shareable</code>
      * or <code>Unshareable</code>).
      */
     private String scope = "Shareable";
 
-    public String getScope() {
+    public String getAuth()
+    {
+        return (this.auth);
+    }
+
+    public void setAuth(String auth)
+    {
+        this.auth = auth;
+    }
+
+    public String getScope()
+    {
         return (this.scope);
     }
 
-    public void setScope(String scope) {
+    public void setScope(String scope)
+    {
         this.scope = scope;
     }
 
@@ -71,24 +74,29 @@ public class ContextResource extends ResourceBase implements Serializable {
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ContextResource[");
         sb.append("name=");
         sb.append(getName());
-        if (getDescription() != null) {
+        if (getDescription() != null)
+        {
             sb.append(", description=");
             sb.append(getDescription());
         }
-        if (getType() != null) {
+        if (getType() != null)
+        {
             sb.append(", type=");
             sb.append(getType());
         }
-        if (auth != null) {
+        if (auth != null)
+        {
             sb.append(", auth=");
             sb.append(auth);
         }
-        if (scope != null) {
+        if (scope != null)
+        {
             sb.append(", scope=");
             sb.append(scope);
         }

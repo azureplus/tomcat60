@@ -25,19 +25,30 @@ package org.apache.catalina;
  * operation of the application containing this component.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public final class LifecycleException extends Exception {
+public final class LifecycleException extends Exception
+{
 
 
     //------------------------------------------------------------ Constructors
 
 
     /**
+     * The error message passed to our constructor (if any)
+     */
+    protected String message = null;
+    /**
+     * The underlying exception or error passed to our constructor (if any)
+     */
+    protected Throwable throwable = null;
+
+
+    /**
      * Construct a new LifecycleException with no other information.
      */
-    public LifecycleException() {
+    public LifecycleException()
+    {
 
         this(null, null);
 
@@ -49,11 +60,15 @@ public final class LifecycleException extends Exception {
      *
      * @param message Message describing this exception
      */
-    public LifecycleException(String message) {
+    public LifecycleException(String message)
+    {
 
         this(message, null);
 
     }
+
+
+    //------------------------------------------------------ Instance Variables
 
 
     /**
@@ -61,7 +76,8 @@ public final class LifecycleException extends Exception {
      *
      * @param throwable Throwable that caused this exception
      */
-    public LifecycleException(Throwable throwable) {
+    public LifecycleException(Throwable throwable)
+    {
 
         this(null, throwable);
 
@@ -72,10 +88,11 @@ public final class LifecycleException extends Exception {
      * Construct a new LifecycleException for the specified message
      * and throwable.
      *
-     * @param message Message describing this exception
+     * @param message   Message describing this exception
      * @param throwable Throwable that caused this exception
      */
-    public LifecycleException(String message, Throwable throwable) {
+    public LifecycleException(String message, Throwable throwable)
+    {
 
         super();
         this.message = message;
@@ -84,28 +101,13 @@ public final class LifecycleException extends Exception {
     }
 
 
-    //------------------------------------------------------ Instance Variables
-
-
-    /**
-     * The error message passed to our constructor (if any)
-     */
-    protected String message = null;
-
-
-    /**
-     * The underlying exception or error passed to our constructor (if any)
-     */
-    protected Throwable throwable = null;
-
-
     //---------------------------------------------------------- Public Methods
-
 
     /**
      * Returns the message associated with this exception, if any.
      */
-    public String getMessage() {
+    public String getMessage()
+    {
 
         return (message);
 
@@ -115,7 +117,8 @@ public final class LifecycleException extends Exception {
     /**
      * Returns the throwable that caused this exception, if any.
      */
-    public Throwable getThrowable() {
+    public Throwable getThrowable()
+    {
 
         return (throwable);
 
@@ -125,16 +128,20 @@ public final class LifecycleException extends Exception {
     /**
      * Return a formatted string that describes this exception.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("LifecycleException:  ");
-        if (message != null) {
+        if (message != null)
+        {
             sb.append(message);
-            if (throwable != null) {
+            if (throwable != null)
+            {
                 sb.append(":  ");
             }
         }
-        if (throwable != null) {
+        if (throwable != null)
+        {
             sb.append(throwable.toString());
         }
         return (sb.toString());

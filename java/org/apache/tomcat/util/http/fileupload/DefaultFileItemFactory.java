@@ -29,19 +29,17 @@ import java.io.File;
  * for larger items. The size threshold, above which content will be stored on
  * disk, is configurable, as is the directory in which temporary files will be
  * created.</p>
- *
+ * <p/>
  * <p>If not otherwise configured, the default configuration values are as
  * follows:
  * <ul>
- *   <li>Size threshold is 10KB.</li>
- *   <li>Repository is the system default temp directory, as returned by
- *       <code>System.getProperty("java.io.tmpdir")</code>.</li>
+ * <li>Size threshold is 10KB.</li>
+ * <li>Repository is the system default temp directory, as returned by
+ * <code>System.getProperty("java.io.tmpdir")</code>.</li>
  * </ul>
  * </p>
  *
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- *
- *
  */
 public class DefaultFileItemFactory implements FileItemFactory
 {
@@ -107,9 +105,7 @@ public class DefaultFileItemFactory implements FileItemFactory
      * than the configured size threshold.
      *
      * @return The directory in which temporary files will be located.
-     *
      * @see #setRepository(java.io.File)
-     *
      */
     public File getRepository()
     {
@@ -122,9 +118,7 @@ public class DefaultFileItemFactory implements FileItemFactory
      * than the configured size threshold.
      *
      * @param repository The directory in which temporary files will be located.
-     *
      * @see #getRepository()
-     *
      */
     public void setRepository(File repository)
     {
@@ -137,7 +131,6 @@ public class DefaultFileItemFactory implements FileItemFactory
      * disk. The default value is 1024 bytes.
      *
      * @return The size threshold, in bytes.
-     *
      * @see #setSizeThreshold(int)
      */
     public int getSizeThreshold()
@@ -150,9 +143,7 @@ public class DefaultFileItemFactory implements FileItemFactory
      * Sets the size threshold beyond which files are written directly to disk.
      *
      * @param sizeThreshold The size threshold, in bytes.
-     *
      * @see #getSizeThreshold()
-     *
      */
     public void setSizeThreshold(int sizeThreshold)
     {
@@ -173,7 +164,6 @@ public class DefaultFileItemFactory implements FileItemFactory
      *                    <code>false</code> otherwise.
      * @param fileName    The name of the uploaded file, if any, as supplied
      *                    by the browser or other client.
-     *
      * @return The newly created file item.
      */
     public FileItem createItem(
@@ -181,7 +171,7 @@ public class DefaultFileItemFactory implements FileItemFactory
             String contentType,
             boolean isFormField,
             String fileName
-            )
+    )
     {
         return new DefaultFileItem(fieldName, contentType,
                 isFormField, fileName, sizeThreshold, repository);

@@ -18,21 +18,16 @@
 
 package org.apache.tomcat.util.modeler.modules;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.DomUtil;
-import org.apache.tomcat.util.modeler.AttributeInfo;
-import org.apache.tomcat.util.modeler.ManagedBean;
-import org.apache.tomcat.util.modeler.NotificationInfo;
-import org.apache.tomcat.util.modeler.OperationInfo;
-import org.apache.tomcat.util.modeler.ParameterInfo;
-import org.apache.tomcat.util.modeler.Registry;
+import org.apache.tomcat.util.modeler.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MbeansDescriptorsDOMSource extends ModelerSource
@@ -43,30 +38,35 @@ public class MbeansDescriptorsDOMSource extends ModelerSource
     String location;
     String type;
     Object source;
-    List mbeans=new ArrayList();
+    List mbeans = new ArrayList();
 
-    public void setRegistry(Registry reg) {
-        this.registry=reg;
+    public void setRegistry(Registry reg)
+    {
+        this.registry = reg;
     }
 
-    public void setLocation( String loc ) {
-        this.location=loc;
+    public void setLocation(String loc)
+    {
+        this.location = loc;
     }
 
-    /** Used if a single component is loaded
+    /**
+     * Used if a single component is loaded
      *
      * @param type
      */
-    public void setType( String type ) {
-       this.type=type;
+    public void setType(String type)
+    {
+        this.type = type;
     }
 
-    public void setSource( Object source ) {
-        this.source=source;
+    public void setSource(Object source)
+    {
+        this.source = source;
     }
 
-    public List loadDescriptors( Registry registry, String location,
-                                 String type, Object source)
+    public List loadDescriptors(Registry registry, String location,
+                                String type, Object source)
             throws Exception
     {
         setRegistry(registry);
@@ -77,40 +77,46 @@ public class MbeansDescriptorsDOMSource extends ModelerSource
         return mbeans;
     }
 
-    public void execute() throws Exception {
-        if( registry==null ) registry=Registry.getRegistry();
+    public void execute() throws Exception
+    {
+        if (registry == null) registry = Registry.getRegistry();
 
-        try {
-            InputStream stream=(InputStream)source;
-            long t1=System.currentTimeMillis();
-            Document doc=DomUtil.readXml(stream);
+        try
+        {
+            InputStream stream = (InputStream) source;
+            long t1 = System.currentTimeMillis();
+            Document doc = DomUtil.readXml(stream);
             // Ignore for now the name of the root element
-            Node descriptorsN=doc.getDocumentElement();
+            Node descriptorsN = doc.getDocumentElement();
             //Node descriptorsN=DomUtil.getChild(doc, "mbeans-descriptors");
-            if( descriptorsN == null ) {
+            if (descriptorsN == null)
+            {
                 log.error("No descriptors found");
                 return;
             }
 
-            Node firstMbeanN=null;
-            if( "mbean".equals( descriptorsN.getNodeName() ) ) {
-                firstMbeanN=descriptorsN;
-            } else {
-                firstMbeanN=DomUtil.getChild(descriptorsN, "mbean");
+            Node firstMbeanN = null;
+            if ("mbean".equals(descriptorsN.getNodeName()))
+            {
+                firstMbeanN = descriptorsN;
+            } else
+            {
+                firstMbeanN = DomUtil.getChild(descriptorsN, "mbean");
             }
 
-            if( firstMbeanN==null ) {
+            if (firstMbeanN == null)
+            {
                 log.error(" No mbean tags ");
                 return;
             }
 
             // Process each <mbean> element
             for (Node mbeanN = firstMbeanN; mbeanN != null;
-                 mbeanN= DomUtil.getNext(mbeanN))
+                 mbeanN = DomUtil.getNext(mbeanN))
             {
 
                 // Create a new managed bean info
-                ManagedBean managed=new ManagedBean();
+                ManagedBean managed = new ManagedBean();
                 DomUtil.setAttributes(managed, mbeanN);
                 Node firstN;
 
@@ -129,13 +135,13 @@ public class MbeansDescriptorsDOMSource extends ModelerSource
                 }*/
 
                 // process attribute nodes
-                firstN=DomUtil.getChild( mbeanN, "attribute");
+                firstN = DomUtil.getChild(mbeanN, "attribute");
                 for (Node descN = firstN; descN != null;
-                     descN = DomUtil.getNext( descN ))
+                     descN = DomUtil.getNext(descN))
                 {
 
                     // Create new attribute info
-                    AttributeInfo ai=new AttributeInfo();
+                    AttributeInfo ai = new AttributeInfo();
                     DomUtil.setAttributes(ai, descN);
 
                     // Process descriptor subnode
@@ -154,8 +160,9 @@ public class MbeansDescriptorsDOMSource extends ModelerSource
                     */
 
                     // Add this info to our managed bean info
-                    managed.addAttribute( ai );
-                    if (log.isTraceEnabled()) {
+                    managed.addAttribute(ai);
+                    if (log.isTraceEnabled())
+                    {
                         log.trace("Create attribute " + ai);
                     }
 
@@ -204,13 +211,13 @@ public class MbeansDescriptorsDOMSource extends ModelerSource
                 }*/
 
                 // process notification nodes
-                firstN=DomUtil.getChild( mbeanN, "notification");
+                firstN = DomUtil.getChild(mbeanN, "notification");
                 for (Node descN = firstN; descN != null;
-                     descN = DomUtil.getNext( descN ))
+                     descN = DomUtil.getNext(descN))
                 {
 
                     // Create new notification info
-                    NotificationInfo ni=new NotificationInfo();
+                    NotificationInfo ni = new NotificationInfo();
                     DomUtil.setAttributes(ni, descN);
 
                     // Process descriptor subnode
@@ -228,30 +235,31 @@ public class MbeansDescriptorsDOMSource extends ModelerSource
                     }*/
 
                     // Process notification-type subnodes
-                    Node firstParamN=DomUtil.getChild( descN, "notification-type");
-                    for (Node paramN = firstParamN;  paramN != null;
+                    Node firstParamN = DomUtil.getChild(descN, "notification-type");
+                    for (Node paramN = firstParamN; paramN != null;
                          paramN = DomUtil.getNext(paramN))
                     {
-                        ni.addNotifType( DomUtil.getContent(paramN) );
+                        ni.addNotifType(DomUtil.getContent(paramN));
                     }
 
                     // Add this info to our managed bean info
-                    managed.addNotification( ni );
-                    if (log.isTraceEnabled()) {
+                    managed.addNotification(ni);
+                    if (log.isTraceEnabled())
+                    {
                         log.trace("Created notification " + ni);
                     }
 
                 }
 
                 // process operation nodes
-                firstN=DomUtil.getChild( mbeanN, "operation");
+                firstN = DomUtil.getChild(mbeanN, "operation");
                 for (Node descN = firstN; descN != null;
-                     descN = DomUtil.getNext( descN ))
+                     descN = DomUtil.getNext(descN))
 
                 {
 
                     // Create new operation info
-                    OperationInfo oi=new OperationInfo();
+                    OperationInfo oi = new OperationInfo();
                     DomUtil.setAttributes(oi, descN);
 
                     // Process descriptor subnode
@@ -269,20 +277,21 @@ public class MbeansDescriptorsDOMSource extends ModelerSource
                     }*/
 
                     // Process parameter subnodes
-                    Node firstParamN=DomUtil.getChild( descN, "parameter");
-                    for (Node paramN = firstParamN;  paramN != null;
+                    Node firstParamN = DomUtil.getChild(descN, "parameter");
+                    for (Node paramN = firstParamN; paramN != null;
                          paramN = DomUtil.getNext(paramN))
                     {
-                        ParameterInfo pi=new ParameterInfo();
+                        ParameterInfo pi = new ParameterInfo();
                         DomUtil.setAttributes(pi, paramN);
-                        if( log.isTraceEnabled())
+                        if (log.isTraceEnabled())
                             log.trace("Add param " + pi.getName());
-                        oi.addParameter( pi );
+                        oi.addParameter(pi);
                     }
 
                     // Add this info to our managed bean info
-                    managed.addOperation( oi );
-                    if( log.isTraceEnabled()) {
+                    managed.addOperation(oi);
+                    if (log.isTraceEnabled())
+                    {
                         log.trace("Create operation " + oi);
                     }
 
@@ -290,14 +299,16 @@ public class MbeansDescriptorsDOMSource extends ModelerSource
 
                 // Add the completed managed bean info to the registry
                 //registry.addManagedBean(managed);
-                mbeans.add( managed );
+                mbeans.add(managed);
 
             }
 
-            long t2=System.currentTimeMillis();
-            log.debug( "Reading descriptors ( dom ) " + (t2-t1));
-        } catch( Exception ex ) {
-            log.error( "Error reading descriptors ", ex);
+            long t2 = System.currentTimeMillis();
+            log.debug("Reading descriptors ( dom ) " + (t2 - t1));
+        }
+        catch (Exception ex)
+        {
+            log.error("Error reading descriptors ", ex);
         }
     }
 }

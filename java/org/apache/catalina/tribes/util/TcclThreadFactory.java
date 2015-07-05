@@ -28,34 +28,41 @@ import java.util.concurrent.atomic.AtomicInteger;
  * class loader is set as the thread context class loader, such as in async
  * session replication.
  */
-public class TcclThreadFactory implements ThreadFactory {
-    
+public class TcclThreadFactory implements ThreadFactory
+{
+
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
     private static final boolean IS_SECURITY_ENABLED =
-        (System.getSecurityManager() != null);
-    
+            (System.getSecurityManager() != null);
+
     private final ThreadGroup group;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
-    
-    public TcclThreadFactory() {
+
+    public TcclThreadFactory()
+    {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
         namePrefix = "pool-" + poolNumber.getAndIncrement() + "-thread-";
     }
 
-    public Thread newThread(Runnable r) {
+    public Thread newThread(Runnable r)
+    {
         final Thread t = new Thread(group, r, namePrefix +
                 threadNumber.getAndIncrement());
-        
-        if (IS_SECURITY_ENABLED) {
-            AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                public Void run() {
+
+        if (IS_SECURITY_ENABLED)
+        {
+            AccessController.doPrivileged(new PrivilegedAction<Void>()
+            {
+                public Void run()
+                {
                     t.setContextClassLoader(this.getClass().getClassLoader());
                     return null;
                 }
             });
-        } else {
+        } else
+        {
             t.setContextClassLoader(this.getClass().getClassLoader());
         }
         return t;

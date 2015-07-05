@@ -17,24 +17,25 @@
 
 package org.apache.catalina.tribes.transport;
 
+import org.apache.catalina.tribes.Member;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.apache.catalina.tribes.Member;
-
 /**
  * <p>Title: </p>
- *
+ * <p/>
  * <p>Description: </p>
- *
+ * <p/>
  * <p>Company: </p>
  *
  * @author not attributable
  * @version 1.0
  */
-public abstract class AbstractSender implements DataSender {
-    
+public abstract class AbstractSender implements DataSender
+{
+
     private boolean connected = false;
     private int rxBufSize = 25188;
     private int txBufSize = 43800;
@@ -57,13 +58,20 @@ public abstract class AbstractSender implements DataSender {
     private int soLingerTime = 3;
     private int soTrafficClass = 0x04 | 0x08 | 0x010;
     private boolean throwOnFailedAck = true;
-    
+
+    public AbstractSender()
+    {
+
+    }
+
     /**
      * transfers sender properties from one sender to another
+     *
      * @param from AbstractSender
-     * @param to AbstractSender
+     * @param to   AbstractSender
      */
-    public static void transferProperties(AbstractSender from, AbstractSender to) {
+    public static void transferProperties(AbstractSender from, AbstractSender to)
+    {
         to.rxBufSize = from.rxBufSize;
         to.txBufSize = from.txBufSize;
         to.directBuffer = from.directBuffer;
@@ -82,13 +90,7 @@ public abstract class AbstractSender implements DataSender {
         to.soLingerTime = from.soLingerTime;
         to.soTrafficClass = from.soTrafficClass;
         to.throwOnFailedAck = from.throwOnFailedAck;
-    }   
-
-    
-    public AbstractSender() {
-        
     }
-    
 
     public abstract void connect() throws IOException;
 
@@ -96,200 +98,246 @@ public abstract class AbstractSender implements DataSender {
     public abstract void disconnect();
 
 
-    public boolean keepalive() {
+    public boolean keepalive()
+    {
         boolean disconnect = false;
-        if ( keepAliveCount >= 0 && requestCount>keepAliveCount ) disconnect = true;
-        else if ( keepAliveTime >= 0 && (System.currentTimeMillis()-connectTime)>keepAliveTime ) disconnect = true;
-        if ( disconnect ) disconnect();
+        if (keepAliveCount >= 0 && requestCount > keepAliveCount) disconnect = true;
+        else if (keepAliveTime >= 0 && (System.currentTimeMillis() - connectTime) > keepAliveTime) disconnect = true;
+        if (disconnect) disconnect();
         return disconnect;
     }
-    
-    protected void setConnected(boolean connected){
-        this.connected = connected;
-    }
-    
-    public boolean isConnected() {
+
+    public boolean isConnected()
+    {
         return connected;
     }
 
-    public long getConnectTime() {
+    protected void setConnected(boolean connected)
+    {
+        this.connected = connected;
+    }
+
+    public long getConnectTime()
+    {
         return connectTime;
     }
 
-    public Member getDestination() {
-        return destination;
-    }
-
-
-    public int getKeepAliveCount() {
-        return keepAliveCount;
-    }
-
-    public long getKeepAliveTime() {
-        return keepAliveTime;
-    }
-
-    public int getRequestCount() {
-        return requestCount;
-    }
-
-    public int getRxBufSize() {
-        return rxBufSize;
-    }
-
-    public long getTimeout() {
-        return timeout;
-    }
-
-    public int getTxBufSize() {
-        return txBufSize;
-    }
-
-    public InetAddress getAddress() {
-        return address;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public int getMaxRetryAttempts() {
-        return maxRetryAttempts;
-    }
-    
-    public void setDirect(boolean direct) {
-        setDirectBuffer(direct);
-    }
-
-    public void setDirectBuffer(boolean directBuffer) {
-        this.directBuffer = directBuffer;
-    }
-
-    public boolean getDirect() {
-        return getDirectBuffer();
-    }
-    
-    public boolean getDirectBuffer() {
-        return this.directBuffer;
-    }
-
-    public int getAttempt() {
-        return attempt;
-    }
-
-    public boolean getTcpNoDelay() {
-        return tcpNoDelay;
-    }
-
-    public boolean getSoKeepAlive() {
-        return soKeepAlive;
-    }
-
-    public boolean getOoBInline() {
-        return ooBInline;
-    }
-
-    public boolean getSoReuseAddress() {
-        return soReuseAddress;
-    }
-
-    public boolean getSoLingerOn() {
-        return soLingerOn;
-    }
-
-    public int getSoLingerTime() {
-        return soLingerTime;
-    }
-
-    public int getSoTrafficClass() {
-        return soTrafficClass;
-    }
-
-    public boolean getThrowOnFailedAck() {
-        return throwOnFailedAck;
-    }
-
-    public void setKeepAliveCount(int keepAliveCount) {
-        this.keepAliveCount = keepAliveCount;
-    }
-
-    public void setKeepAliveTime(long keepAliveTime) {
-        this.keepAliveTime = keepAliveTime;
-    }
-
-    public void setRequestCount(int requestCount) {
-        this.requestCount = requestCount;
-    }
-
-    public void setRxBufSize(int rxBufSize) {
-        this.rxBufSize = rxBufSize;
-    }
-
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
-    }
-
-    public void setTxBufSize(int txBufSize) {
-        this.txBufSize = txBufSize;
-    }
-
-    public void setConnectTime(long connectTime) {
+    public void setConnectTime(long connectTime)
+    {
         this.connectTime = connectTime;
     }
 
-    public void setMaxRetryAttempts(int maxRetryAttempts) {
-        this.maxRetryAttempts = maxRetryAttempts;
+    public Member getDestination()
+    {
+        return destination;
     }
 
-    public void setAttempt(int attempt) {
-        this.attempt = attempt;
-    }
-
-    public void setTcpNoDelay(boolean tcpNoDelay) {
-        this.tcpNoDelay = tcpNoDelay;
-    }
-
-    public void setSoKeepAlive(boolean soKeepAlive) {
-        this.soKeepAlive = soKeepAlive;
-    }
-
-    public void setOoBInline(boolean ooBInline) {
-        this.ooBInline = ooBInline;
-    }
-
-    public void setSoReuseAddress(boolean soReuseAddress) {
-        this.soReuseAddress = soReuseAddress;
-    }
-
-    public void setSoLingerOn(boolean soLingerOn) {
-        this.soLingerOn = soLingerOn;
-    }
-
-    public void setSoLingerTime(int soLingerTime) {
-        this.soLingerTime = soLingerTime;
-    }
-
-    public void setSoTrafficClass(int soTrafficClass) {
-        this.soTrafficClass = soTrafficClass;
-    }
-
-    public void setThrowOnFailedAck(boolean throwOnFailedAck) {
-        this.throwOnFailedAck = throwOnFailedAck;
-    }
-
-    public void setDestination(Member destination) throws UnknownHostException {
+    public void setDestination(Member destination) throws UnknownHostException
+    {
         this.destination = destination;
         this.address = InetAddress.getByAddress(destination.getHost());
         this.port = destination.getPort();
 
     }
 
-    public void setPort(int port) {
+    public int getKeepAliveCount()
+    {
+        return keepAliveCount;
+    }
+
+    public void setKeepAliveCount(int keepAliveCount)
+    {
+        this.keepAliveCount = keepAliveCount;
+    }
+
+    public long getKeepAliveTime()
+    {
+        return keepAliveTime;
+    }
+
+    public void setKeepAliveTime(long keepAliveTime)
+    {
+        this.keepAliveTime = keepAliveTime;
+    }
+
+    public int getRequestCount()
+    {
+        return requestCount;
+    }
+
+    public void setRequestCount(int requestCount)
+    {
+        this.requestCount = requestCount;
+    }
+
+    public int getRxBufSize()
+    {
+        return rxBufSize;
+    }
+
+    public void setRxBufSize(int rxBufSize)
+    {
+        this.rxBufSize = rxBufSize;
+    }
+
+    public long getTimeout()
+    {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout)
+    {
+        this.timeout = timeout;
+    }
+
+    public int getTxBufSize()
+    {
+        return txBufSize;
+    }
+
+    public void setTxBufSize(int txBufSize)
+    {
+        this.txBufSize = txBufSize;
+    }
+
+    public InetAddress getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(InetAddress address)
+    {
+        this.address = address;
+    }
+
+    public int getPort()
+    {
+        return port;
+    }
+
+    public void setPort(int port)
+    {
         this.port = port;
     }
 
-    public void setAddress(InetAddress address) {
-        this.address = address;
+    public int getMaxRetryAttempts()
+    {
+        return maxRetryAttempts;
+    }
+
+    public void setMaxRetryAttempts(int maxRetryAttempts)
+    {
+        this.maxRetryAttempts = maxRetryAttempts;
+    }
+
+    public boolean getDirect()
+    {
+        return getDirectBuffer();
+    }
+
+    public void setDirect(boolean direct)
+    {
+        setDirectBuffer(direct);
+    }
+
+    public boolean getDirectBuffer()
+    {
+        return this.directBuffer;
+    }
+
+    public void setDirectBuffer(boolean directBuffer)
+    {
+        this.directBuffer = directBuffer;
+    }
+
+    public int getAttempt()
+    {
+        return attempt;
+    }
+
+    public void setAttempt(int attempt)
+    {
+        this.attempt = attempt;
+    }
+
+    public boolean getTcpNoDelay()
+    {
+        return tcpNoDelay;
+    }
+
+    public void setTcpNoDelay(boolean tcpNoDelay)
+    {
+        this.tcpNoDelay = tcpNoDelay;
+    }
+
+    public boolean getSoKeepAlive()
+    {
+        return soKeepAlive;
+    }
+
+    public void setSoKeepAlive(boolean soKeepAlive)
+    {
+        this.soKeepAlive = soKeepAlive;
+    }
+
+    public boolean getOoBInline()
+    {
+        return ooBInline;
+    }
+
+    public void setOoBInline(boolean ooBInline)
+    {
+        this.ooBInline = ooBInline;
+    }
+
+    public boolean getSoReuseAddress()
+    {
+        return soReuseAddress;
+    }
+
+    public void setSoReuseAddress(boolean soReuseAddress)
+    {
+        this.soReuseAddress = soReuseAddress;
+    }
+
+    public boolean getSoLingerOn()
+    {
+        return soLingerOn;
+    }
+
+    public void setSoLingerOn(boolean soLingerOn)
+    {
+        this.soLingerOn = soLingerOn;
+    }
+
+    public int getSoLingerTime()
+    {
+        return soLingerTime;
+    }
+
+    public void setSoLingerTime(int soLingerTime)
+    {
+        this.soLingerTime = soLingerTime;
+    }
+
+    public int getSoTrafficClass()
+    {
+        return soTrafficClass;
+    }
+
+    public void setSoTrafficClass(int soTrafficClass)
+    {
+        this.soTrafficClass = soTrafficClass;
+    }
+
+    public boolean getThrowOnFailedAck()
+    {
+        return throwOnFailedAck;
+    }
+
+    public void setThrowOnFailedAck(boolean throwOnFailedAck)
+    {
+        this.throwOnFailedAck = throwOnFailedAck;
     }
 
 }

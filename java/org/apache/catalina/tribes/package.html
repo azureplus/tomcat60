@@ -16,34 +16,35 @@
 -->
 <body>
 <head><title>Apache Tribes - The Tomcat Cluster Communication Module</title>
-<h3>QuickStart</h3>
+
+    <h3>QuickStart</h3>
     <pre><code>
-            //create a channel
-            Channel myChannel = new GroupChannel();
+        //create a channel
+        Channel myChannel = new GroupChannel();
 
-            //create my listeners
-            MyMessageListener msgListener = new MyMessageListener();
-            MyMemberListener mbrListener = new MyMemberListener();
+        //create my listeners
+        MyMessageListener msgListener = new MyMessageListener();
+        MyMemberListener mbrListener = new MyMemberListener();
 
-            //attach the listeners to the channel
-            myChannel.addMembershipListener(mbrListener);
-            myChannel.addChannelListener(msgListener);
+        //attach the listeners to the channel
+        myChannel.addMembershipListener(mbrListener);
+        myChannel.addChannelListener(msgListener);
 
-            //start the channel
-            myChannel.start(Channel.DEFAULT);
+        //start the channel
+        myChannel.start(Channel.DEFAULT);
 
-            //create a message to be sent, message must implement java.io.Serializable
-            //for performance reasons you probably want them to implement java.io.Externalizable
-            Serializable myMsg = new MyMessage();
+        //create a message to be sent, message must implement java.io.Serializable
+        //for performance reasons you probably want them to implement java.io.Externalizable
+        Serializable myMsg = new MyMessage();
 
-            //retrieve my current members
-            Member[] group = myChannel.getMembers();
+        //retrieve my current members
+        Member[] group = myChannel.getMembers();
 
-            //send the message
-            channel.send(group,myMsg,Channel.SEND_OPTIONS_DEFAULT);
+        //send the message
+        channel.send(group,myMsg,Channel.SEND_OPTIONS_DEFAULT);
 
     </code></pre>
-<h3>Interfaces for the Application Developer</h3>
+    <h3>Interfaces for the Application Developer</h3>
     <ol>
         <li><code>org.apache.catalina.tribes.Channel</code>
             Main component to interact with to send messages
@@ -70,13 +71,13 @@
             IO Component to send messages over some network transport
         </li>
         <li><code>org.apache.catalina.tribes.MembershipService</code>
-            IO Component that handles membership discovery and 
+            IO Component that handles membership discovery and
         </li>
         <li><code>org.apache.catalina.tribes.ChannelInterceptor</code>
             interceptors between the Channel and the IO layer
         </li>
         <li><code>org.apache.catalina.tribes.ChannelMessage</code>
-            The message that is sent through the interceptor stack down to the IO layer 
+            The message that is sent through the interceptor stack down to the IO layer
         </li>
 
         <li><code>org.apache.catalina.tribes.Member</code>

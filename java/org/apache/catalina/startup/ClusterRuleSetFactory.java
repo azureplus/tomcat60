@@ -19,76 +19,95 @@
 package org.apache.catalina.startup;
 
 
-import org.apache.tomcat.util.digester.Digester;
-import org.apache.tomcat.util.digester.RuleSetBase;
-import java.lang.reflect.Constructor;
-
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.digester.Digester;
+import org.apache.tomcat.util.digester.RuleSetBase;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-public class ClusterRuleSetFactory {
-    
+
+public class ClusterRuleSetFactory
+{
+
     public static Log log = LogFactory.getLog(ClusterRuleSetFactory.class);
-    
-    public static RuleSetBase getClusterRuleSet(String prefix) {
-        
+
+    public static RuleSetBase getClusterRuleSet(String prefix)
+    {
+
         //OLD CLUSTER 1
         //first try the same classloader as this class server/lib
-        try {
-            return loadRuleSet(prefix,"org.apache.catalina.cluster.ClusterRuleSet",ClusterRuleSetFactory.class.getClassLoader());
-        } catch ( Exception x ) {
+        try
+        {
+            return loadRuleSet(prefix, "org.apache.catalina.cluster.ClusterRuleSet", ClusterRuleSetFactory.class.getClassLoader());
+        }
+        catch (Exception x)
+        {
             //display warning
-            if ( log.isDebugEnabled() ) log.debug("Unable to load ClusterRuleSet (org.apache.catalina.cluster.ClusterRuleSet), falling back on context classloader");
+            if (log.isDebugEnabled())
+                log.debug("Unable to load ClusterRuleSet (org.apache.catalina.cluster.ClusterRuleSet), falling back on context classloader");
         }
         //try to load it from the context class loader
-        try {
-            return loadRuleSet(prefix,"org.apache.catalina.cluster.ClusterRuleSet",Thread.currentThread().getContextClassLoader());
-        } catch ( Exception x ) {
-            //display warning
-            if ( log.isDebugEnabled() ) log.debug("Unable to load ClusterRuleSet (org.apache.catalina.cluster.ClusterRuleSet), will try to load the HA cluster");
+        try
+        {
+            return loadRuleSet(prefix, "org.apache.catalina.cluster.ClusterRuleSet", Thread.currentThread().getContextClassLoader());
         }
-        
+        catch (Exception x)
+        {
+            //display warning
+            if (log.isDebugEnabled())
+                log.debug("Unable to load ClusterRuleSet (org.apache.catalina.cluster.ClusterRuleSet), will try to load the HA cluster");
+        }
+
         //NEW CLUSTER 2
         //first try the same classloader as this class server/lib
-        try {
-            return loadRuleSet(prefix,"org.apache.catalina.ha.ClusterRuleSet",ClusterRuleSetFactory.class.getClassLoader());
-        } catch ( Exception x ) {
+        try
+        {
+            return loadRuleSet(prefix, "org.apache.catalina.ha.ClusterRuleSet", ClusterRuleSetFactory.class.getClassLoader());
+        }
+        catch (Exception x)
+        {
             //display warning
-            if ( log.isDebugEnabled() ) log.debug("Unable to load HA ClusterRuleSet (org.apache.catalina.ha.ClusterRuleSet), falling back on context classloader");
+            if (log.isDebugEnabled())
+                log.debug("Unable to load HA ClusterRuleSet (org.apache.catalina.ha.ClusterRuleSet), falling back on context classloader");
         }
         //try to load it from the context class loader
-        try {
-            return loadRuleSet(prefix,"org.apache.catalina.ha.ClusterRuleSet",Thread.currentThread().getContextClassLoader());
-        } catch ( Exception x ) {
+        try
+        {
+            return loadRuleSet(prefix, "org.apache.catalina.ha.ClusterRuleSet", Thread.currentThread().getContextClassLoader());
+        }
+        catch (Exception x)
+        {
             //display warning
-            if ( log.isDebugEnabled() ) log.debug("Unable to load HA ClusterRuleSet (org.apache.catalina.ha.ClusterRuleSet), falling back on DefaultClusterRuleSet");
+            if (log.isDebugEnabled())
+                log.debug("Unable to load HA ClusterRuleSet (org.apache.catalina.ha.ClusterRuleSet), falling back on DefaultClusterRuleSet");
         }
 
         log.info("Unable to find a cluster rule set in the classpath. Will load the default rule set.");
         return new DefaultClusterRuleSet(prefix);
     }
-    
-    
-    protected static RuleSetBase loadRuleSet(String prefix, String className, ClassLoader cl) 
-        throws ClassNotFoundException, InstantiationException, 
-               NoSuchMethodException,IllegalAccessException,
-               InvocationTargetException {
-        Class clazz = Class.forName(className,true,cl);
-        Constructor cons = clazz.getConstructor(new Class[] {String.class});
-        return (RuleSetBase)cons.newInstance(prefix);
+
+
+    protected static RuleSetBase loadRuleSet(String prefix, String className, ClassLoader cl)
+            throws ClassNotFoundException, InstantiationException,
+            NoSuchMethodException, IllegalAccessException,
+            InvocationTargetException
+    {
+        Class clazz = Class.forName(className, true, cl);
+        Constructor cons = clazz.getConstructor(new Class[]{String.class});
+        return (RuleSetBase) cons.newInstance(prefix);
     }
-    
+
     /**
      * <p><strong>RuleSet</strong> for processing the contents of a
      * Cluster definition element.  </p>
      *
      * @author Filip Hanik
      * @author Peter Rossbach
-     *
      */
 
-    public static class DefaultClusterRuleSet extends RuleSetBase {
+    public static class DefaultClusterRuleSet extends RuleSetBase
+    {
 
 
         // ----------------------------------------------------- Instance Variables
@@ -107,7 +126,8 @@ public class ClusterRuleSetFactory {
          * Construct an instance of this <code>RuleSet</code> with the default
          * matching pattern prefix.
          */
-        public DefaultClusterRuleSet() {
+        public DefaultClusterRuleSet()
+        {
 
             this("");
 
@@ -119,9 +139,10 @@ public class ClusterRuleSetFactory {
          * matching pattern prefix.
          *
          * @param prefix Prefix for matching pattern rules (including the
-         *  trailing slash character)
+         *               trailing slash character)
          */
-        public DefaultClusterRuleSet(String prefix) {
+        public DefaultClusterRuleSet(String prefix)
+        {
             super();
             this.namespaceURI = null;
             this.prefix = prefix;
@@ -138,65 +159,66 @@ public class ClusterRuleSetFactory {
          * by a Digester instance.</p>
          *
          * @param digester Digester instance to which the new Rule instances
-         *  should be added.
+         *                 should be added.
          */
-        public void addRuleInstances(Digester digester) {
+        public void addRuleInstances(Digester digester)
+        {
             //Cluster configuration start
             digester.addObjectCreate(prefix + "Membership",
-                                     null, // MUST be specified in the element
-                                     "className");
+                    null, // MUST be specified in the element
+                    "className");
             digester.addSetProperties(prefix + "Membership");
             digester.addSetNext(prefix + "Membership",
-                                "setMembershipService",
-                                "org.apache.catalina.cluster.MembershipService");
+                    "setMembershipService",
+                    "org.apache.catalina.cluster.MembershipService");
 
             digester.addObjectCreate(prefix + "Sender",
-                                     null, // MUST be specified in the element
-                                     "className");
+                    null, // MUST be specified in the element
+                    "className");
             digester.addSetProperties(prefix + "Sender");
             digester.addSetNext(prefix + "Sender",
-                                "setClusterSender",
-                                "org.apache.catalina.cluster.ClusterSender");
+                    "setClusterSender",
+                    "org.apache.catalina.cluster.ClusterSender");
 
             digester.addObjectCreate(prefix + "Receiver",
-                                     null, // MUST be specified in the element
-                                     "className");
+                    null, // MUST be specified in the element
+                    "className");
             digester.addSetProperties(prefix + "Receiver");
             digester.addSetNext(prefix + "Receiver",
-                                "setClusterReceiver",
-                                "org.apache.catalina.cluster.ClusterReceiver");
+                    "setClusterReceiver",
+                    "org.apache.catalina.cluster.ClusterReceiver");
 
             digester.addObjectCreate(prefix + "Valve",
-                                     null, // MUST be specified in the element
-                                     "className");
+                    null, // MUST be specified in the element
+                    "className");
             digester.addSetProperties(prefix + "Valve");
             digester.addSetNext(prefix + "Valve",
-                                "addValve",
-                                "org.apache.catalina.Valve");
+                    "addValve",
+                    "org.apache.catalina.Valve");
 
             digester.addObjectCreate(prefix + "Deployer",
-                                     null, // MUST be specified in the element
-                                     "className");
+                    null, // MUST be specified in the element
+                    "className");
             digester.addSetProperties(prefix + "Deployer");
             digester.addSetNext(prefix + "Deployer",
-                                "setClusterDeployer",
-                                "org.apache.catalina.cluster.ClusterDeployer");
+                    "setClusterDeployer",
+                    "org.apache.catalina.cluster.ClusterDeployer");
 
             digester.addObjectCreate(prefix + "Listener",
                     null, // MUST be specified in the element
                     "className");
             digester.addSetProperties(prefix + "Listener");
             digester.addSetNext(prefix + "Listener",
-                                "addLifecycleListener",
-                                "org.apache.catalina.LifecycleListener");
+                    "addLifecycleListener",
+                    "org.apache.catalina.LifecycleListener");
 
             digester.addObjectCreate(prefix + "ClusterListener",
                     null, // MUST be specified in the element
                     "className");
             digester.addSetProperties(prefix + "ClusterListener");
             digester.addSetNext(prefix + "ClusterListener",
-                                "addClusterListener",
-                                "org.apache.catalina.cluster.MessageListener");
+                    "addClusterListener",
+                    "org.apache.catalina.cluster.MessageListener");
             //Cluster configuration end
         }
 

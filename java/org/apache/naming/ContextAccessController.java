@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -24,10 +24,10 @@ import java.util.Hashtable;
  * Handles the access control on the JNDI contexts.
  *
  * @author Remy Maucherat
- *
  */
 
-public class ContextAccessController {
+public class ContextAccessController
+{
 
 
     // -------------------------------------------------------------- Variables
@@ -50,18 +50,21 @@ public class ContextAccessController {
 
     /**
      * Set a security token for a context. Can be set only once.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Security token
      */
-    public static void setSecurityToken(Object name, Object token) {
+    public static void setSecurityToken(Object name, Object token)
+    {
         SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
+        if (sm != null)
+        {
             sm.checkPermission(new RuntimePermission(
                     ContextAccessController.class.getName()
                             + ".setSecurityToken"));
         }
-        if ((!securityTokens.containsKey(name)) && (token != null)) {
+        if ((!securityTokens.containsKey(name)) && (token != null))
+        {
             securityTokens.put(name, token);
         }
     }
@@ -69,12 +72,14 @@ public class ContextAccessController {
 
     /**
      * Remove a security token for a context.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Security token
      */
-    public static void unsetSecurityToken(Object name, Object token) {
-        if (checkSecurityToken(name, token)) {
+    public static void unsetSecurityToken(Object name, Object token)
+    {
+        if (checkSecurityToken(name, token))
+        {
             securityTokens.remove(name);
         }
     }
@@ -82,14 +87,15 @@ public class ContextAccessController {
 
     /**
      * Check a submitted security token. The submitted token must be equal to
-     * the token present in the repository. If no token is present for the 
+     * the token present in the repository. If no token is present for the
      * context, then returns true.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Submitted security token
      */
     public static boolean checkSecurityToken
-        (Object name, Object token) {
+    (Object name, Object token)
+    {
         Object refToken = securityTokens.get(name);
         if (refToken == null)
             return (true);
@@ -101,11 +107,12 @@ public class ContextAccessController {
 
     /**
      * Allow writing to a context.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Security token
      */
-    public static void setWritable(Object name, Object token) {
+    public static void setWritable(Object name, Object token)
+    {
         if (checkSecurityToken(name, token))
             readOnlyContexts.remove(name);
     }
@@ -113,20 +120,22 @@ public class ContextAccessController {
 
     /**
      * Set whether or not a context is writable.
-     * 
+     *
      * @param name Name of the context
      */
-    public static void setReadOnly(Object name) {
+    public static void setReadOnly(Object name)
+    {
         readOnlyContexts.put(name, name);
     }
 
 
     /**
      * Returns if a context is writable.
-     * 
+     *
      * @param name Name of the context
      */
-    public static boolean isWritable(Object name) {
+    public static boolean isWritable(Object name)
+    {
         return !(readOnlyContexts.containsKey(name));
     }
 

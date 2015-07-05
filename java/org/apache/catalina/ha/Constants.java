@@ -23,9 +23,9 @@ package org.apache.catalina.ha;
  * package.
  *
  * @author Bip Thelin
- *
  */
 
-public final class Constants {
+public final class Constants
+{
     public static final String Package = "org.apache.catalina.ha";
 }

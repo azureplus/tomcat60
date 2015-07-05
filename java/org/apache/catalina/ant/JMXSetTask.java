@@ -30,16 +30,16 @@ import java.net.URLEncoder;
  * supported by the Tomcat manager application.
  *
  * @author Vivek Chopra
- *
  */
-public class JMXSetTask extends AbstractCatalinaTask {
+public class JMXSetTask extends AbstractCatalinaTask
+{
 
     // Properties
 
     /**
      * The full bean name
      */
-    protected String bean      = null;
+    protected String bean = null;
 
     /**
      * The attribute you wish to alter
@@ -49,79 +49,96 @@ public class JMXSetTask extends AbstractCatalinaTask {
     /**
      * The new value for the attribute
      */
-    protected String value     = null;
+    protected String value = null;
 
     // Public Methods
-    
+
     /**
      * Get method for the bean name
+     *
      * @return Bean name
      */
-    public String getBean () {
+    public String getBean()
+    {
         return this.bean;
     }
 
     /**
      * Set method for the bean name
+     *
      * @param bean Bean name
      */
-    public void setBean (String bean) {
+    public void setBean(String bean)
+    {
         this.bean = bean;
     }
 
     /**
      * Get method for the attribute name
+     *
      * @return Attribute name
      */
-    public String getAttribute () {
+    public String getAttribute()
+    {
         return this.attribute;
     }
 
     /**
      * Set method for the attribute name
+     *
      * @param attribute Attribute name
      */
-    public void setAttribute (String attribute) {
+    public void setAttribute(String attribute)
+    {
         this.attribute = attribute;
     }
 
     /**
      * Get method for the attribute value
+     *
      * @return Attribute value
      */
-    public String getValue () {
+    public String getValue()
+    {
         return this.value;
     }
 
     /**
      * Set method for the attribute value.
+     *
      * @param value Attribute value
      */
-    public void setValue (String value) {
+    public void setValue(String value)
+    {
         this.value = value;
     }
 
     /**
      * Execute the requested operation.
      *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
         super.execute();
-        if (bean == null || attribute == null || value == null) {
+        if (bean == null || attribute == null || value == null)
+        {
             throw new BuildException
-                ("Must specify 'bean', 'attribute' and 'value' attributes");
+                    ("Must specify 'bean', 'attribute' and 'value' attributes");
         }
         log("Setting attribute " + attribute +
-                            " in bean " + bean +
-                            " to " + value); 
-        try {
-            execute("/jmxproxy/?set=" + URLEncoder.encode(bean, getCharset()) 
-                    + "&att=" + URLEncoder.encode(attribute, getCharset()) 
+                " in bean " + bean +
+                " to " + value);
+        try
+        {
+            execute("/jmxproxy/?set=" + URLEncoder.encode(bean, getCharset())
+                    + "&att=" + URLEncoder.encode(attribute, getCharset())
                     + "&val=" + URLEncoder.encode(value, getCharset()));
-        } catch (UnsupportedEncodingException e) {
+        }
+        catch (UnsupportedEncodingException e)
+        {
             throw new BuildException
-                ("Invalid 'charset' attribute: " + getCharset());
+                    ("Invalid 'charset' attribute: " + getCharset());
         }
     }
 }

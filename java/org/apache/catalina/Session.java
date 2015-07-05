@@ -30,10 +30,10 @@ import java.util.Iterator;
  * between requests for a particular user of a web application.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface Session {
+public interface Session
+{
 
 
     // ----------------------------------------------------- Manifest Constants
@@ -102,13 +102,6 @@ public interface Session {
      */
     public String getId();
 
-
-    /**
-     * Return the session identifier for this session.
-     */
-    public String getIdInternal();
-
-
     /**
      * Set the session identifier for this session and notifies any associated
      * listeners that a new session has been created.
@@ -117,14 +110,18 @@ public interface Session {
      */
     public void setId(String id);
 
+    /**
+     * Return the session identifier for this session.
+     */
+    public String getIdInternal();
 
     /**
      * Set the session identifier for this session and optionally notifies any
      * associated listeners that a new session has been created.
      *
-     * @param id        The new session identifier
-     * @param notify    Should any associated listeners be notified that a new
-     *                      session has been created? 
+     * @param id     The new session identifier
+     * @param notify Should any associated listeners be notified that a new
+     *               session has been created?
      */
     public void setId(String id, boolean notify);
 
@@ -147,6 +144,7 @@ public interface Session {
 
     /**
      * Return the last client access time without invalidation check
+     *
      * @see #getLastAccessedTime().
      */
     public long getLastAccessedTimeInternal();
@@ -218,6 +216,10 @@ public interface Session {
      */
     public HttpSession getSession();
 
+    /**
+     * Return the <code>isValid</code> flag for this session.
+     */
+    public boolean isValid();
 
     /**
      * Set the <code>isValid</code> flag for this session.
@@ -227,14 +229,7 @@ public interface Session {
     public void setValid(boolean isValid);
 
 
-    /**
-     * Return the <code>isValid</code> flag for this session.
-     */
-    public boolean isValid();
-
-
     // --------------------------------------------------------- Public Methods
-
 
     /**
      * Update the accessed time information for this session.  This method
@@ -305,7 +300,7 @@ public interface Session {
      * Bind an object to a specified name in the internal notes associated
      * with this session, replacing any existing binding for this name.
      *
-     * @param name Name to which the object should be bound
+     * @param name  Name to which the object should be bound
      * @param value Object to be bound to the specified name
      */
     public void setNote(String name, Object value);

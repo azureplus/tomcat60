@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming.factory;
@@ -26,13 +26,13 @@ import java.util.Hashtable;
 
 /**
  * Object factory for Resources.
- * 
- * @author Remy Maucherat
  *
+ * @author Remy Maucherat
  */
 
 public class ResourceFactory
-    implements ObjectFactory {
+        implements ObjectFactory
+{
 
 
     // ----------------------------------------------------------- Constructors
@@ -52,96 +52,122 @@ public class ResourceFactory
 
     /**
      * Crete a new DataSource instance.
-     * 
+     *
      * @param obj The reference object describing the DataSource
      */
     public Object getObjectInstance(Object obj, Name name, Context nameCtx,
                                     Hashtable environment)
-        throws Exception {
-        
-        if (obj instanceof ResourceRef) {
+            throws Exception
+    {
+
+        if (obj instanceof ResourceRef)
+        {
             Reference ref = (Reference) obj;
             ObjectFactory factory = null;
             RefAddr factoryRefAddr = ref.get(Constants.FACTORY);
-            if (factoryRefAddr != null) {
+            if (factoryRefAddr != null)
+            {
                 // Using the specified factory
-                String factoryClassName = 
-                    factoryRefAddr.getContent().toString();
+                String factoryClassName =
+                        factoryRefAddr.getContent().toString();
                 // Loading factory
-                ClassLoader tcl = 
-                    Thread.currentThread().getContextClassLoader();
+                ClassLoader tcl =
+                        Thread.currentThread().getContextClassLoader();
                 Class factoryClass = null;
-                if (tcl != null) {
-                    try {
+                if (tcl != null)
+                {
+                    try
+                    {
                         factoryClass = tcl.loadClass(factoryClassName);
-                    } catch(ClassNotFoundException e) {
+                    }
+                    catch (ClassNotFoundException e)
+                    {
                         NamingException ex = new NamingException
-                            ("Could not load resource factory class");
+                                ("Could not load resource factory class");
                         ex.initCause(e);
                         throw ex;
                     }
-                } else {
-                    try {
+                } else
+                {
+                    try
+                    {
                         factoryClass = Class.forName(factoryClassName);
-                    } catch(ClassNotFoundException e) {
+                    }
+                    catch (ClassNotFoundException e)
+                    {
                         NamingException ex = new NamingException
-                            ("Could not load resource factory class");
+                                ("Could not load resource factory class");
                         ex.initCause(e);
                         throw ex;
                     }
                 }
-                if (factoryClass != null) {
-                    try {
+                if (factoryClass != null)
+                {
+                    try
+                    {
                         factory = (ObjectFactory) factoryClass.newInstance();
-                    } catch (Throwable t) {
+                    }
+                    catch (Throwable t)
+                    {
                         if (t instanceof NamingException)
                             throw (NamingException) t;
                         NamingException ex = new NamingException
-                            ("Could not create resource factory instance");
+                                ("Could not create resource factory instance");
                         ex.initCause(t);
                         throw ex;
                     }
                 }
-            } else {
-                if (ref.getClassName().equals("javax.sql.DataSource")) {
+            } else
+            {
+                if (ref.getClassName().equals("javax.sql.DataSource"))
+                {
                     String javaxSqlDataSourceFactoryClassName =
-                        System.getProperty("javax.sql.DataSource.Factory",
-                                           Constants.DBCP_DATASOURCE_FACTORY);
-                    try {
-                        factory = (ObjectFactory) 
-                            Class.forName(javaxSqlDataSourceFactoryClassName)
-                            .newInstance();
-                    } catch (Throwable t) {
+                            System.getProperty("javax.sql.DataSource.Factory",
+                                    Constants.DBCP_DATASOURCE_FACTORY);
+                    try
+                    {
+                        factory = (ObjectFactory)
+                                Class.forName(javaxSqlDataSourceFactoryClassName)
+                                        .newInstance();
+                    }
+                    catch (Throwable t)
+                    {
                         NamingException ex = new NamingException
-                            ("Could not create resource factory instance");
+                                ("Could not create resource factory instance");
                         ex.initCause(t);
                         throw ex;
                     }
-                } else if (ref.getClassName().equals("javax.mail.Session")) {
+                } else if (ref.getClassName().equals("javax.mail.Session"))
+                {
                     String javaxMailSessionFactoryClassName =
-                        System.getProperty("javax.mail.Session.Factory",
-                                           "org.apache.naming.factory.MailSessionFactory");
-                    try {
-                        factory = (ObjectFactory) 
-                            Class.forName(javaxMailSessionFactoryClassName)
-                            .newInstance();
-                    } catch(Throwable t) {
+                            System.getProperty("javax.mail.Session.Factory",
+                                    "org.apache.naming.factory.MailSessionFactory");
+                    try
+                    {
+                        factory = (ObjectFactory)
+                                Class.forName(javaxMailSessionFactoryClassName)
+                                        .newInstance();
+                    }
+                    catch (Throwable t)
+                    {
                         NamingException ex = new NamingException
-                            ("Could not create resource factory instance");
+                                ("Could not create resource factory instance");
                         ex.initCause(t);
                         throw ex;
                     }
                 }
             }
-            if (factory != null) {
+            if (factory != null)
+            {
                 return factory.getObjectInstance
-                    (obj, name, nameCtx, environment);
-            } else {
+                        (obj, name, nameCtx, environment);
+            } else
+            {
                 throw new NamingException
-                    ("Cannot create resource instance");
+                        ("Cannot create resource instance");
             }
         }
-        
+
         return null;
 
     }

@@ -35,17 +35,17 @@ import java.util.HashMap;
  * one passed to a servlet, or might be based on the 2.3
  * <code>javax.servlet.ServletRequestWrapper</code> class)
  * back into an internal <code>org.apache.catalina.Request</code>.
- * <p>
+ * <p/>
  * <strong>WARNING</strong>:  Due to Java's lack of support for multiple
  * inheritance, all of the logic in <code>ApplicationRequest</code> is
  * duplicated in <code>ApplicationHttpRequest</code>.  Make sure that you
  * keep these two classes in synchronization when making changes!
  *
  * @author Craig R. McClanahan
- *
  */
 
-class ApplicationRequest extends ServletRequestWrapper {
+class ApplicationRequest extends ServletRequestWrapper
+{
 
 
     // ------------------------------------------------------- Static Variables
@@ -55,32 +55,22 @@ class ApplicationRequest extends ServletRequestWrapper {
      * The set of attribute names that are special for request dispatchers.
      */
     protected static final String specials[] =
-    { Globals.INCLUDE_REQUEST_URI_ATTR, Globals.INCLUDE_CONTEXT_PATH_ATTR,
-      Globals.INCLUDE_SERVLET_PATH_ATTR, Globals.INCLUDE_PATH_INFO_ATTR,
-      Globals.INCLUDE_QUERY_STRING_ATTR, Globals.FORWARD_REQUEST_URI_ATTR, 
-      Globals.FORWARD_CONTEXT_PATH_ATTR, Globals.FORWARD_SERVLET_PATH_ATTR, 
-      Globals.FORWARD_PATH_INFO_ATTR, Globals.FORWARD_QUERY_STRING_ATTR };
+            {Globals.INCLUDE_REQUEST_URI_ATTR, Globals.INCLUDE_CONTEXT_PATH_ATTR,
+                    Globals.INCLUDE_SERVLET_PATH_ATTR, Globals.INCLUDE_PATH_INFO_ATTR,
+                    Globals.INCLUDE_QUERY_STRING_ATTR, Globals.FORWARD_REQUEST_URI_ATTR,
+                    Globals.FORWARD_CONTEXT_PATH_ATTR, Globals.FORWARD_SERVLET_PATH_ATTR,
+                    Globals.FORWARD_PATH_INFO_ATTR, Globals.FORWARD_QUERY_STRING_ATTR};
 
 
     // ----------------------------------------------------------- Constructors
-
-
     /**
-     * Construct a new wrapped request around the specified servlet request.
-     *
-     * @param request The servlet request being wrapped
+     * The string manager for this package.
      */
-    public ApplicationRequest(ServletRequest request) {
-
-        super(request);
-        setRequest(request);
-
-    }
+    protected static StringManager sm =
+            StringManager.getManager(Constants.Package);
 
 
     // ----------------------------------------------------- Instance Variables
-
-
     /**
      * The request attributes for this request.  This is initialized from the
      * wrapped request, but updates are allowed.
@@ -89,23 +79,31 @@ class ApplicationRequest extends ServletRequestWrapper {
 
 
     /**
-     * The string manager for this package.
+     * Construct a new wrapped request around the specified servlet request.
+     *
+     * @param request The servlet request being wrapped
      */
-    protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
+    public ApplicationRequest(ServletRequest request)
+    {
+
+        super(request);
+        setRequest(request);
+
+    }
 
 
     // ------------------------------------------------- ServletRequest Methods
-
 
     /**
      * Override the <code>getAttribute()</code> method of the wrapped request.
      *
      * @param name Name of the attribute to retrieve
      */
-    public Object getAttribute(String name) {
+    public Object getAttribute(String name)
+    {
 
-        synchronized (attributes) {
+        synchronized (attributes)
+        {
             return (attributes.get(name));
         }
 
@@ -116,9 +114,11 @@ class ApplicationRequest extends ServletRequestWrapper {
      * Override the <code>getAttributeNames()</code> method of the wrapped
      * request.
      */
-    public Enumeration getAttributeNames() {
+    public Enumeration getAttributeNames()
+    {
 
-        synchronized (attributes) {
+        synchronized (attributes)
+        {
             return (new Enumerator(attributes.keySet()));
         }
 
@@ -131,9 +131,11 @@ class ApplicationRequest extends ServletRequestWrapper {
      *
      * @param name Name of the attribute to remove
      */
-    public void removeAttribute(String name) {
+    public void removeAttribute(String name)
+    {
 
-        synchronized (attributes) {
+        synchronized (attributes)
+        {
             attributes.remove(name);
             if (!isSpecial(name))
                 getRequest().removeAttribute(name);
@@ -146,12 +148,14 @@ class ApplicationRequest extends ServletRequestWrapper {
      * Override the <code>setAttribute()</code> method of the
      * wrapped request.
      *
-     * @param name Name of the attribute to set
+     * @param name  Name of the attribute to set
      * @param value Value of the attribute to set
      */
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(String name, Object value)
+    {
 
-        synchronized (attributes) {
+        synchronized (attributes)
+        {
             attributes.put(name, value);
             if (!isSpecial(name))
                 getRequest().setAttribute(name, value);
@@ -168,15 +172,18 @@ class ApplicationRequest extends ServletRequestWrapper {
      *
      * @param request The new wrapped request
      */
-    public void setRequest(ServletRequest request) {
+    public void setRequest(ServletRequest request)
+    {
 
         super.setRequest(request);
 
         // Initialize the attributes for this request
-        synchronized (attributes) {
+        synchronized (attributes)
+        {
             attributes.clear();
             Enumeration names = request.getAttributeNames();
-            while (names.hasMoreElements()) {
+            while (names.hasMoreElements())
+            {
                 String name = (String) names.nextElement();
                 Object value = request.getAttribute(name);
                 attributes.put(name, value);
@@ -195,9 +202,11 @@ class ApplicationRequest extends ServletRequestWrapper {
      *
      * @param name Attribute name to be tested
      */
-    protected boolean isSpecial(String name) {
+    protected boolean isSpecial(String name)
+    {
 
-        for (int i = 0; i < specials.length; i++) {
+        for (int i = 0; i < specials.length; i++)
+        {
             if (specials[i].equals(name))
                 return (true);
         }

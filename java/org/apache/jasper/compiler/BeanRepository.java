@@ -22,12 +22,13 @@ import org.apache.jasper.JasperException;
 import java.util.HashMap;
 
 /**
- * Repository of {page, request, session, application}-scoped beans 
+ * Repository of {page, request, session, application}-scoped beans
  *
  * @author Mandar Raje
  * @author Remy Maucherat
  */
-public class BeanRepository {
+public class BeanRepository
+{
 
     protected HashMap<String, String> beanTypes;
     protected ClassLoader loader;
@@ -35,36 +36,44 @@ public class BeanRepository {
 
     /**
      * Constructor.
-     */    
-    public BeanRepository(ClassLoader loader, ErrorDispatcher err) {
+     */
+    public BeanRepository(ClassLoader loader, ErrorDispatcher err)
+    {
         this.loader = loader;
         this.errDispatcher = err;
         beanTypes = new HashMap<String, String>();
     }
 
     public void addBean(Node.UseBean n, String s, String type, String scope)
-        throws JasperException {
+            throws JasperException
+    {
 
-        if (!(scope == null || scope.equals("page") || scope.equals("request") 
-                || scope.equals("session") || scope.equals("application"))) {
+        if (!(scope == null || scope.equals("page") || scope.equals("request")
+                || scope.equals("session") || scope.equals("application")))
+        {
             errDispatcher.jspError(n, "jsp.error.usebean.badScope");
         }
 
         beanTypes.put(s, type);
     }
-            
+
     public Class getBeanType(String bean)
-        throws JasperException {
+            throws JasperException
+    {
         Class clazz = null;
-        try {
+        try
+        {
             clazz = loader.loadClass(beanTypes.get(bean));
-        } catch (ClassNotFoundException ex) {
-            throw new JasperException (ex);
+        }
+        catch (ClassNotFoundException ex)
+        {
+            throw new JasperException(ex);
         }
         return clazz;
     }
-      
-    public boolean checkVariable(String bean) {
+
+    public boolean checkVariable(String bean)
+    {
         return beanTypes.containsKey(bean);
     }
 

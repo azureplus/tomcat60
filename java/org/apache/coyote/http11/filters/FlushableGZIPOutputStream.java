@@ -28,37 +28,42 @@ import java.util.zip.GZIPOutputStream;
  * (<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4255743">Bug
  * 4255743</a> and
  * <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4813885">Bug
- * 4813885</a>) so the GZIP'd output can be flushed. 
+ * 4813885</a>) so the GZIP'd output can be flushed.
  */
-public class FlushableGZIPOutputStream extends GZIPOutputStream {
-    public FlushableGZIPOutputStream(OutputStream os) throws IOException {
-        super(os);
-    }
-
+public class FlushableGZIPOutputStream extends GZIPOutputStream
+{
     /**
      * It is used to reserve one byte of real data so that it can be used when
      * flushing the stream.
      */
     private byte[] lastByte = new byte[1];
     private boolean hasLastByte = false;
-
     /**
      * Flag that compression has to be re-enabled before the next write
      * operation.
      */
     private boolean flagReenableCompression = false;
 
+    public FlushableGZIPOutputStream(OutputStream os) throws IOException
+    {
+        super(os);
+    }
+
     @Override
-    public void write(byte[] bytes) throws IOException {
+    public void write(byte[] bytes) throws IOException
+    {
         write(bytes, 0, bytes.length);
     }
 
     @Override
     public synchronized void write(byte[] bytes, int offset, int length)
-            throws IOException {
-        if (length > 0) {
+            throws IOException
+    {
+        if (length > 0)
+        {
             flushLastByte();
-            if (length > 1) {
+            if (length > 1)
+            {
                 reenableCompression();
                 super.write(bytes, offset, length - 1);
             }
@@ -67,16 +72,21 @@ public class FlushableGZIPOutputStream extends GZIPOutputStream {
     }
 
     @Override
-    public synchronized void write(int i) throws IOException {
+    public synchronized void write(int i) throws IOException
+    {
         flushLastByte();
         rememberLastByte((byte) i);
     }
 
     @Override
-    public synchronized void finish() throws IOException {
-        try {
+    public synchronized void finish() throws IOException
+    {
+        try
+        {
             flushLastByte();
-        } catch (IOException ignore) {
+        }
+        catch (IOException ignore)
+        {
             // If our write failed, then trailer write in finish() will fail
             // with IOException as well, but it will leave Deflater in more
             // consistent state.
@@ -85,10 +95,14 @@ public class FlushableGZIPOutputStream extends GZIPOutputStream {
     }
 
     @Override
-    public synchronized void close() throws IOException {
-        try {
+    public synchronized void close() throws IOException
+    {
+        try
+        {
             flushLastByte();
-        } catch (IOException ignored) {
+        }
+        catch (IOException ignored)
+        {
             // Ignore. As OutputStream#close() says, the contract of close()
             // is to close the stream. It does not matter much if the
             // stream is not writable any more.
@@ -96,20 +110,25 @@ public class FlushableGZIPOutputStream extends GZIPOutputStream {
         super.close();
     }
 
-    private void reenableCompression() {
-        if (flagReenableCompression && !def.finished()) {
+    private void reenableCompression()
+    {
+        if (flagReenableCompression && !def.finished())
+        {
             flagReenableCompression = false;
             def.setLevel(Deflater.DEFAULT_COMPRESSION);
         }
     }
 
-    private void rememberLastByte(byte b) {
+    private void rememberLastByte(byte b)
+    {
         lastByte[0] = b;
         hasLastByte = true;
     }
 
-    private void flushLastByte() throws IOException {
-        if (hasLastByte) {
+    private void flushLastByte() throws IOException
+    {
+        if (hasLastByte)
+        {
             reenableCompression();
             // Clear the flag first, because write() may fail
             hasLastByte = false;
@@ -118,8 +137,10 @@ public class FlushableGZIPOutputStream extends GZIPOutputStream {
     }
 
     @Override
-    public synchronized void flush() throws IOException {
-        if (hasLastByte) {
+    public synchronized void flush() throws IOException
+    {
+        if (hasLastByte)
+        {
             // - do not allow the gzip header to be flushed on its own
             // - do not do anything if there is no data to send
 
@@ -130,7 +151,8 @@ public class FlushableGZIPOutputStream extends GZIPOutputStream {
              * for
              * http://developer.java.sun.com/developer/bugParade/bugs/4255743.html
              */
-            if (!def.finished()) {
+            if (!def.finished())
+            {
                 def.setLevel(Deflater.NO_COMPRESSION);
                 flushLastByte();
                 flagReenableCompression = true;
@@ -145,11 +167,14 @@ public class FlushableGZIPOutputStream extends GZIPOutputStream {
      * flushed out.
      */
     @Override
-    protected void deflate() throws IOException {
+    protected void deflate() throws IOException
+    {
         int len;
-        do {
+        do
+        {
             len = def.deflate(buf, 0, buf.length);
-            if (len > 0) {
+            if (len > 0)
+            {
                 out.write(buf, 0, len);
             }
         } while (len != 0);

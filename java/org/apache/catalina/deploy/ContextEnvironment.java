@@ -26,105 +26,117 @@ import java.io.Serializable;
  * an <code>&lt;env-entry&gt;</code> element in the deployment descriptor.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class ContextEnvironment implements Serializable {
+public class ContextEnvironment implements Serializable
+{
 
 
     // ------------------------------------------------------------- Properties
 
 
     /**
+     * The NamingResources with which we are associated (if any).
+     */
+    protected NamingResources resources = null;
+    /**
      * The description of this environment entry.
      */
     private String description = null;
-
-    public String getDescription() {
-        return (this.description);
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-
     /**
      * The name of this environment entry.
      */
     private String name = null;
-
-    public String getName() {
-        return (this.name);
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
     /**
      * Does this environment entry allow overrides by the application
      * deployment descriptor?
      */
     private boolean override = true;
-
-    public boolean getOverride() {
-        return (this.override);
-    }
-
-    public void setOverride(boolean override) {
-        this.override = override;
-    }
-
-
     /**
      * The type of this environment entry.
      */
     private String type = null;
-
-    public String getType() {
-        return (this.type);
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-
     /**
      * The value of this environment entry.
      */
     private String value = null;
 
-    public String getValue() {
-        return (this.value);
+    public String getDescription()
+    {
+        return (this.description);
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public String getName()
+    {
+        return (this.name);
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public boolean getOverride()
+    {
+        return (this.override);
+    }
+
+    public void setOverride(boolean override)
+    {
+        this.override = override;
+    }
+
+    public String getType()
+    {
+        return (this.type);
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
+    public String getValue()
+    {
+        return (this.value);
     }
 
     // --------------------------------------------------------- Public Methods
 
+    public void setValue(String value)
+    {
+        this.value = value;
+    }
+
+
+    // -------------------------------------------------------- Package Methods
 
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ContextEnvironment[");
         sb.append("name=");
         sb.append(name);
-        if (description != null) {
+        if (description != null)
+        {
             sb.append(", description=");
             sb.append(description);
         }
-        if (type != null) {
+        if (type != null)
+        {
             sb.append(", type=");
             sb.append(type);
         }
-        if (value != null) {
+        if (value != null)
+        {
             sb.append(", value=");
             sb.append(value);
         }
@@ -135,20 +147,13 @@ public class ContextEnvironment implements Serializable {
 
     }
 
-
-    // -------------------------------------------------------- Package Methods
-
-
-    /**
-     * The NamingResources with which we are associated (if any).
-     */
-    protected NamingResources resources = null;
-
-    public NamingResources getNamingResources() {
+    public NamingResources getNamingResources()
+    {
         return (this.resources);
     }
 
-    void setNamingResources(NamingResources resources) {
+    void setNamingResources(NamingResources resources)
+    {
         this.resources = resources;
     }
 

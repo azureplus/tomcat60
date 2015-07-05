@@ -31,12 +31,12 @@ import org.apache.juli.logging.LogFactory;
  * started.
  *
  * @author Remy Maucherat
- *
  * @since 4.1
  */
 
 public class JasperListener
-    implements LifecycleListener {
+        implements LifecycleListener
+{
 
     private static Log log = LogFactory.getLog(JasperListener.class);
 
@@ -44,7 +44,7 @@ public class JasperListener
      * The string manager for this package.
      */
     protected StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
 
 
     // ---------------------------------------------- LifecycleListener Methods
@@ -55,15 +55,20 @@ public class JasperListener
      *
      * @param event The event that has occurred
      */
-    public void lifecycleEvent(LifecycleEvent event) {
+    public void lifecycleEvent(LifecycleEvent event)
+    {
 
-        if (Lifecycle.INIT_EVENT.equals(event.getType())) {
-            try {
+        if (Lifecycle.INIT_EVENT.equals(event.getType()))
+        {
+            try
+            {
                 // Set JSP factory
                 Class.forName("org.apache.jasper.compiler.JspRuntimeContext",
-                              true,
-                              this.getClass().getClassLoader());
-            } catch (Throwable t) {
+                        true,
+                        this.getClass().getClassLoader());
+            }
+            catch (Throwable t)
+            {
                 // Should not occur, obviously
                 log.warn("Couldn't initialize Jasper", t);
             }

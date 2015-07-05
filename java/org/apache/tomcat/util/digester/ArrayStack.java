@@ -22,58 +22,64 @@ import java.util.EmptyStackException;
 /**
  * <p>Imported copy of the <code>ArrayStack</code> class from
  * Commons Collections, which was the only direct dependency from Digester.</p>
- *
+ * <p/>
  * <p><strong>WARNNG</strong> - This class is public solely to allow it to be
  * used from subpackages of <code>org.apache.commons.digester</code>.
  * It should not be considered part of the public API of Commons Digester.
  * If you want to use such a class yourself, you should use the one from
  * Commons Collections directly.</p>
- *
+ * <p/>
  * <p>An implementation of the {@link java.util.Stack} API that is based on an
  * <code>ArrayList</code> instead of a <code>Vector</code>, so it is not
  * synchronized to protect against multi-threaded access.  The implementation
  * is therefore operates faster in environments where you do not need to
  * worry about multiple thread contention.</p>
- *
+ * <p/>
  * <p>Unlike <code>Stack</code>, <code>ArrayStack</code> accepts null entries.
  * </p>
  *
  * @see java.util.Stack
  * @since Digester 1.6 (from Commons Collections 1.0)
  */
-public class ArrayStack extends ArrayList {
+public class ArrayStack extends ArrayList
+{
 
-    /** Ensure serialization compatibility */    
+    /**
+     * Ensure serialization compatibility
+     */
     private static final long serialVersionUID = 2130079159931574599L;
 
     /**
      * Constructs a new empty <code>ArrayStack</code>. The initial size
      * is controlled by <code>ArrayList</code> and is currently 10.
      */
-    public ArrayStack() {
+    public ArrayStack()
+    {
         super();
     }
 
     /**
      * Constructs a new empty <code>ArrayStack</code> with an initial size.
-     * 
-     * @param initialSize  the initial size to use
-     * @throws IllegalArgumentException  if the specified initial size
-     *  is negative
+     *
+     * @param initialSize the initial size to use
+     * @throws IllegalArgumentException if the specified initial size
+     *                                  is negative
      */
-    public ArrayStack(int initialSize) {
+    public ArrayStack(int initialSize)
+    {
         super(initialSize);
     }
 
     /**
      * Return <code>true</code> if this stack is currently empty.
-     * <p>
+     * <p/>
      * This method exists for compatibility with <code>java.util.Stack</code>.
      * New users of this class should use <code>isEmpty</code> instead.
-     * 
+     *
      * @return true if the stack is currently empty
      */
-    public boolean empty() {
+    public boolean empty()
+    {
         return isEmpty();
     }
 
@@ -81,13 +87,16 @@ public class ArrayStack extends ArrayList {
      * Returns the top item off of this stack without removing it.
      *
      * @return the top item on the stack
-     * @throws EmptyStackException  if the stack is empty
+     * @throws EmptyStackException if the stack is empty
      */
-    public Object peek() throws EmptyStackException {
+    public Object peek() throws EmptyStackException
+    {
         int n = size();
-        if (n <= 0) {
+        if (n <= 0)
+        {
             throw new EmptyStackException();
-        } else {
+        } else
+        {
             return get(n - 1);
         }
     }
@@ -96,16 +105,19 @@ public class ArrayStack extends ArrayList {
      * Returns the n'th item down (zero-relative) from the top of this
      * stack without removing it.
      *
-     * @param n  the number of items down to go
+     * @param n the number of items down to go
      * @return the n'th item on the stack, zero relative
-     * @throws EmptyStackException  if there are not enough items on the
-     *  stack to satisfy this request
+     * @throws EmptyStackException if there are not enough items on the
+     *                             stack to satisfy this request
      */
-    public Object peek(int n) throws EmptyStackException {
+    public Object peek(int n) throws EmptyStackException
+    {
         int m = (size() - n) - 1;
-        if (m < 0) {
+        if (m < 0)
+        {
             throw new EmptyStackException();
-        } else {
+        } else
+        {
             return get(m);
         }
     }
@@ -114,13 +126,16 @@ public class ArrayStack extends ArrayList {
      * Pops the top item off of this stack and return it.
      *
      * @return the top item on the stack
-     * @throws EmptyStackException  if the stack is empty
+     * @throws EmptyStackException if the stack is empty
      */
-    public Object pop() throws EmptyStackException {
+    public Object pop() throws EmptyStackException
+    {
         int n = size();
-        if (n <= 0) {
+        if (n <= 0)
+        {
             throw new EmptyStackException();
-        } else {
+        } else
+        {
             return remove(n - 1);
         }
     }
@@ -129,10 +144,11 @@ public class ArrayStack extends ArrayList {
      * Pushes a new item onto the top of this stack. The pushed item is also
      * returned. This is equivalent to calling <code>add</code>.
      *
-     * @param item  the item to be added
+     * @param item the item to be added
      * @return the item just pushed
      */
-    public Object push(Object item) {
+    public Object push(Object item)
+    {
         add(item);
         return item;
     }
@@ -146,16 +162,19 @@ public class ArrayStack extends ArrayList {
      * <code>equals()</code> method is used to compare to the items
      * in this stack.
      *
-     * @param object  the object to be searched for
+     * @param object the object to be searched for
      * @return the 1-based depth into the stack of the object, or -1 if not found
      */
-    public int search(Object object) {
+    public int search(Object object)
+    {
         int i = size() - 1;        // Current index
         int n = 1;                 // Current distance
-        while (i >= 0) {
+        while (i >= 0)
+        {
             Object current = get(i);
             if ((object == null && current == null) ||
-                (object != null && object.equals(current))) {
+                    (object != null && object.equals(current)))
+            {
                 return n;
             }
             i--;

@@ -19,8 +19,8 @@ package org.apache.catalina.ha.deploy;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * <p>
@@ -28,13 +28,14 @@ import java.util.Iterator;
  * directory (adding new WAR files->deploy or remove WAR files->undeploy) And
  * notifies a listener of the changes made
  * </p>
- * 
+ *
  * @author Filip Hanik
  * @author Peter Rossbach
  * @version 1.1
  */
 
-public class WarWatcher {
+public class WarWatcher
+{
 
     /*--Static Variables----------------------------------------*/
     public static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory
@@ -58,10 +59,12 @@ public class WarWatcher {
 
     /*--Constructor---------------------------------------------*/
 
-    public WarWatcher() {
+    public WarWatcher()
+    {
     }
 
-    public WarWatcher(FileChangeListener listener, File watchDir) {
+    public WarWatcher(FileChangeListener listener, File watchDir)
+    {
         this.listener = listener;
         this.watchDir = watchDir;
     }
@@ -71,25 +74,30 @@ public class WarWatcher {
     /**
      * check for modification and send notifcation to listener
      */
-    public void check() {
+    public void check()
+    {
         if (log.isInfoEnabled())
             log.info("check cluster wars at " + watchDir);
         File[] list = watchDir.listFiles(new WarFilter());
         if (list == null)
             list = new File[0];
         //first make sure all the files are listed in our current status
-        for (int i = 0; i < list.length; i++) {
+        for (int i = 0; i < list.length; i++)
+        {
             addWarInfo(list[i]);
         }
 
         //check all the status codes and update the FarmDeployer
-        for (Iterator i = currentStatus.entrySet().iterator(); i.hasNext();) {
+        for (Iterator i = currentStatus.entrySet().iterator(); i.hasNext(); )
+        {
             Map.Entry entry = (Map.Entry) i.next();
             WarInfo info = (WarInfo) entry.getValue();
             int check = info.check();
-            if (check == 1) {
+            if (check == 1)
+            {
                 listener.fileModified(info.getWar());
-            } else if (check == -1) {
+            } else if (check == -1)
+            {
                 listener.fileRemoved(info.getWar());
                 //no need to keep in memory
                 i.remove();
@@ -100,11 +108,14 @@ public class WarWatcher {
 
     /**
      * add cluster war to the watcher state
+     *
      * @param warfile
      */
-    protected void addWarInfo(File warfile) {
+    protected void addWarInfo(File warfile)
+    {
         WarInfo info = (WarInfo) currentStatus.get(warfile.getAbsolutePath());
-        if (info == null) {
+        if (info == null)
+        {
             info = new WarInfo(warfile);
             info.setLastState(-1); //assume file is non existent
             currentStatus.put(warfile.getAbsolutePath(), info);
@@ -114,37 +125,40 @@ public class WarWatcher {
     /**
      * clear watcher state
      */
-    public void clear() {
+    public void clear()
+    {
         currentStatus.clear();
     }
 
     /**
      * @return Returns the watchDir.
      */
-    public File getWatchDir() {
+    public File getWatchDir()
+    {
         return watchDir;
     }
 
     /**
-     * @param watchDir
-     *            The watchDir to set.
+     * @param watchDir The watchDir to set.
      */
-    public void setWatchDir(File watchDir) {
+    public void setWatchDir(File watchDir)
+    {
         this.watchDir = watchDir;
     }
 
     /**
      * @return Returns the listener.
      */
-    public FileChangeListener getListener() {
+    public FileChangeListener getListener()
+    {
         return listener;
     }
 
     /**
-     * @param listener
-     *            The listener to set.
+     * @param listener The listener to set.
      */
-    public void setListener(FileChangeListener listener) {
+    public void setListener(FileChangeListener listener)
+    {
         this.listener = listener;
     }
 
@@ -153,8 +167,10 @@ public class WarWatcher {
     /**
      * File name filter for war files
      */
-    protected class WarFilter implements java.io.FilenameFilter {
-        public boolean accept(File path, String name) {
+    protected class WarFilter implements java.io.FilenameFilter
+    {
+        public boolean accept(File path, String name)
+        {
             if (name == null)
                 return false;
             return name.endsWith(".war");
@@ -164,47 +180,55 @@ public class WarWatcher {
     /**
      * File information on existing WAR files
      */
-    protected class WarInfo {
+    protected class WarInfo
+    {
         protected File war = null;
 
         protected long lastChecked = 0;
 
         protected long lastState = 0;
 
-        public WarInfo(File war) {
+        public WarInfo(File war)
+        {
             this.war = war;
             this.lastChecked = war.lastModified();
             if (!war.exists())
                 lastState = -1;
         }
 
-        public boolean modified() {
+        public boolean modified()
+        {
             return war.exists() && war.lastModified() > lastChecked;
         }
 
-        public boolean exists() {
+        public boolean exists()
+        {
             return war.exists();
         }
 
         /**
          * Returns 1 if the file has been added/modified, 0 if the file is
          * unchanged and -1 if the file has been removed
-         * 
+         *
          * @return int 1=file added; 0=unchanged; -1=file removed
          */
-        public int check() {
+        public int check()
+        {
             //file unchanged by default
             int result = 0;
 
-            if (modified()) {
+            if (modified())
+            {
                 //file has changed - timestamp
                 result = 1;
                 lastState = result;
-            } else if ((!exists()) && (!(lastState == -1))) {
+            } else if ((!exists()) && (!(lastState == -1)))
+            {
                 //file was removed
                 result = -1;
                 lastState = result;
-            } else if ((lastState == -1) && exists()) {
+            } else if ((lastState == -1) && exists())
+            {
                 //file was added
                 result = 1;
                 lastState = result;
@@ -213,24 +237,30 @@ public class WarWatcher {
             return result;
         }
 
-        public File getWar() {
+        public File getWar()
+        {
             return war;
         }
 
-        public int hashCode() {
+        public int hashCode()
+        {
             return war.getAbsolutePath().hashCode();
         }
 
-        public boolean equals(Object other) {
-            if (other instanceof WarInfo) {
+        public boolean equals(Object other)
+        {
+            if (other instanceof WarInfo)
+            {
                 WarInfo wo = (WarInfo) other;
                 return wo.getWar().equals(getWar());
-            } else {
+            } else
+            {
                 return false;
             }
         }
 
-        protected void setLastState(int lastState) {
+        protected void setLastState(int lastState)
+        {
             this.lastState = lastState;
         }
 

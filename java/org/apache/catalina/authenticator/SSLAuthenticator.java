@@ -19,19 +19,17 @@
 package org.apache.catalina.authenticator;
 
 
-import java.io.IOException;
-import java.security.Principal;
-import java.security.cert.X509Certificate;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.coyote.ActionCode;
 import org.apache.catalina.Globals;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.deploy.LoginConfig;
+import org.apache.coyote.ActionCode;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.security.Principal;
+import java.security.cert.X509Certificate;
 
 
 /**
@@ -39,11 +37,11 @@ import org.apache.catalina.deploy.LoginConfig;
  * that utilizes SSL certificates to identify client users.
  *
  * @author Craig R. McClanahan
- *
  */
 
 public class SSLAuthenticator
-    extends AuthenticatorBase {
+        extends AuthenticatorBase
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -53,13 +51,14 @@ public class SSLAuthenticator
      * Descriptive information about this implementation.
      */
     protected static final String info =
-        "org.apache.catalina.authenticator.SSLAuthenticator/1.0";
+            "org.apache.catalina.authenticator.SSLAuthenticator/1.0";
 
 
     /**
      * Return descriptive information about this Valve implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -74,22 +73,23 @@ public class SSLAuthenticator
      * chain, and optionally asking a trust manager to validate that we trust
      * this user.
      *
-     * @param request Request we are processing
+     * @param request  Request we are processing
      * @param response Response we are creating
-     * @param config    Login configuration describing how authentication
-     *              should be performed
-     *
-     * @exception IOException if an input/output error occurs
+     * @param config   Login configuration describing how authentication
+     *                 should be performed
+     * @throws IOException if an input/output error occurs
      */
     public boolean authenticate(Request request,
                                 Response response,
                                 LoginConfig config)
-        throws IOException {
+            throws IOException
+    {
 
         // Have we already authenticated someone?
         Principal principal = request.getUserPrincipal();
         //String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
-        if (principal != null) {
+        if (principal != null)
+        {
             if (containerLog.isDebugEnabled())
                 containerLog.debug("Already authenticated '" + principal.getName() + "'");
             // Associate the session with any existing SSO session in order
@@ -130,34 +130,37 @@ public class SSLAuthenticator
             containerLog.debug(" Looking up certificates");
 
         X509Certificate certs[] = (X509Certificate[])
-            request.getAttribute(Globals.CERTIFICATES_ATTR);
-        if ((certs == null) || (certs.length < 1)) {
-            request.getCoyoteRequest().action
-                              (ActionCode.ACTION_REQ_SSL_CERTIFICATE, null);
-            certs = (X509Certificate[])
                 request.getAttribute(Globals.CERTIFICATES_ATTR);
+        if ((certs == null) || (certs.length < 1))
+        {
+            request.getCoyoteRequest().action
+                    (ActionCode.ACTION_REQ_SSL_CERTIFICATE, null);
+            certs = (X509Certificate[])
+                    request.getAttribute(Globals.CERTIFICATES_ATTR);
         }
-        if ((certs == null) || (certs.length < 1)) {
+        if ((certs == null) || (certs.length < 1))
+        {
             if (containerLog.isDebugEnabled())
                 containerLog.debug("  No certificates included with this request");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                               sm.getString("authenticator.certificates"));
+                    sm.getString("authenticator.certificates"));
             return (false);
         }
 
         // Authenticate the specified certificate chain
         principal = context.getRealm().authenticate(certs);
-        if (principal == null) {
+        if (principal == null)
+        {
             if (containerLog.isDebugEnabled())
                 containerLog.debug("  Realm.authenticate() returned false");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                               sm.getString("authenticator.unauthorized"));
+                    sm.getString("authenticator.unauthorized"));
             return (false);
         }
 
         // Cache the principal (if requested) and record this authentication
         register(request, response, principal, Constants.CERT_METHOD,
-                 null, null);
+                null, null);
         return (true);
 
     }
@@ -170,10 +173,11 @@ public class SSLAuthenticator
      * Initialize the database we will be using for client verification
      * and certificate validation (if any).
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
-    public void start() throws LifecycleException {
+    public void start() throws LifecycleException
+    {
 
         super.start();
 
@@ -184,10 +188,11 @@ public class SSLAuthenticator
      * Finalize the database we used for client verification and
      * certificate validation (if any).
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws LifecycleException
+    {
 
         super.stop();
 

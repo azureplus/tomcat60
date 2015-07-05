@@ -27,11 +27,10 @@ import org.apache.tomcat.util.digester.RuleSetBase;
  * <p><strong>RuleSet</strong> for processing the contents of a Realm definition
  * element.  This <code>RuleSet</code> supports Realms such as the
  * <code>CombinedRealm</code> that used nested Realms.</p>
- *
- *
  */
 
-public class RealmRuleSet extends RuleSetBase {
+public class RealmRuleSet extends RuleSetBase
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -50,7 +49,8 @@ public class RealmRuleSet extends RuleSetBase {
      * Construct an instance of this <code>RuleSet</code> with the default
      * matching pattern prefix.
      */
-    public RealmRuleSet() {
+    public RealmRuleSet()
+    {
 
         this("");
 
@@ -62,9 +62,10 @@ public class RealmRuleSet extends RuleSetBase {
      * matching pattern prefix.
      *
      * @param prefix Prefix for matching pattern rules (including the
-     *  trailing slash character)
+     *               trailing slash character)
      */
-    public RealmRuleSet(String prefix) {
+    public RealmRuleSet(String prefix)
+    {
 
         super();
         this.namespaceURI = null;
@@ -83,25 +84,26 @@ public class RealmRuleSet extends RuleSetBase {
      * by a Digester instance.</p>
      *
      * @param digester Digester instance to which the new Rule instances
-     *  should be added.
+     *                 should be added.
      */
-    public void addRuleInstances(Digester digester) {
+    public void addRuleInstances(Digester digester)
+    {
 
         digester.addObjectCreate(prefix + "Realm",
-                                 null, // MUST be specified in the element,
-                                 "className");
+                null, // MUST be specified in the element,
+                "className");
         digester.addSetProperties(prefix + "Realm");
         digester.addSetNext(prefix + "Realm",
-                            "setRealm",
-                            "org.apache.catalina.Realm");
+                "setRealm",
+                "org.apache.catalina.Realm");
 
         digester.addObjectCreate(prefix + "Realm/Realm",
-                                 null, // MUST be specified in the element
-                                 "className");
+                null, // MUST be specified in the element
+                "className");
         digester.addSetProperties(prefix + "Realm/Realm");
         digester.addSetNext(prefix + "Realm/Realm",
-                            "addRealm",
-                            "org.apache.catalina.Realm");
+                "addRealm",
+                "org.apache.catalina.Realm");
 
     }
 

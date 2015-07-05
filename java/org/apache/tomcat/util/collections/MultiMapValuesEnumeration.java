@@ -17,14 +17,16 @@
 
 package org.apache.tomcat.util.collections;
 
-import java.util.Enumeration;
-
 import org.apache.tomcat.util.buf.MessageBytes;
 
-/** Enumerate the values for a (possibly ) multiple
- *    value element.
+import java.util.Enumeration;
+
+/**
+ * Enumerate the values for a (possibly ) multiple
+ * value element.
  */
-class MultiMapValuesEnumeration implements Enumeration {
+class MultiMapValuesEnumeration implements Enumeration
+{
     int pos;
     int size;
     MessageBytes next;
@@ -32,33 +34,39 @@ class MultiMapValuesEnumeration implements Enumeration {
     String name;
 
     MultiMapValuesEnumeration(MultiMap headers, String name,
-			      boolean toString) {
-        this.name=name;
-	this.headers=headers;
-	pos=0;
-	size = headers.size();
-	findNext();
+                              boolean toString)
+    {
+        this.name = name;
+        this.headers = headers;
+        pos = 0;
+        size = headers.size();
+        findNext();
     }
 
-    private void findNext() {
-	next=null;
-	for( ; pos< size; pos++ ) {
-	    MessageBytes n1=headers.getName( pos );
-	    if( n1.equalsIgnoreCase( name )) {
-		next=headers.getValue( pos );
-		break;
-	    }
-	}
-	pos++;
-    }
-    
-    public boolean hasMoreElements() {
-	return next!=null;
+    private void findNext()
+    {
+        next = null;
+        for (; pos < size; pos++)
+        {
+            MessageBytes n1 = headers.getName(pos);
+            if (n1.equalsIgnoreCase(name))
+            {
+                next = headers.getValue(pos);
+                break;
+            }
+        }
+        pos++;
     }
 
-    public Object nextElement() {
-	MessageBytes current=next;
-	findNext();
-	return current.toString();
+    public boolean hasMoreElements()
+    {
+        return next != null;
+    }
+
+    public Object nextElement()
+    {
+        MessageBytes current = next;
+        findNext();
+        return current.toString();
     }
 }

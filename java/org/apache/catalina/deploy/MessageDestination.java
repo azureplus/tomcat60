@@ -25,11 +25,11 @@ package org.apache.catalina.deploy;
  * in the deployment descriptor.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since Tomcat 5.0
  */
 
-public class MessageDestination {
+public class MessageDestination
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -39,68 +39,70 @@ public class MessageDestination {
      * The description of this destination.
      */
     private String description = null;
-
-    public String getDescription() {
-        return (this.description);
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-
     /**
      * The display name of this destination.
      */
     private String displayName = null;
-
-    public String getDisplayName() {
-        return (this.displayName);
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-
     /**
      * The large icon of this destination.
      */
     private String largeIcon = null;
-
-    public String getLargeIcon() {
-        return (this.largeIcon);
-    }
-
-    public void setLargeIcon(String largeIcon) {
-        this.largeIcon = largeIcon;
-    }
-
-
     /**
      * The name of this destination.
      */
     private String name = null;
-
-    public String getName() {
-        return (this.name);
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
     /**
      * The small icon of this destination.
      */
     private String smallIcon = null;
 
-    public String getSmallIcon() {
+    public String getDescription()
+    {
+        return (this.description);
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public String getDisplayName()
+    {
+        return (this.displayName);
+    }
+
+    public void setDisplayName(String displayName)
+    {
+        this.displayName = displayName;
+    }
+
+    public String getLargeIcon()
+    {
+        return (this.largeIcon);
+    }
+
+    public void setLargeIcon(String largeIcon)
+    {
+        this.largeIcon = largeIcon;
+    }
+
+    public String getName()
+    {
+        return (this.name);
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getSmallIcon()
+    {
         return (this.smallIcon);
     }
 
-    public void setSmallIcon(String smallIcon) {
+    public void setSmallIcon(String smallIcon)
+    {
         this.smallIcon = smallIcon;
     }
 
@@ -111,24 +113,29 @@ public class MessageDestination {
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("MessageDestination[");
         sb.append("name=");
         sb.append(name);
-        if (displayName != null) {
+        if (displayName != null)
+        {
             sb.append(", displayName=");
             sb.append(displayName);
         }
-        if (largeIcon != null) {
+        if (largeIcon != null)
+        {
             sb.append(", largeIcon=");
             sb.append(largeIcon);
         }
-        if (smallIcon != null) {
+        if (smallIcon != null)
+        {
             sb.append(", smallIcon=");
             sb.append(smallIcon);
         }
-        if (description != null) {
+        if (description != null)
+        {
             sb.append(", description=");
             sb.append(description);
         }

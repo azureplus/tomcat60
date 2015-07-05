@@ -17,13 +17,12 @@
 
 package org.apache.tomcat.util.net.jsse;
 
-import java.net.Socket;
+import org.apache.tomcat.util.net.SSLSupport;
+import org.apache.tomcat.util.net.ServerSocketFactory;
 
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-
-import org.apache.tomcat.util.net.SSLSupport;
-import org.apache.tomcat.util.net.ServerSocketFactory;
+import java.net.Socket;
 
 /**
  * Factory interface to construct components based on the JSSE version
@@ -32,33 +31,39 @@ import org.apache.tomcat.util.net.ServerSocketFactory;
  * @author Bill Barker
  * @author Filip Hanik
  */
-public class JSSEFactory {
+public class JSSEFactory
+{
 
     /**
      * Returns the ServerSocketFactory to use.
      */
-    public ServerSocketFactory getSocketFactory() {
+    public ServerSocketFactory getSocketFactory()
+    {
         return new JSSESocketFactory();
     }
 
     /**
      * Returns the ServerSocketFactory to use.
+     *
      * @param sslProtocol Name of SSL protocol, e.g. "TLS". It is used to
-     *  obtain an instance of <code>javax.net.ssl.SSLContext</code>. If it is
-     *  <code>null</code> then a default will be used.
+     *                    obtain an instance of <code>javax.net.ssl.SSLContext</code>. If it is
+     *                    <code>null</code> then a default will be used.
      */
-    public ServerSocketFactory getSocketFactory(String sslProtocol) {
+    public ServerSocketFactory getSocketFactory(String sslProtocol)
+    {
         return new JSSESocketFactory(sslProtocol);
     }
 
     /**
      * returns the SSLSupport attached to this socket.
      */
-    public SSLSupport getSSLSupport(Socket socket) {
-        return new JSSESupport((SSLSocket)socket);
+    public SSLSupport getSSLSupport(Socket socket)
+    {
+        return new JSSESupport((SSLSocket) socket);
     }
 
-    public SSLSupport getSSLSupport(SSLSession session) {
+    public SSLSupport getSSLSupport(SSLSession session)
+    {
         return new JSSESupport(session);
     }
 

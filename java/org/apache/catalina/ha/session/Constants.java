@@ -25,7 +25,8 @@ package org.apache.catalina.ha.session;
  * @author Peter Rossbach Pero
  */
 
-public class Constants {
+public class Constants
+{
 
     public static final String Package = "org.apache.catalina.ha.session";
 

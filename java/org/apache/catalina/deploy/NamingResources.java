@@ -29,29 +29,26 @@ import java.util.Hashtable;
 
 
 /**
- * Holds and manages the naming resources defined in the J2EE Enterprise 
+ * Holds and manages the naming resources defined in the J2EE Enterprise
  * Naming Context and their associated JNDI context.
  *
  * @author Remy Maucherat
- *
  */
 
-public class NamingResources implements Serializable {
+public class NamingResources implements Serializable
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
-     * Create a new NamingResources instance.
+     * The property change support for this component.
      */
-    public NamingResources() {
-    }
+    protected PropertyChangeSupport support = new PropertyChangeSupport(this);
 
 
     // ----------------------------------------------------- Instance Variables
-
-
     /**
      * Associated container object.
      */
@@ -123,18 +120,20 @@ public class NamingResources implements Serializable {
 
 
     /**
-     * The property change support for this component.
+     * Create a new NamingResources instance.
      */
-    protected PropertyChangeSupport support = new PropertyChangeSupport(this);
+    public NamingResources()
+    {
+    }
 
 
     // ------------------------------------------------------------- Properties
 
-
     /**
      * Get the container with which the naming resources are associated.
      */
-    public Object getContainer() {
+    public Object getContainer()
+    {
         return container;
     }
 
@@ -142,41 +141,45 @@ public class NamingResources implements Serializable {
     /**
      * Set the container with which the naming resources are associated.
      */
-    public void setContainer(Object container) {
+    public void setContainer(Object container)
+    {
         this.container = container;
     }
-
-    
-    /**
-     * Set the transaction object.
-     */
-    public void setTransaction(ContextTransaction transaction) {
-        this.transaction = transaction;
-    }
-    
 
     /**
      * Get the transaction object.
      */
-    public ContextTransaction getTransaction() {
+    public ContextTransaction getTransaction()
+    {
         return transaction;
     }
-    
+
+    /**
+     * Set the transaction object.
+     */
+    public void setTransaction(ContextTransaction transaction)
+    {
+        this.transaction = transaction;
+    }
 
     /**
      * Add an EJB resource reference for this web application.
      *
      * @param ejb New EJB resource reference
      */
-    public void addEjb(ContextEjb ejb) {
+    public void addEjb(ContextEjb ejb)
+    {
 
-        if (entries.containsKey(ejb.getName())) {
+        if (entries.containsKey(ejb.getName()))
+        {
             return;
-        } else {
+        } else
+        {
             entries.put(ejb.getName(), ejb.getType());
         }
 
-        synchronized (ejbs) {
+        synchronized (ejbs)
+        {
             ejb.setNamingResources(this);
             ejbs.put(ejb.getName(), ejb);
         }
@@ -190,37 +193,48 @@ public class NamingResources implements Serializable {
      *
      * @param environment New environment entry
      */
-    public void addEnvironment(ContextEnvironment environment) {
+    public void addEnvironment(ContextEnvironment environment)
+    {
 
-        if (entries.containsKey(environment.getName())) {
+        if (entries.containsKey(environment.getName()))
+        {
             ContextEnvironment ce = findEnvironment(environment.getName());
             ContextResourceLink rl = findResourceLink(environment.getName());
-            if (ce != null) {
-                if (ce.getOverride()) {
+            if (ce != null)
+            {
+                if (ce.getOverride())
+                {
                     removeEnvironment(environment.getName());
-                } else {
+                } else
+                {
                     return;
                 }
-            } else if (rl != null) {
+            } else if (rl != null)
+            {
                 // Link. Need to look at the global resources
                 NamingResources global =
-                    ServerFactory.getServer().getGlobalNamingResources();
-                if (global.findEnvironment(rl.getGlobal()) != null) {
-                    if (global.findEnvironment(rl.getGlobal()).getOverride()) {
+                        ServerFactory.getServer().getGlobalNamingResources();
+                if (global.findEnvironment(rl.getGlobal()) != null)
+                {
+                    if (global.findEnvironment(rl.getGlobal()).getOverride())
+                    {
                         removeResourceLink(environment.getName());
-                    } else {
+                    } else
+                    {
                         return;
                     }
                 }
-            } else {
+            } else
+            {
                 // It exists but it isn't an env or a res link...
                 return;
             }
         }
-        
+
         entries.put(environment.getName(), environment.getType());
 
-        synchronized (envs) {
+        synchronized (envs)
+        {
             environment.setNamingResources(this);
             envs.put(environment.getName(), environment);
         }
@@ -234,15 +248,19 @@ public class NamingResources implements Serializable {
      *
      * @param ejb New EJB resource reference
      */
-    public void addLocalEjb(ContextLocalEjb ejb) {
+    public void addLocalEjb(ContextLocalEjb ejb)
+    {
 
-        if (entries.containsKey(ejb.getName())) {
+        if (entries.containsKey(ejb.getName()))
+        {
             return;
-        } else {
+        } else
+        {
             entries.put(ejb.getName(), ejb.getType());
         }
 
-        synchronized (localEjbs) {
+        synchronized (localEjbs)
+        {
             ejb.setNamingResources(this);
             localEjbs.put(ejb.getName(), ejb);
         }
@@ -256,15 +274,19 @@ public class NamingResources implements Serializable {
      *
      * @param mdr New message destination reference
      */
-    public void addMessageDestinationRef(MessageDestinationRef mdr) {
+    public void addMessageDestinationRef(MessageDestinationRef mdr)
+    {
 
-        if (entries.containsKey(mdr.getName())) {
+        if (entries.containsKey(mdr.getName()))
+        {
             return;
-        } else {
+        } else
+        {
             entries.put(mdr.getName(), mdr.getType());
         }
 
-        synchronized (mdrs) {
+        synchronized (mdrs)
+        {
             mdr.setNamingResources(this);
             mdrs.put(mdr.getName(), mdr);
         }
@@ -278,7 +300,8 @@ public class NamingResources implements Serializable {
      *
      * @param listener The listener to add
      */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
+    public void addPropertyChangeListener(PropertyChangeListener listener)
+    {
 
         support.addPropertyChangeListener(listener);
 
@@ -290,15 +313,19 @@ public class NamingResources implements Serializable {
      *
      * @param resource New resource reference
      */
-    public void addResource(ContextResource resource) {
+    public void addResource(ContextResource resource)
+    {
 
-        if (entries.containsKey(resource.getName())) {
+        if (entries.containsKey(resource.getName()))
+        {
             return;
-        } else {
+        } else
+        {
             entries.put(resource.getName(), resource.getType());
         }
 
-        synchronized (resources) {
+        synchronized (resources)
+        {
             resource.setNamingResources(this);
             resources.put(resource.getName(), resource);
         }
@@ -312,15 +339,19 @@ public class NamingResources implements Serializable {
      *
      * @param resource The resource
      */
-    public void addResourceEnvRef(ContextResourceEnvRef resource) {
+    public void addResourceEnvRef(ContextResourceEnvRef resource)
+    {
 
-        if (entries.containsKey(resource.getName())) {
+        if (entries.containsKey(resource.getName()))
+        {
             return;
-        } else {
+        } else
+        {
             entries.put(resource.getName(), resource.getType());
         }
 
-        synchronized (resourceEnvRefs) {
+        synchronized (resourceEnvRefs)
+        {
             resource.setNamingResources(this);
             resourceEnvRefs.put(resource.getName(), resource);
         }
@@ -334,19 +365,24 @@ public class NamingResources implements Serializable {
      *
      * @param resourceLink New resource link
      */
-    public void addResourceLink(ContextResourceLink resourceLink) {
+    public void addResourceLink(ContextResourceLink resourceLink)
+    {
 
-        if (entries.containsKey(resourceLink.getName())) {
+        if (entries.containsKey(resourceLink.getName()))
+        {
             return;
-        } else {
+        } else
+        {
             Object value = resourceLink.getType();
-            if (value == null) {
+            if (value == null)
+            {
                 value = "";
             }
             entries.put(resourceLink.getName(), value);
         }
 
-        synchronized (resourceLinks) {
+        synchronized (resourceLinks)
+        {
             resourceLink.setNamingResources(this);
             resourceLinks.put(resourceLink.getName(), resourceLink);
         }
@@ -360,24 +396,29 @@ public class NamingResources implements Serializable {
      *
      * @param service New web service reference
      */
-    public void addService(ContextService service) {
+    public void addService(ContextService service)
+    {
 
-        if (entries.containsKey(service.getName())) {
+        if (entries.containsKey(service.getName()))
+        {
             return;
-        } else {
+        } else
+        {
             Object value = service.getType();
-            if (value == null) {
+            if (value == null)
+            {
                 value = "";
             }
             entries.put(service.getName(), value);
         }
-        
-        synchronized (services) {
+
+        synchronized (services)
+        {
             service.setNamingResources(this);
             services.put(service.getName(), service);
         }
         support.firePropertyChange("service", null, service);
-        
+
     }
 
 
@@ -387,9 +428,11 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the desired EJB resource reference
      */
-    public ContextEjb findEjb(String name) {
+    public ContextEjb findEjb(String name)
+    {
 
-        synchronized (ejbs) {
+        synchronized (ejbs)
+        {
             return ((ContextEjb) ejbs.get(name));
         }
 
@@ -400,9 +443,11 @@ public class NamingResources implements Serializable {
      * Return the defined EJB resource references for this application.
      * If there are none, a zero-length array is returned.
      */
-    public ContextEjb[] findEjbs() {
+    public ContextEjb[] findEjbs()
+    {
 
-        synchronized (ejbs) {
+        synchronized (ejbs)
+        {
             ContextEjb results[] = new ContextEjb[ejbs.size()];
             return ((ContextEjb[]) ejbs.values().toArray(results));
         }
@@ -416,9 +461,11 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the desired environment entry
      */
-    public ContextEnvironment findEnvironment(String name) {
+    public ContextEnvironment findEnvironment(String name)
+    {
 
-        synchronized (envs) {
+        synchronized (envs)
+        {
             return ((ContextEnvironment) envs.get(name));
         }
 
@@ -430,9 +477,11 @@ public class NamingResources implements Serializable {
      * application.  If none have been defined, a zero-length array
      * is returned.
      */
-    public ContextEnvironment[] findEnvironments() {
+    public ContextEnvironment[] findEnvironments()
+    {
 
-        synchronized (envs) {
+        synchronized (envs)
+        {
             ContextEnvironment results[] = new ContextEnvironment[envs.size()];
             return ((ContextEnvironment[]) envs.values().toArray(results));
         }
@@ -446,9 +495,11 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the desired EJB resource reference
      */
-    public ContextLocalEjb findLocalEjb(String name) {
+    public ContextLocalEjb findLocalEjb(String name)
+    {
 
-        synchronized (localEjbs) {
+        synchronized (localEjbs)
+        {
             return ((ContextLocalEjb) localEjbs.get(name));
         }
 
@@ -459,9 +510,11 @@ public class NamingResources implements Serializable {
      * Return the defined local EJB resource references for this application.
      * If there are none, a zero-length array is returned.
      */
-    public ContextLocalEjb[] findLocalEjbs() {
+    public ContextLocalEjb[] findLocalEjbs()
+    {
 
-        synchronized (localEjbs) {
+        synchronized (localEjbs)
+        {
             ContextLocalEjb results[] = new ContextLocalEjb[localEjbs.size()];
             return ((ContextLocalEjb[]) localEjbs.values().toArray(results));
         }
@@ -475,9 +528,11 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the desired message destination reference
      */
-    public MessageDestinationRef findMessageDestinationRef(String name) {
+    public MessageDestinationRef findMessageDestinationRef(String name)
+    {
 
-        synchronized (mdrs) {
+        synchronized (mdrs)
+        {
             return ((MessageDestinationRef) mdrs.get(name));
         }
 
@@ -488,11 +543,13 @@ public class NamingResources implements Serializable {
      * Return the defined message destination references for this application.
      * If there are none, a zero-length array is returned.
      */
-    public MessageDestinationRef[] findMessageDestinationRefs() {
+    public MessageDestinationRef[] findMessageDestinationRefs()
+    {
 
-        synchronized (mdrs) {
+        synchronized (mdrs)
+        {
             MessageDestinationRef results[] =
-                new MessageDestinationRef[mdrs.size()];
+                    new MessageDestinationRef[mdrs.size()];
             return ((MessageDestinationRef[]) mdrs.values().toArray(results));
         }
 
@@ -505,9 +562,11 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the desired resource reference
      */
-    public ContextResource findResource(String name) {
+    public ContextResource findResource(String name)
+    {
 
-        synchronized (resources) {
+        synchronized (resources)
+        {
             return ((ContextResource) resources.get(name));
         }
 
@@ -520,9 +579,11 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the desired resource link
      */
-    public ContextResourceLink findResourceLink(String name) {
+    public ContextResourceLink findResourceLink(String name)
+    {
 
-        synchronized (resourceLinks) {
+        synchronized (resourceLinks)
+        {
             return ((ContextResourceLink) resourceLinks.get(name));
         }
 
@@ -533,11 +594,13 @@ public class NamingResources implements Serializable {
      * Return the defined resource links for this application.  If
      * none have been defined, a zero-length array is returned.
      */
-    public ContextResourceLink[] findResourceLinks() {
+    public ContextResourceLink[] findResourceLinks()
+    {
 
-        synchronized (resourceLinks) {
-            ContextResourceLink results[] = 
-                new ContextResourceLink[resourceLinks.size()];
+        synchronized (resourceLinks)
+        {
+            ContextResourceLink results[] =
+                    new ContextResourceLink[resourceLinks.size()];
             return ((ContextResourceLink[]) resourceLinks.values()
                     .toArray(results));
         }
@@ -549,9 +612,11 @@ public class NamingResources implements Serializable {
      * Return the defined resource references for this application.  If
      * none have been defined, a zero-length array is returned.
      */
-    public ContextResource[] findResources() {
+    public ContextResource[] findResources()
+    {
 
-        synchronized (resources) {
+        synchronized (resources)
+        {
             ContextResource results[] = new ContextResource[resources.size()];
             return ((ContextResource[]) resources.values().toArray(results));
         }
@@ -565,9 +630,11 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the desired resource environment reference
      */
-    public ContextResourceEnvRef findResourceEnvRef(String name) {
+    public ContextResourceEnvRef findResourceEnvRef(String name)
+    {
 
-        synchronized (resourceEnvRefs) {
+        synchronized (resourceEnvRefs)
+        {
             return ((ContextResourceEnvRef) resourceEnvRefs.get(name));
         }
 
@@ -579,9 +646,11 @@ public class NamingResources implements Serializable {
      * web application.  If none have been specified, a zero-length
      * array is returned.
      */
-    public ContextResourceEnvRef[] findResourceEnvRefs() {
+    public ContextResourceEnvRef[] findResourceEnvRefs()
+    {
 
-        synchronized (resourceEnvRefs) {
+        synchronized (resourceEnvRefs)
+        {
             ContextResourceEnvRef results[] = new ContextResourceEnvRef[resourceEnvRefs.size()];
             return ((ContextResourceEnvRef[]) resourceEnvRefs.values().toArray(results));
         }
@@ -595,9 +664,11 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the desired web service
      */
-    public ContextService findService(String name) {
+    public ContextService findService(String name)
+    {
 
-        synchronized (services) {
+        synchronized (services)
+        {
             return ((ContextService) services.get(name));
         }
 
@@ -608,20 +679,23 @@ public class NamingResources implements Serializable {
      * Return the defined web service references for this application.  If
      * none have been defined, a zero-length array is returned.
      */
-    public ContextService[] findServices() {
-        
-        synchronized (services) {
+    public ContextService[] findServices()
+    {
+
+        synchronized (services)
+        {
             ContextService results[] = new ContextService[services.size()];
             return ((ContextService[]) services.values().toArray(results));
         }
-        
+
     }
 
 
     /**
      * Return true if the name specified already exists.
      */
-    public boolean exists(String name) {
+    public boolean exists(String name)
+    {
 
         return (entries.containsKey(name));
 
@@ -633,15 +707,18 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the EJB resource reference to remove
      */
-    public void removeEjb(String name) {
+    public void removeEjb(String name)
+    {
 
         entries.remove(name);
 
         ContextEjb ejb = null;
-        synchronized (ejbs) {
+        synchronized (ejbs)
+        {
             ejb = (ContextEjb) ejbs.remove(name);
         }
-        if (ejb != null) {
+        if (ejb != null)
+        {
             support.firePropertyChange("ejb", ejb, null);
             ejb.setNamingResources(null);
         }
@@ -654,15 +731,18 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the environment entry to remove
      */
-    public void removeEnvironment(String name) {
+    public void removeEnvironment(String name)
+    {
 
         entries.remove(name);
 
         ContextEnvironment environment = null;
-        synchronized (envs) {
+        synchronized (envs)
+        {
             environment = (ContextEnvironment) envs.remove(name);
         }
-        if (environment != null) {
+        if (environment != null)
+        {
             support.firePropertyChange("environment", environment, null);
             environment.setNamingResources(null);
         }
@@ -675,15 +755,18 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the EJB resource reference to remove
      */
-    public void removeLocalEjb(String name) {
+    public void removeLocalEjb(String name)
+    {
 
         entries.remove(name);
 
         ContextLocalEjb localEjb = null;
-        synchronized (localEjbs) {
+        synchronized (localEjbs)
+        {
             localEjb = (ContextLocalEjb) localEjbs.remove(name);
         }
-        if (localEjb != null) {
+        if (localEjb != null)
+        {
             support.firePropertyChange("localEjb", localEjb, null);
             localEjb.setNamingResources(null);
         }
@@ -696,17 +779,20 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the message destination resource reference to remove
      */
-    public void removeMessageDestinationRef(String name) {
+    public void removeMessageDestinationRef(String name)
+    {
 
         entries.remove(name);
 
         MessageDestinationRef mdr = null;
-        synchronized (mdrs) {
+        synchronized (mdrs)
+        {
             mdr = (MessageDestinationRef) mdrs.remove(name);
         }
-        if (mdr != null) {
+        if (mdr != null)
+        {
             support.firePropertyChange("messageDestinationRef",
-                                       mdr, null);
+                    mdr, null);
             mdr.setNamingResources(null);
         }
 
@@ -718,7 +804,8 @@ public class NamingResources implements Serializable {
      *
      * @param listener The listener to remove
      */
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
+    public void removePropertyChangeListener(PropertyChangeListener listener)
+    {
 
         support.removePropertyChangeListener(listener);
 
@@ -730,15 +817,18 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the resource reference to remove
      */
-    public void removeResource(String name) {
+    public void removeResource(String name)
+    {
 
         entries.remove(name);
 
         ContextResource resource = null;
-        synchronized (resources) {
+        synchronized (resources)
+        {
             resource = (ContextResource) resources.remove(name);
         }
-        if (resource != null) {
+        if (resource != null)
+        {
             support.firePropertyChange("resource", resource, null);
             resource.setNamingResources(null);
         }
@@ -751,16 +841,19 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the resource environment reference to remove
      */
-    public void removeResourceEnvRef(String name) {
+    public void removeResourceEnvRef(String name)
+    {
 
         entries.remove(name);
 
         ContextResourceEnvRef resourceEnvRef = null;
-        synchronized (resourceEnvRefs) {
+        synchronized (resourceEnvRefs)
+        {
             resourceEnvRef =
-                (ContextResourceEnvRef) resourceEnvRefs.remove(name);
+                    (ContextResourceEnvRef) resourceEnvRefs.remove(name);
         }
-        if (resourceEnvRef != null) {
+        if (resourceEnvRef != null)
+        {
             support.firePropertyChange("resourceEnvRef", resourceEnvRef, null);
             resourceEnvRef.setNamingResources(null);
         }
@@ -773,15 +866,18 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the resource link to remove
      */
-    public void removeResourceLink(String name) {
+    public void removeResourceLink(String name)
+    {
 
         entries.remove(name);
 
         ContextResourceLink resourceLink = null;
-        synchronized (resourceLinks) {
+        synchronized (resourceLinks)
+        {
             resourceLink = (ContextResourceLink) resourceLinks.remove(name);
         }
-        if (resourceLink != null) {
+        if (resourceLink != null)
+        {
             support.firePropertyChange("resourceLink", resourceLink, null);
             resourceLink.setNamingResources(null);
         }
@@ -794,19 +890,22 @@ public class NamingResources implements Serializable {
      *
      * @param name Name of the web service reference to remove
      */
-    public void removeService(String name) {
-        
+    public void removeService(String name)
+    {
+
         entries.remove(name);
-        
+
         ContextService service = null;
-        synchronized (services) {
+        synchronized (services)
+        {
             service = (ContextService) services.remove(name);
         }
-        if (service != null) {
+        if (service != null)
+        {
             support.firePropertyChange("service", service, null);
             service.setNamingResources(null);
         }
-        
+
     }
 
 

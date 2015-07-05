@@ -19,9 +19,8 @@
 package org.apache.tomcat.util.modeler;
 
 
-import java.io.Serializable;
-
 import javax.management.MBeanNotificationInfo;
+import java.io.Serializable;
 
 
 /**
@@ -29,31 +28,29 @@ import javax.management.MBeanNotificationInfo;
  * descriptor.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class NotificationInfo extends FeatureInfo implements Serializable {
+public class NotificationInfo extends FeatureInfo implements Serializable
+{
     static final long serialVersionUID = -6319885418912650856L;
 
     // ----------------------------------------------------- Instance Variables
-
-
+    protected String notifTypes[] = new String[0];
     /**
      * The <code>ModelMBeanNotificationInfo</code> object that corresponds
      * to this <code>NotificationInfo</code> instance.
      */
     transient MBeanNotificationInfo info = null;
-    protected String notifTypes[] = new String[0];
 
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Override the <code>description</code> property setter.
      *
      * @param description The new description
      */
-    public void setDescription(String description) {
+    public void setDescription(String description)
+    {
         super.setDescription(description);
         this.info = null;
     }
@@ -64,7 +61,8 @@ public class NotificationInfo extends FeatureInfo implements Serializable {
      *
      * @param name The new name
      */
-    public void setName(String name) {
+    public void setName(String name)
+    {
         super.setName(name);
         this.info = null;
     }
@@ -73,7 +71,8 @@ public class NotificationInfo extends FeatureInfo implements Serializable {
     /**
      * The set of notification types for this MBean.
      */
-    public String[] getNotifTypes() {
+    public String[] getNotifTypes()
+    {
         return (this.notifTypes);
     }
 
@@ -86,9 +85,11 @@ public class NotificationInfo extends FeatureInfo implements Serializable {
      *
      * @param notifType The new notification type
      */
-    public void addNotifType(String notifType) {
+    public void addNotifType(String notifType)
+    {
 
-        synchronized (notifTypes) {
+        synchronized (notifTypes)
+        {
             String results[] = new String[notifTypes.length + 1];
             System.arraycopy(notifTypes, 0, results, 0, notifTypes.length);
             results[notifTypes.length] = notifType;
@@ -103,7 +104,8 @@ public class NotificationInfo extends FeatureInfo implements Serializable {
      * Create and return a <code>ModelMBeanNotificationInfo</code> object that
      * corresponds to the attribute described by this instance.
      */
-    public MBeanNotificationInfo createNotificationInfo() {
+    public MBeanNotificationInfo createNotificationInfo()
+    {
 
         // Return our cached information (if any)
         if (info != null)
@@ -111,7 +113,7 @@ public class NotificationInfo extends FeatureInfo implements Serializable {
 
         // Create and return a new information object
         info = new MBeanNotificationInfo
-            (getNotifTypes(), getName(), getDescription());
+                (getNotifTypes(), getName(), getDescription());
         //Descriptor descriptor = info.getDescriptor();
         //addFields(descriptor);
         //info.setDescriptor(descriptor);
@@ -123,7 +125,8 @@ public class NotificationInfo extends FeatureInfo implements Serializable {
     /**
      * Return a string representation of this notification descriptor.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("NotificationInfo[");
         sb.append("name=");

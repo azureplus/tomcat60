@@ -27,11 +27,11 @@ import org.apache.catalina.UserDatabase;
  * <p>Convenience base class for {@link Role} implementations.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
-public abstract class AbstractRole implements Role {
+public abstract class AbstractRole implements Role
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -55,7 +55,8 @@ public abstract class AbstractRole implements Role {
     /**
      * Return the description of this role.
      */
-    public String getDescription() {
+    public String getDescription()
+    {
 
         return (this.description);
 
@@ -67,7 +68,8 @@ public abstract class AbstractRole implements Role {
      *
      * @param description The new description
      */
-    public void setDescription(String description) {
+    public void setDescription(String description)
+    {
 
         this.description = description;
 
@@ -78,7 +80,8 @@ public abstract class AbstractRole implements Role {
      * Return the role name of this role, which must be unique
      * within the scope of a {@link UserDatabase}.
      */
-    public String getRolename() {
+    public String getRolename()
+    {
 
         return (this.rolename);
 
@@ -91,7 +94,8 @@ public abstract class AbstractRole implements Role {
      *
      * @param rolename The new role name
      */
-    public void setRolename(String rolename) {
+    public void setRolename(String rolename)
+    {
 
         this.rolename = rolename;
 
@@ -113,7 +117,8 @@ public abstract class AbstractRole implements Role {
     /**
      * Make the principal name the same as the role name.
      */
-    public String getName() {
+    public String getName()
+    {
 
         return (getRolename());
 

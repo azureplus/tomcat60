@@ -17,6 +17,20 @@
 
 package org.apache.catalina.mbeans;
 
+import org.apache.catalina.Lifecycle;
+import org.apache.catalina.LifecycleEvent;
+import org.apache.catalina.LifecycleListener;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.res.StringManager;
+
+import javax.management.MBeanServer;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
+import javax.management.remote.JMXServiceURL;
+import javax.management.remote.rmi.RMIConnectorServer;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
@@ -28,21 +42,6 @@ import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.util.HashMap;
 
-import javax.management.MBeanServer;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
-import javax.management.remote.JMXServiceURL;
-import javax.management.remote.rmi.RMIConnectorServer;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
-import javax.rmi.ssl.SslRMIServerSocketFactory;
-
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleEvent;
-import org.apache.catalina.LifecycleListener;
-import org.apache.tomcat.util.res.StringManager;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
-
 /**
  * This listener fixes the port used by JMX/RMI Server making things much
  * simpler if you need to connect jconsole or similar to a remote Tomcat
@@ -50,17 +49,16 @@ import org.apache.juli.logging.LogFactory;
  * the listener. The remainder of the configuration is via the standard system
  * properties for configuring JMX.
  */
-public class JmxRemoteLifecycleListener implements LifecycleListener {
-    
-    private static Log log =
-        LogFactory.getLog(JmxRemoteLifecycleListener.class);
-    
+public class JmxRemoteLifecycleListener implements LifecycleListener
+{
+
     /**
      * The string resources for this package.
      */
     protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
-
+            StringManager.getManager(Constants.Package);
+    private static Log log =
+            LogFactory.getLog(JmxRemoteLifecycleListener.class);
     protected int rmiRegistryPortPlatform = -1;
     protected int rmiServerPortPlatform = -1;
     protected boolean rmiSSL = true;
@@ -74,63 +72,76 @@ public class JmxRemoteLifecycleListener implements LifecycleListener {
     protected boolean useLocalPorts = false;
 
     protected JMXConnectorServer csPlatform = null;
-    
+
     /**
      * Get the port on which the Platform RMI server is exported. This is the
      * port that is normally chosen by the RMI stack.
+     *
      * @return The port number
      */
-    public int getRmiServerPortPlatform() {
+    public int getRmiServerPortPlatform()
+    {
         return rmiServerPortPlatform;
     }
-    
+
     /**
      * Set the port on which the Platform RMI server is exported. This is the
      * port that is normally chosen by the RMI stack.
+     *
      * @param theRmiServerPortPlatform The port number
      */
-    public void setRmiServerPortPlatform(int theRmiServerPortPlatform) {
+    public void setRmiServerPortPlatform(int theRmiServerPortPlatform)
+    {
         rmiServerPortPlatform = theRmiServerPortPlatform;
     }
-    
+
     /**
      * Get the port on which the Platform RMI registry is exported.
+     *
      * @return The port number
      */
-    public int getRmiRegistryPortPlatform() {
+    public int getRmiRegistryPortPlatform()
+    {
         return rmiRegistryPortPlatform;
     }
-    
+
     /**
      * Set the port on which the Platform RMI registry is exported.
+     *
      * @param theRmiRegistryPortPlatform The port number
      */
-    public void setRmiRegistryPortPlatform(int theRmiRegistryPortPlatform) {
+    public void setRmiRegistryPortPlatform(int theRmiRegistryPortPlatform)
+    {
         rmiRegistryPortPlatform = theRmiRegistryPortPlatform;
     }
-    
+
     /**
      * Get the flag that indicates that local ports should be used for all
      * connections. If using SSH tunnels, or similar, this should be set to
      * true to ensure the RMI client uses the tunnel.
+     *
      * @return <code>true</code> if local ports should be used
      */
-    public boolean getUseLocalPorts() {
+    public boolean getUseLocalPorts()
+    {
         return useLocalPorts;
     }
-    
+
     /**
      * Set the flag that indicates that local ports should be used for all
      * connections. If using SSH tunnels, or similar, this should be set to
      * true to ensure the RMI client uses the tunnel.
+     *
      * @param useLocalPorts Set to <code>true</code> if local ports should be
      *                      used
      */
-    public void setUseLocalPorts(boolean useLocalPorts) {
+    public void setUseLocalPorts(boolean useLocalPorts)
+    {
         this.useLocalPorts = useLocalPorts;
     }
-    
-    private void init() {
+
+    private void init()
+    {
         // Get all the other parameters required from the standard system
         // properties. Only need to get the parameters that affect the creation
         // of the server port.
@@ -140,18 +151,20 @@ public class JmxRemoteLifecycleListener implements LifecycleListener {
 
         String protocolsValue = System.getProperty(
                 "com.sun.management.jmxremote.ssl.enabled.protocols");
-        if (protocolsValue != null) {
+        if (protocolsValue != null)
+        {
             protocols = protocolsValue.split(",");
         }
 
         String ciphersValue = System.getProperty(
                 "com.sun.management.jmxremote.ssl.enabled.cipher.suites");
-        if (ciphersValue != null) {
+        if (ciphersValue != null)
+        {
             ciphers = ciphersValue.split(",");
         }
 
         String clientAuthValue = System.getProperty(
-            "com.sun.management.jmxremote.ssl.need.client.auth", "true");
+                "com.sun.management.jmxremote.ssl.need.client.auth", "true");
         clientAuth = Boolean.parseBoolean(clientAuthValue);
 
         String authenticateValue = System.getProperty(
@@ -165,15 +178,17 @@ public class JmxRemoteLifecycleListener implements LifecycleListener {
         accessFile = System.getProperty(
                 "com.sun.management.jmxremote.access.file",
                 "jmxremote.access");
-        
+
         loginModuleName = System.getProperty(
                 "com.sun.management.jmxremote.login.config");
     }
-    
 
-    public void lifecycleEvent(LifecycleEvent event) {
+
+    public void lifecycleEvent(LifecycleEvent event)
+    {
         // When the server starts, configure JMX/RMI
-        if (Lifecycle.START_EVENT == event.getType()) {
+        if (Lifecycle.START_EVENT == event.getType())
+        {
             // Configure using standard jmx system properties 
             init();
 
@@ -181,35 +196,40 @@ public class JmxRemoteLifecycleListener implements LifecycleListener {
             System.setProperty("java.rmi.server.randomIDs", "true");
 
             // Create the environment
-            HashMap<String,Object> env = new HashMap<String,Object>();
+            HashMap<String, Object> env = new HashMap<String, Object>();
 
             RMIClientSocketFactory csf = null;
             RMIServerSocketFactory ssf = null;
 
             // Configure SSL for RMI connection if required
-            if (rmiSSL) {
+            if (rmiSSL)
+            {
                 csf = new SslRMIClientSocketFactory();
                 ssf = new SslRMIServerSocketFactory(ciphers, protocols,
-                            clientAuth);
+                        clientAuth);
             }
-            
+
             // Force the use of local ports if required
-            if (useLocalPorts) {
+            if (useLocalPorts)
+            {
                 csf = new RmiClientLocalhostSocketFactory(csf);
             }
 
             // Populate the env properties used to create the server
-            if (csf != null) {
+            if (csf != null)
+            {
                 env.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,
                         csf);
             }
-            if (ssf != null) {
+            if (ssf != null)
+            {
                 env.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
                         ssf);
             }
 
             // Configure authentication
-            if (authenticate) {
+            if (authenticate)
+            {
                 env.put("jmx.remote.x.password.file", passwordFile);
                 env.put("jmx.remote.x.access.file", accessFile);
                 env.put("jmx.remote.x.login.config", loginModuleName);
@@ -220,20 +240,25 @@ public class JmxRemoteLifecycleListener implements LifecycleListener {
             csPlatform = createServer("Platform", rmiRegistryPortPlatform,
                     rmiServerPortPlatform, env,
                     ManagementFactory.getPlatformMBeanServer());
-            
-        } else if (Lifecycle.STOP_EVENT == event.getType()) {
+
+        } else if (Lifecycle.STOP_EVENT == event.getType())
+        {
             destroyServer("Platform", csPlatform);
         }
     }
 
     private JMXConnectorServer createServer(String serverName,
-            int theRmiRegistryPort, int theRmiServerPort,
-            HashMap<String,Object> theEnv, MBeanServer theMBeanServer) {
-        
+                                            int theRmiRegistryPort, int theRmiServerPort,
+                                            HashMap<String, Object> theEnv, MBeanServer theMBeanServer)
+    {
+
         // Create the RMI registry
-        try {
+        try
+        {
             LocateRegistry.createRegistry(theRmiRegistryPort);
-        } catch (RemoteException e) {
+        }
+        catch (RemoteException e)
+        {
             log.error(sm.getString(
                     "jmxRemoteLifecycleListener.createRegistryFailed",
                     serverName, Integer.toString(theRmiRegistryPort)), e);
@@ -248,25 +273,31 @@ public class JmxRemoteLifecycleListener implements LifecycleListener {
         url.append(theRmiRegistryPort);
         url.append("/jmxrmi");
         JMXServiceURL serviceUrl;
-        try {
+        try
+        {
             serviceUrl = new JMXServiceURL(url.toString());
-        } catch (MalformedURLException e) {
+        }
+        catch (MalformedURLException e)
+        {
             log.error(sm.getString(
                     "jmxRemoteLifecycleListener.invalidURL",
                     serverName, url.toString()), e);
             return null;
         }
-        
+
         // Start the JMX server with the connection string
         JMXConnectorServer cs = null;
-        try {
+        try
+        {
             cs = JMXConnectorServerFactory.newJMXConnectorServer(
                     serviceUrl, theEnv, theMBeanServer);
             cs.start();
             log.info(sm.getString("jmxRemoteLifecycleListener.start",
                     Integer.toString(theRmiRegistryPort),
                     Integer.toString(theRmiServerPort), serverName));
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             log.error(sm.getString(
                     "jmxRemoteLifecycleListener.createServerFailed",
                     serverName), e);
@@ -275,36 +306,46 @@ public class JmxRemoteLifecycleListener implements LifecycleListener {
     }
 
     private void destroyServer(String serverName,
-            JMXConnectorServer theConnectorServer) {
-        if (theConnectorServer != null) {
-            try {
+                               JMXConnectorServer theConnectorServer)
+    {
+        if (theConnectorServer != null)
+        {
+            try
+            {
                 theConnectorServer.stop();
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 log.error(sm.getString(
                         "jmxRemoteLifecycleListener.destroyServerFailed",
-                        serverName),e);
+                        serverName), e);
             }
         }
     }
 
     public static class RmiClientLocalhostSocketFactory
-    implements RMIClientSocketFactory, Serializable {
+            implements RMIClientSocketFactory, Serializable
+    {
         private static final String FORCED_HOST = "localhost";
 
         private RMIClientSocketFactory factory = null;
-        
-        public RmiClientLocalhostSocketFactory(RMIClientSocketFactory theFactory) {
+
+        public RmiClientLocalhostSocketFactory(RMIClientSocketFactory theFactory)
+        {
             factory = theFactory;
         }
 
-        public Socket createSocket(String host, int port) throws IOException {
-            if (factory == null) {
+        public Socket createSocket(String host, int port) throws IOException
+        {
+            if (factory == null)
+            {
                 return new Socket(FORCED_HOST, port);
-            } else {
+            } else
+            {
                 return factory.createSocket(FORCED_HOST, port);
             }
         }
 
-        
+
     }
 }

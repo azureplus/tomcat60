@@ -34,19 +34,19 @@ import javax.servlet.ServletContext;
  * facilities to identify the appropriate Wrapper to handle this request.
  * It also provides a convenient mechanism to use Interceptors that see
  * every request processed by this particular web application.
- * <p>
+ * <p/>
  * The parent Container attached to a Context is generally a Host, but may
  * be some other implementation, or may be omitted if it is not necessary.
- * <p>
+ * <p/>
  * The child containers attached to a Context are generally implementations
  * of Wrapper (representing individual servlet definitions).
- * <p>
+ * <p/>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface Context extends Container {
+public interface Context extends Container
+{
 
 
     // ----------------------------------------------------- Manifest Constants
@@ -71,8 +71,8 @@ public interface Context extends Container {
      * in the order they were specified in the web application deployment
      * descriptor, for this application.
      *
-     * @exception IllegalStateException if this method is called before
-     *  this application has started, or after it has been stopped
+     * @throws IllegalStateException if this method is called before
+     *                               this application has started, or after it has been stopped
      */
     public Object[] getApplicationEventListeners();
 
@@ -92,8 +92,8 @@ public interface Context extends Container {
      * in the order they were specified in the web application deployment
      * descriptor, for this application.
      *
-     * @exception IllegalStateException if this method is called before
-     *  this application has started, or after it has been stopped
+     * @throws IllegalStateException if this method is called before
+     *                               this application has started, or after it has been stopped
      */
     public Object[] getApplicationLifecycleListeners();
 
@@ -179,100 +179,87 @@ public interface Context extends Container {
      */
     public void setCookies(boolean cookies);
 
-    
+
     /**
      * Gets the name to use for session cookies. Overrides any setting that
      * may be specified by the application.
-     * 
-     * @return  The value of the default session cookie name or null if not
-     *          specified
+     *
+     * @return The value of the default session cookie name or null if not
+     * specified
      */
     public String getSessionCookieName();
-    
-    
+
+
     /**
      * Sets the name to use for session cookies. Overrides any setting that
      * may be specified by the application.
-     * 
-     * @param sessionCookieName   The name to use
+     *
+     * @param sessionCookieName The name to use
      */
     public void setSessionCookieName(String sessionCookieName);
 
-    
+
     /**
      * Gets the value of the use HttpOnly cookies for session cookies flag.
-     * 
+     *
      * @return <code>true</code> if the HttpOnly flag should be set on session
-     *         cookies
+     * cookies
      */
     public boolean getUseHttpOnly();
 
 
     /**
      * Sets the use HttpOnly cookies for session cookies flag.
-     * 
-     * @param useHttpOnly   Set to <code>true</code> to use HttpOnly cookies
-     *                          for session cookies
+     *
+     * @param useHttpOnly Set to <code>true</code> to use HttpOnly cookies
+     *                    for session cookies
      */
     public void setUseHttpOnly(boolean useHttpOnly);
-    
-    
+
+
     /**
      * Gets the domain to use for session cookies. Overrides any setting that
      * may be specified by the application.
-     * 
-     * @return  The value of the default session cookie domain or null if not
-     *          specified
+     *
+     * @return The value of the default session cookie domain or null if not
+     * specified
      */
     public String getSessionCookieDomain();
-    
-    
+
+
     /**
      * Sets the domain to use for session cookies. Overrides any setting that
      * may be specified by the application.
-     * 
-     * @param sessionCookieDomain   The domain to use
+     *
+     * @param sessionCookieDomain The domain to use
      */
     public void setSessionCookieDomain(String sessionCookieDomain);
 
-    
+
     /**
      * Gets the path to use for session cookies. Overrides any setting that
      * may be specified by the application.
-     * 
-     * @return  The value of the default session cookie path or null if not
-     *          specified
+     *
+     * @return The value of the default session cookie path or null if not
+     * specified
      */
     public String getSessionCookiePath();
-    
-    
+
+
     /**
      * Sets the path to use for session cookies. Overrides any setting that
      * may be specified by the application.
-     * 
-     * @param sessionCookiePath   The path to use
+     *
+     * @param sessionCookiePath The path to use
      */
     public void setSessionCookiePath(String sessionCookiePath);
 
-    
+
     /**
      * Return the "allow crossing servlet contexts" flag.
      */
     public boolean getCrossContext();
 
-    
-    /**
-     * Return the alternate Deployment Descriptor name.
-     */
-    public String getAltDDName();
-    
-    
-    /**
-     * Set an alternate Deployment Descriptor name.
-     */
-    public void setAltDDName(String altDDName) ;
-    
-    
     /**
      * Set the "allow crossing servlet contexts" flag.
      *
@@ -280,6 +267,15 @@ public interface Context extends Container {
      */
     public void setCrossContext(boolean crossContext);
 
+    /**
+     * Return the alternate Deployment Descriptor name.
+     */
+    public String getAltDDName();
+
+    /**
+     * Set an alternate Deployment Descriptor name.
+     */
+    public void setAltDDName(String altDDName);
 
     /**
      * Return the display name of this web application.
@@ -323,25 +319,24 @@ public interface Context extends Container {
      * @param docBase The new document root
      */
     public void setDocBase(String docBase);
-    
-    
+
+
     /**
      * Is URL rewriting disabled?
      * URL rewriting is an optional component of the servlet 2.5 specification.
      * However if set to true this will be non-compliant with the specification
      * as the specification requires that there <b>must</b> be a way to retain
      * sessions if the client doesn't allow session cookies.
-     * 
+     *
      * @return true If URL rewriting is disabled.
-     * 
      * @see <a href="http://jcp.org/aboutJava/communityprocess/mrel/jsr154/index2.html">Servlet
-     *      2.5 Specification. Sections SRV.7.1.3 and SRV.7.1.4</a>
+     * 2.5 Specification. Sections SRV.7.1.3 and SRV.7.1.4</a>
      * @see javax.servlet.http.HttpServletResponse#encodeURL(String) encodeURL
      * @see javax.servlet.http.HttpServletResponse#encodeRedirectURL(String)
-     *      encodeRedirectURL
+     * encodeRedirectURL
      */
     public boolean isDisableURLRewriting();
-    
+
     /**
      * Is URL rewriting disabled?
      * URL rewriting is an optional component of the servlet 2.5 specification.
@@ -364,17 +359,17 @@ public interface Context extends Container {
      * Return the boolean on the annotations parsing.
      */
     public boolean getIgnoreAnnotations();
-    
-    
+
+
     /**
-     * Set the boolean on the annotations parsing for this web 
+     * Set the boolean on the annotations parsing for this web
      * application.
-     * 
+     *
      * @param ignoreAnnotations The boolean on the annotations parsing
      */
     public void setIgnoreAnnotations(boolean ignoreAnnotations);
-    
-    
+
+
     /**
      * Return the login configuration descriptor for this web application.
      */
@@ -551,7 +546,7 @@ public interface Context extends Container {
      * @param xmlNamespaceAware true to enable namespace awareness
      */
     public void setXmlNamespaceAware(boolean xmlNamespaceAware);
-     
+
 
     /**
      * Will the parsing of the web.xml file for this Context be performed by a
@@ -575,7 +570,6 @@ public interface Context extends Container {
      * *.tld files are always parsed using a namespace aware parser.
      *
      * @return Always <code>true</code>
-     * 
      * @deprecated This option will be removed in 8.0.x.
      */
     @Deprecated
@@ -586,7 +580,6 @@ public interface Context extends Container {
      * *.tld files are always parsed using a namespace aware parser.
      *
      * @param tldNamespaceAware ignored
-     * 
      * @deprecated This option will be removed in 8.0.x.
      */
     @Deprecated
@@ -696,7 +689,7 @@ public interface Context extends Container {
      * property group, we only care about the URL pattern here.  The
      * JSP container will parse the rest.
      *
-     * @param pattern URL pattern to be mapped 
+     * @param pattern URL pattern to be mapped
      */
     public void addJspMapping(String pattern);
 
@@ -704,7 +697,7 @@ public interface Context extends Container {
     /**
      * Add a Locale Encoding Mapping (see Sec 5.4 of Servlet spec 2.4)
      *
-     * @param locale locale to map an encoding for
+     * @param locale   locale to map an encoding for
      * @param encoding encoding to be used for a give locale
      */
     public void addLocaleEncodingMappingParameter(String locale, String encoding);
@@ -715,7 +708,7 @@ public interface Context extends Container {
      * the specified extension.
      *
      * @param extension Filename extension being mapped
-     * @param mimeType Corresponding MIME type
+     * @param mimeType  Corresponding MIME type
      */
     public void addMimeMapping(String extension, String mimeType);
 
@@ -724,7 +717,7 @@ public interface Context extends Container {
      * Add a new context initialization parameter, replacing any existing
      * value for the specified name.
      *
-     * @param name Name of the new parameter
+     * @param name  Name of the new parameter
      * @param value Value of the new  parameter
      */
     public void addParameter(String name, String value);
@@ -752,7 +745,7 @@ public interface Context extends Container {
      * the specified pattern.
      *
      * @param pattern URL pattern to be mapped
-     * @param name Name of the corresponding servlet to execute
+     * @param name    Name of the corresponding servlet to execute
      */
     public void addServletMapping(String pattern, String name);
 
@@ -760,20 +753,20 @@ public interface Context extends Container {
     /**
      * Add a JSP tag library for the specified URI.
      *
-     * @param uri URI, relative to the web.xml file, of this tag library
+     * @param uri      URI, relative to the web.xml file, of this tag library
      * @param location Location of the tag library descriptor
      */
     public void addTaglib(String uri, String location);
 
-    
+
     /**
      * Add a resource which will be watched for reloading by the host auto
      * deployer. Note: this will not be used in embedded mode.
-     * 
+     *
      * @param name Path to the resource, relative to docBase
      */
     public void addWatchedResource(String name);
-    
+
 
     /**
      * Add a new welcome file to the set recognized by this Context.
@@ -846,7 +839,6 @@ public interface Context extends Container {
      * @param exceptionType Exception type to look up
      */
     public ErrorPage findErrorPage(String exceptionType);
-
 
 
     /**
@@ -994,11 +986,11 @@ public interface Context extends Container {
 
 
     /**
-     * Return the set of watched resources for this Context. If none are 
+     * Return the set of watched resources for this Context. If none are
      * defined, a zero length array will be returned.
      */
     public String[] findWatchedResources();
-    
+
 
     /**
      * Return <code>true</code> if the specified welcome file is defined
@@ -1008,7 +1000,7 @@ public interface Context extends Container {
      */
     public boolean findWelcomeFile(String name);
 
-    
+
     /**
      * Return the set of welcome files defined for this Context.  If none are
      * defined, a zero-length array is returned.
@@ -1033,8 +1025,8 @@ public interface Context extends Container {
     /**
      * Reload this web application, if reloading is supported.
      *
-     * @exception IllegalStateException if the <code>reloadable</code>
-     *  property is set to <code>false</code>.
+     * @throws IllegalStateException if the <code>reloadable</code>
+     *                               property is set to <code>false</code>.
      */
     public void reload();
 
@@ -1150,15 +1142,15 @@ public interface Context extends Container {
      */
     public void removeTaglib(String uri);
 
-    
+
     /**
      * Remove the specified watched resource name from the list associated
      * with this Context.
-     * 
+     *
      * @param name Name of the watched resource to be removed
      */
     public void removeWatchedResource(String name);
-    
+
 
     /**
      * Remove the specified welcome file name from the list recognized

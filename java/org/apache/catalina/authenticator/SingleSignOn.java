@@ -19,26 +19,19 @@
 package org.apache.catalina.authenticator;
 
 
-import java.io.IOException;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Realm;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionEvent;
-import org.apache.catalina.SessionListener;
+import org.apache.catalina.*;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.util.LifecycleSupport;
 import org.apache.catalina.util.StringManager;
 import org.apache.catalina.valves.ValveBase;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -49,73 +42,62 @@ import org.apache.catalina.valves.ValveBase;
  * be met:
  * <ul>
  * <li>This Valve must be configured on the Container that represents a
- *     virtual host (typically an implementation of <code>Host</code>).</li>
+ * virtual host (typically an implementation of <code>Host</code>).</li>
  * <li>The <code>Realm</code> that contains the shared user and role
- *     information must be configured on the same Container (or a higher
- *     one), and not overridden at the web application level.</li>
+ * information must be configured on the same Container (or a higher
+ * one), and not overridden at the web application level.</li>
  * <li>The web applications themselves must use one of the standard
- *     Authenticators found in the
- *     <code>org.apache.catalina.authenticator</code> package.</li>
+ * Authenticators found in the
+ * <code>org.apache.catalina.authenticator</code> package.</li>
  * </ul>
  *
  * @author Craig R. McClanahan
- *
  */
 
 public class SingleSignOn
-    extends ValveBase
-    implements Lifecycle, SessionListener {
+        extends ValveBase
+        implements Lifecycle, SessionListener
+{
 
 
     // ----------------------------------------------------- Instance Variables
 
 
     /**
-     * The cache of SingleSignOnEntry instances for authenticated Principals,
-     * keyed by the cookie value that is used to select them.
+     * The string manager for this package.
      */
-    protected Map<String,SingleSignOnEntry> cache =
-        new HashMap<String,SingleSignOnEntry>();
-
-
+    protected final static StringManager sm =
+            StringManager.getManager(Constants.Package);
     /**
      * Descriptive information about this Valve implementation.
      */
     protected static String info =
-        "org.apache.catalina.authenticator.SingleSignOn";
-
-
+            "org.apache.catalina.authenticator.SingleSignOn";
+    /**
+     * The cache of SingleSignOnEntry instances for authenticated Principals,
+     * keyed by the cookie value that is used to select them.
+     */
+    protected Map<String, SingleSignOnEntry> cache =
+            new HashMap<String, SingleSignOnEntry>();
     /**
      * The lifecycle event support for this component.
      */
     protected LifecycleSupport lifecycle = new LifecycleSupport(this);
-
+    /**
+     * The cache of single sign on identifiers, keyed by the Session that is
+     * associated with them.
+     */
+    protected Map<Session, String> reverse = new HashMap<Session, String>();
+    /**
+     * Component started flag.
+     */
+    protected boolean started = false;
     /**
      * Indicates whether this valve should require a downstream Authenticator to
      * reauthenticate each request, or if it itself can bind a UserPrincipal
      * and AuthType object to the request.
      */
     private boolean requireReauthentication = false;
-
-    /**
-     * The cache of single sign on identifiers, keyed by the Session that is
-     * associated with them.
-     */
-    protected Map<Session,String> reverse = new HashMap<Session,String>();
-
-
-    /**
-     * The string manager for this package.
-     */
-    protected final static StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-
-    /**
-     * Component started flag.
-     */
-    protected boolean started = false;
-
     /**
      * Optional SSO cookie domain.
      */
@@ -129,16 +111,20 @@ public class SingleSignOn
      *
      * @return The cookie domain
      */
-    public String getCookieDomain() {
+    public String getCookieDomain()
+    {
         return cookieDomain;
     }
+
     /**
      * Sets the domain to be used for sso cookies.
      *
      * @param cookieDomain cookie domain name
      */
-    public void setCookieDomain(String cookieDomain) {
-        if (cookieDomain != null && cookieDomain.trim().length() == 0) {
+    public void setCookieDomain(String cookieDomain)
+    {
+        if (cookieDomain != null && cookieDomain.trim().length() == 0)
+        {
             cookieDomain = null;
         }
         this.cookieDomain = cookieDomain;
@@ -151,14 +137,13 @@ public class SingleSignOn
      * to the request based on the presence of a valid SSO entry without
      * rechecking with the <code>Realm</code..
      *
-     * @return  <code>true</code> if it is required that a downstream
-     *          Authenticator reauthenticate each request before calls to
-     *          <code>HttpServletRequest.setUserPrincipal()</code>
-     *          and <code>HttpServletRequest.setAuthType()</code> are made;
-     *          <code>false</code> if the <code>Valve</code> can itself make
-     *          those calls relying on the presence of a valid SingleSignOn
-     *          entry associated with the request.
-     *
+     * @return <code>true</code> if it is required that a downstream
+     * Authenticator reauthenticate each request before calls to
+     * <code>HttpServletRequest.setUserPrincipal()</code>
+     * and <code>HttpServletRequest.setAuthType()</code> are made;
+     * <code>false</code> if the <code>Valve</code> can itself make
+     * those calls relying on the presence of a valid SingleSignOn
+     * entry associated with the request.
      * @see #setRequireReauthentication
      */
     public boolean getRequireReauthentication()
@@ -173,19 +158,19 @@ public class SingleSignOn
      * <code>Realm</code>, or if this Valve can itself bind security info
      * to the request, based on the presence of a valid SSO entry, without
      * rechecking with the <code>Realm</code.
-     * <p>
+     * <p/>
      * If this property is <code>false</code> (the default), this
      * <code>Valve</code> will bind a UserPrincipal and AuthType to the request
      * if a valid SSO entry is associated with the request.  It will not notify
      * the security <code>Realm</code> of the incoming request.
-     * <p>
+     * <p/>
      * This property should be set to <code>true</code> if the overall server
      * configuration requires that the <code>Realm</code> reauthenticate each
      * request thread.  An example of such a configuration would be one where
      * the <code>Realm</code> implementation provides security for both a
      * web tier and an associated EJB tier, and needs to set security
      * credentials on each request thread in order to support EJB access.
-     * <p>
+     * <p/>
      * If this property is set to <code>true</code>, this Valve will set flags
      * on the request notifying the downstream Authenticator that the request
      * is associated with an SSO session.  The Authenticator will then call its
@@ -193,18 +178,17 @@ public class SingleSignOn
      * method to attempt to reauthenticate the request to the
      * <code>Realm</code>, using any credentials that were cached with this
      * Valve.
-     * <p>
+     * <p/>
      * The default value of this property is <code>false</code>, in order
      * to maintain backward compatibility with previous versions of Tomcat.
      *
-     * @param required  <code>true</code> if it is required that a downstream
-     *                  Authenticator reauthenticate each request before calls
-     *                  to  <code>HttpServletRequest.setUserPrincipal()</code>
-     *                  and <code>HttpServletRequest.setAuthType()</code> are
-     *                  made; <code>false</code> if the <code>Valve</code> can
-     *                  itself make those calls relying on the presence of a
-     *                  valid SingleSignOn entry associated with the request.
-     *
+     * @param required <code>true</code> if it is required that a downstream
+     *                 Authenticator reauthenticate each request before calls
+     *                 to  <code>HttpServletRequest.setUserPrincipal()</code>
+     *                 and <code>HttpServletRequest.setAuthType()</code> are
+     *                 made; <code>false</code> if the <code>Valve</code> can
+     *                 itself make those calls relying on the presence of a
+     *                 valid SingleSignOn entry associated with the request.
      * @see AuthenticatorBase#reauthenticateFromSSO
      */
     public void setRequireReauthentication(boolean required)
@@ -221,7 +205,8 @@ public class SingleSignOn
      *
      * @param listener The listener to add
      */
-    public void addLifecycleListener(LifecycleListener listener) {
+    public void addLifecycleListener(LifecycleListener listener)
+    {
 
         lifecycle.addLifecycleListener(listener);
 
@@ -229,10 +214,11 @@ public class SingleSignOn
 
 
     /**
-     * Get the lifecycle listeners associated with this lifecycle. If this 
+     * Get the lifecycle listeners associated with this lifecycle. If this
      * Lifecycle has no listeners registered, a zero-length array is returned.
      */
-    public LifecycleListener[] findLifecycleListeners() {
+    public LifecycleListener[] findLifecycleListeners()
+    {
 
         return lifecycle.findLifecycleListeners();
 
@@ -244,7 +230,8 @@ public class SingleSignOn
      *
      * @param listener The listener to remove
      */
-    public void removeLifecycleListener(LifecycleListener listener) {
+    public void removeLifecycleListener(LifecycleListener listener)
+    {
 
         lifecycle.removeLifecycleListener(listener);
 
@@ -256,15 +243,16 @@ public class SingleSignOn
      * component.  This method should be called after <code>configure()</code>,
      * and before any of the public methods of the component are utilized.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
-    public void start() throws LifecycleException {
+    public void start() throws LifecycleException
+    {
 
         // Validate and update our current component state
         if (started)
             throw new LifecycleException
-                (sm.getString("authenticator.alreadyStarted"));
+                    (sm.getString("authenticator.alreadyStarted"));
         lifecycle.fireLifecycleEvent(START_EVENT, null);
         started = true;
 
@@ -276,15 +264,16 @@ public class SingleSignOn
      * component.  This method should be the last one called on a given
      * instance of this component.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that needs to be reported
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that needs to be reported
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws LifecycleException
+    {
 
         // Validate and update our current component state
         if (!started)
             throw new LifecycleException
-                (sm.getString("authenticator.notStarted"));
+                    (sm.getString("authenticator.notStarted"));
         lifecycle.fireLifecycleEvent(STOP_EVENT, null);
         started = false;
 
@@ -299,7 +288,8 @@ public class SingleSignOn
      *
      * @param event SessionEvent that has occurred
      */
-    public void sessionEvent(SessionEvent event) {
+    public void sessionEvent(SessionEvent event)
+    {
 
         // We only care about session destroyed events
         if (!Session.SESSION_DESTROYED_EVENT.equals(event.getType())
@@ -312,7 +302,8 @@ public class SingleSignOn
             containerLog.debug("Process session destroyed on " + session);
 
         String ssoId = null;
-        synchronized (reverse) {
+        synchronized (reverse)
+        {
             ssoId = (String) reverse.get(session);
         }
         if (ssoId == null)
@@ -323,11 +314,13 @@ public class SingleSignOn
         // SSO.  If the session was logged out, we'll log out
         // of all session associated with the SSO.
         if (((session.getMaxInactiveInterval() > 0)
-            && (System.currentTimeMillis() - session.getLastAccessedTimeInternal() >=
-                session.getMaxInactiveInterval() * 1000)) 
-            || (Session.SESSION_PASSIVATED_EVENT.equals(event.getType()))) {
+                && (System.currentTimeMillis() - session.getLastAccessedTimeInternal() >=
+                session.getMaxInactiveInterval() * 1000))
+                || (Session.SESSION_PASSIVATED_EVENT.equals(event.getType())))
+        {
             removeSession(ssoId, session);
-        } else {
+        } else
+        {
             // The session was logged out.
             // Deregister this single session id, invalidating 
             // associated sessions
@@ -343,7 +336,8 @@ public class SingleSignOn
     /**
      * Return descriptive information about this Valve implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -353,24 +347,25 @@ public class SingleSignOn
     /**
      * Perform single-sign-on support processing for this request.
      *
-     * @param request The servlet request we are processing
+     * @param request  The servlet request we are processing
      * @param response The servlet response we are creating
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet error occurs
      */
     public void invoke(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         request.removeNote(Constants.REQ_SSOID_NOTE);
 
         // Has a valid user already been authenticated?
         if (containerLog.isDebugEnabled())
             containerLog.debug("Process request for '" + request.getRequestURI() + "'");
-        if (request.getUserPrincipal() != null) {
+        if (request.getUserPrincipal() != null)
+        {
             if (containerLog.isDebugEnabled())
                 containerLog.debug(" Principal '" + request.getUserPrincipal().getName() +
-                    "' has already been authenticated");
+                        "' has already been authenticated");
             getNext().invoke(request, response);
             return;
         }
@@ -382,13 +377,16 @@ public class SingleSignOn
         Cookie cookies[] = request.getCookies();
         if (cookies == null)
             cookies = new Cookie[0];
-        for (int i = 0; i < cookies.length; i++) {
-            if (Constants.SINGLE_SIGN_ON_COOKIE.equals(cookies[i].getName())) {
+        for (int i = 0; i < cookies.length; i++)
+        {
+            if (Constants.SINGLE_SIGN_ON_COOKIE.equals(cookies[i].getName()))
+            {
                 cookie = cookies[i];
                 break;
             }
         }
-        if (cookie == null) {
+        if (cookie == null)
+        {
             if (containerLog.isDebugEnabled())
                 containerLog.debug(" SSO cookie is not present");
             getNext().invoke(request, response);
@@ -399,18 +397,21 @@ public class SingleSignOn
         if (containerLog.isDebugEnabled())
             containerLog.debug(" Checking for cached principal for " + cookie.getValue());
         SingleSignOnEntry entry = lookup(cookie.getValue());
-        if (entry != null) {
+        if (entry != null)
+        {
             if (containerLog.isDebugEnabled())
                 containerLog.debug(" Found cached principal '" +
-                    (entry.getPrincipal() != null ? entry.getPrincipal().getName() : "") + "' with auth type '" +
-                    entry.getAuthType() + "'");
+                        (entry.getPrincipal() != null ? entry.getPrincipal().getName() : "") + "' with auth type '" +
+                        entry.getAuthType() + "'");
             request.setNote(Constants.REQ_SSOID_NOTE, cookie.getValue());
             // Only set security elements if reauthentication is not required
-            if (!getRequireReauthentication()) {
+            if (!getRequireReauthentication())
+            {
                 request.setAuthType(entry.getAuthType());
                 request.setUserPrincipal(entry.getPrincipal());
             }
-        } else {
+        } else
+        {
             if (containerLog.isDebugEnabled())
                 containerLog.debug(" No cached principal found, erasing SSO cookie");
             cookie.setMaxAge(0);
@@ -429,10 +430,11 @@ public class SingleSignOn
     /**
      * Return a String rendering of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("SingleSignOn[");
-        if (container == null )
+        if (container == null)
             sb.append("Container is null");
         else
             sb.append(container.getName());
@@ -449,10 +451,11 @@ public class SingleSignOn
      * Associate the specified single sign on identifier with the
      * specified Session.
      *
-     * @param ssoId Single sign on identifier
+     * @param ssoId   Single sign on identifier
      * @param session Session to be associated
      */
-    protected void associate(String ssoId, Session session) {
+    protected void associate(String ssoId, Session session)
+    {
 
         if (containerLog.isDebugEnabled())
             containerLog.debug("Associate sso id " + ssoId + " with session " + session);
@@ -460,7 +463,8 @@ public class SingleSignOn
         SingleSignOnEntry sso = lookup(ssoId);
         if (sso != null)
             sso.addSession(this, session);
-        synchronized (reverse) {
+        synchronized (reverse)
+        {
             reverse.put(session, ssoId);
         }
 
@@ -470,25 +474,29 @@ public class SingleSignOn
      * Deregister the specified session.  If it is the last session,
      * then also get rid of the single sign on identifier
      *
-     * @param ssoId Single sign on identifier
+     * @param ssoId   Single sign on identifier
      * @param session Session to be deregistered
      */
-    protected void deregister(String ssoId, Session session) {
+    protected void deregister(String ssoId, Session session)
+    {
 
-        synchronized (reverse) {
+        synchronized (reverse)
+        {
             reverse.remove(session);
         }
 
         SingleSignOnEntry sso = lookup(ssoId);
-        if ( sso == null )
+        if (sso == null)
             return;
 
-        sso.removeSession( session );
+        sso.removeSession(session);
 
         // see if we are the last session, if so blow away ssoId
         Session sessions[] = sso.findSessions();
-        if ( sessions == null || sessions.length == 0 ) {
-            synchronized (cache) {
+        if (sessions == null || sessions.length == 0)
+        {
+            synchronized (cache)
+            {
                 sso = (SingleSignOnEntry) cache.remove(ssoId);
             }
         }
@@ -502,14 +510,16 @@ public class SingleSignOn
      *
      * @param ssoId Single sign on identifier to deregister
      */
-    protected void deregister(String ssoId) {
+    protected void deregister(String ssoId)
+    {
 
         if (containerLog.isDebugEnabled())
             containerLog.debug("Deregistering sso id '" + ssoId + "'");
 
         // Look up and remove the corresponding SingleSignOnEntry
         SingleSignOnEntry sso = null;
-        synchronized (cache) {
+        synchronized (cache)
+        {
             sso = (SingleSignOnEntry) cache.remove(ssoId);
         }
 
@@ -518,11 +528,13 @@ public class SingleSignOn
 
         // Expire any associated sessions
         Session sessions[] = sso.findSessions();
-        for (int i = 0; i < sessions.length; i++) {
+        for (int i = 0; i < sessions.length; i++)
+        {
             if (containerLog.isTraceEnabled())
                 containerLog.trace(" Invalidating session " + sessions[i]);
             // Remove from reverse cache first to avoid recursion
-            synchronized (reverse) {
+            synchronized (reverse)
+            {
                 reverse.remove(sessions[i]);
             }
             // Invalidate this session
@@ -543,22 +555,22 @@ public class SingleSignOn
      * <p>
      * If reauthentication is successful, the <code>Principal</code> and
      * authorization type associated with the SSO session will be bound
-     * to the given <code>Request</code> object via calls to 
-     * {@link Request#setAuthType Request.setAuthType()} and 
+     * to the given <code>Request</code> object via calls to
+     * {@link Request#setAuthType Request.setAuthType()} and
      * {@link Request#setUserPrincipal Request.setUserPrincipal()}
      * </p>
      *
-     * @param ssoId     identifier of SingleSignOn session with which the
-     *                  caller is associated
-     * @param realm     Realm implementation against which the caller is to
-     *                  be authenticated
-     * @param request   the request that needs to be authenticated
-     * 
-     * @return  <code>true</code> if reauthentication was successful,
-     *          <code>false</code> otherwise.
+     * @param ssoId   identifier of SingleSignOn session with which the
+     *                caller is associated
+     * @param realm   Realm implementation against which the caller is to
+     *                be authenticated
+     * @param request the request that needs to be authenticated
+     * @return <code>true</code> if reauthentication was successful,
+     * <code>false</code> otherwise.
      */
     protected boolean reauthenticate(String ssoId, Realm realm,
-                                     Request request) {
+                                     Request request)
+    {
 
         if (ssoId == null || realm == null)
             return false;
@@ -566,14 +578,17 @@ public class SingleSignOn
         boolean reauthenticated = false;
 
         SingleSignOnEntry entry = lookup(ssoId);
-        if (entry != null && entry.getCanReauthenticate()) {
-            
+        if (entry != null && entry.getCanReauthenticate())
+        {
+
             String username = entry.getUsername();
-            if (username != null) {
+            if (username != null)
+            {
                 Principal reauthPrincipal =
-                        realm.authenticate(username, entry.getPassword());                
-                if (reauthPrincipal != null) {                    
-                    reauthenticated = true;                    
+                        realm.authenticate(username, entry.getPassword());
+                if (reauthPrincipal != null)
+                {
+                    reauthenticated = true;
                     // Bind the authorization credentials to the request
                     request.setAuthType(entry.getAuthType());
                     request.setUserPrincipal(reauthPrincipal);
@@ -589,23 +604,25 @@ public class SingleSignOn
      * Register the specified Principal as being associated with the specified
      * value for the single sign on identifier.
      *
-     * @param ssoId Single sign on identifier to register
+     * @param ssoId     Single sign on identifier to register
      * @param principal Associated user principal that is identified
-     * @param authType Authentication type used to authenticate this
-     *  user principal
-     * @param username Username used to authenticate this user
-     * @param password Password used to authenticate this user
+     * @param authType  Authentication type used to authenticate this
+     *                  user principal
+     * @param username  Username used to authenticate this user
+     * @param password  Password used to authenticate this user
      */
     protected void register(String ssoId, Principal principal, String authType,
-                  String username, String password) {
+                            String username, String password)
+    {
 
         if (containerLog.isDebugEnabled())
             containerLog.debug("Registering sso id '" + ssoId + "' for user '" +
-                (principal != null ? principal.getName() : "") + "' with auth type '" + authType + "'");
+                    (principal != null ? principal.getName() : "") + "' with auth type '" + authType + "'");
 
-        synchronized (cache) {
+        synchronized (cache)
+        {
             cache.put(ssoId, new SingleSignOnEntry(principal, authType,
-                                                   username, password));
+                    username, password));
         }
 
     }
@@ -614,14 +631,14 @@ public class SingleSignOn
     /**
      * Updates any <code>SingleSignOnEntry</code> found under key
      * <code>ssoId</code> with the given authentication data.
-     * <p>
+     * <p/>
      * The purpose of this method is to allow an SSO entry that was
      * established without a username/password combination (i.e. established
      * following DIGEST or CLIENT_CERT authentication) to be updated with
      * a username and password if one becomes available through a subsequent
      * BASIC or FORM authentication.  The SSO entry will then be usable for
      * reauthentication.
-     * <p>
+     * <p/>
      * <b>NOTE:</b> Only updates the SSO entry if a call to
      * <code>SingleSignOnEntry.getCanReauthenticate()</code> returns
      * <code>false</code>; otherwise, it is assumed that the SSO entry already
@@ -637,14 +654,17 @@ public class SingleSignOn
      * @param password  the password (if any) used for the authentication
      */
     protected void update(String ssoId, Principal principal, String authType,
-                          String username, String password) {
+                          String username, String password)
+    {
 
         SingleSignOnEntry sso = lookup(ssoId);
-        if (sso != null && !sso.getCanReauthenticate()) {
+        if (sso != null && !sso.getCanReauthenticate())
+        {
             if (containerLog.isDebugEnabled())
                 containerLog.debug("Update sso id " + ssoId + " to auth type " + authType);
 
-            synchronized(sso) {
+            synchronized (sso)
+            {
                 sso.updateCredentials(principal, authType, username, password);
             }
 
@@ -658,27 +678,30 @@ public class SingleSignOn
      *
      * @param ssoId Single sign on identifier to look up
      */
-    protected SingleSignOnEntry lookup(String ssoId) {
+    protected SingleSignOnEntry lookup(String ssoId)
+    {
 
-        synchronized (cache) {
+        synchronized (cache)
+        {
             return ((SingleSignOnEntry) cache.get(ssoId));
         }
 
     }
 
-    
+
     /**
      * Remove a single Session from a SingleSignOn.  Called when
      * a session is timed out and no longer active.
      *
-     * @param ssoId Single sign on identifier from which to remove the session.
+     * @param ssoId   Single sign on identifier from which to remove the session.
      * @param session the session to be removed.
      */
-    protected void removeSession(String ssoId, Session session) {
+    protected void removeSession(String ssoId, Session session)
+    {
 
         if (containerLog.isDebugEnabled())
-            containerLog.debug("Removing session " + session.toString() + " from sso id " + 
-                ssoId );
+            containerLog.debug("Removing session " + session.toString() + " from sso id " +
+                    ssoId);
 
         // Get a reference to the SingleSignOn
         SingleSignOnEntry entry = lookup(ssoId);
@@ -689,13 +712,15 @@ public class SingleSignOn
         entry.removeSession(session);
 
         // Remove the inactive session from the 'reverse' Map.
-        synchronized(reverse) {
+        synchronized (reverse)
+        {
             reverse.remove(session);
         }
 
         // If there are not sessions left in the SingleSignOnEntry,
         // deregister the entry.
-        if (entry.findSessions().length == 0) {
+        if (entry.findSessions().length == 0)
+        {
             deregister(ssoId);
         }
     }

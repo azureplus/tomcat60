@@ -28,86 +28,98 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/** Efficient conversion of bytes  to character .
- *  
- *  This uses the standard JDK mechansim - a reader - but provides mechanisms
- *  to recycle all the objects that are used. It is compatible with JDK1.1
- *  and up,
- *  ( nio is better, but it's not available even in 1.2 or 1.3 )
- *
- *  Not used in the current code, the performance gain is not very big
- *  in the current case ( since String is created anyway ), but it will
- *  be used in a later version or after the remaining optimizations.
+/**
+ * Efficient conversion of bytes  to character .
+ * <p/>
+ * This uses the standard JDK mechansim - a reader - but provides mechanisms
+ * to recycle all the objects that are used. It is compatible with JDK1.1
+ * and up,
+ * ( nio is better, but it's not available even in 1.2 or 1.3 )
+ * <p/>
+ * Not used in the current code, the performance gain is not very big
+ * in the current case ( since String is created anyway ), but it will
+ * be used in a later version or after the remaining optimizations.
  */
-public class B2CConverter {
-    
-    
-    private static org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog( B2CConverter.class );
+public class B2CConverter
+{
 
+
+    static final int BUFFER_SIZE = 8192;
     private static final Map<String, Charset> encodingToCharsetCache =
-        new HashMap<String, Charset>();
-    
-    static {
-        for (Charset charset: Charset.availableCharsets().values()) {
+            new HashMap<String, Charset>();
+    private static org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(B2CConverter.class);
+
+    static
+    {
+        for (Charset charset : Charset.availableCharsets().values())
+        {
             encodingToCharsetCache.put(
                     charset.name().toLowerCase(Locale.US), charset);
-            for (String alias : charset.aliases()) {
+            for (String alias : charset.aliases())
+            {
                 encodingToCharsetCache.put(
                         alias.toLowerCase(Locale.US), charset);
             }
         }
     }
 
+    private final int debug = 0;
+    char result[] = new char[BUFFER_SIZE];
+    private IntermediateInputStream iis;
+    private ReadConvertor conv;
+    private CharsetDecoder decoder;
+    private String encoding;
+
+
+    protected B2CConverter()
+    {
+    }
+
+    /**
+     * Create a converter, with bytes going to a byte buffer
+     */
+    public B2CConverter(String encoding)
+            throws IOException
+    {
+        this.encoding = encoding;
+        reset();
+    }
+
     public static Charset getCharset(String enc)
-            throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException
+    {
 
         // Encoding names should all be ASCII
         String lowerCaseEnc = enc.toLowerCase(Locale.US);
-        
+
         Charset charset = encodingToCharsetCache.get(lowerCaseEnc);
 
-        if (charset == null) {
+        if (charset == null)
+        {
             // Pre-population of the cache means this must be invalid
             throw new UnsupportedEncodingException(enc);
         }
         return charset;
     }
 
-    private IntermediateInputStream iis;
-    private ReadConvertor conv;
-    private CharsetDecoder decoder;
-    private String encoding;
-
-    protected B2CConverter() {
-    }
-    
-    /** Create a converter, with bytes going to a byte buffer
+    /**
+     * Reset the internal state, empty the buffers.
+     * The encoding remain in effect, the internal buffers remain allocated.
      */
-    public B2CConverter(String encoding)
-        throws IOException
+    public void recycle()
     {
-        this.encoding=encoding;
-        reset();
-    }
-
-    
-    /** Reset the internal state, empty the buffers.
-     *  The encoding remain in effect, the internal buffers remain allocated.
-     */
-    public  void recycle() {
         conv.recycle();
         decoder.reset();
     }
 
-    static final int BUFFER_SIZE=8192;
-    char result[]=new char[BUFFER_SIZE];
-
-    /** Convert a buffer of bytes into a chars
+    /**
+     * Convert a buffer of bytes into a chars
+     *
      * @deprecated
      */
-    public  void convert( ByteChunk bb, CharChunk cb )
-        throws IOException
+    public void convert(ByteChunk bb, CharChunk cb)
+            throws IOException
     {
         // Set the ByteChunk as input to the Intermediate reader
         convert(bb, cb, cb.getBuffer().length - cb.getEnd());
@@ -120,49 +132,54 @@ public class B2CConverter {
      * @param cb    Output char buffer
      * @param limit Number of bytes to convert
      * @throws IOException
-     */    
-    public void convert( ByteChunk bb, CharChunk cb, int limit) 
-        throws IOException
+     */
+    public void convert(ByteChunk bb, CharChunk cb, int limit)
+            throws IOException
     {
-        iis.setByteChunk( bb );
-        try {
+        iis.setByteChunk(bb);
+        try
+        {
             // read from the reader
-            int bbLengthBeforeRead  = 0;
-            while( limit > 0 ) {
+            int bbLengthBeforeRead = 0;
+            while (limit > 0)
+            {
                 int size = limit < BUFFER_SIZE ? limit : BUFFER_SIZE;
                 bbLengthBeforeRead = bb.getLength();
-                int cnt=conv.read( result, 0, size );
-                if( cnt <= 0 ) {
+                int cnt = conv.read(result, 0, size);
+                if (cnt <= 0)
+                {
                     // End of stream ! - we may be in a bad state
-                    if( debug>0)
-                        log( "EOF" );
+                    if (debug > 0)
+                        log("EOF");
                     return;
                 }
-                if( debug > 1 )
-                    log("Converted: " + new String( result, 0, cnt ));
-                cb.append( result, 0, cnt );
+                if (debug > 1)
+                    log("Converted: " + new String(result, 0, cnt));
+                cb.append(result, 0, cnt);
                 limit = limit - (bbLengthBeforeRead - bb.getLength());
             }
-        } catch( IOException ex) {
-            if( debug>0)
-                log( "Reseting the converter " + ex.toString() );
+        }
+        catch (IOException ex)
+        {
+            if (debug > 0)
+                log("Reseting the converter " + ex.toString());
             reset();
             throw ex;
         }
     }
 
-
-    public void reset() throws IOException {
+    public void reset() throws IOException
+    {
         // Re-create the reader and iis
         iis = new IntermediateInputStream();
         decoder = getCharset(encoding).newDecoder();
         conv = new ReadConvertor(iis, decoder);
     }
 
-    private final int debug=0;
-    void log( String s ) {
+    void log(String s)
+    {
         if (log.isDebugEnabled())
-            log.debug("B2CConverter: " + s );
+            log.debug("B2CConverter: " + s);
     }
 
     // -------------------- Not used - the speed improvemnt is quite small
@@ -224,78 +241,95 @@ public class B2CConverter {
 // -------------------- Private implementation --------------------
 
 
-
 /**
- * 
+ *
  */
-final class  ReadConvertor extends InputStreamReader {
-    
+final class ReadConvertor extends InputStreamReader
+{
+
     // Has a private, internal byte[8192]
-    
-    /** Create a converter.
+
+    /**
+     * Create a converter.
      */
-    public ReadConvertor(IntermediateInputStream in, CharsetDecoder decoder) {
+    public ReadConvertor(IntermediateInputStream in, CharsetDecoder decoder)
+    {
         super(in, decoder);
     }
-    
-    /** Overriden - will do nothing but reset internal state.
+
+    /**
+     * Overriden - will do nothing but reset internal state.
      */
-    public  final void close() throws IOException {
+    public final void close() throws IOException
+    {
         // NOTHING
         // Calling super.close() would reset out and cb.
     }
-    
-    public  final int read(char cbuf[], int off, int len)
-        throws IOException
+
+    public final int read(char cbuf[], int off, int len)
+            throws IOException
     {
         // will do the conversion and call write on the output stream
-        return super.read( cbuf, off, len );
+        return super.read(cbuf, off, len);
     }
-    
-    /** Reset the buffer
+
+    /**
+     * Reset the buffer
      */
-    public  final void recycle() {
-        try {
+    public final void recycle()
+    {
+        try
+        {
             // Must clear super's buffer.
-            while (ready()) {
+            while (ready())
+            {
                 // InputStreamReader#skip(long) will allocate buffer to skip.
                 read();
             }
-        } catch(IOException ioe){
+        }
+        catch (IOException ioe)
+        {
         }
     }
 }
 
 
-/** Special output stream where close() is overriden, so super.close()
-    is never called.
-    
-    This allows recycling. It can also be disabled, so callbacks will
-    not be called if recycling the converter and if data was not flushed.
-*/
-final class IntermediateInputStream extends InputStream {
+/**
+ * Special output stream where close() is overriden, so super.close()
+ * is never called.
+ * <p/>
+ * This allows recycling. It can also be disabled, so callbacks will
+ * not be called if recycling the converter and if data was not flushed.
+ */
+final class IntermediateInputStream extends InputStream
+{
     ByteChunk bc = null;
-    
-    public IntermediateInputStream() {
+
+    public IntermediateInputStream()
+    {
     }
-    
-    public  final void close() throws IOException {
+
+    public final void close() throws IOException
+    {
         // shouldn't be called - we filter it out in writer
         throw new IOException("close() called - shouldn't happen ");
     }
-    
-    public  final  int read(byte cbuf[], int off, int len) throws IOException {
+
+    public final int read(byte cbuf[], int off, int len) throws IOException
+    {
         return bc.substract(cbuf, off, len);
     }
-    
-    public  final int read() throws IOException {
+
+    public final int read() throws IOException
+    {
         return bc.substract();
     }
 
     // -------------------- Internal methods --------------------
 
 
-    void setByteChunk( ByteChunk mb ) {
+    void setByteChunk(ByteChunk mb)
+    {
         bc = mb;
     }
 

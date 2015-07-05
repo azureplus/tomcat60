@@ -20,26 +20,35 @@ package javax.el;
 import java.beans.FeatureDescriptor;
 import java.util.*;
 
-public class ResourceBundleELResolver extends ELResolver {
+public class ResourceBundleELResolver extends ELResolver
+{
 
-    public ResourceBundleELResolver() {
+    public ResourceBundleELResolver()
+    {
         super();
     }
 
     public Object getValue(ELContext context, Object base, Object property)
-            throws NullPointerException, PropertyNotFoundException, ELException {
-        if (context == null) {
+            throws NullPointerException, PropertyNotFoundException, ELException
+    {
+        if (context == null)
+        {
             throw new NullPointerException();
         }
 
-        if (base instanceof ResourceBundle) {
+        if (base instanceof ResourceBundle)
+        {
             context.setPropertyResolved(true);
 
-            if (property != null) {
-                try {
+            if (property != null)
+            {
+                try
+                {
                     return ((ResourceBundle) base).getObject(property
                             .toString());
-                } catch (MissingResourceException mre) {
+                }
+                catch (MissingResourceException mre)
+                {
                     return "???" + property.toString() + "???";
                 }
             }
@@ -49,12 +58,15 @@ public class ResourceBundleELResolver extends ELResolver {
     }
 
     public Class<?> getType(ELContext context, Object base, Object property)
-            throws NullPointerException, PropertyNotFoundException, ELException {
-        if (context == null) {
+            throws NullPointerException, PropertyNotFoundException, ELException
+    {
+        if (context == null)
+        {
             throw new NullPointerException();
         }
 
-        if (base instanceof ResourceBundle) {
+        if (base instanceof ResourceBundle)
+        {
             context.setPropertyResolved(true);
         }
 
@@ -62,41 +74,50 @@ public class ResourceBundleELResolver extends ELResolver {
     }
 
     public void setValue(ELContext context, Object base, Object property,
-            Object value) throws NullPointerException,
+                         Object value) throws NullPointerException,
             PropertyNotFoundException, PropertyNotWritableException,
-            ELException {
-        if (context == null) {
+            ELException
+    {
+        if (context == null)
+        {
             throw new NullPointerException();
         }
 
-        if (base instanceof ResourceBundle) {
+        if (base instanceof ResourceBundle)
+        {
             context.setPropertyResolved(true);
             throw new PropertyNotWritableException(message(context,
-                    "resolverNotWriteable", new Object[] { base.getClass()
-                            .getName() }));
+                    "resolverNotWriteable", new Object[]{base.getClass()
+                            .getName()}));
         }
     }
 
     public boolean isReadOnly(ELContext context, Object base, Object property)
-            throws NullPointerException, PropertyNotFoundException, ELException {
-        if (context == null) {
+            throws NullPointerException, PropertyNotFoundException, ELException
+    {
+        if (context == null)
+        {
             throw new NullPointerException();
         }
 
-        if (base instanceof ResourceBundle) {
+        if (base instanceof ResourceBundle)
+        {
             context.setPropertyResolved(true);
         }
 
         return true;
     }
 
-    public Iterator getFeatureDescriptors(ELContext context, Object base) {
-        if (base instanceof ResourceBundle) {
+    public Iterator getFeatureDescriptors(ELContext context, Object base)
+    {
+        if (base instanceof ResourceBundle)
+        {
             List<FeatureDescriptor> feats = new ArrayList<FeatureDescriptor>();
             Enumeration e = ((ResourceBundle) base).getKeys();
             FeatureDescriptor feat;
             String key;
-            while (e.hasMoreElements()) {
+            while (e.hasMoreElements())
+            {
                 key = (String) e.nextElement();
                 feat = new FeatureDescriptor();
                 feat.setDisplayName(key);
@@ -113,8 +134,10 @@ public class ResourceBundleELResolver extends ELResolver {
         return null;
     }
 
-    public Class<?> getCommonPropertyType(ELContext context, Object base) {
-        if (base instanceof ResourceBundle) {
+    public Class<?> getCommonPropertyType(ELContext context, Object base)
+    {
+        if (base instanceof ResourceBundle)
+        {
             return String.class;
         }
         return null;

@@ -24,7 +24,7 @@ import java.util.Iterator;
  * Abstract the protocol implementation, including threading, etc.
  * Processor is single threaded and specific to stream-based protocols,
  * will not fit Jk protocols like JNI.
- *
+ * <p/>
  * This is the main interface to be implemented by a coyoute connector.
  * Adapter is the main interface to be impleneted by a coyote servlet container.
  *
@@ -32,7 +32,8 @@ import java.util.Iterator;
  * @author Costin Manolache
  * @see Adapter
  */
-public interface ProtocolHandler {
+public interface ProtocolHandler
+{
 
 
     /**
@@ -42,44 +43,43 @@ public interface ProtocolHandler {
 
 
     public Object getAttribute(String name);
+
     public Iterator getAttributeNames();
+
+    public Adapter getAdapter();
 
     /**
      * The adapter, used to call the connector.
      */
     public void setAdapter(Adapter adapter);
 
-
-    public Adapter getAdapter();
-
-
     /**
      * Init the protocol.
      */
     public void init()
-        throws Exception;
+            throws Exception;
 
 
     /**
      * Start the protocol.
      */
     public void start()
-        throws Exception;
+            throws Exception;
 
     /**
      * Pause the protocol (optional).
      */
     public void pause()
-        throws Exception;
+            throws Exception;
 
     /**
      * Resume the protocol (optional).
      */
     public void resume()
-        throws Exception;
+            throws Exception;
 
     public void destroy()
-        throws Exception;
+            throws Exception;
 
 
 }

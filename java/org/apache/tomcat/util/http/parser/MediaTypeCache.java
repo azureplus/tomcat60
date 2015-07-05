@@ -16,19 +16,21 @@
  */
 package org.apache.tomcat.util.http.parser;
 
+import org.apache.tomcat.util.collections.ConcurrentCache;
+
 import java.io.IOException;
 import java.io.StringReader;
-
-import org.apache.tomcat.util.collections.ConcurrentCache;
 
 /**
  * Caches the results of parsing content-type headers.
  */
-public class MediaTypeCache {
+public class MediaTypeCache
+{
 
-    private final ConcurrentCache<String,String[]> cache;
+    private final ConcurrentCache<String, String[]> cache;
 
-    public MediaTypeCache(int size) {
+    public MediaTypeCache(int size)
+    {
         cache = new ConcurrentCache<String, String[]>(size);
     }
 
@@ -38,25 +40,31 @@ public class MediaTypeCache {
      * the results placed in the cache and returned to the user.
      *
      * @param input The content-type header value to parse
-     * @return      The results are provided as a two element String array. The
-     *                  first element is the media type less the charset and
-     *                  the second element is the charset
+     * @return The results are provided as a two element String array. The
+     * first element is the media type less the charset and
+     * the second element is the charset
      */
-    public String[] parse(String input) {
+    public String[] parse(String input)
+    {
         String[] result = cache.get(input);
 
-        if (result != null) {
+        if (result != null)
+        {
             return result;
         }
 
         MediaType m = null;
-        try {
+        try
+        {
             m = HttpParser.parseMediaType(new StringReader(input));
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             // Ignore - return null
         }
-        if (m != null) {
-            result = new String[] {m.toStringNoCharset(), m.getCharset()};
+        if (m != null)
+        {
+            result = new String[]{m.toStringNoCharset(), m.getCharset()};
             cache.put(input, result);
         }
 

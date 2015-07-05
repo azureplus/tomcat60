@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
- 
+
 package org.apache.coyote;
 
 
@@ -22,14 +22,15 @@ package org.apache.coyote;
  * Enumerated class containing the adapter event codes.
  * Actions represent callbacks from the servlet container to the coyote
  * connector.
- *
+ * <p/>
  * Actions are implemented by ProtocolHandler, using the ActionHook interface.
  *
+ * @author Remy Maucherat
  * @see ProtocolHandler
  * @see ActionHook
- * @author Remy Maucherat
  */
-public final class ActionCode {
+public final class ActionCode
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -47,12 +48,12 @@ public final class ActionCode {
     /**
      * A flush() operation originated by the client ( i.e. a flush() on
      * the servlet output stream or writer, called by a servlet ).
-     * 
+     * <p/>
      * Argument is the Response.
      */
     public static final ActionCode ACTION_CLIENT_FLUSH = new ActionCode(4);
 
-    
+
     public static final ActionCode ACTION_CUSTOM = new ActionCode(5);
 
 
@@ -67,17 +68,18 @@ public final class ActionCode {
 
     public static final ActionCode ACTION_WEBAPP = new ActionCode(9);
 
-    /** Hook called after request, but before recycling. Can be used
-        for logging, to update counters, custom cleanup - the request
-        is still visible
-    */
+    /**
+     * Hook called after request, but before recycling. Can be used
+     * for logging, to update counters, custom cleanup - the request
+     * is still visible
+     */
     public static final ActionCode ACTION_POST_REQUEST = new ActionCode(10);
 
     /**
      * Callback for lazy evaluation - extract the remote host address.
      */
-    public static final ActionCode ACTION_REQ_HOST_ATTRIBUTE = 
-        new ActionCode(11);
+    public static final ActionCode ACTION_REQ_HOST_ATTRIBUTE =
+            new ActionCode(11);
 
 
     /**
@@ -91,37 +93,38 @@ public final class ActionCode {
     public static final ActionCode ACTION_REQ_SSL_ATTRIBUTE = new ActionCode(13);
 
 
-    /** Chain for request creation. Called each time a new request is created
-        ( requests are recycled ).
+    /**
+     * Chain for request creation. Called each time a new request is created
+     * ( requests are recycled ).
      */
     public static final ActionCode ACTION_NEW_REQUEST = new ActionCode(14);
 
 
     /**
-     * Callback for lazy evaluation - extract the SSL-certificate 
+     * Callback for lazy evaluation - extract the SSL-certificate
      * (including forcing a re-handshake if necessary)
      */
     public static final ActionCode ACTION_REQ_SSL_CERTIFICATE = new ActionCode(15);
-    
-    
+
+
     /**
      * Callback for lazy evaluation - socket remote port.
      **/
     public static final ActionCode ACTION_REQ_REMOTEPORT_ATTRIBUTE = new ActionCode(16);
 
-    
+
     /**
      * Callback for lazy evaluation - socket local port.
      **/
     public static final ActionCode ACTION_REQ_LOCALPORT_ATTRIBUTE = new ActionCode(17);
-    
-    
+
+
     /**
      * Callback for lazy evaluation - local address.
      **/
     public static final ActionCode ACTION_REQ_LOCAL_ADDR_ATTRIBUTE = new ActionCode(18);
-    
-    
+
+
     /**
      * Callback for lazy evaluation - local address.
      **/
@@ -160,20 +163,23 @@ public final class ActionCode {
      * Callback for setting the timeout asynchronously
      */
     public static final ActionCode ACTION_COMET_SETTIMEOUT = new ActionCode(25);
-    
+
     // ----------------------------------------------------------- Constructors
     int code;
 
     /**
      * Private constructor.
      */
-    private ActionCode(int code) {
-        this.code=code;
+    private ActionCode(int code)
+    {
+        this.code = code;
     }
 
-    /** Action id, useable in switches and table indexes
+    /**
+     * Action id, useable in switches and table indexes
      */
-    public int getCode() {
+    public int getCode()
+    {
         return code;
     }
 

@@ -16,6 +16,7 @@
  */
 package javax.mail;
 
-public class Authenticator {
+public class Authenticator
+{
 
 }

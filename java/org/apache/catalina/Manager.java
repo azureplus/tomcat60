@@ -28,22 +28,22 @@ import java.io.IOException;
  * particular Container.  Different Manager implementations may support
  * value-added features such as the persistent storage of session data,
  * as well as migrating sessions for distributable web applications.
- * <p>
+ * <p/>
  * In order for a <code>Manager</code> implementation to successfully operate
  * with a <code>Context</code> implementation that implements reloading, it
  * must obey the following constraints:
  * <ul>
  * <li>Must implement <code>Lifecycle</code> so that the Context can indicate
- *     that a restart is required.
+ * that a restart is required.
  * <li>Must allow a call to <code>stop()</code> to be followed by a call to
- *     <code>start()</code> on the same <code>Manager</code> instance.
+ * <code>start()</code> on the same <code>Manager</code> instance.
  * </ul>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface Manager {
+public interface Manager
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -122,7 +122,7 @@ public interface Manager {
     public void setSessionIdLength(int idLength);
 
 
-    /** 
+    /**
      * Returns the total number of sessions created by this manager.
      *
      * @return Total number of sessions created by this manager.
@@ -130,7 +130,7 @@ public interface Manager {
     public int getSessionCounter();
 
 
-    /** 
+    /**
      * Sets the total number of sessions created by this manager.
      *
      * @param sessionCounter Total number of sessions created by this manager.
@@ -153,12 +153,12 @@ public interface Manager {
      * same time.
      *
      * @param maxActive Maximum number of sessions that have been active at
-     * the same time.
+     *                  the same time.
      */
     public void setMaxActive(int maxActive);
 
 
-    /** 
+    /**
      * Gets the number of currently active sessions.
      *
      * @return Number of currently active sessions
@@ -215,7 +215,7 @@ public interface Manager {
      * alive.
      *
      * @param sessionMaxAliveTime Longest time (in seconds) that an expired
-     * session had been alive.
+     *                            session had been alive.
      */
     public void setSessionMaxAliveTime(int sessionMaxAliveTime);
 
@@ -235,7 +235,7 @@ public interface Manager {
      * alive.
      *
      * @param sessionAverageAliveTime Average time (in seconds) that expired
-     * sessions had been alive.
+     *                                sessions had been alive.
      */
     public void setSessionAverageAliveTime(int sessionAverageAliveTime);
 
@@ -262,17 +262,17 @@ public interface Manager {
     /**
      * Change the session ID of the current session to a new randomly generated
      * session ID.
-     * 
-     * @param session   The session to change the session ID for
+     *
+     * @param session The session to change the session ID for
      */
     public void changeSessionId(Session session);
-    
-    
+
+
     /**
      * Get a session from the recycled ones or create a new empty one.
      * The PersistentManager manager does not need to create session data
      * because it reads it from the Store.
-     */                                                                         
+     */
     public Session createEmptySession();
 
 
@@ -282,9 +282,9 @@ public interface Manager {
      * id will be assigned by this method, and available via the getId()
      * method of the returned session.  If a new session cannot be created
      * for any reason, return <code>null</code>.
-     * 
-     * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
+     *
+     * @throws IllegalStateException if a new session cannot be
+     *                               instantiated for any reason
      * @deprecated
      */
     public Session createSession();
@@ -294,15 +294,15 @@ public interface Manager {
      * Construct and return a new session object, based on the default
      * settings specified by this Manager's properties.  The session
      * id specified will be used as the session id.
-     * If a new session cannot be created for any reason, return 
+     * If a new session cannot be created for any reason, return
      * <code>null</code>.
-     * 
+     *
      * @param sessionId The session id which should be used to create the
-     *  new session; if <code>null</code>, the session
-     *  id will be assigned by this method, and available via the getId()
-     *  method of the returned session.
-     * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
+     *                  new session; if <code>null</code>, the session
+     *                  id will be assigned by this method, and available via the getId()
+     *                  method of the returned session.
+     * @throws IllegalStateException if a new session cannot be
+     *                               instantiated for any reason
      */
     public Session createSession(String sessionId);
 
@@ -312,11 +312,10 @@ public interface Manager {
      * specified session id (if any); otherwise return <code>null</code>.
      *
      * @param id The session id for the session to be returned
-     *
-     * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
-     * @exception IOException if an input/output error occurs while
-     *  processing this request
+     * @throws IllegalStateException if a new session cannot be
+     *                               instantiated for any reason
+     * @throws IOException           if an input/output error occurs while
+     *                               processing this request
      */
     public Session findSession(String id) throws IOException;
 
@@ -333,9 +332,9 @@ public interface Manager {
      * to the appropriate persistence mechanism, if any.  If persistence is not
      * supported, this method returns without doing anything.
      *
-     * @exception ClassNotFoundException if a serialized class cannot be
-     *  found during the reload
-     * @exception IOException if an input/output error occurs
+     * @throws ClassNotFoundException if a serialized class cannot be
+     *                                found during the reload
+     * @throws IOException            if an input/output error occurs
      */
     public void load() throws ClassNotFoundException, IOException;
 
@@ -361,15 +360,15 @@ public interface Manager {
      * mechanism, if any.  If persistence is not supported, this method
      * returns without doing anything.
      *
-     * @exception IOException if an input/output error occurs
+     * @throws IOException if an input/output error occurs
      */
     public void unload() throws IOException;
-    
-     /**
-      * This method will be invoked by the context/container on a periodic
-      * basis and allows the manager to implement
-      * a method that executes periodic tasks, such as expiring sessions etc.
-      */
-     public void backgroundProcess();
+
+    /**
+     * This method will be invoked by the context/container on a periodic
+     * basis and allows the manager to implement
+     * a method that executes periodic tasks, such as expiring sessions etc.
+     */
+    public void backgroundProcess();
 
 }

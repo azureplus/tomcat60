@@ -17,14 +17,14 @@
 
 package org.apache.tomcat.util.http.mapper;
 
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-
+import org.apache.tomcat.util.buf.Ascii;
 import org.apache.tomcat.util.buf.CharChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
-import org.apache.tomcat.util.buf.Ascii;
-import java.util.List;
+
+import javax.naming.NamingException;
+import javax.naming.directory.DirContext;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mapper, which implements the servlet API mapping rules (which are derived
@@ -32,11 +32,12 @@ import java.util.ArrayList;
  *
  * @author Remy Maucherat
  */
-public final class Mapper {
+public final class Mapper
+{
 
 
     private static org.apache.juli.logging.Log logger =
-        org.apache.juli.logging.LogFactory.getLog(Mapper.class);
+            org.apache.juli.logging.LogFactory.getLog(Mapper.class);
     // ----------------------------------------------------- Instance Variables
 
 
@@ -59,23 +60,384 @@ public final class Mapper {
 
     // --------------------------------------------------------- Public Methods
 
+    /**
+     * Find a map elemnt given its name in a sorted array of map elements.
+     * This will return the index for the closest inferior or equal item in the
+     * given array.
+     */
+    private static final int find(MapElement[] map, CharChunk name)
+    {
+        return find(map, name, name.getStart(), name.getEnd());
+    }
+
+    /**
+     * Find a map elemnt given its name in a sorted array of map elements.
+     * This will return the index for the closest inferior or equal item in the
+     * given array.
+     */
+    private static final int find(MapElement[] map, CharChunk name,
+                                  int start, int end)
+    {
+
+        int a = 0;
+        int b = map.length - 1;
+
+        // Special cases: -1 and 0
+        if (b == -1)
+        {
+            return -1;
+        }
+
+        if (compare(name, start, end, map[0].name) < 0)
+        {
+            return -1;
+        }
+        if (b == 0)
+        {
+            return 0;
+        }
+
+        int i = 0;
+        while (true)
+        {
+            i = (b + a) / 2;
+            int result = compare(name, start, end, map[i].name);
+            if (result == 1)
+            {
+                a = i;
+            } else if (result == 0)
+            {
+                return i;
+            } else
+            {
+                b = i;
+            }
+            if ((b - a) == 1)
+            {
+                int result2 = compare(name, start, end, map[b].name);
+                if (result2 < 0)
+                {
+                    return a;
+                } else
+                {
+                    return b;
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Find a map elemnt given its name in a sorted array of map elements.
+     * This will return the index for the closest inferior or equal item in the
+     * given array.
+     */
+    private static final int findIgnoreCase(MapElement[] map, CharChunk name)
+    {
+        return findIgnoreCase(map, name, name.getStart(), name.getEnd());
+    }
+
+    /**
+     * Find a map elemnt given its name in a sorted array of map elements.
+     * This will return the index for the closest inferior or equal item in the
+     * given array.
+     */
+    private static final int findIgnoreCase(MapElement[] map, CharChunk name,
+                                            int start, int end)
+    {
+
+        int a = 0;
+        int b = map.length - 1;
+
+        // Special cases: -1 and 0
+        if (b == -1)
+        {
+            return -1;
+        }
+        if (compareIgnoreCase(name, start, end, map[0].name) < 0)
+        {
+            return -1;
+        }
+        if (b == 0)
+        {
+            return 0;
+        }
+
+        int i = 0;
+        while (true)
+        {
+            i = (b + a) / 2;
+            int result = compareIgnoreCase(name, start, end, map[i].name);
+            if (result == 1)
+            {
+                a = i;
+            } else if (result == 0)
+            {
+                return i;
+            } else
+            {
+                b = i;
+            }
+            if ((b - a) == 1)
+            {
+                int result2 = compareIgnoreCase(name, start, end, map[b].name);
+                if (result2 < 0)
+                {
+                    return a;
+                } else
+                {
+                    return b;
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Find a map element given its name in a sorted array of map elements.
+     * This will return the index for the closest inferior or equal item in the
+     * given array.
+     */
+    private static final int find(MapElement[] map, String name)
+    {
+
+        int a = 0;
+        int b = map.length - 1;
+
+        // Special cases: -1 and 0
+        if (b == -1)
+        {
+            return -1;
+        }
+
+        if (name.compareTo(map[0].name) < 0)
+        {
+            return -1;
+        }
+        if (b == 0)
+        {
+            return 0;
+        }
+
+        int i = 0;
+        while (true)
+        {
+            i = (b + a) / 2;
+            int result = name.compareTo(map[i].name);
+            if (result > 0)
+            {
+                a = i;
+            } else if (result == 0)
+            {
+                return i;
+            } else
+            {
+                b = i;
+            }
+            if ((b - a) == 1)
+            {
+                int result2 = name.compareTo(map[b].name);
+                if (result2 < 0)
+                {
+                    return a;
+                } else
+                {
+                    return b;
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Compare given char chunk with String.
+     * Return -1, 0 or +1 if inferior, equal, or superior to the String.
+     */
+    private static final int compare(CharChunk name, int start, int end,
+                                     String compareTo)
+    {
+        int result = 0;
+        char[] c = name.getBuffer();
+        int len = compareTo.length();
+        if ((end - start) < len)
+        {
+            len = end - start;
+        }
+        for (int i = 0; (i < len) && (result == 0); i++)
+        {
+            if (c[i + start] > compareTo.charAt(i))
+            {
+                result = 1;
+            } else if (c[i + start] < compareTo.charAt(i))
+            {
+                result = -1;
+            }
+        }
+        if (result == 0)
+        {
+            if (compareTo.length() > (end - start))
+            {
+                result = -1;
+            } else if (compareTo.length() < (end - start))
+            {
+                result = 1;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Compare given char chunk with String ignoring case.
+     * Return -1, 0 or +1 if inferior, equal, or superior to the String.
+     */
+    private static final int compareIgnoreCase(CharChunk name, int start, int end,
+                                               String compareTo)
+    {
+        int result = 0;
+        char[] c = name.getBuffer();
+        int len = compareTo.length();
+        if ((end - start) < len)
+        {
+            len = end - start;
+        }
+        for (int i = 0; (i < len) && (result == 0); i++)
+        {
+            if (Ascii.toLower(c[i + start]) > Ascii.toLower(compareTo.charAt(i)))
+            {
+                result = 1;
+            } else if (Ascii.toLower(c[i + start]) < Ascii.toLower(compareTo.charAt(i)))
+            {
+                result = -1;
+            }
+        }
+        if (result == 0)
+        {
+            if (compareTo.length() > (end - start))
+            {
+                result = -1;
+            } else if (compareTo.length() < (end - start))
+            {
+                result = 1;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Find the position of the last slash in the given char chunk.
+     */
+    private static final int lastSlash(CharChunk name)
+    {
+
+        char[] c = name.getBuffer();
+        int end = name.getEnd();
+        int start = name.getStart();
+        int pos = end;
+
+        while (pos > start)
+        {
+            if (c[--pos] == '/')
+            {
+                break;
+            }
+        }
+
+        return (pos);
+
+    }
+
+    /**
+     * Find the position of the nth slash, in the given char chunk.
+     */
+    private static final int nthSlash(CharChunk name, int n)
+    {
+
+        char[] c = name.getBuffer();
+        int end = name.getEnd();
+        int start = name.getStart();
+        int pos = start;
+        int count = 0;
+
+        while (pos < end)
+        {
+            if ((c[pos++] == '/') && ((++count) == n))
+            {
+                pos--;
+                break;
+            }
+        }
+
+        return (pos);
+
+    }
+
+    /**
+     * Return the slash count in a given string.
+     */
+    private static final int slashCount(String name)
+    {
+        int pos = -1;
+        int count = 0;
+        while ((pos = name.indexOf('/', pos + 1)) != -1)
+        {
+            count++;
+        }
+        return count;
+    }
+
+    /**
+     * Insert into the right place in a sorted MapElement array, and prevent
+     * duplicates.
+     */
+    private static final boolean insertMap
+    (MapElement[] oldMap, MapElement[] newMap, MapElement newElement)
+    {
+        int pos = find(oldMap, newElement.name);
+        if ((pos != -1) && (newElement.name.equals(oldMap[pos].name)))
+        {
+            return false;
+        }
+        System.arraycopy(oldMap, 0, newMap, 0, pos + 1);
+        newMap[pos + 1] = newElement;
+        System.arraycopy
+                (oldMap, pos + 1, newMap, pos + 2, oldMap.length - pos - 1);
+        return true;
+    }
+
+    /**
+     * Insert into the right place in a sorted MapElement array.
+     */
+    private static final boolean removeMap
+    (MapElement[] oldMap, MapElement[] newMap, String name)
+    {
+        int pos = find(oldMap, name);
+        if ((pos != -1) && (name.equals(oldMap[pos].name)))
+        {
+            System.arraycopy(oldMap, 0, newMap, 0, pos);
+            System.arraycopy(oldMap, pos + 1, newMap, pos,
+                    oldMap.length - pos - 1);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Get default host.
      *
      * @return Default host name
      */
-    public String getDefaultHostName() {
+    public String getDefaultHostName()
+    {
         return defaultHostName;
     }
-
 
     /**
      * Set default host.
      *
      * @param defaultHostName Default host name
      */
-    public void setDefaultHostName(String defaultHostName) {
+    public void setDefaultHostName(String defaultHostName)
+    {
         this.defaultHostName = defaultHostName;
     }
 
@@ -86,50 +448,59 @@ public final class Mapper {
      * @param host Host object
      */
     public synchronized void addHost(String name, String[] aliases,
-                                     Object host) {
+                                     Object host)
+    {
         Host[] newHosts = new Host[hosts.length + 1];
         Host newHost = new Host();
         ContextList contextList = new ContextList();
         newHost.name = name;
         newHost.contextList = contextList;
         newHost.object = host;
-        if (insertMap(hosts, newHosts, newHost)) {
+        if (insertMap(hosts, newHosts, newHost))
+        {
             hosts = newHosts;
         }
-        for (int i = 0; i < aliases.length; i++) {
+        for (int i = 0; i < aliases.length; i++)
+        {
             newHosts = new Host[hosts.length + 1];
             newHost = new Host();
             newHost.name = aliases[i];
             newHost.contextList = contextList;
             newHost.object = host;
-            if (insertMap(hosts, newHosts, newHost)) {
+            if (insertMap(hosts, newHosts, newHost))
+            {
                 hosts = newHosts;
             }
         }
     }
-
 
     /**
      * Remove a host from the mapper.
      *
      * @param name Virtual host name
      */
-    public synchronized void removeHost(String name) {
+    public synchronized void removeHost(String name)
+    {
         // Find and remove the old host
         int pos = find(hosts, name);
-        if (pos < 0) {
+        if (pos < 0)
+        {
             return;
         }
         Object host = hosts[pos].object;
         Host[] newHosts = new Host[hosts.length - 1];
-        if (removeMap(hosts, newHosts, name)) {
+        if (removeMap(hosts, newHosts, name))
+        {
             hosts = newHosts;
         }
         // Remove all aliases (they will map to the same host object)
-        for (int i = 0; i < newHosts.length; i++) {
-            if (newHosts[i].object == host) {
+        for (int i = 0; i < newHosts.length; i++)
+        {
+            if (newHosts[i].object == host)
+            {
                 Host[] newHosts2 = new Host[hosts.length - 1];
-                if (removeMap(hosts, newHosts2, newHosts[i].name)) {
+                if (removeMap(hosts, newHosts2, newHosts[i].name))
+                {
                     hosts = newHosts2;
                 }
             }
@@ -138,98 +509,113 @@ public final class Mapper {
 
     /**
      * Add an alias to an existing host.
+     *
      * @param name  The name of the host
      * @param alias The alias to add
      */
-    public synchronized void addHostAlias(String name, String alias) {
+    public synchronized void addHostAlias(String name, String alias)
+    {
         int pos = find(hosts, name);
-        if (pos < 0) {
+        if (pos < 0)
+        {
             // Should not be adding an alias for a host that doesn't exist but
             // just in case...
             return;
         }
         Host realHost = hosts[pos];
-        
+
         Host[] newHosts = new Host[hosts.length + 1];
         Host newHost = new Host();
         newHost.name = alias;
         newHost.contextList = realHost.contextList;
         newHost.object = realHost.object;
-        if (insertMap(hosts, newHosts, newHost)) {
+        if (insertMap(hosts, newHosts, newHost))
+        {
             hosts = newHosts;
         }
     }
 
     /**
      * Remove a host alias
+     *
      * @param alias The alias to remove
      */
-    public synchronized void removeHostAlias(String alias) {
+    public synchronized void removeHostAlias(String alias)
+    {
         // Find and remove the alias
         int pos = find(hosts, alias);
-        if (pos < 0) {
+        if (pos < 0)
+        {
             return;
         }
         Host[] newHosts = new Host[hosts.length - 1];
-        if (removeMap(hosts, newHosts, alias)) {
+        if (removeMap(hosts, newHosts, alias))
+        {
             hosts = newHosts;
         }
 
     }
 
-    public String[] getHosts() {
+    public String[] getHosts()
+    {
         String hostN[] = new String[hosts.length];
-        for( int i = 0; i < hosts.length; i++ ) {
+        for (int i = 0; i < hosts.length; i++)
+        {
             hostN[i] = hosts[i].name;
         }
         return hostN;
     }
 
-
     /**
      * Set context, used for wrapper mapping (request dispatcher).
      *
      * @param welcomeResources Welcome files defined for this context
-     * @param resources Static resources of the context
+     * @param resources        Static resources of the context
      */
     public void setContext(String path, String[] welcomeResources,
-                           javax.naming.Context resources) {
+                           javax.naming.Context resources)
+    {
         context.name = path;
         context.welcomeResources = welcomeResources;
         context.resources = resources;
     }
 
-
     /**
      * Add a new Context to an existing Host.
      *
-     * @param hostName Virtual host name this context belongs to
-     * @param path Context path
-     * @param context Context object
+     * @param hostName         Virtual host name this context belongs to
+     * @param path             Context path
+     * @param context          Context object
      * @param welcomeResources Welcome files defined for this context
-     * @param resources Static resources of the context
+     * @param resources        Static resources of the context
      */
     public void addContext
-        (String hostName, String path, Object context,
-         String[] welcomeResources, javax.naming.Context resources) {
+    (String hostName, String path, Object context,
+     String[] welcomeResources, javax.naming.Context resources)
+    {
 
         Host[] hosts = this.hosts;
         int pos = find(hosts, hostName);
-        if( pos <0 ) {
+        if (pos < 0)
+        {
             addHost(hostName, new String[0], "");
             hosts = this.hosts;
             pos = find(hosts, hostName);
         }
-        if (pos < 0) {
+        if (pos < 0)
+        {
             logger.error("No host found: " + hostName);
         }
         Host host = hosts[pos];
-        if (host.name.equals(hostName)) {
+        if (host.name.equals(hostName))
+        {
             int slashCount = slashCount(path);
-            synchronized (host) {
+            synchronized (host)
+            {
                 Context[] contexts = host.contextList.contexts;
                 // Update nesting
-                if (slashCount > host.contextList.nesting) {
+                if (slashCount > host.contextList.nesting)
+                {
                     host.contextList.nesting = slashCount;
                 }
                 Context[] newContexts = new Context[contexts.length + 1];
@@ -238,7 +624,8 @@ public final class Mapper {
                 newContext.object = context;
                 newContext.welcomeResources = welcomeResources;
                 newContext.resources = resources;
-                if (insertMap(contexts, newContexts, newContext)) {
+                if (insertMap(contexts, newContexts, newContext))
+                {
                     host.contextList.contexts = newContexts;
                 }
             }
@@ -246,34 +633,41 @@ public final class Mapper {
 
     }
 
-
     /**
      * Remove a context from an existing host.
      *
      * @param hostName Virtual host name this context belongs to
-     * @param path Context path
+     * @param path     Context path
      */
-    public void removeContext(String hostName, String path) {
+    public void removeContext(String hostName, String path)
+    {
         Host[] hosts = this.hosts;
         int pos = find(hosts, hostName);
-        if (pos < 0) {
+        if (pos < 0)
+        {
             return;
         }
         Host host = hosts[pos];
-        if (host.name.equals(hostName)) {
-            synchronized (host) {
+        if (host.name.equals(hostName))
+        {
+            synchronized (host)
+            {
                 Context[] contexts = host.contextList.contexts;
-                if( contexts.length == 0 ){
+                if (contexts.length == 0)
+                {
                     return;
                 }
                 Context[] newContexts = new Context[contexts.length - 1];
-                if (removeMap(contexts, newContexts, path)) {
+                if (removeMap(contexts, newContexts, path))
+                {
                     host.contextList.contexts = newContexts;
                     // Recalculate nesting
                     host.contextList.nesting = 0;
-                    for (int i = 0; i < newContexts.length; i++) {
+                    for (int i = 0; i < newContexts.length; i++)
+                    {
                         int slashCount = slashCount(newContexts[i].name);
-                        if (slashCount > host.contextList.nesting) {
+                        if (slashCount > host.contextList.nesting)
+                        {
                             host.contextList.nesting = slashCount;
                         }
                     }
@@ -282,17 +676,19 @@ public final class Mapper {
         }
     }
 
-
     /**
      * Return all contexts, in //HOST/PATH form
      *
      * @return The context names
      */
-    public String[] getContextNames() {
+    public String[] getContextNames()
+    {
         List<String> list = new ArrayList<String>();
-        for( int i=0; i<hosts.length; i++ ) {
-            for( int j=0; j<hosts[i].contextList.contexts.length; j++ ) {
-                String cname=hosts[i].contextList.contexts[j].name;
+        for (int i = 0; i < hosts.length; i++)
+        {
+            for (int j = 0; j < hosts[i].contextList.contexts.length; j++)
+            {
+                String cname = hosts[i].contextList.contexts[j].name;
                 list.add("//" + hosts[i].name +
                         (cname.startsWith("/") ? cname : "/"));
             }
@@ -301,255 +697,294 @@ public final class Mapper {
         return list.toArray(res);
     }
 
-
     /**
      * Add a new Wrapper to an existing Context.
      *
-     * @param hostName Virtual host name this wrapper belongs to
+     * @param hostName    Virtual host name this wrapper belongs to
      * @param contextPath Context path this wrapper belongs to
-     * @param path Wrapper mapping
-     * @param wrapper Wrapper object
+     * @param path        Wrapper mapping
+     * @param wrapper     Wrapper object
      */
     public void addWrapper(String hostName, String contextPath, String path,
-                           Object wrapper) {
+                           Object wrapper)
+    {
         addWrapper(hostName, contextPath, path, wrapper, false);
     }
 
 
+    // -------------------------------------------------------- Private Methods
+
     public void addWrapper(String hostName, String contextPath, String path,
-                           Object wrapper, boolean jspWildCard) {
+                           Object wrapper, boolean jspWildCard)
+    {
         Host[] hosts = this.hosts;
         int pos = find(hosts, hostName);
-        if (pos < 0) {
+        if (pos < 0)
+        {
             return;
         }
         Host host = hosts[pos];
-        if (host.name.equals(hostName)) {
+        if (host.name.equals(hostName))
+        {
             Context[] contexts = host.contextList.contexts;
             int pos2 = find(contexts, contextPath);
-            if( pos2<0 ) {
-                logger.error("No context found: " + contextPath );
+            if (pos2 < 0)
+            {
+                logger.error("No context found: " + contextPath);
                 return;
             }
             Context context = contexts[pos2];
-            if (context.name.equals(contextPath)) {
+            if (context.name.equals(contextPath))
+            {
                 addWrapper(context, path, wrapper, jspWildCard);
             }
         }
     }
 
-
     /**
      * Add a wrapper to the context associated with this wrapper.
      *
-     * @param path Wrapper mapping
+     * @param path    Wrapper mapping
      * @param wrapper The Wrapper object
      */
-    public void addWrapper(String path, Object wrapper) {
+    public void addWrapper(String path, Object wrapper)
+    {
         addWrapper(context, path, wrapper);
     }
 
-
-    public void addWrapper(String path, Object wrapper, boolean jspWildCard) {
+    public void addWrapper(String path, Object wrapper, boolean jspWildCard)
+    {
         addWrapper(context, path, wrapper, jspWildCard);
     }
 
-
-    protected void addWrapper(Context context, String path, Object wrapper) {
+    protected void addWrapper(Context context, String path, Object wrapper)
+    {
         addWrapper(context, path, wrapper, false);
     }
-
 
     /**
      * Adds a wrapper to the given context.
      *
-     * @param context The context to which to add the wrapper
-     * @param path Wrapper mapping
-     * @param wrapper The Wrapper object
+     * @param context     The context to which to add the wrapper
+     * @param path        Wrapper mapping
+     * @param wrapper     The Wrapper object
      * @param jspWildCard true if the wrapper corresponds to the JspServlet
-     * and the mapping path contains a wildcard; false otherwise
+     *                    and the mapping path contains a wildcard; false otherwise
      */
     protected void addWrapper(Context context, String path, Object wrapper,
-                              boolean jspWildCard) {
+                              boolean jspWildCard)
+    {
 
-        synchronized (context) {
+        synchronized (context)
+        {
             Wrapper newWrapper = new Wrapper();
             newWrapper.object = wrapper;
             newWrapper.jspWildCard = jspWildCard;
-            if (path.endsWith("/*")) {
+            if (path.endsWith("/*"))
+            {
                 // Wildcard wrapper
                 newWrapper.name = path.substring(0, path.length() - 2);
                 Wrapper[] oldWrappers = context.wildcardWrappers;
                 Wrapper[] newWrappers =
-                    new Wrapper[oldWrappers.length + 1];
-                if (insertMap(oldWrappers, newWrappers, newWrapper)) {
+                        new Wrapper[oldWrappers.length + 1];
+                if (insertMap(oldWrappers, newWrappers, newWrapper))
+                {
                     context.wildcardWrappers = newWrappers;
                     int slashCount = slashCount(newWrapper.name);
-                    if (slashCount > context.nesting) {
+                    if (slashCount > context.nesting)
+                    {
                         context.nesting = slashCount;
                     }
                 }
-            } else if (path.startsWith("*.")) {
+            } else if (path.startsWith("*."))
+            {
                 // Extension wrapper
                 newWrapper.name = path.substring(2);
                 Wrapper[] oldWrappers = context.extensionWrappers;
                 Wrapper[] newWrappers =
-                    new Wrapper[oldWrappers.length + 1];
-                if (insertMap(oldWrappers, newWrappers, newWrapper)) {
+                        new Wrapper[oldWrappers.length + 1];
+                if (insertMap(oldWrappers, newWrappers, newWrapper))
+                {
                     context.extensionWrappers = newWrappers;
                 }
-            } else if (path.equals("/")) {
+            } else if (path.equals("/"))
+            {
                 // Default wrapper
                 newWrapper.name = "";
                 context.defaultWrapper = newWrapper;
-            } else {
+            } else
+            {
                 // Exact wrapper
                 newWrapper.name = path;
                 Wrapper[] oldWrappers = context.exactWrappers;
                 Wrapper[] newWrappers =
-                    new Wrapper[oldWrappers.length + 1];
-                if (insertMap(oldWrappers, newWrappers, newWrapper)) {
+                        new Wrapper[oldWrappers.length + 1];
+                if (insertMap(oldWrappers, newWrappers, newWrapper))
+                {
                     context.exactWrappers = newWrappers;
                 }
             }
         }
     }
-
 
     /**
      * Remove a wrapper from the context associated with this wrapper.
      *
      * @param path Wrapper mapping
      */
-    public void removeWrapper(String path) {
+    public void removeWrapper(String path)
+    {
         removeWrapper(context, path);
     }
-
 
     /**
      * Remove a wrapper from an existing context.
      *
-     * @param hostName Virtual host name this wrapper belongs to
+     * @param hostName    Virtual host name this wrapper belongs to
      * @param contextPath Context path this wrapper belongs to
-     * @param path Wrapper mapping
+     * @param path        Wrapper mapping
      */
     public void removeWrapper
-        (String hostName, String contextPath, String path) {
+    (String hostName, String contextPath, String path)
+    {
         Host[] hosts = this.hosts;
         int pos = find(hosts, hostName);
-        if (pos < 0) {
+        if (pos < 0)
+        {
             return;
         }
         Host host = hosts[pos];
-        if (host.name.equals(hostName)) {
+        if (host.name.equals(hostName))
+        {
             Context[] contexts = host.contextList.contexts;
             int pos2 = find(contexts, contextPath);
-            if (pos2 < 0) {
+            if (pos2 < 0)
+            {
                 return;
             }
             Context context = contexts[pos2];
-            if (context.name.equals(contextPath)) {
+            if (context.name.equals(contextPath))
+            {
                 removeWrapper(context, path);
             }
         }
     }
 
-    protected void removeWrapper(Context context, String path) {
-        synchronized (context) {
-            if (path.endsWith("/*")) {
+    protected void removeWrapper(Context context, String path)
+    {
+        synchronized (context)
+        {
+            if (path.endsWith("/*"))
+            {
                 // Wildcard wrapper
                 String name = path.substring(0, path.length() - 2);
                 Wrapper[] oldWrappers = context.wildcardWrappers;
                 Wrapper[] newWrappers =
-                    new Wrapper[oldWrappers.length - 1];
-                if (removeMap(oldWrappers, newWrappers, name)) {
+                        new Wrapper[oldWrappers.length - 1];
+                if (removeMap(oldWrappers, newWrappers, name))
+                {
                     // Recalculate nesting
                     context.nesting = 0;
-                    for (int i = 0; i < newWrappers.length; i++) {
+                    for (int i = 0; i < newWrappers.length; i++)
+                    {
                         int slashCount = slashCount(newWrappers[i].name);
-                        if (slashCount > context.nesting) {
+                        if (slashCount > context.nesting)
+                        {
                             context.nesting = slashCount;
                         }
                     }
                     context.wildcardWrappers = newWrappers;
                 }
-            } else if (path.startsWith("*.")) {
+            } else if (path.startsWith("*."))
+            {
                 // Extension wrapper
                 String name = path.substring(2);
                 Wrapper[] oldWrappers = context.extensionWrappers;
                 Wrapper[] newWrappers =
-                    new Wrapper[oldWrappers.length - 1];
-                if (removeMap(oldWrappers, newWrappers, name)) {
+                        new Wrapper[oldWrappers.length - 1];
+                if (removeMap(oldWrappers, newWrappers, name))
+                {
                     context.extensionWrappers = newWrappers;
                 }
-            } else if (path.equals("/")) {
+            } else if (path.equals("/"))
+            {
                 // Default wrapper
                 context.defaultWrapper = null;
-            } else {
+            } else
+            {
                 // Exact wrapper
                 String name = path;
                 Wrapper[] oldWrappers = context.exactWrappers;
                 Wrapper[] newWrappers =
-                    new Wrapper[oldWrappers.length - 1];
-                if (removeMap(oldWrappers, newWrappers, name)) {
+                        new Wrapper[oldWrappers.length - 1];
+                if (removeMap(oldWrappers, newWrappers, name))
+                {
                     context.exactWrappers = newWrappers;
                 }
             }
         }
     }
 
-    public String getWrappersString( String host, String context ) {
-        String names[]=getWrapperNames(host, context);
-        StringBuffer sb=new StringBuffer();
-        for( int i=0; i<names.length; i++ ) {
+    public String getWrappersString(String host, String context)
+    {
+        String names[] = getWrapperNames(host, context);
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < names.length; i++)
+        {
             sb.append(names[i]).append(":");
         }
         return sb.toString();
     }
 
-    public String[] getWrapperNames( String host, String context ) {
+    public String[] getWrapperNames(String host, String context)
+    {
         List<String> list = new ArrayList<String>();
-        if( host==null ) host="";
-        if( context==null ) context="";
-        for( int i=0; i<hosts.length; i++ ) {
-            if( ! host.equals( hosts[i].name ))
+        if (host == null) host = "";
+        if (context == null) context = "";
+        for (int i = 0; i < hosts.length; i++)
+        {
+            if (!host.equals(hosts[i].name))
                 continue;
-            for( int j=0; j<hosts[i].contextList.contexts.length; j++ ) {
-                if( ! context.equals( hosts[i].contextList.contexts[j].name))
+            for (int j = 0; j < hosts[i].contextList.contexts.length; j++)
+            {
+                if (!context.equals(hosts[i].contextList.contexts[j].name))
                     continue;
                 // found the context
-                Context ctx=hosts[i].contextList.contexts[j];
-                list.add( ctx.defaultWrapper.path);
-                for( int k=0; k<ctx.exactWrappers.length; k++ ) {
-                    list.add( ctx.exactWrappers[k].path);
+                Context ctx = hosts[i].contextList.contexts[j];
+                list.add(ctx.defaultWrapper.path);
+                for (int k = 0; k < ctx.exactWrappers.length; k++)
+                {
+                    list.add(ctx.exactWrappers[k].path);
                 }
-                for( int k=0; k<ctx.wildcardWrappers.length; k++ ) {
-                    list.add( ctx.wildcardWrappers[k].path + "*");
+                for (int k = 0; k < ctx.wildcardWrappers.length; k++)
+                {
+                    list.add(ctx.wildcardWrappers[k].path + "*");
                 }
-                for( int k=0; k<ctx.extensionWrappers.length; k++ ) {
-                    list.add( "*." + ctx.extensionWrappers[k].path);
+                for (int k = 0; k < ctx.extensionWrappers.length; k++)
+                {
+                    list.add("*." + ctx.extensionWrappers[k].path);
                 }
             }
         }
-        String res[]=new String[list.size()];
+        String res[] = new String[list.size()];
         return list.toArray(res);
     }
-
-
 
     /**
      * Map the specified host name and URI, mutating the given mapping data.
      *
-     * @param host Virtual host name
-     * @param uri URI
+     * @param host        Virtual host name
+     * @param uri         URI
      * @param mappingData This structure will contain the result of the mapping
      *                    operation
      */
     public void map(MessageBytes host, MessageBytes uri,
                     MappingData mappingData)
-        throws Exception {
+            throws Exception
+    {
 
-        if (host.isNull()) {
+        if (host.isNull())
+        {
             host.getCharChunk().append(defaultHostName);
         }
         host.toChars();
@@ -558,17 +993,17 @@ public final class Mapper {
 
     }
 
-
     /**
      * Map the specified URI relative to the context,
      * mutating the given mapping data.
      *
-     * @param uri URI
+     * @param uri         URI
      * @param mappingData This structure will contain the result of the mapping
      *                    operation
      */
     public void map(MessageBytes uri, MappingData mappingData)
-        throws Exception {
+            throws Exception
+    {
 
         uri.toChars();
         CharChunk uricc = uri.getCharChunk();
@@ -577,18 +1012,16 @@ public final class Mapper {
 
     }
 
-
-    // -------------------------------------------------------- Private Methods
-
-
     /**
      * Map the specified URI.
      */
     private final void internalMap(CharChunk host, CharChunk uri,
                                    MappingData mappingData)
-        throws Exception {
+            throws Exception
+    {
 
-        if (mappingData.host != null) {
+        if (mappingData.host != null)
+        {
             // The legacy code (dating down at least to Tomcat 4.1) just
             // skipped all mapping work in this case. That behaviour has a risk
             // of returning an inconsistent result.
@@ -605,27 +1038,33 @@ public final class Mapper {
         // Virtual host mapping
         Host[] hosts = this.hosts;
         int pos = findIgnoreCase(hosts, host);
-        if ((pos != -1) && (host.equalsIgnoreCase(hosts[pos].name))) {
+        if ((pos != -1) && (host.equalsIgnoreCase(hosts[pos].name)))
+        {
             mappingData.host = hosts[pos].object;
             contexts = hosts[pos].contextList.contexts;
             nesting = hosts[pos].contextList.nesting;
-        } else {
-            if (defaultHostName == null) {
+        } else
+        {
+            if (defaultHostName == null)
+            {
                 return;
             }
             pos = find(hosts, defaultHostName);
-            if ((pos != -1) && (defaultHostName.equals(hosts[pos].name))) {
+            if ((pos != -1) && (defaultHostName.equals(hosts[pos].name)))
+            {
                 mappingData.host = hosts[pos].object;
                 contexts = hosts[pos].contextList.contexts;
                 nesting = hosts[pos].contextList.nesting;
-            } else {
+            } else
+            {
                 return;
             }
         }
 
         // Context mapping
         pos = find(contexts, uri);
-        if (pos == -1) {
+        if (pos == -1)
+        {
             return;
         }
 
@@ -633,20 +1072,26 @@ public final class Mapper {
         int uriEnd = uri.getEnd();
         int length = -1;
         boolean found = false;
-        while (pos >= 0) {
-            if (uri.startsWith(contexts[pos].name)) {
+        while (pos >= 0)
+        {
+            if (uri.startsWith(contexts[pos].name))
+            {
                 length = contexts[pos].name.length();
-                if (uri.getLength() == length) {
+                if (uri.getLength() == length)
+                {
                     found = true;
                     break;
-                } else if (uri.startsWithIgnoreCase("/", length)) {
+                } else if (uri.startsWithIgnoreCase("/", length))
+                {
                     found = true;
                     break;
                 }
             }
-            if (lastSlash == -1) {
+            if (lastSlash == -1)
+            {
                 lastSlash = nthSlash(uri, nesting + 1);
-            } else {
+            } else
+            {
                 lastSlash = lastSlash(uri);
             }
             uri.setEnd(lastSlash);
@@ -654,32 +1099,37 @@ public final class Mapper {
         }
         uri.setEnd(uriEnd);
 
-        if (!found) {
-            if (contexts[0].name.equals("")) {
+        if (!found)
+        {
+            if (contexts[0].name.equals(""))
+            {
                 context = contexts[0];
             }
-        } else {
+        } else
+        {
             context = contexts[pos];
         }
-        if (context != null) {
+        if (context != null)
+        {
             mappingData.context = context.object;
             mappingData.contextPath.setString(context.name);
         }
 
         // Wrapper mapping
-        if (context != null) {
+        if (context != null)
+        {
             internalMapWrapper(context, uri, mappingData);
         }
 
     }
-
 
     /**
      * Wrapper mapping.
      */
     private final void internalMapWrapper(Context context, CharChunk path,
                                           MappingData mappingData)
-        throws Exception {
+            throws Exception
+    {
 
         int pathOffset = path.getOffset();
         int pathEnd = path.getEnd();
@@ -687,14 +1137,16 @@ public final class Mapper {
         boolean noServletPath = false;
 
         int length = context.name.length();
-        if (length != (pathEnd - pathOffset)) {
+        if (length != (pathEnd - pathOffset))
+        {
             servletPath = pathOffset + length;
-        } else {
+        } else
+        {
             noServletPath = true;
             path.append('/');
             pathOffset = path.getOffset();
             pathEnd = path.getEnd();
-            servletPath = pathOffset+length;
+            servletPath = pathOffset + length;
         }
 
         path.setOffset(servletPath);
@@ -706,12 +1158,15 @@ public final class Mapper {
         // Rule 2 -- Prefix Match
         boolean checkJspWelcomeFiles = false;
         Wrapper[] wildcardWrappers = context.wildcardWrappers;
-        if (mappingData.wrapper == null) {
-            internalMapWildcardWrapper(wildcardWrappers, context.nesting, 
-                                       path, mappingData);
-            if (mappingData.wrapper != null && mappingData.jspWildCard) {
+        if (mappingData.wrapper == null)
+        {
+            internalMapWildcardWrapper(wildcardWrappers, context.nesting,
+                    path, mappingData);
+            if (mappingData.wrapper != null && mappingData.jspWildCard)
+            {
                 char[] buf = path.getBuffer();
-                if (buf[pathEnd - 1] == '/') {
+                if (buf[pathEnd - 1] == '/')
+                {
                     /*
                      * Path ending in '/' was mapped to JSP servlet based on
                      * wildcard match (e.g., as specified in url-pattern of a
@@ -719,82 +1174,96 @@ public final class Mapper {
                      * Force the context's welcome files, which are interpreted
                      * as JSP files (since they match the url-pattern), to be
                      * considered. See Bugzilla 27664.
-                     */ 
+                     */
                     mappingData.wrapper = null;
                     checkJspWelcomeFiles = true;
-                } else {
+                } else
+                {
                     // See Bugzilla 27704
                     mappingData.wrapperPath.setChars(buf, path.getStart(),
-                                                     path.getLength());
+                            path.getLength());
                     mappingData.pathInfo.recycle();
                 }
             }
         }
 
-        if(mappingData.wrapper == null && noServletPath) {
+        if (mappingData.wrapper == null && noServletPath)
+        {
             // The path is empty, redirect to "/"
             mappingData.redirectPath.setChars
-                (path.getBuffer(), pathOffset, pathEnd-pathOffset);
+                    (path.getBuffer(), pathOffset, pathEnd - pathOffset);
             path.setEnd(pathEnd - 1);
             return;
         }
 
         // Rule 3 -- Extension Match
         Wrapper[] extensionWrappers = context.extensionWrappers;
-        if (mappingData.wrapper == null && !checkJspWelcomeFiles) {
+        if (mappingData.wrapper == null && !checkJspWelcomeFiles)
+        {
             internalMapExtensionWrapper(extensionWrappers, path, mappingData);
         }
 
         // Rule 4 -- Welcome resources processing for servlets
-        if (mappingData.wrapper == null) {
+        if (mappingData.wrapper == null)
+        {
             boolean checkWelcomeFiles = checkJspWelcomeFiles;
-            if (!checkWelcomeFiles) {
+            if (!checkWelcomeFiles)
+            {
                 char[] buf = path.getBuffer();
                 checkWelcomeFiles = (buf[pathEnd - 1] == '/');
             }
-            if (checkWelcomeFiles) {
+            if (checkWelcomeFiles)
+            {
                 for (int i = 0; (i < context.welcomeResources.length)
-                         && (mappingData.wrapper == null); i++) {
+                        && (mappingData.wrapper == null); i++)
+                {
                     path.setOffset(pathOffset);
                     path.setEnd(pathEnd);
                     path.append(context.welcomeResources[i], 0,
-                                context.welcomeResources[i].length());
+                            context.welcomeResources[i].length());
                     path.setOffset(servletPath);
 
                     // Rule 4a -- Welcome resources processing for exact macth
                     internalMapExactWrapper(exactWrappers, path, mappingData);
 
                     // Rule 4b -- Welcome resources processing for prefix match
-                    if (mappingData.wrapper == null) {
+                    if (mappingData.wrapper == null)
+                    {
                         internalMapWildcardWrapper
-                            (wildcardWrappers, context.nesting, 
-                             path, mappingData);
+                                (wildcardWrappers, context.nesting,
+                                        path, mappingData);
                     }
 
                     // Rule 4c -- Welcome resources processing
                     //            for physical folder
                     if (mappingData.wrapper == null
-                        && context.resources != null) {
+                            && context.resources != null)
+                    {
                         Object file = null;
                         String pathStr = path.toString();
-                        try {
+                        try
+                        {
                             file = context.resources.lookup(pathStr);
-                        } catch(NamingException nex) {
+                        }
+                        catch (NamingException nex)
+                        {
                             // Swallow not found, since this is normal
                         }
-                        if (file != null && !(file instanceof DirContext) ) {
+                        if (file != null && !(file instanceof DirContext))
+                        {
                             internalMapExtensionWrapper(extensionWrappers,
-                                                        path, mappingData);
+                                    path, mappingData);
                             if (mappingData.wrapper == null
-                                && context.defaultWrapper != null) {
+                                    && context.defaultWrapper != null)
+                            {
                                 mappingData.wrapper =
-                                    context.defaultWrapper.object;
+                                        context.defaultWrapper.object;
                                 mappingData.requestPath.setChars
-                                    (path.getBuffer(), path.getStart(), 
-                                     path.getLength());
+                                        (path.getBuffer(), path.getStart(),
+                                                path.getLength());
                                 mappingData.wrapperPath.setChars
-                                    (path.getBuffer(), path.getStart(), 
-                                     path.getLength());
+                                        (path.getBuffer(), path.getStart(),
+                                                path.getLength());
                                 mappingData.requestPath.setString(pathStr);
                                 mappingData.wrapperPath.setString(pathStr);
                             }
@@ -805,38 +1274,46 @@ public final class Mapper {
                 path.setOffset(servletPath);
                 path.setEnd(pathEnd);
             }
-                                        
+
         }
 
 
         // Rule 7 -- Default servlet
-        if (mappingData.wrapper == null && !checkJspWelcomeFiles) {
-            if (context.defaultWrapper != null) {
+        if (mappingData.wrapper == null && !checkJspWelcomeFiles)
+        {
+            if (context.defaultWrapper != null)
+            {
                 mappingData.wrapper = context.defaultWrapper.object;
                 mappingData.requestPath.setChars
-                    (path.getBuffer(), path.getStart(), path.getLength());
+                        (path.getBuffer(), path.getStart(), path.getLength());
                 mappingData.wrapperPath.setChars
-                    (path.getBuffer(), path.getStart(), path.getLength());
+                        (path.getBuffer(), path.getStart(), path.getLength());
             }
             // Redirection to a folder
             char[] buf = path.getBuffer();
-            if (context.resources != null && buf[pathEnd -1 ] != '/') {
+            if (context.resources != null && buf[pathEnd - 1] != '/')
+            {
                 Object file = null;
                 String pathStr = path.toString();
-                try {
+                try
+                {
                     file = context.resources.lookup(pathStr);
-                } catch(NamingException nex) {
+                }
+                catch (NamingException nex)
+                {
                     // Swallow, since someone else handles the 404
                 }
-                if (file != null && file instanceof DirContext) {
+                if (file != null && file instanceof DirContext)
+                {
                     // Note: this mutates the path: do not do any processing 
                     // after this (since we set the redirectPath, there 
                     // shouldn't be any)
                     path.setOffset(pathOffset);
                     path.append('/');
                     mappingData.redirectPath.setChars
-                        (path.getBuffer(), path.getStart(), path.getLength());
-                } else {
+                            (path.getBuffer(), path.getStart(), path.getLength());
+                } else
+                {
                     mappingData.requestPath.setString(pathStr);
                     mappingData.wrapperPath.setString(pathStr);
                 }
@@ -848,27 +1325,28 @@ public final class Mapper {
 
     }
 
-
     /**
      * Exact mapping.
      */
     private final void internalMapExactWrapper
-        (Wrapper[] wrappers, CharChunk path, MappingData mappingData) {
+    (Wrapper[] wrappers, CharChunk path, MappingData mappingData)
+    {
         int pos = find(wrappers, path);
-        if ((pos != -1) && (path.equals(wrappers[pos].name))) {
+        if ((pos != -1) && (path.equals(wrappers[pos].name)))
+        {
             mappingData.requestPath.setString(wrappers[pos].name);
             mappingData.wrapperPath.setString(wrappers[pos].name);
             mappingData.wrapper = wrappers[pos].object;
         }
     }
 
-
     /**
      * Wildcard mapping.
      */
     private final void internalMapWildcardWrapper
-        (Wrapper[] wrappers, int nesting, CharChunk path, 
-         MappingData mappingData) {
+    (Wrapper[] wrappers, int nesting, CharChunk path,
+     MappingData mappingData)
+    {
 
         int pathEnd = path.getEnd();
         int pathOffset = path.getOffset();
@@ -876,78 +1354,94 @@ public final class Mapper {
         int lastSlash = -1;
         int length = -1;
         int pos = find(wrappers, path);
-        if (pos != -1) {
+        if (pos != -1)
+        {
             boolean found = false;
-            while (pos >= 0) {
-                if (path.startsWith(wrappers[pos].name)) {
+            while (pos >= 0)
+            {
+                if (path.startsWith(wrappers[pos].name))
+                {
                     length = wrappers[pos].name.length();
-                    if (path.getLength() == length) {
+                    if (path.getLength() == length)
+                    {
                         found = true;
                         break;
-                    } else if (path.startsWithIgnoreCase("/", length)) {
+                    } else if (path.startsWithIgnoreCase("/", length))
+                    {
                         found = true;
                         break;
                     }
                 }
-                if (lastSlash == -1) {
+                if (lastSlash == -1)
+                {
                     lastSlash = nthSlash(path, nesting + 1);
-                } else {
+                } else
+                {
                     lastSlash = lastSlash(path);
                 }
                 path.setEnd(lastSlash);
                 pos = find(wrappers, path);
             }
             path.setEnd(pathEnd);
-            if (found) {
+            if (found)
+            {
                 mappingData.wrapperPath.setString(wrappers[pos].name);
-                if (path.getLength() > length) {
+                if (path.getLength() > length)
+                {
                     mappingData.pathInfo.setChars
-                        (path.getBuffer(),
-                         path.getOffset() + length,
-                         path.getLength() - length);
+                            (path.getBuffer(),
+                                    path.getOffset() + length,
+                                    path.getLength() - length);
                 }
                 mappingData.requestPath.setChars
-                    (path.getBuffer(), path.getOffset(), path.getLength());
+                        (path.getBuffer(), path.getOffset(), path.getLength());
                 mappingData.wrapper = wrappers[pos].object;
                 mappingData.jspWildCard = wrappers[pos].jspWildCard;
             }
         }
     }
 
-
     /**
      * Extension mappings.
      */
     private final void internalMapExtensionWrapper
-        (Wrapper[] wrappers, CharChunk path, MappingData mappingData) {
+    (Wrapper[] wrappers, CharChunk path, MappingData mappingData)
+    {
         char[] buf = path.getBuffer();
         int pathEnd = path.getEnd();
         int servletPath = path.getOffset();
         int slash = -1;
-        for (int i = pathEnd - 1; i >= servletPath; i--) {
-            if (buf[i] == '/') {
+        for (int i = pathEnd - 1; i >= servletPath; i--)
+        {
+            if (buf[i] == '/')
+            {
                 slash = i;
                 break;
             }
         }
-        if (slash >= 0) {
+        if (slash >= 0)
+        {
             int period = -1;
-            for (int i = pathEnd - 1; i > slash; i--) {
-                if (buf[i] == '.') {
+            for (int i = pathEnd - 1; i > slash; i--)
+            {
+                if (buf[i] == '.')
+                {
                     period = i;
                     break;
                 }
             }
-            if (period >= 0) {
+            if (period >= 0)
+            {
                 path.setOffset(period + 1);
                 path.setEnd(pathEnd);
                 int pos = find(wrappers, path);
                 if ((pos != -1)
-                    && (path.equals(wrappers[pos].name))) {
+                        && (path.equals(wrappers[pos].name)))
+                {
                     mappingData.wrapperPath.setChars
-                        (buf, servletPath, pathEnd - servletPath);
+                            (buf, servletPath, pathEnd - servletPath);
                     mappingData.requestPath.setChars
-                        (buf, servletPath, pathEnd - servletPath);
+                            (buf, servletPath, pathEnd - servletPath);
                     mappingData.wrapper = wrappers[pos].object;
                 }
                 path.setOffset(servletPath);
@@ -957,319 +1451,10 @@ public final class Mapper {
     }
 
 
-    /**
-     * Find a map elemnt given its name in a sorted array of map elements.
-     * This will return the index for the closest inferior or equal item in the
-     * given array.
-     */
-    private static final int find(MapElement[] map, CharChunk name) {
-        return find(map, name, name.getStart(), name.getEnd());
-    }
-
-
-    /**
-     * Find a map elemnt given its name in a sorted array of map elements.
-     * This will return the index for the closest inferior or equal item in the
-     * given array.
-     */
-    private static final int find(MapElement[] map, CharChunk name,
-                                  int start, int end) {
-
-        int a = 0;
-        int b = map.length - 1;
-
-        // Special cases: -1 and 0
-        if (b == -1) {
-            return -1;
-        }
-        
-        if (compare(name, start, end, map[0].name) < 0 ) {
-            return -1;
-        }         
-        if (b == 0) {
-            return 0;
-        }
-
-        int i = 0;
-        while (true) {
-            i = (b + a) / 2;
-            int result = compare(name, start, end, map[i].name);
-            if (result == 1) {
-                a = i;
-            } else if (result == 0) {
-                return i;
-            } else {
-                b = i;
-            }
-            if ((b - a) == 1) {
-                int result2 = compare(name, start, end, map[b].name);
-                if (result2 < 0) {
-                    return a;
-                } else {
-                    return b;
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Find a map elemnt given its name in a sorted array of map elements.
-     * This will return the index for the closest inferior or equal item in the
-     * given array.
-     */
-    private static final int findIgnoreCase(MapElement[] map, CharChunk name) {
-        return findIgnoreCase(map, name, name.getStart(), name.getEnd());
-    }
-
-
-    /**
-     * Find a map elemnt given its name in a sorted array of map elements.
-     * This will return the index for the closest inferior or equal item in the
-     * given array.
-     */
-    private static final int findIgnoreCase(MapElement[] map, CharChunk name,
-                                  int start, int end) {
-
-        int a = 0;
-        int b = map.length - 1;
-
-        // Special cases: -1 and 0
-        if (b == -1) {
-            return -1;
-        }
-        if (compareIgnoreCase(name, start, end, map[0].name) < 0 ) {
-            return -1;
-        }         
-        if (b == 0) {
-            return 0;
-        }
-
-        int i = 0;
-        while (true) {
-            i = (b + a) / 2;
-            int result = compareIgnoreCase(name, start, end, map[i].name);
-            if (result == 1) {
-                a = i;
-            } else if (result == 0) {
-                return i;
-            } else {
-                b = i;
-            }
-            if ((b - a) == 1) {
-                int result2 = compareIgnoreCase(name, start, end, map[b].name);
-                if (result2 < 0) {
-                    return a;
-                } else {
-                    return b;
-                }
-            }
-        }
-
-    }
-
-
-    /**
-     * Find a map element given its name in a sorted array of map elements.
-     * This will return the index for the closest inferior or equal item in the
-     * given array.
-     */
-    private static final int find(MapElement[] map, String name) {
-
-        int a = 0;
-        int b = map.length - 1;
-
-        // Special cases: -1 and 0
-        if (b == -1) {
-            return -1;
-        }
-        
-        if (name.compareTo(map[0].name) < 0) {
-            return -1;
-        } 
-        if (b == 0) {
-            return 0;
-        }
-
-        int i = 0;
-        while (true) {
-            i = (b + a) / 2;
-            int result = name.compareTo(map[i].name);
-            if (result > 0) {
-                a = i;
-            } else if (result == 0) {
-                return i;
-            } else {
-                b = i;
-            }
-            if ((b - a) == 1) {
-                int result2 = name.compareTo(map[b].name);
-                if (result2 < 0) {
-                    return a;
-                } else {
-                    return b;
-                }
-            }
-        }
-
-    }
-
-
-    /**
-     * Compare given char chunk with String.
-     * Return -1, 0 or +1 if inferior, equal, or superior to the String.
-     */
-    private static final int compare(CharChunk name, int start, int end,
-                                     String compareTo) {
-        int result = 0;
-        char[] c = name.getBuffer();
-        int len = compareTo.length();
-        if ((end - start) < len) {
-            len = end - start;
-        }
-        for (int i = 0; (i < len) && (result == 0); i++) {
-            if (c[i + start] > compareTo.charAt(i)) {
-                result = 1;
-            } else if (c[i + start] < compareTo.charAt(i)) {
-                result = -1;
-            }
-        }
-        if (result == 0) {
-            if (compareTo.length() > (end - start)) {
-                result = -1;
-            } else if (compareTo.length() < (end - start)) {
-                result = 1;
-            }
-        }
-        return result;
-    }
-
-
-    /**
-     * Compare given char chunk with String ignoring case.
-     * Return -1, 0 or +1 if inferior, equal, or superior to the String.
-     */
-    private static final int compareIgnoreCase(CharChunk name, int start, int end,
-                                     String compareTo) {
-        int result = 0;
-        char[] c = name.getBuffer();
-        int len = compareTo.length();
-        if ((end - start) < len) {
-            len = end - start;
-        }
-        for (int i = 0; (i < len) && (result == 0); i++) {
-            if (Ascii.toLower(c[i + start]) > Ascii.toLower(compareTo.charAt(i))) {
-                result = 1;
-            } else if (Ascii.toLower(c[i + start]) < Ascii.toLower(compareTo.charAt(i))) {
-                result = -1;
-            }
-        }
-        if (result == 0) {
-            if (compareTo.length() > (end - start)) {
-                result = -1;
-            } else if (compareTo.length() < (end - start)) {
-                result = 1;
-            }
-        }
-        return result;
-    }
-
-
-    /**
-     * Find the position of the last slash in the given char chunk.
-     */
-    private static final int lastSlash(CharChunk name) {
-
-        char[] c = name.getBuffer();
-        int end = name.getEnd();
-        int start = name.getStart();
-        int pos = end;
-
-        while (pos > start) {
-            if (c[--pos] == '/') {
-                break;
-            }
-        }
-
-        return (pos);
-
-    }
-
-
-    /**
-     * Find the position of the nth slash, in the given char chunk.
-     */
-    private static final int nthSlash(CharChunk name, int n) {
-
-        char[] c = name.getBuffer();
-        int end = name.getEnd();
-        int start = name.getStart();
-        int pos = start;
-        int count = 0;
-
-        while (pos < end) {
-            if ((c[pos++] == '/') && ((++count) == n)) {
-                pos--;
-                break;
-            }
-        }
-
-        return (pos);
-
-    }
-
-
-    /**
-     * Return the slash count in a given string.
-     */
-    private static final int slashCount(String name) {
-        int pos = -1;
-        int count = 0;
-        while ((pos = name.indexOf('/', pos + 1)) != -1) {
-            count++;
-        }
-        return count;
-    }
-
-
-    /**
-     * Insert into the right place in a sorted MapElement array, and prevent
-     * duplicates.
-     */
-    private static final boolean insertMap
-        (MapElement[] oldMap, MapElement[] newMap, MapElement newElement) {
-        int pos = find(oldMap, newElement.name);
-        if ((pos != -1) && (newElement.name.equals(oldMap[pos].name))) {
-            return false;
-        }
-        System.arraycopy(oldMap, 0, newMap, 0, pos + 1);
-        newMap[pos + 1] = newElement;
-        System.arraycopy
-            (oldMap, pos + 1, newMap, pos + 2, oldMap.length - pos - 1);
-        return true;
-    }
-
-
-    /**
-     * Insert into the right place in a sorted MapElement array.
-     */
-    private static final boolean removeMap
-        (MapElement[] oldMap, MapElement[] newMap, String name) {
-        int pos = find(oldMap, name);
-        if ((pos != -1) && (name.equals(oldMap[pos].name))) {
-            System.arraycopy(oldMap, 0, newMap, 0, pos);
-            System.arraycopy(oldMap, pos + 1, newMap, pos,
-                             oldMap.length - pos - 1);
-            return true;
-        }
-        return false;
-    }
-
-
     // ------------------------------------------------- MapElement Inner Class
 
-
-    protected static abstract class MapElement {
+    protected static abstract class MapElement
+    {
 
         public String name = null;
         public Object object = null;
@@ -1281,7 +1466,8 @@ public final class Mapper {
 
 
     protected static final class Host
-        extends MapElement {
+            extends MapElement
+    {
 
         public ContextList contextList = null;
 
@@ -1291,7 +1477,8 @@ public final class Mapper {
     // ------------------------------------------------ ContextList Inner Class
 
 
-    protected static final class ContextList {
+    protected static final class ContextList
+    {
 
         public Context[] contexts = new Context[0];
         public int nesting = 0;
@@ -1303,7 +1490,8 @@ public final class Mapper {
 
 
     protected static final class Context
-        extends MapElement {
+            extends MapElement
+    {
 
         public String path = null;
         public String[] welcomeResources = new String[0];
@@ -1321,7 +1509,8 @@ public final class Mapper {
 
 
     protected static class Wrapper
-        extends MapElement {
+            extends MapElement
+    {
 
         public String path = null;
         public boolean jspWildCard = false;

@@ -26,10 +26,15 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 
-public @interface EJB {
-   String name() default "";
-   String description() default "";
-   Class beanInterface() default java.lang.Object.class;
-   String beanName() default "";
-   String mappedName() default "";
+public @interface EJB
+{
+    String name() default "";
+
+    String description() default "";
+
+    Class beanInterface() default java.lang.Object.class;
+
+    String beanName() default "";
+
+    String mappedName() default "";
 }

@@ -20,19 +20,22 @@ package javax.el;
 /**
  *
  */
-public class PropertyNotFoundException extends ELException {
-	
+public class PropertyNotFoundException extends ELException
+{
+
     /**
-     * 
+     *
      */
-    public PropertyNotFoundException() {
+    public PropertyNotFoundException()
+    {
         super();
     }
 
     /**
      * @param message
      */
-    public PropertyNotFoundException(String message) {
+    public PropertyNotFoundException(String message)
+    {
         super(message);
     }
 
@@ -40,14 +43,16 @@ public class PropertyNotFoundException extends ELException {
      * @param message
      * @param cause
      */
-    public PropertyNotFoundException(String message, Throwable cause) {
+    public PropertyNotFoundException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
     /**
      * @param cause
      */
-    public PropertyNotFoundException(Throwable cause) {
+    public PropertyNotFoundException(Throwable cause)
+    {
         super(cause);
     }
 

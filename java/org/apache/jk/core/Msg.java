@@ -26,7 +26,7 @@ import java.io.IOException;
 /**
  * A single packet for communication between the web server and the
  * container.
- *
+ * <p/>
  * In a more generic sense, it's the event that drives the processing chain.
  * XXX Use Event, make Msg a particular case.
  *
@@ -36,10 +36,39 @@ import java.io.IOException;
  * @author Kevin Seguin
  * @author Costin Manolache
  */
-public abstract class Msg {
+public abstract class Msg
+{
 
-    
-    
+
+    public static String hexLine(byte buf[], int start, int len)
+    {
+        StringBuffer sb = new StringBuffer();
+        for (int i = start; i < start + 16; i++)
+        {
+            if (i < len + 4)
+                sb.append(hex(buf[i]) + " ");
+            else
+                sb.append("   ");
+        }
+        sb.append(" | ");
+        for (int i = start; i < start + 16 && i < len + 4; i++)
+        {
+            if (!Character.isISOControl((char) buf[i]))
+                sb.append(new Character((char) buf[i]));
+            else
+                sb.append(".");
+        }
+        return sb.toString();
+    }
+
+    private static String hex(int x)
+    {
+        //	    if( x < 0) x=256 + x;
+        String h = Integer.toHexString(x);
+        if (h.length() == 1) h = "0" + h;
+        return h.substring(h.length() - 2);
+    }
+
     /**
      * Prepare this packet for accumulating a message from the container to
      * the web server.  Set the write position to just after the header
@@ -50,40 +79,40 @@ public abstract class Msg {
     /**
      * For a packet to be sent to the web server, finish the process of
      * accumulating data and write the length of the data payload into
-     * the header.  
+     * the header.
      */
     public abstract void end();
 
-    public abstract  void appendInt( int val );
+    public abstract void appendInt(int val);
 
-    public abstract void appendByte( int val );
-	
-    public abstract void appendLongInt( int val );
+    public abstract void appendByte(int val);
+
+    public abstract void appendLongInt(int val);
 
     /**
      */
     public abstract void appendBytes(MessageBytes mb) throws IOException;
 
     public abstract void appendByteChunk(ByteChunk bc) throws IOException;
-    
-    /** 
+
+    /**
      * Copy a chunk of bytes into the packet, starting at the current
      * write position.  The chunk of bytes is encoded with the length
      * in two bytes first, then the data itself, and finally a
      * terminating \0 (which is <B>not</B> included in the encoded
      * length).
      *
-     * @param b The array from which to copy bytes.
-     * @param off The offset into the array at which to start copying
-     * @param numBytes The number of bytes to copy.  
+     * @param b        The array from which to copy bytes.
+     * @param off      The offset into the array at which to start copying
+     * @param numBytes The number of bytes to copy.
      */
-    public abstract void appendBytes( byte b[], int off, int numBytes );
+    public abstract void appendBytes(byte b[], int off, int numBytes);
 
     /**
      * Read an integer from packet, and advance the read position past
      * it.  Integers are encoded as two unsigned bytes with the
      * high-order byte first, and, as far as I can tell, in
-     * little-endian order within each byte.  
+     * little-endian order within each byte.
      */
     public abstract int getInt();
 
@@ -94,7 +123,7 @@ public abstract class Msg {
     public abstract byte peekByte();
 
     public abstract void getBytes(MessageBytes mb);
-    
+
     /**
      * Copy a chunk of bytes from the packet into an array and advance
      * the read position past the chunk.  See appendBytes() for details
@@ -118,37 +147,12 @@ public abstract class Msg {
 
     public abstract byte[] getBuffer();
 
-    public abstract int getLen();
-    
-    public abstract void dump(String msg);
-
     /* -------------------- Utilities -------------------- */
     // XXX Move to util package
 
-    public static String hexLine( byte buf[], int start, int len ) {
-        StringBuffer sb=new StringBuffer();
-        for( int i=start; i< start+16 ; i++ ) {
-            if( i < len + 4)
-                sb.append( hex( buf[i] ) + " ");
-            else
-                sb.append( "   " );
-        }
-        sb.append(" | ");
-        for( int i=start; i < start+16 && i < len + 4; i++ ) {
-            if( ! Character.isISOControl( (char)buf[i] ))
-                sb.append( new Character((char)buf[i]) );
-            else
-                sb.append( "." );
-        }
-        return sb.toString();
-    }
+    public abstract int getLen();
 
-    private  static String hex( int x ) {
-        //	    if( x < 0) x=256 + x;
-        String h=Integer.toHexString( x );
-        if( h.length() == 1 ) h = "0" + h;
-        return h.substring( h.length() - 2 );
-    }
+    public abstract void dump(String msg);
 
 
 }

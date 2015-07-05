@@ -25,15 +25,17 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstFalse extends BooleanNode {
-    public AstFalse(int id) {
+public final class AstFalse extends BooleanNode
+{
+    public AstFalse(int id)
+    {
         super(id);
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return Boolean.FALSE;
     }
 }

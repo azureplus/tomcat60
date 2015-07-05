@@ -34,20 +34,40 @@ import java.util.Locale;
  * one passed to a servlet, or might be based on the 2.3
  * <code>javax.servlet.http.HttpServletResponseWrapper</code> class)
  * back into an internal <code>org.apache.catalina.HttpResponse</code>.
- * <p>
+ * <p/>
  * <strong>WARNING</strong>:  Due to Java's lack of support for multiple
  * inheritance, all of the logic in <code>ApplicationResponse</code> is
  * duplicated in <code>ApplicationHttpResponse</code>.  Make sure that you
  * keep these two classes in synchronization when making changes!
  *
  * @author Craig R. McClanahan
- *
  */
 
-class ApplicationHttpResponse extends HttpServletResponseWrapper {
+class ApplicationHttpResponse extends HttpServletResponseWrapper
+{
 
 
     // ----------------------------------------------------------- Constructors
+
+
+    /**
+     * Descriptive information about this implementation.
+     */
+    protected static final String info =
+            "org.apache.catalina.core.ApplicationHttpResponse/1.0";
+    /**
+     * The string manager for this package.
+     */
+    protected static StringManager sm =
+            StringManager.getManager(Constants.Package);
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * Is this wrapped response the subject of an <code>include()</code>
+     * call?
+     */
+    protected boolean included = false;
 
 
     /**
@@ -55,7 +75,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param response The servlet response being wrapped
      */
-    public ApplicationHttpResponse(HttpServletResponse response) {
+    public ApplicationHttpResponse(HttpServletResponse response)
+    {
 
         this(response, false);
 
@@ -67,10 +88,11 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param response The servlet response being wrapped
      * @param included <code>true</code> if this response is being processed
-     *  by a <code>RequestDispatcher.include()</code> call
+     *                 by a <code>RequestDispatcher.include()</code> call
      */
     public ApplicationHttpResponse(HttpServletResponse response,
-                                   boolean included) {
+                                   boolean included)
+    {
 
         super(response);
         setIncluded(included);
@@ -78,40 +100,16 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * Is this wrapped response the subject of an <code>include()</code>
-     * call?
-     */
-    protected boolean included = false;
-
-
-    /**
-     * Descriptive information about this implementation.
-     */
-    protected static final String info =
-        "org.apache.catalina.core.ApplicationHttpResponse/1.0";
-
-
-    /**
-     * The string manager for this package.
-     */
-    protected static StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-
     // ------------------------------------------------ ServletResponse Methods
-
 
     /**
      * Disallow <code>reset()</code> calls on a included response.
      *
-     * @exception IllegalStateException if the response has already
-     *  been committed
+     * @throws IllegalStateException if the response has already
+     *                               been committed
      */
-    public void reset() {
+    public void reset()
+    {
 
         // If already committed, the wrapped response will throw ISE
         if (!included || getResponse().isCommitted())
@@ -125,7 +123,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param len The new content length
      */
-    public void setContentLength(int len) {
+    public void setContentLength(int len)
+    {
 
         if (!included)
             getResponse().setContentLength(len);
@@ -138,7 +137,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param type The new content type
      */
-    public void setContentType(String type) {
+    public void setContentType(String type)
+    {
 
         if (!included)
             getResponse().setContentType(type);
@@ -151,7 +151,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param loc The new locale
      */
-    public void setLocale(Locale loc) {
+    public void setLocale(Locale loc)
+    {
 
         if (!included)
             getResponse().setLocale(loc);
@@ -164,7 +165,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param size The buffer size
      */
-    public void setBufferSize(int size) {
+    public void setBufferSize(int size)
+    {
         if (!included)
             getResponse().setBufferSize(size);
     }
@@ -178,7 +180,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param cookie The new cookie
      */
-    public void addCookie(Cookie cookie) {
+    public void addCookie(Cookie cookie)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).addCookie(cookie);
@@ -189,10 +192,11 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Disallow <code>addDateHeader()</code> calls on an included response.
      *
-     * @param name The new header name
+     * @param name  The new header name
      * @param value The new header value
      */
-    public void addDateHeader(String name, long value) {
+    public void addDateHeader(String name, long value)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).addDateHeader(name, value);
@@ -203,10 +207,11 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Disallow <code>addHeader()</code> calls on an included response.
      *
-     * @param name The new header name
+     * @param name  The new header name
      * @param value The new header value
      */
-    public void addHeader(String name, String value) {
+    public void addHeader(String name, String value)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).addHeader(name, value);
@@ -217,10 +222,11 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Disallow <code>addIntHeader()</code> calls on an included response.
      *
-     * @param name The new header name
+     * @param name  The new header name
      * @param value The new header value
      */
-    public void addIntHeader(String name, int value) {
+    public void addIntHeader(String name, int value)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).addIntHeader(name, value);
@@ -232,10 +238,10 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      * Disallow <code>sendError()</code> calls on an included response.
      *
      * @param sc The new status code
-     *
-     * @exception IOException if an input/output error occurs
+     * @throws IOException if an input/output error occurs
      */
-    public void sendError(int sc) throws IOException {
+    public void sendError(int sc) throws IOException
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).sendError(sc);
@@ -246,12 +252,12 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Disallow <code>sendError()</code> calls on an included response.
      *
-     * @param sc The new status code
+     * @param sc  The new status code
      * @param msg The new message
-     *
-     * @exception IOException if an input/output error occurs
+     * @throws IOException if an input/output error occurs
      */
-    public void sendError(int sc, String msg) throws IOException {
+    public void sendError(int sc, String msg) throws IOException
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).sendError(sc, msg);
@@ -263,10 +269,10 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      * Disallow <code>sendRedirect()</code> calls on an included response.
      *
      * @param location The new location
-     *
-     * @exception IOException if an input/output error occurs
+     * @throws IOException if an input/output error occurs
      */
-    public void sendRedirect(String location) throws IOException {
+    public void sendRedirect(String location) throws IOException
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).sendRedirect(location);
@@ -277,10 +283,11 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Disallow <code>setDateHeader()</code> calls on an included response.
      *
-     * @param name The new header name
+     * @param name  The new header name
      * @param value The new header value
      */
-    public void setDateHeader(String name, long value) {
+    public void setDateHeader(String name, long value)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).setDateHeader(name, value);
@@ -291,10 +298,11 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Disallow <code>setHeader()</code> calls on an included response.
      *
-     * @param name The new header name
+     * @param name  The new header name
      * @param value The new header value
      */
-    public void setHeader(String name, String value) {
+    public void setHeader(String name, String value)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).setHeader(name, value);
@@ -305,10 +313,11 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Disallow <code>setIntHeader()</code> calls on an included response.
      *
-     * @param name The new header name
+     * @param name  The new header name
      * @param value The new header value
      */
-    public void setIntHeader(String name, int value) {
+    public void setIntHeader(String name, int value)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).setIntHeader(name, value);
@@ -321,7 +330,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param sc The new status code
      */
-    public void setStatus(int sc) {
+    public void setStatus(int sc)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).setStatus(sc);
@@ -332,10 +342,11 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Disallow <code>setStatus()</code> calls on an included response.
      *
-     * @param sc The new status code
+     * @param sc  The new status code
      * @param msg The new message
      */
-    public void setStatus(int sc, String msg) {
+    public void setStatus(int sc, String msg)
+    {
 
         if (!included)
             ((HttpServletResponse) getResponse()).setStatus(sc, msg);
@@ -349,7 +360,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Return descriptive information about this implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -359,7 +371,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
     /**
      * Return the included flag for this response.
      */
-    boolean isIncluded() {
+    boolean isIncluded()
+    {
 
         return (this.included);
 
@@ -371,7 +384,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param included The new included flag
      */
-    void setIncluded(boolean included) {
+    void setIncluded(boolean included)
+    {
 
         this.included = included;
 
@@ -383,7 +397,8 @@ class ApplicationHttpResponse extends HttpServletResponseWrapper {
      *
      * @param response The new wrapped response
      */
-    void setResponse(HttpServletResponse response) {
+    void setResponse(HttpServletResponse response)
+    {
 
         super.setResponse(response);
 

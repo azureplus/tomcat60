@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.apache.tomcat.util.digester;
 
@@ -26,16 +26,17 @@ package org.apache.tomcat.util.digester;
  * <ul>
  * <li>Create a concrete implementation of this interface.</li>
  * <li>Optionally, you can configure a <code>RuleSet</code> to be relevant
- *     only for a particular namespace URI by configuring the value to be
- *     returned by <code>getNamespaceURI()</code>.</li>
+ * only for a particular namespace URI by configuring the value to be
+ * returned by <code>getNamespaceURI()</code>.</li>
  * <li>As you are configuring your Digester instance, call
- *     <code>digester.addRuleSet()</code> and pass the RuleSet instance.</li>
+ * <code>digester.addRuleSet()</code> and pass the RuleSet instance.</li>
  * <li>Digester will call the <code>addRuleInstances()</code> method of
- *     your RuleSet to configure the necessary rules.</li>
+ * your RuleSet to configure the necessary rules.</li>
  * </ul>
  */
 
-public interface RuleSet {
+public interface RuleSet
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -58,7 +59,7 @@ public interface RuleSet {
      * by a Digester instance.
      *
      * @param digester Digester instance to which the new Rule instances
-     *  should be added.
+     *                 should be added.
      */
     public void addRuleInstances(Digester digester);
 

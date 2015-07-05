@@ -19,22 +19,13 @@
 package org.apache.tomcat.util.http.fileupload;
 
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 
 /**
  * <p> The default implementation of the
  * {@link org.apache.tomcat.util.http.fileupload.FileItem FileItem} interface.
- *
+ * <p/>
  * <p> After retrieving an instance of this class from a {@link
  * org.apache.tomcat.util.http.fileupload.DiskFileUpload DiskFileUpload} instance (see
  * {@link org.apache.tomcat.util.http.fileupload.DiskFileUpload
@@ -50,11 +41,9 @@ import java.io.UnsupportedEncodingException;
  * @author <a href="mailto:jmcnally@apache.org">John McNally</a>
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
- *
- *
  */
 public class DefaultFileItem
-    implements FileItem
+        implements FileItem
 {
 
     // ----------------------------------------------------------- Data members
@@ -149,18 +138,40 @@ public class DefaultFileItem
 
     // ------------------------------- Methods from javax.activation.DataSource
 
+    /**
+     * Returns an identifier that is unique within the class loader used to
+     * load this class, but does not have random-like apearance.
+     *
+     * @return A String with the non-random looking instance identifier.
+     */
+    private static String getUniqueId()
+    {
+        int current;
+        synchronized (DefaultFileItem.class)
+        {
+            current = counter++;
+        }
+        String id = Integer.toString(current);
+
+        // If you manage to get more than 100 million of ids, you'll
+        // start getting ids longer than 8 characters.
+        if (current < 100000000)
+        {
+            id = ("00000000" + id).substring(id.length());
+        }
+        return id;
+    }
 
     /**
      * Returns an {@link java.io.InputStream InputStream} that can be
      * used to retrieve the contents of the file.
      *
      * @return An {@link java.io.InputStream InputStream} that can be
-     *         used to retrieve the contents of the file.
-     *
-     * @exception IOException if an error occurs.
+     * used to retrieve the contents of the file.
+     * @throws IOException if an error occurs.
      */
     public InputStream getInputStream()
-        throws IOException
+            throws IOException
     {
         if (!dfos.isInMemory())
         {
@@ -174,19 +185,20 @@ public class DefaultFileItem
         return new ByteArrayInputStream(cachedContent);
     }
 
-
     /**
      * Returns the content type passed by the browser or <code>null</code> if
      * not defined.
      *
      * @return The content type passed by the browser or <code>null</code> if
-     *         not defined.
+     * not defined.
      */
     public String getContentType()
     {
         return contentType;
     }
 
+
+    // ------------------------------------------------------- FileItem methods
 
     /**
      * Returns the original filename in the client's filesystem.
@@ -198,22 +210,17 @@ public class DefaultFileItem
         return fileName;
     }
 
-
-    // ------------------------------------------------------- FileItem methods
-
-
     /**
      * Provides a hint as to whether or not the file contents will be read
      * from memory.
      *
      * @return <code>true</code> if the file contents will be read
-     *         from memory; <code>false</code> otherwise.
+     * from memory; <code>false</code> otherwise.
      */
     public boolean isInMemory()
     {
         return (dfos.isInMemory());
     }
-
 
     /**
      * Returns the size of the file.
@@ -225,17 +232,14 @@ public class DefaultFileItem
         if (cachedContent != null)
         {
             return cachedContent.length;
-        }
-        else if (dfos.isInMemory())
+        } else if (dfos.isInMemory())
         {
             return dfos.getData().length;
-        }
-        else
+        } else
         {
             return dfos.getFile().length();
         }
     }
-
 
     /**
      * Returns the contents of the file as an array of bytes.  If the
@@ -285,25 +289,21 @@ public class DefaultFileItem
         return fileData;
     }
 
-
     /**
      * Returns the contents of the file as a String, using the specified
      * encoding.  This method uses {@link #get()} to retrieve the
      * contents of the file.
      *
      * @param encoding The character encoding to use.
-     *
      * @return The contents of the file, as a string.
-     *
-     * @exception UnsupportedEncodingException if the requested character
-     *                                         encoding is not available.
+     * @throws UnsupportedEncodingException if the requested character
+     *                                      encoding is not available.
      */
     public String getString(String encoding)
-        throws UnsupportedEncodingException
+            throws UnsupportedEncodingException
     {
         return new String(get(), encoding);
     }
-
 
     /**
      * Returns the contents of the file as a String, using the default
@@ -317,17 +317,16 @@ public class DefaultFileItem
         return new String(get());
     }
 
-
     /**
      * A convenience method to write an uploaded item to disk. The client code
      * is not concerned with whether or not the item is stored in memory, or on
      * disk in a temporary location. They just want to write the uploaded item
      * to a file.
-     * <p>
+     * <p/>
      * This implementation first attempts to rename the uploaded item to the
      * specified destination file, if the item was originally written to disk.
      * Otherwise, the data will be copied to the specified file.
-     * <p>
+     * <p/>
      * This method is only guaranteed to work <em>once</em>, the first time it
      * is invoked for a particular item. This is because, in the event that the
      * method renames a temporary file, that file will no longer be available
@@ -335,8 +334,7 @@ public class DefaultFileItem
      *
      * @param file The <code>File</code> into which the uploaded item should
      *             be stored.
-     *
-     * @exception Exception if an error occurs.
+     * @throws Exception if an error occurs.
      */
     public void write(File file) throws Exception
     {
@@ -355,8 +353,7 @@ public class DefaultFileItem
                     fout.close();
                 }
             }
-        }
-        else
+        } else
         {
             File outputFile = getStoreLocation();
             if (outputFile != null)
@@ -373,7 +370,7 @@ public class DefaultFileItem
                     try
                     {
                         in = new BufferedInputStream(
-                            new FileInputStream(outputFile));
+                                new FileInputStream(outputFile));
                         out = new BufferedOutputStream(
                                 new FileOutputStream(file));
                         byte[] bytes = new byte[2048];
@@ -403,19 +400,17 @@ public class DefaultFileItem
                         }
                     }
                 }
-            }
-            else
+            } else
             {
                 /*
                  * For whatever reason we cannot write the
                  * file to disk.
                  */
                 throw new FileUploadException(
-                    "Cannot write uploaded file to disk!");
+                        "Cannot write uploaded file to disk!");
             }
         }
     }
-
 
     /**
      * Deletes the underlying storage for a file item, including deleting any
@@ -434,51 +429,41 @@ public class DefaultFileItem
         }
     }
 
-
     /**
      * Returns the name of the field in the multipart form corresponding to
      * this file item.
      *
      * @return The name of the form field.
-     *
      * @see #setFieldName(java.lang.String)
-     *
      */
     public String getFieldName()
     {
         return fieldName;
     }
 
-
     /**
      * Sets the field name used to reference this file item.
      *
      * @param fieldName The name of the form field.
-     *
      * @see #getFieldName()
-     *
      */
     public void setFieldName(String fieldName)
     {
         this.fieldName = fieldName;
     }
 
-
     /**
      * Determines whether or not a <code>FileItem</code> instance represents
      * a simple form field.
      *
      * @return <code>true</code> if the instance represents a simple form
-     *         field; <code>false</code> if it represents an uploaded file.
-     *
+     * field; <code>false</code> if it represents an uploaded file.
      * @see #setFormField(boolean)
-     *
      */
     public boolean isFormField()
     {
         return isFormField;
     }
-
 
     /**
      * Specifies whether or not a <code>FileItem</code> instance represents
@@ -486,9 +471,7 @@ public class DefaultFileItem
      *
      * @param state <code>true</code> if the instance represents a simple form
      *              field; <code>false</code> if it represents an uploaded file.
-     *
      * @see #isFormField()
-     *
      */
     public void setFormField(boolean state)
     {
@@ -496,17 +479,18 @@ public class DefaultFileItem
     }
 
 
+    // --------------------------------------------------------- Public methods
+
     /**
      * Returns an {@link java.io.OutputStream OutputStream} that can
      * be used for storing the contents of the file.
      *
      * @return An {@link java.io.OutputStream OutputStream} that can be used
-     *         for storing the contensts of the file.
-     *
-     * @exception IOException if an error occurs.
+     * for storing the contensts of the file.
+     * @throws IOException if an error occurs.
      */
     public OutputStream getOutputStream()
-        throws IOException
+            throws IOException
     {
         if (dfos == null)
         {
@@ -517,8 +501,7 @@ public class DefaultFileItem
     }
 
 
-    // --------------------------------------------------------- Public methods
-
+    // ------------------------------------------------------ Protected methods
 
     /**
      * Returns the {@link java.io.File} object for the <code>FileItem</code>'s
@@ -531,16 +514,12 @@ public class DefaultFileItem
      * volume.
      *
      * @return The data file, or <code>null</code> if the data is stored in
-     *         memory.
+     * memory.
      */
     public File getStoreLocation()
     {
         return dfos.getFile();
     }
-
-
-    // ------------------------------------------------------ Protected methods
-
 
     /**
      * Removes the file contents from the temporary storage.
@@ -555,6 +534,8 @@ public class DefaultFileItem
         }
     }
 
+
+    // -------------------------------------------------------- Private methods
 
     /**
      * Creates and returns a {@link java.io.File File} representing a uniquely
@@ -575,34 +556,6 @@ public class DefaultFileItem
         File f = new File(tempDir, fileName);
         f.deleteOnExit();
         return f;
-    }
-
-
-    // -------------------------------------------------------- Private methods
-
-
-    /**
-     * Returns an identifier that is unique within the class loader used to
-     * load this class, but does not have random-like apearance.
-     *
-     * @return A String with the non-random looking instance identifier.
-     */
-    private static String getUniqueId()
-    {
-        int current;
-        synchronized (DefaultFileItem.class)
-        {
-            current = counter++;
-        }
-        String id = Integer.toString(current);
-
-        // If you manage to get more than 100 million of ids, you'll
-        // start getting ids longer than 8 characters.
-        if (current < 100000000)
-        {
-            id = ("00000000" + id).substring(id.length());
-        }
-        return id;
     }
 
 }

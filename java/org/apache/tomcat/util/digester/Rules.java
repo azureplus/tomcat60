@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.tomcat.util.digester;
@@ -29,7 +29,8 @@ import java.util.List;
  * during parsing.
  */
 
-public interface Rules {
+public interface Rules
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -62,8 +63,8 @@ public interface Rules {
      * added <code>Rule</code> objects.
      *
      * @param namespaceURI Namespace URI that must match on all
-     *  subsequently added rules, or <code>null</code> for matching
-     *  regardless of the current namespace URI
+     *                     subsequently added rules, or <code>null</code> for matching
+     *                     regardless of the current namespace URI
      */
     public void setNamespaceURI(String namespaceURI);
 
@@ -75,7 +76,7 @@ public interface Rules {
      * Register a new Rule instance matching the specified pattern.
      *
      * @param pattern Nesting pattern to be matched for this Rule
-     * @param rule Rule instance to be registered
+     * @param rule    Rule instance to be registered
      */
     public void add(String pattern, Rule rule);
 
@@ -94,7 +95,6 @@ public interface Rules {
      * method.
      *
      * @param pattern Nesting pattern to be matched
-     *
      * @deprecated Call match(namespaceURI,pattern) instead.
      */
     public List match(String pattern);
@@ -108,8 +108,8 @@ public interface Rules {
      * method.
      *
      * @param namespaceURI Namespace URI for which to select matching rules,
-     *  or <code>null</code> to match regardless of namespace URI
-     * @param pattern Nesting pattern to be matched
+     *                     or <code>null</code> to match regardless of namespace URI
+     * @param pattern      Nesting pattern to be matched
      */
     public List match(String namespaceURI, String pattern);
 

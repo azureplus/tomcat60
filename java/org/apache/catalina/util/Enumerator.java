@@ -29,13 +29,20 @@ import java.util.*;
  * Constructors are provided to easliy create such wrappers.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public final class Enumerator implements Enumeration {
+public final class Enumerator implements Enumeration
+{
 
 
     // ----------------------------------------------------------- Constructors
+
+
+    /**
+     * The <code>Iterator</code> over which the <code>Enumeration</code>
+     * represented by this class actually operates.
+     */
+    private Iterator iterator = null;
 
 
     /**
@@ -43,7 +50,8 @@ public final class Enumerator implements Enumeration {
      *
      * @param collection Collection whose values should be enumerated
      */
-    public Enumerator(Collection collection) {
+    public Enumerator(Collection collection)
+    {
 
         this(collection.iterator());
 
@@ -54,9 +62,10 @@ public final class Enumerator implements Enumeration {
      * Return an Enumeration over the values of the specified Collection.
      *
      * @param collection Collection whose values should be enumerated
-     * @param clone true to clone iterator
+     * @param clone      true to clone iterator
      */
-    public Enumerator(Collection collection, boolean clone) {
+    public Enumerator(Collection collection, boolean clone)
+    {
 
         this(collection.iterator(), clone);
 
@@ -69,7 +78,8 @@ public final class Enumerator implements Enumeration {
      *
      * @param iterator Iterator to be wrapped
      */
-    public Enumerator(Iterator iterator) {
+    public Enumerator(Iterator iterator)
+    {
 
         super();
         this.iterator = iterator;
@@ -82,19 +92,23 @@ public final class Enumerator implements Enumeration {
      * specified Iterator.
      *
      * @param iterator Iterator to be wrapped
-     * @param clone true to clone iterator
+     * @param clone    true to clone iterator
      */
-    public Enumerator(Iterator iterator, boolean clone) {
+    public Enumerator(Iterator iterator, boolean clone)
+    {
 
         super();
-        if (!clone) {
+        if (!clone)
+        {
             this.iterator = iterator;
-        } else {
+        } else
+        {
             List list = new ArrayList();
-            while (iterator.hasNext()) {
+            while (iterator.hasNext())
+            {
                 list.add(iterator.next());
             }
-            this.iterator = list.iterator();   
+            this.iterator = list.iterator();
         }
 
     }
@@ -105,22 +119,10 @@ public final class Enumerator implements Enumeration {
      *
      * @param map Map whose values should be enumerated
      */
-    public Enumerator(Map map) {
+    public Enumerator(Map map)
+    {
 
         this(map.values().iterator());
-
-    }
-
-
-    /**
-     * Return an Enumeration over the values of the specified Map.
-     *
-     * @param map Map whose values should be enumerated
-     * @param clone true to clone iterator
-     */
-    public Enumerator(Map map, boolean clone) {
-
-        this(map.values().iterator(), clone);
 
     }
 
@@ -129,23 +131,30 @@ public final class Enumerator implements Enumeration {
 
 
     /**
-     * The <code>Iterator</code> over which the <code>Enumeration</code>
-     * represented by this class actually operates.
+     * Return an Enumeration over the values of the specified Map.
+     *
+     * @param map   Map whose values should be enumerated
+     * @param clone true to clone iterator
      */
-    private Iterator iterator = null;
+    public Enumerator(Map map, boolean clone)
+    {
+
+        this(map.values().iterator(), clone);
+
+    }
 
 
     // --------------------------------------------------------- Public Methods
-
 
     /**
      * Tests if this enumeration contains more elements.
      *
      * @return <code>true</code> if and only if this enumeration object
-     *  contains at least one more element to provide, <code>false</code>
-     *  otherwise
+     * contains at least one more element to provide, <code>false</code>
+     * otherwise
      */
-    public boolean hasMoreElements() {
+    public boolean hasMoreElements()
+    {
 
         return (iterator.hasNext());
 
@@ -157,10 +166,10 @@ public final class Enumerator implements Enumeration {
      * has at least one more element to provide.
      *
      * @return the next element of this enumeration
-     *
-     * @exception NoSuchElementException if no more elements exist
+     * @throws NoSuchElementException if no more elements exist
      */
-    public Object nextElement() throws NoSuchElementException {
+    public Object nextElement() throws NoSuchElementException
+    {
 
         return (iterator.next());
 

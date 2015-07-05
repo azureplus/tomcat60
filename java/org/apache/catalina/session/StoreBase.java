@@ -17,28 +17,24 @@
 
 package org.apache.catalina.session;
 
+import org.apache.catalina.*;
+import org.apache.catalina.util.LifecycleSupport;
+import org.apache.catalina.util.StringManager;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Manager;
-import org.apache.catalina.Store;
-import org.apache.catalina.util.LifecycleSupport;
-import org.apache.catalina.util.StringManager;
 
 /**
  * Abstract implementation of the Store interface to
  * support most of the functionality required by a Store.
  *
  * @author Bip Thelin
- *
  */
 
 public abstract class StoreBase
-    implements Lifecycle, Store {
+        implements Lifecycle, Store
+{
 
     // ----------------------------------------------------- Instance Variables
 
@@ -82,35 +78,38 @@ public abstract class StoreBase
     /**
      * Return the info for this Store.
      */
-    public String getInfo() {
-        return(info);
+    public String getInfo()
+    {
+        return (info);
     }
 
 
     /**
      * Return the name for this Store, used for logging.
      */
-    public String getStoreName() {
-        return(storeName);
+    public String getStoreName()
+    {
+        return (storeName);
     }
 
+    /**
+     * Return the Manager with which the Store is associated.
+     */
+    public Manager getManager()
+    {
+        return (this.manager);
+    }
 
     /**
      * Set the Manager with which this Store is associated.
      *
      * @param manager The newly associated Manager
      */
-    public void setManager(Manager manager) {
+    public void setManager(Manager manager)
+    {
         Manager oldManager = this.manager;
         this.manager = manager;
         support.firePropertyChange("manager", oldManager, this.manager);
-    }
-
-    /**
-     * Return the Manager with which the Store is associated.
-     */
-    public Manager getManager() {
-        return(this.manager);
     }
 
 
@@ -121,16 +120,18 @@ public abstract class StoreBase
      *
      * @param listener The listener to add
      */
-    public void addLifecycleListener(LifecycleListener listener) {
+    public void addLifecycleListener(LifecycleListener listener)
+    {
         lifecycle.addLifecycleListener(listener);
     }
 
 
     /**
-     * Get the lifecycle listeners associated with this lifecycle. If this 
+     * Get the lifecycle listeners associated with this lifecycle. If this
      * Lifecycle has no listeners registered, a zero-length array is returned.
      */
-    public LifecycleListener[] findLifecycleListeners() {
+    public LifecycleListener[] findLifecycleListeners()
+    {
 
         return lifecycle.findLifecycleListeners();
 
@@ -142,7 +143,8 @@ public abstract class StoreBase
      *
      * @param listener The listener to add
      */
-    public void removeLifecycleListener(LifecycleListener listener) {
+    public void removeLifecycleListener(LifecycleListener listener)
+    {
         lifecycle.removeLifecycleListener(listener);
     }
 
@@ -151,7 +153,8 @@ public abstract class StoreBase
      *
      * @param listener a value of type 'PropertyChangeListener'
      */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
+    public void addPropertyChangeListener(PropertyChangeListener listener)
+    {
         support.addPropertyChangeListener(listener);
     }
 
@@ -160,7 +163,8 @@ public abstract class StoreBase
      *
      * @param listener The listener to remove
      */
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
+    public void removePropertyChangeListener(PropertyChangeListener listener)
+    {
         support.removePropertyChangeListener(listener);
     }
 
@@ -170,52 +174,69 @@ public abstract class StoreBase
      * Called by our background reaper thread to check if Sessions
      * saved in our store are subject of being expired. If so expire
      * the Session and remove it from the Store.
-     *
      */
-    public void processExpires() {
+    public void processExpires()
+    {
         long timeNow = System.currentTimeMillis();
         String[] keys = null;
 
-         if(!started) {
+        if (!started)
+        {
             return;
         }
 
-        try {
+        try
+        {
             keys = keys();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             manager.getContainer().getLogger().error("Error getting keys", e);
             return;
         }
-        if (manager.getContainer().getLogger().isDebugEnabled()) {
-            manager.getContainer().getLogger().debug(getStoreName()+ ": processExpires check number of " + keys.length + " sessions" );
+        if (manager.getContainer().getLogger().isDebugEnabled())
+        {
+            manager.getContainer().getLogger().debug(getStoreName() + ": processExpires check number of " + keys.length + " sessions");
         }
 
-        for (int i = 0; i < keys.length; i++) {
-            try {
+        for (int i = 0; i < keys.length; i++)
+        {
+            try
+            {
                 StandardSession session = (StandardSession) load(keys[i]);
-                if (session == null) {
+                if (session == null)
+                {
                     continue;
                 }
                 int timeIdle = (int) ((timeNow - session.thisAccessedTime) / 1000L);
-                if (timeIdle < session.getMaxInactiveInterval()) {
+                if (timeIdle < session.getMaxInactiveInterval())
+                {
                     continue;
                 }
-                if (manager.getContainer().getLogger().isDebugEnabled()) {
-                    manager.getContainer().getLogger().debug(getStoreName()+ ": processExpires expire store session " + keys[i] );
+                if (manager.getContainer().getLogger().isDebugEnabled())
+                {
+                    manager.getContainer().getLogger().debug(getStoreName() + ": processExpires expire store session " + keys[i]);
                 }
-                if ( ( (PersistentManagerBase) manager).isLoaded( keys[i] )) {
+                if (((PersistentManagerBase) manager).isLoaded(keys[i]))
+                {
                     // recycle old backup session
                     session.recycle();
-                } else {
+                } else
+                {
                     // expire swapped out session
                     session.expire();
                 }
                 remove(keys[i]);
-            } catch (Exception e) {
-                manager.getContainer().getLogger().error("Session: "+keys[i]+"; ", e);
-                try {
+            }
+            catch (Exception e)
+            {
+                manager.getContainer().getLogger().error("Session: " + keys[i] + "; ", e);
+                try
+                {
                     remove(keys[i]);
-                } catch (IOException e2) {
+                }
+                catch (IOException e2)
+                {
                     manager.getContainer().getLogger().error("Error removing key", e2);
                 }
             }
@@ -231,14 +252,15 @@ public abstract class StoreBase
      * component.  This method should be called after <code>configure()</code>,
      * and before any of the public methods of the component are utilized.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
-    public void start() throws LifecycleException {
+    public void start() throws LifecycleException
+    {
         // Validate and update our current component state
         if (started)
             throw new LifecycleException
-                (sm.getString(getStoreName()+".alreadyStarted"));
+                    (sm.getString(getStoreName() + ".alreadyStarted"));
         lifecycle.fireLifecycleEvent(START_EVENT, null);
         started = true;
 
@@ -250,14 +272,15 @@ public abstract class StoreBase
      * component.  This method should be the last one called on a given
      * instance of this component.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that needs to be reported
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that needs to be reported
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws LifecycleException
+    {
         // Validate and update our current component state
         if (!started)
             throw new LifecycleException
-                (sm.getString(getStoreName()+".notStarted"));
+                    (sm.getString(getStoreName() + ".notStarted"));
         lifecycle.fireLifecycleEvent(STOP_EVENT, null);
         started = false;
 

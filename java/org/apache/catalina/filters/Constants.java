@@ -23,15 +23,16 @@ package org.apache.catalina.filters;
  * Constants for this Java package.
  */
 
-public final class Constants {
+public final class Constants
+{
 
     public static final String Package = "org.apache.catalina.filters";
 
     public static final String CSRF_NONCE_SESSION_ATTR_NAME =
-        "org.apache.catalina.filters.CSRF_NONCE";
-    
+            "org.apache.catalina.filters.CSRF_NONCE";
+
     public static final String CSRF_NONCE_REQUEST_PARAM =
-        "org.apache.catalina.filters.CSRF_NONCE";
-    
+            "org.apache.catalina.filters.CSRF_NONCE";
+
     public static final String METHOD_GET = "GET";
 }

@@ -19,18 +19,6 @@
 package org.apache.catalina.startup;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.logging.LogManager;
-
 import org.apache.catalina.Container;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
@@ -42,150 +30,158 @@ import org.apache.tomcat.util.digester.Rule;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 
+import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.LogManager;
+
 
 /**
  * Startup/Shutdown shell program for Catalina.  The following command line
  * options are recognized:
  * <ul>
  * <li><b>-config {pathname}</b> - Set the pathname of the configuration file
- *     to be processed.  If a relative path is specified, it will be
- *     interpreted as relative to the directory pathname specified by the
- *     "catalina.base" system property.   [conf/server.xml]
+ * to be processed.  If a relative path is specified, it will be
+ * interpreted as relative to the directory pathname specified by the
+ * "catalina.base" system property.   [conf/server.xml]
  * <li><b>-help</b>      - Display usage information.
  * <li><b>-nonaming</b>  - Disable naming support.
  * <li><b>start</b>      - Start an instance of Catalina.
  * <li><b>stop</b>       - Stop the currently running instance of Catalina.
  * </u>
- *
+ * <p/>
  * Should do the same thing as Embedded, but using a server.xml file.
  *
  * @author Craig R. McClanahan
  * @author Remy Maucherat
- *
  */
 
-public class Catalina extends Embedded {
+public class Catalina extends Embedded
+{
 
 
     // ----------------------------------------------------- Instance Variables
 
 
+    private static org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(Catalina.class);
+
+    // XXX Should be moved to embedded
     /**
      * Pathname to the server configuration file.
      */
     protected String configFile = "conf/server.xml";
-
-    // XXX Should be moved to embedded
     /**
      * The shared extensions class loader for this server.
      */
     protected ClassLoader parentClassLoader =
-        Catalina.class.getClassLoader();
-
-
+            Catalina.class.getClassLoader();
     /**
      * Are we starting a new server?
      */
     protected boolean starting = false;
-
-
     /**
      * Are we stopping an existing server?
      */
     protected boolean stopping = false;
-
-
     /**
      * Use shutdown hook flag.
      */
     protected boolean useShutdownHook = true;
 
 
+    // ------------------------------------------------------------- Properties
     /**
      * Shutdown hook.
      */
     protected Thread shutdownHook = null;
-
-
-    // ------------------------------------------------------------- Properties
-
-
-    public void setConfig(String file) {
-        configFile = file;
-    }
-
-
-    public void setConfigFile(String file) {
-        configFile = file;
-    }
-
-
-    public String getConfigFile() {
-        return configFile;
-    }
-
-
-    public void setUseShutdownHook(boolean useShutdownHook) {
-        this.useShutdownHook = useShutdownHook;
-    }
-
-
-    public boolean getUseShutdownHook() {
-        return useShutdownHook;
-    }
-
-
-    /**
-     * Set the shared extensions class loader.
-     *
-     * @param parentClassLoader The shared extensions class loader.
-     */
-    public void setParentClassLoader(ClassLoader parentClassLoader) {
-
-        this.parentClassLoader = parentClassLoader;
-
-    }
-
-
-    // ----------------------------------------------------------- Main Program
 
     /**
      * The application main program.
      *
      * @param args Command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String args[])
+    {
         (new Catalina()).process(args);
     }
 
+    public void setConfig(String file)
+    {
+        configFile = file;
+    }
+
+    public String getConfigFile()
+    {
+        return configFile;
+    }
+
+    public void setConfigFile(String file)
+    {
+        configFile = file;
+    }
+
+    public boolean getUseShutdownHook()
+    {
+        return useShutdownHook;
+    }
+
+
+    // ----------------------------------------------------------- Main Program
+
+    public void setUseShutdownHook(boolean useShutdownHook)
+    {
+        this.useShutdownHook = useShutdownHook;
+    }
+
+    /**
+     * Set the shared extensions class loader.
+     *
+     * @param parentClassLoader The shared extensions class loader.
+     */
+    public void setParentClassLoader(ClassLoader parentClassLoader)
+    {
+
+        this.parentClassLoader = parentClassLoader;
+
+    }
+
+
+    // ------------------------------------------------------ Protected Methods
 
     /**
      * The instance main program.
      *
      * @param args Command line arguments
      */
-    public void process(String args[]) {
+    public void process(String args[])
+    {
 
         setAwait(true);
         setCatalinaHome();
         setCatalinaBase();
-        try {
-            if (arguments(args)) {
-                if (starting) {
+        try
+        {
+            if (arguments(args))
+            {
+                if (starting)
+                {
                     load(args);
                     start();
-                } else if (stopping) {
+                } else if (stopping)
+                {
                     stopServer();
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace(System.out);
         }
     }
-
-
-    // ------------------------------------------------------ Protected Methods
-
 
     /**
      * Process the specified command line arguments, and return
@@ -194,33 +190,43 @@ public class Catalina extends Embedded {
      *
      * @param args Command line arguments to process
      */
-    protected boolean arguments(String args[]) {
+    protected boolean arguments(String args[])
+    {
 
         boolean isConfig = false;
 
-        if (args.length < 1) {
+        if (args.length < 1)
+        {
             usage();
             return (false);
         }
 
-        for (int i = 0; i < args.length; i++) {
-            if (isConfig) {
+        for (int i = 0; i < args.length; i++)
+        {
+            if (isConfig)
+            {
                 configFile = args[i];
                 isConfig = false;
-            } else if (args[i].equals("-config")) {
+            } else if (args[i].equals("-config"))
+            {
                 isConfig = true;
-            } else if (args[i].equals("-nonaming")) {
-                setUseNaming( false );
-            } else if (args[i].equals("-help")) {
+            } else if (args[i].equals("-nonaming"))
+            {
+                setUseNaming(false);
+            } else if (args[i].equals("-help"))
+            {
                 usage();
                 return (false);
-            } else if (args[i].equals("start")) {
+            } else if (args[i].equals("start"))
+            {
                 starting = true;
                 stopping = false;
-            } else if (args[i].equals("stop")) {
+            } else if (args[i].equals("stop"))
+            {
                 starting = false;
                 stopping = true;
-            } else {
+            } else
+            {
                 usage();
                 return (false);
             }
@@ -230,11 +236,11 @@ public class Catalina extends Embedded {
 
     }
 
-
     /**
      * Return a File object representing our configuration file.
      */
-    protected File configFile() {
+    protected File configFile()
+    {
 
         File file = new File(configFile);
         if (!file.isAbsolute())
@@ -243,12 +249,12 @@ public class Catalina extends Embedded {
 
     }
 
-
     /**
      * Create and configure the Digester we will be using for startup.
      */
-    protected Digester createStartDigester() {
-        long t1=System.currentTimeMillis();
+    protected Digester createStartDigester()
+    {
+        long t1 = System.currentTimeMillis();
         // Initialize the digester
         Digester digester = new Digester();
         digester.setValidating(false);
@@ -262,73 +268,71 @@ public class Catalina extends Embedded {
 
         // Configure the actions we will be using
         digester.addObjectCreate("Server",
-                                 "org.apache.catalina.core.StandardServer",
-                                 "className");
+                "org.apache.catalina.core.StandardServer",
+                "className");
         digester.addSetProperties("Server");
         digester.addSetNext("Server",
-                            "setServer",
-                            "org.apache.catalina.Server");
+                "setServer",
+                "org.apache.catalina.Server");
 
         digester.addObjectCreate("Server/GlobalNamingResources",
-                                 "org.apache.catalina.deploy.NamingResources");
+                "org.apache.catalina.deploy.NamingResources");
         digester.addSetProperties("Server/GlobalNamingResources");
         digester.addSetNext("Server/GlobalNamingResources",
-                            "setGlobalNamingResources",
-                            "org.apache.catalina.deploy.NamingResources");
+                "setGlobalNamingResources",
+                "org.apache.catalina.deploy.NamingResources");
 
         digester.addObjectCreate("Server/Listener",
-                                 null, // MUST be specified in the element
-                                 "className");
+                null, // MUST be specified in the element
+                "className");
         digester.addSetProperties("Server/Listener");
         digester.addSetNext("Server/Listener",
-                            "addLifecycleListener",
-                            "org.apache.catalina.LifecycleListener");
+                "addLifecycleListener",
+                "org.apache.catalina.LifecycleListener");
 
         digester.addObjectCreate("Server/Service",
-                                 "org.apache.catalina.core.StandardService",
-                                 "className");
+                "org.apache.catalina.core.StandardService",
+                "className");
         digester.addSetProperties("Server/Service");
         digester.addSetNext("Server/Service",
-                            "addService",
-                            "org.apache.catalina.Service");
+                "addService",
+                "org.apache.catalina.Service");
 
         digester.addObjectCreate("Server/Service/Listener",
-                                 null, // MUST be specified in the element
-                                 "className");
+                null, // MUST be specified in the element
+                "className");
         digester.addSetProperties("Server/Service/Listener");
         digester.addSetNext("Server/Service/Listener",
-                            "addLifecycleListener",
-                            "org.apache.catalina.LifecycleListener");
+                "addLifecycleListener",
+                "org.apache.catalina.LifecycleListener");
 
         //Executor
         digester.addObjectCreate("Server/Service/Executor",
-                         "org.apache.catalina.core.StandardThreadExecutor",
-                         "className");
+                "org.apache.catalina.core.StandardThreadExecutor",
+                "className");
         digester.addSetProperties("Server/Service/Executor");
 
         digester.addSetNext("Server/Service/Executor",
-                            "addExecutor",
-                            "org.apache.catalina.Executor");
+                "addExecutor",
+                "org.apache.catalina.Executor");
 
-        
+
         digester.addRule("Server/Service/Connector",
-                         new ConnectorCreateRule());
-        digester.addRule("Server/Service/Connector", 
-                         new SetAllPropertiesRule(new String[]{"executor"}));
+                new ConnectorCreateRule());
+        digester.addRule("Server/Service/Connector",
+                new SetAllPropertiesRule(new String[]{"executor"}));
         digester.addSetNext("Server/Service/Connector",
-                            "addConnector",
-                            "org.apache.catalina.connector.Connector");
-        
-        
+                "addConnector",
+                "org.apache.catalina.connector.Connector");
 
 
         digester.addObjectCreate("Server/Service/Connector/Listener",
-                                 null, // MUST be specified in the element
-                                 "className");
+                null, // MUST be specified in the element
+                "className");
         digester.addSetProperties("Server/Service/Connector/Listener");
         digester.addSetNext("Server/Service/Connector/Listener",
-                            "addLifecycleListener",
-                            "org.apache.catalina.LifecycleListener");
+                "addLifecycleListener",
+                "org.apache.catalina.LifecycleListener");
 
         // Add RuleSets for nested elements
         digester.addRuleSet(new NamingRuleSet("Server/GlobalNamingResources/"));
@@ -340,73 +344,84 @@ public class Catalina extends Embedded {
 
         // When the 'engine' is found, set the parentClassLoader.
         digester.addRule("Server/Service/Engine",
-                         new SetParentClassLoaderRule(parentClassLoader));
+                new SetParentClassLoaderRule(parentClassLoader));
         digester.addRuleSet(ClusterRuleSetFactory.getClusterRuleSet("Server/Service/Engine/Cluster/"));
 
-        long t2=System.currentTimeMillis();
+        long t2 = System.currentTimeMillis();
         if (log.isDebugEnabled())
-            log.debug("Digester for server.xml created " + ( t2-t1 ));
+            log.debug("Digester for server.xml created " + (t2 - t1));
         return (digester);
 
     }
 
-
     /**
      * Create and configure the Digester we will be using for shutdown.
      */
-    protected Digester createStopDigester() {
+    protected Digester createStopDigester()
+    {
 
         // Initialize the digester
         Digester digester = new Digester();
 
         // Configure the rules we need for shutting down
         digester.addObjectCreate("Server",
-                                 "org.apache.catalina.core.StandardServer",
-                                 "className");
+                "org.apache.catalina.core.StandardServer",
+                "className");
         digester.addSetProperties("Server");
         digester.addSetNext("Server",
-                            "setServer",
-                            "org.apache.catalina.Server");
+                "setServer",
+                "org.apache.catalina.Server");
 
         return (digester);
 
     }
 
-
-    public void stopServer() {
+    public void stopServer()
+    {
         stopServer(null);
     }
 
-    public void stopServer(String[] arguments) {
+    public void stopServer(String[] arguments)
+    {
 
-        if (arguments != null) {
+        if (arguments != null)
+        {
             arguments(arguments);
         }
 
         Server s = getServer();
-        if( s == null ) {
+        if (s == null)
+        {
             // Create and execute our Digester
             Digester digester = createStopDigester();
             digester.setClassLoader(Thread.currentThread().getContextClassLoader());
             File file = configFile();
-            try {
+            try
+            {
                 InputSource is =
-                    new InputSource("file://" + file.getAbsolutePath());
+                        new InputSource("file://" + file.getAbsolutePath());
                 FileInputStream fis = new FileInputStream(file);
                 is.setByteStream(fis);
                 digester.push(this);
                 digester.parse(is);
                 fis.close();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 log.error("Catalina.stop: ", e);
                 System.exit(1);
             }
-        } else {
+        } else
+        {
             // Server object already present. Must be running as a service
-            if (s instanceof Lifecycle) {
-                try {
+            if (s instanceof Lifecycle)
+            {
+                try
+                {
                     ((Lifecycle) s).stop();
-                } catch (LifecycleException e) {
+                }
+                catch (LifecycleException e)
+                {
                     log.error("Catalina.stop: ", e);
                 }
                 return;
@@ -416,8 +431,10 @@ public class Catalina extends Embedded {
 
         // Stop the existing server
         s = getServer();
-        try {
-            if (s.getPort()>0) { 
+        try
+        {
+            if (s.getPort() > 0)
+            {
                 String hostAddress = InetAddress.getByName("localhost").getHostAddress();
                 Socket socket = new Socket(hostAddress, getServer().getPort());
                 OutputStream stream = socket.getOutputStream();
@@ -427,40 +444,47 @@ public class Catalina extends Embedded {
                 stream.flush();
                 stream.close();
                 socket.close();
-            } else {
+            } else
+            {
                 log.error(sm.getString("catalina.stopServer"));
                 System.exit(1);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             log.error("Catalina.stop: ", e);
             System.exit(1);
         }
 
     }
 
-
     /**
      * Set the <code>catalina.base</code> System property to the current
      * working directory if it has not been set.
+     *
      * @deprecated Use initDirs()
      */
-    public void setCatalinaBase() {
+    public void setCatalinaBase()
+    {
         initDirs();
     }
 
     /**
      * Set the <code>catalina.home</code> System property to the current
      * working directory if it has not been set.
+     *
      * @deprecated Use initDirs()
      */
-    public void setCatalinaHome() {
+    public void setCatalinaHome()
+    {
         initDirs();
     }
 
     /**
      * Start a new server instance.
      */
-    public void load() {
+    public void load()
+    {
 
         long t1 = System.nanoTime();
 
@@ -476,56 +500,72 @@ public class Catalina extends Embedded {
         InputSource inputSource = null;
         InputStream inputStream = null;
         File file = null;
-        try {
+        try
+        {
             file = configFile();
             inputStream = new FileInputStream(file);
             inputSource = new InputSource("file://" + file.getAbsolutePath());
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             ;
         }
-        if (inputStream == null) {
-            try {
+        if (inputStream == null)
+        {
+            try
+            {
                 inputStream = getClass().getClassLoader()
-                    .getResourceAsStream(getConfigFile());
+                        .getResourceAsStream(getConfigFile());
                 inputSource = new InputSource
-                    (getClass().getClassLoader()
-                     .getResource(getConfigFile()).toString());
-            } catch (Exception e) {
+                        (getClass().getClassLoader()
+                                .getResource(getConfigFile()).toString());
+            }
+            catch (Exception e)
+            {
                 ;
             }
         }
 
         // This should be included in catalina.jar
         // Alternative: don't bother with xml, just create it manually.
-        if( inputStream==null ) {
-            try {
+        if (inputStream == null)
+        {
+            try
+            {
                 inputStream = getClass().getClassLoader()
-                .getResourceAsStream("server-embed.xml");
+                        .getResourceAsStream("server-embed.xml");
                 inputSource = new InputSource
-                (getClass().getClassLoader()
-                        .getResource("server-embed.xml").toString());
-            } catch (Exception e) {
+                        (getClass().getClassLoader()
+                                .getResource("server-embed.xml").toString());
+            }
+            catch (Exception e)
+            {
                 ;
             }
         }
-        
 
-        if ((inputStream == null) && (file != null)) {
+
+        if ((inputStream == null) && (file != null))
+        {
             log.warn("Can't load server.xml from " + file.getAbsolutePath());
-            if (file.exists() && !file.canRead()) {
+            if (file.exists() && !file.canRead())
+            {
                 log.warn("Permissions incorrect, read permission is not allowed on the file.");
             }
             return;
         }
 
-        try {
+        try
+        {
             inputSource.setByteStream(inputStream);
             digester.push(this);
             digester.parse(inputSource);
             inputStream.close();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             log.warn("Catalina.start using "
-                               + getConfigFile() + ": " , e);
+                    + getConfigFile() + ": ", e);
             return;
         }
 
@@ -533,161 +573,179 @@ public class Catalina extends Embedded {
         initStreams();
 
         // Start the new server
-        if (getServer() instanceof Lifecycle) {
-            try {
+        if (getServer() instanceof Lifecycle)
+        {
+            try
+            {
                 getServer().initialize();
-            } catch (LifecycleException e) {
+            }
+            catch (LifecycleException e)
+            {
                 if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE"))
                     throw new java.lang.Error(e);
-                else   
+                else
                     log.error("Catalina.start", e);
-                
+
             }
         }
 
         long t2 = System.nanoTime();
-        if(log.isInfoEnabled())
+        if (log.isInfoEnabled())
             log.info("Initialization processed in " + ((t2 - t1) / 1000000) + " ms");
 
     }
 
-
     /* 
      * Load using arguments
      */
-    public void load(String args[]) {
+    public void load(String args[])
+    {
 
-        try {
+        try
+        {
             if (arguments(args))
                 load();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace(System.out);
         }
     }
 
-    public void create() {
+    public void create()
+    {
 
     }
 
-    public void destroy() {
+    public void destroy()
+    {
 
     }
 
     /**
      * Start a new server instance.
      */
-    public void start() {
+    public void start()
+    {
 
-        if (getServer() == null) {
+        if (getServer() == null)
+        {
             load();
         }
 
-        if (getServer() == null) {
+        if (getServer() == null)
+        {
             log.fatal("Cannot start server. Server instance is not configured.");
             return;
         }
 
         long t1 = System.nanoTime();
-        
+
         // Start the new server
-        if (getServer() instanceof Lifecycle) {
-            try {
+        if (getServer() instanceof Lifecycle)
+        {
+            try
+            {
                 ((Lifecycle) getServer()).start();
-            } catch (LifecycleException e) {
+            }
+            catch (LifecycleException e)
+            {
                 log.error("Catalina.start: ", e);
             }
         }
 
         long t2 = System.nanoTime();
-        if(log.isInfoEnabled())
+        if (log.isInfoEnabled())
             log.info("Server startup in " + ((t2 - t1) / 1000000) + " ms");
 
-        try {
+        try
+        {
             // Register shutdown hook
-            if (useShutdownHook) {
-                if (shutdownHook == null) {
+            if (useShutdownHook)
+            {
+                if (shutdownHook == null)
+                {
                     shutdownHook = new CatalinaShutdownHook();
                 }
                 Runtime.getRuntime().addShutdownHook(shutdownHook);
-                
+
                 // If JULI is being used, disable JULI's shutdown hook since
                 // shutdown hooks run in parallel and log messages may be lost
                 // if JULI's hook completes before the CatalinaShutdownHook()
                 LogManager logManager = LogManager.getLogManager();
-                if (logManager instanceof ClassLoaderLogManager) {
+                if (logManager instanceof ClassLoaderLogManager)
+                {
                     ((ClassLoaderLogManager) logManager).setUseShutdownHook(
                             false);
                 }
             }
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             // This will fail on JDK 1.2. Ignoring, as Tomcat can run
             // fine without the shutdown hook.
         }
 
-        if (await) {
+        if (await)
+        {
             await();
             stop();
         }
 
     }
 
-
     /**
      * Stop an existing server instance.
      */
-    public void stop() {
+    public void stop()
+    {
 
-        try {
+        try
+        {
             // Remove the ShutdownHook first so that server.stop() 
             // doesn't get invoked twice
-            if (useShutdownHook) {
+            if (useShutdownHook)
+            {
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
 
                 // If JULI is being used, re-enable JULI's shutdown to ensure
                 // log messages are not lost
                 LogManager logManager = LogManager.getLogManager();
-                if (logManager instanceof ClassLoaderLogManager) {
+                if (logManager instanceof ClassLoaderLogManager)
+                {
                     ((ClassLoaderLogManager) logManager).setUseShutdownHook(
                             true);
                 }
             }
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             // This will fail on JDK 1.2. Ignoring, as Tomcat can run
             // fine without the shutdown hook.
         }
 
         // Shut down the server
-        if (getServer() instanceof Lifecycle) {
-            try {
+        if (getServer() instanceof Lifecycle)
+        {
+            try
+            {
                 ((Lifecycle) getServer()).stop();
-            } catch (LifecycleException e) {
+            }
+            catch (LifecycleException e)
+            {
                 log.error("Catalina.stop", e);
             }
         }
 
     }
 
-
     /**
      * Await and shutdown.
      */
-    public void await() {
+    public void await()
+    {
 
         getServer().await();
-
-    }
-
-
-    /**
-     * Print usage information for this application.
-     */
-    protected void usage() {
-
-        System.out.println
-            ("usage: java org.apache.catalina.startup.Catalina"
-             + " [ -config {pathname} ]"
-             + " [ -nonaming ] "
-             + " { -help | start | stop }");
 
     }
 
@@ -695,23 +753,47 @@ public class Catalina extends Embedded {
     // --------------------------------------- CatalinaShutdownHook Inner Class
 
     // XXX Should be moved to embedded !
+
+    /**
+     * Print usage information for this application.
+     */
+    protected void usage()
+    {
+
+        System.out.println
+                ("usage: java org.apache.catalina.startup.Catalina"
+                        + " [ -config {pathname} ]"
+                        + " [ -nonaming ] "
+                        + " { -help | start | stop }");
+
+    }
+
     /**
      * Shutdown hook which will perform a clean shutdown of Catalina if needed.
      */
-    protected class CatalinaShutdownHook extends Thread {
+    protected class CatalinaShutdownHook extends Thread
+    {
 
-        public void run() {
-            try {
-                if (getServer() != null) {
+        public void run()
+        {
+            try
+            {
+                if (getServer() != null)
+                {
                     Catalina.this.stop();
                 }
-            } catch (Throwable ex) {
+            }
+            catch (Throwable ex)
+            {
                 log.error(sm.getString("catalina.shutdownHookFail"), ex);
-            } finally {
+            }
+            finally
+            {
                 // If JULI is used, shut JULI down *after* the server shuts down
                 // so log messages aren't lost
                 LogManager logManager = LogManager.getLogManager();
-                if (logManager instanceof ClassLoaderLogManager) {
+                if (logManager instanceof ClassLoaderLogManager)
+                {
                     ((ClassLoaderLogManager) logManager).shutdown();
                 }
             }
@@ -719,10 +801,6 @@ public class Catalina extends Embedded {
         }
 
     }
-    
-    
-    private static org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog( Catalina.class );
 
 }
 
@@ -735,18 +813,21 @@ public class Catalina extends Embedded {
  * which must be a <code>Container</code>.
  */
 
-final class SetParentClassLoaderRule extends Rule {
+final class SetParentClassLoaderRule extends Rule
+{
 
-    public SetParentClassLoaderRule(ClassLoader parentClassLoader) {
+    ClassLoader parentClassLoader = null;
+
+    public SetParentClassLoaderRule(ClassLoader parentClassLoader)
+    {
 
         this.parentClassLoader = parentClassLoader;
 
     }
 
-    ClassLoader parentClassLoader = null;
-
     public void begin(String namespace, String name, Attributes attributes)
-        throws Exception {
+            throws Exception
+    {
 
         if (digester.getLogger().isDebugEnabled())
             digester.getLogger().debug("Setting parent class loader");

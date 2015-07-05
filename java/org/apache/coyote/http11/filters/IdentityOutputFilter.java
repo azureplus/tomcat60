@@ -17,20 +17,20 @@
 
 package org.apache.coyote.http11.filters;
 
-import java.io.IOException;
-
-import org.apache.tomcat.util.buf.ByteChunk;
-
 import org.apache.coyote.OutputBuffer;
 import org.apache.coyote.Response;
 import org.apache.coyote.http11.OutputFilter;
+import org.apache.tomcat.util.buf.ByteChunk;
+
+import java.io.IOException;
 
 /**
  * Identity output filter.
- * 
+ *
  * @author Remy Maucherat
  */
-public class IdentityOutputFilter implements OutputFilter {
+public class IdentityOutputFilter implements OutputFilter
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -43,7 +43,8 @@ public class IdentityOutputFilter implements OutputFilter {
     // ----------------------------------------------------- Static Initializer
 
 
-    static {
+    static
+    {
         ENCODING.setBytes(ENCODING_NAME.getBytes(), 0, ENCODING_NAME.length());
     }
 
@@ -75,7 +76,8 @@ public class IdentityOutputFilter implements OutputFilter {
     /**
      * Get content length.
      */
-    public long getContentLength() {
+    public long getContentLength()
+    {
         return contentLength;
     }
 
@@ -83,7 +85,8 @@ public class IdentityOutputFilter implements OutputFilter {
     /**
      * Get remaining bytes.
      */
-    public long getRemaining() {
+    public long getRemaining()
+    {
         return remaining;
     }
 
@@ -93,36 +96,43 @@ public class IdentityOutputFilter implements OutputFilter {
 
     /**
      * Write some bytes.
-     * 
+     *
      * @return number of bytes written by the filter
      */
     public int doWrite(ByteChunk chunk, Response res)
-        throws IOException {
+            throws IOException
+    {
 
         int result = -1;
 
-        if (contentLength >= 0) {
-            if (remaining > 0) {
+        if (contentLength >= 0)
+        {
+            if (remaining > 0)
+            {
                 result = chunk.getLength();
-                if (result > remaining) {
+                if (result > remaining)
+                {
                     // The chunk is longer than the number of bytes remaining
                     // in the body; changing the chunk length to the number
                     // of bytes remaining
-                    chunk.setBytes(chunk.getBytes(), chunk.getStart(), 
-                                   (int) remaining);
+                    chunk.setBytes(chunk.getBytes(), chunk.getStart(),
+                            (int) remaining);
                     result = (int) remaining;
                     remaining = 0;
-                } else {
+                } else
+                {
                     remaining = remaining - result;
                 }
                 buffer.doWrite(chunk, res);
-            } else {
+            } else
+            {
                 // No more bytes left to be written : return -1 and clear the 
                 // buffer
                 chunk.recycle();
                 result = -1;
             }
-        } else {
+        } else
+        {
             // If no content length was set, just write the bytes
             buffer.doWrite(chunk, res);
             result = chunk.getLength();
@@ -137,11 +147,12 @@ public class IdentityOutputFilter implements OutputFilter {
 
 
     /**
-     * Some filters need additional parameters from the response. All the 
+     * Some filters need additional parameters from the response. All the
      * necessary reading can occur in that method, as this method is called
      * after the response header processing is complete.
      */
-    public void setResponse(Response response) {
+    public void setResponse(Response response)
+    {
         contentLength = response.getContentLengthLong();
         remaining = contentLength;
     }
@@ -150,7 +161,8 @@ public class IdentityOutputFilter implements OutputFilter {
     /**
      * Set the next buffer in the filter pipeline.
      */
-    public void setBuffer(OutputBuffer buffer) {
+    public void setBuffer(OutputBuffer buffer)
+    {
         this.buffer = buffer;
     }
 
@@ -160,7 +172,8 @@ public class IdentityOutputFilter implements OutputFilter {
      * buffer.doWrite during the execution of this method.
      */
     public long end()
-        throws IOException {
+            throws IOException
+    {
 
         if (remaining > 0)
             return remaining;
@@ -172,17 +185,19 @@ public class IdentityOutputFilter implements OutputFilter {
     /**
      * Make the filter ready to process the next request.
      */
-    public void recycle() {
+    public void recycle()
+    {
         contentLength = -1;
         remaining = 0;
     }
 
 
     /**
-     * Return the name of the associated encoding; Here, the value is 
+     * Return the name of the associated encoding; Here, the value is
      * "identity".
      */
-    public ByteChunk getEncodingName() {
+    public ByteChunk getEncodingName()
+    {
         return ENCODING;
     }
 

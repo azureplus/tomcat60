@@ -24,78 +24,77 @@ import org.apache.jk.core.MsgContext;
 import java.io.IOException;
 
 
-
-
 /**
  * Dispatch based on the message type. ( XXX make it more generic,
  * now it's specific to ajp13 ).
- * 
+ *
  * @author Costin Manolache
  */
 public class HandlerDispatch extends JkHandler
 {
-    private static org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog( HandlerDispatch.class );
-
-    public HandlerDispatch() 
+    static final int MAX_HANDLERS = 32;
+    static final int RESERVED = 16;  // reserved names, backward compat
+    private static org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(HandlerDispatch.class);
+    JkHandler handlers[] = new JkHandler[MAX_HANDLERS];
+    String handlerNames[] = new String[MAX_HANDLERS];
+    int currentId = RESERVED;
+    public HandlerDispatch()
     {
     }
 
-    public void init() {
+    public void init()
+    {
     }
 
-    JkHandler handlers[]=new JkHandler[MAX_HANDLERS];
-    String handlerNames[]=new String[MAX_HANDLERS];
-    
-    static final int MAX_HANDLERS=32;    
-    static final int RESERVED=16;  // reserved names, backward compat
-    int currentId=RESERVED;
-
-    public int registerMessageType( int id, String name, JkHandler h,
-                                    String sig[] )
+    public int registerMessageType(int id, String name, JkHandler h,
+                                   String sig[])
     {
-        if( log.isDebugEnabled() )
-            log.debug( "Register message " + id + " " + h.getName() +
-                 " " + h.getClass().getName());
-	if( id < 0 ) {
-	    // try to find it by name
-	    for( int i=0; i< handlerNames.length; i++ ) {
-                if( handlerNames[i]==null ) continue;
-                if( name.equals( handlerNames[i] ) )
+        if (log.isDebugEnabled())
+            log.debug("Register message " + id + " " + h.getName() +
+                    " " + h.getClass().getName());
+        if (id < 0)
+        {
+            // try to find it by name
+            for (int i = 0; i < handlerNames.length; i++)
+            {
+                if (handlerNames[i] == null) continue;
+                if (name.equals(handlerNames[i]))
                     return i;
             }
-	    handlers[currentId]=h;
-            handlerNames[currentId]=name;
-	    currentId++;
-	    return currentId;
-	}
-	handlers[id]=h;
-        handlerNames[currentId]=name;
-	return id;
+            handlers[currentId] = h;
+            handlerNames[currentId] = name;
+            currentId++;
+            return currentId;
+        }
+        handlers[id] = h;
+        handlerNames[currentId] = name;
+        return id;
     }
 
-    
+
     // -------------------- Incoming message --------------------
 
-    public int invoke(Msg msg, MsgContext ep ) 
-        throws IOException
+    public int invoke(Msg msg, MsgContext ep)
+            throws IOException
     {
-        int type=msg.peekByte();
-        ep.setType( type );
-        
-        if( type > handlers.length ||
-            handlers[type]==null ) {
-	    if( log.isDebugEnabled() )
-                log.debug( "Invalid handler " + type );
-	    return ERROR;
-	}
+        int type = msg.peekByte();
+        ep.setType(type);
 
-        if( log.isDebugEnabled() )
-            log.debug( "Received " + type + " " + handlers[type].getName());
-        
-	JkHandler handler=handlers[type];
-        
-        return handler.invoke( msg, ep );
+        if (type > handlers.length ||
+                handlers[type] == null)
+        {
+            if (log.isDebugEnabled())
+                log.debug("Invalid handler " + type);
+            return ERROR;
+        }
+
+        if (log.isDebugEnabled())
+            log.debug("Received " + type + " " + handlers[type].getName());
+
+        JkHandler handler = handlers[type];
+
+        return handler.invoke(msg, ep);
     }
 
- }
+}

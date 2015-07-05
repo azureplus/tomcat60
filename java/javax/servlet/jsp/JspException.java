@@ -22,24 +22,27 @@ package javax.servlet.jsp;
  * machinery.
  */
 
-public class JspException extends Exception {
+public class JspException extends Exception
+{
 
     /**
      * Construct a JspException.
      */
-    public JspException() {
+    public JspException()
+    {
     }
 
 
     /**
      * Constructs a new JSP exception with the
-     * specified message. The message can be written 
-     * to the server log and/or displayed for the user. 
+     * specified message. The message can be written
+     * to the server log and/or displayed for the user.
      *
-     * @param msg   a <code>String</code> specifying the text of the exception
-     *              message
+     * @param msg a <code>String</code> specifying the text of the exception
+     *            message
      */
-    public JspException(String msg) {
+    public JspException(String msg)
+    {
         super(msg);
     }
 
@@ -49,18 +52,17 @@ public class JspException extends Exception {
      * message and cause. The cause is saved for later retrieval by the
      * <code>java.lang.Throwable.getCause()</code> and {@link #getRootCause()}
      * methods.
-     * 
+     *
+     * @param message a <code>String</code> containing the text of the
+     *                exception message
+     * @param cause   the <code>Throwable</code> exception that
+     *                interfered with the JSP's normal operation,
+     *                making this JSP exception necessary
      * @see <code>java.lang.Exception.Exception(String, Throwable)</code>
-     *
-     * @param message       a <code>String</code> containing the text of the
-     *                      exception message
-     *
-     * @param cause         the <code>Throwable</code> exception that
-     *                      interfered with the JSP's normal operation,
-     *                      making this JSP exception necessary
      */
-    
-    public JspException(String message, Throwable cause) {
+
+    public JspException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
@@ -70,29 +72,29 @@ public class JspException extends Exception {
      * The cause is saved for later retrieval by the
      * <code>java.lang.Throwable.getCause()</code> and {@link #getRootCause()}
      * methods.
-     * 
-     * @see <code>java.lang.Exception.Exception(Throwable)</code>
      *
-     * @param cause         the <code>Throwable</code> exception that
-     *                      interfered with the JSP's normal operation, making
-     *                      the JSP exception necessary
+     * @param cause the <code>Throwable</code> exception that
+     *              interfered with the JSP's normal operation, making
+     *              the JSP exception necessary
+     * @see <code>java.lang.Exception.Exception(Throwable)</code>
      */
 
-    public JspException(Throwable cause) {
+    public JspException(Throwable cause)
+    {
         super(cause);
     }
 
-    
+
     /**
+     * @return the <code>Throwable</code> that caused this JSP exception
      * @deprecated As of JSP 2.1, replaced by
      * <code>java.lang.Throwable.getCause()</code>
-     *  
+     * <p/>
      * Returns the exception that caused this JSP exception.
-     *
-     * @return  the <code>Throwable</code> that caused this JSP exception
      */
-    
-    public Throwable getRootCause() {
+
+    public Throwable getRootCause()
+    {
         return getCause();
     }
 }

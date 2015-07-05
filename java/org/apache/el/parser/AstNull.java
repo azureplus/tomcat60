@@ -25,20 +25,23 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstNull extends SimpleNode {
-    public AstNull(int id) {
+public final class AstNull extends SimpleNode
+{
+    public AstNull(int id)
+    {
         super(id);
     }
 
     public Class getType(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return null;
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return null;
     }
 }

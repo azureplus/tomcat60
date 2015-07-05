@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.tomcat.util.digester;
@@ -25,7 +25,8 @@ package org.apache.tomcat.util.digester;
  * logic in the <code>addRuleSet()</code> implementation.</p>
  */
 
-public abstract class RuleSetBase implements RuleSet {
+public abstract class RuleSetBase implements RuleSet
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -45,7 +46,8 @@ public abstract class RuleSetBase implements RuleSet {
      * Return the namespace URI that will be applied to all Rule instances
      * created from this RuleSet.
      */
-    public String getNamespaceURI() {
+    public String getNamespaceURI()
+    {
 
         return (this.namespaceURI);
 
@@ -62,7 +64,7 @@ public abstract class RuleSetBase implements RuleSet {
      * by a Digester instance.
      *
      * @param digester Digester instance to which the new Rule instances
-     *  should be added.
+     *                 should be added.
      */
     public abstract void addRuleInstances(Digester digester);
 

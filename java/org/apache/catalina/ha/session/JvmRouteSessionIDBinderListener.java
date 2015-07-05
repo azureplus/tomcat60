@@ -17,43 +17,35 @@
 
 package org.apache.catalina.ha.session;
 
-import java.io.IOException;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
-import org.apache.catalina.Engine;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.Session;
+import org.apache.catalina.*;
+import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.ha.ClusterListener;
 import org.apache.catalina.ha.ClusterMessage;
-import org.apache.catalina.core.StandardEngine;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.res.StringManager;
 
+import java.io.IOException;
+
 /**
  * Receive SessionID cluster change from other backup node after primary session
  * node is failed.
- * 
- * @author Peter Rossbach
  *
+ * @author Peter Rossbach
  */
-public class JvmRouteSessionIDBinderListener extends ClusterListener {
- 
-    private static final Log log =
-        LogFactory.getLog(JvmRouteSessionIDBinderListener.class);
-    
-    private static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+public class JvmRouteSessionIDBinderListener extends ClusterListener
+{
 
     /**
      * The descriptive information about this implementation.
      */
     protected static final String info = "org.apache.catalina.ha.session.JvmRouteSessionIDBinderListener/1.1";
+    private static final Log log =
+            LogFactory.getLog(JvmRouteSessionIDBinderListener.class);
+    private static final StringManager sm =
+            StringManager.getManager(Constants.Package);
 
     //--Instance Variables--------------------------------------
-
-
     protected boolean started = false;
 
     /**
@@ -63,7 +55,8 @@ public class JvmRouteSessionIDBinderListener extends ClusterListener {
 
     //--Constructor---------------------------------------------
 
-    public JvmRouteSessionIDBinderListener() {
+    public JvmRouteSessionIDBinderListener()
+    {
     }
 
     //--Logic---------------------------------------------------
@@ -71,7 +64,8 @@ public class JvmRouteSessionIDBinderListener extends ClusterListener {
     /**
      * Return descriptive information about this implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -80,16 +74,18 @@ public class JvmRouteSessionIDBinderListener extends ClusterListener {
     /**
      * @return Returns the numberOfSessions.
      */
-    public long getNumberOfSessions() {
+    public long getNumberOfSessions()
+    {
         return numberOfSessions;
     }
 
     /**
      * Add this Mover as Cluster Listener ( receiver)
-     * 
+     *
      * @throws LifecycleException
      */
-    public void start() throws LifecycleException {
+    public void start() throws LifecycleException
+    {
         if (started)
             return;
         getCluster().addClusterListener(this);
@@ -100,10 +96,11 @@ public class JvmRouteSessionIDBinderListener extends ClusterListener {
 
     /**
      * Remove this from Cluster Listener
-     * 
+     *
      * @throws LifecycleException
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws LifecycleException
+    {
         started = false;
         getCluster().removeClusterListener(this);
         if (log.isInfoEnabled())
@@ -113,12 +110,13 @@ public class JvmRouteSessionIDBinderListener extends ClusterListener {
     /**
      * Callback from the cluster, when a message is received, The cluster will
      * broadcast it invoking the messageReceived on the receiver.
-     * 
-     * @param msg
-     *            ClusterMessage - the message received from the cluster
+     *
+     * @param msg ClusterMessage - the message received from the cluster
      */
-    public void messageReceived(ClusterMessage msg) {
-        if (msg instanceof SessionIDMessage && msg != null) {
+    public void messageReceived(ClusterMessage msg)
+    {
+        if (msg instanceof SessionIDMessage && msg != null)
+        {
             SessionIDMessage sessionmsg = (SessionIDMessage) msg;
             if (log.isDebugEnabled())
                 log.debug(sm.getString(
@@ -127,26 +125,34 @@ public class JvmRouteSessionIDBinderListener extends ClusterListener {
                                 .getBackupSessionID(), sessionmsg
                                 .getContextPath()));
             Container container = getCluster().getContainer();
-            Container host = null ;
-            if(container instanceof Engine) {
+            Container host = null;
+            if (container instanceof Engine)
+            {
                 host = container.findChild(sessionmsg.getHost());
-            } else {
-                host = container ;
+            } else
+            {
+                host = container;
             }
-            if (host != null) {
+            if (host != null)
+            {
                 Context context = (Context) host.findChild(sessionmsg
                         .getContextPath());
-                if (context != null) {
-                    try {
+                if (context != null)
+                {
+                    try
+                    {
                         Session session = context.getManager().findSession(
                                 sessionmsg.getOrignalSessionID());
-                        if (session != null) {
+                        if (session != null)
+                        {
                             session.setId(sessionmsg.getBackupSessionID());
                         } else if (log.isInfoEnabled())
                             log.info(sm.getString("jvmRoute.lostSession",
                                     sessionmsg.getOrignalSessionID(),
                                     sessionmsg.getContextPath()));
-                    } catch (IOException e) {
+                    }
+                    catch (IOException e)
+                    {
                         log.error(e);
                     }
 
@@ -162,14 +168,14 @@ public class JvmRouteSessionIDBinderListener extends ClusterListener {
 
     /**
      * Accept only SessionIDMessages
-     * 
-     * @param msg
-     *            ClusterMessage
+     *
+     * @param msg ClusterMessage
      * @return boolean - returns true to indicate that messageReceived should be
-     *         invoked. If false is returned, the messageReceived method will
-     *         not be invoked.
+     * invoked. If false is returned, the messageReceived method will
+     * not be invoked.
      */
-    public boolean accept(ClusterMessage msg) {
+    public boolean accept(ClusterMessage msg)
+    {
         return (msg instanceof SessionIDMessage);
     }
 }

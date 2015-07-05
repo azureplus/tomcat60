@@ -28,10 +28,10 @@ import java.io.Serializable;
  *
  * @author Craig R. McClanahan
  * @author Peter Rossbach (pero@apache.org)
- *
  */
 
-public class ContextLocalEjb extends ResourceBase implements Serializable {
+public class ContextLocalEjb extends ResourceBase implements Serializable
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -40,72 +40,80 @@ public class ContextLocalEjb extends ResourceBase implements Serializable {
      * The name of the EJB home implementation class.
      */
     private String home = null;
-
-    public String getHome() {
-        return (this.home);
-    }
-
-    public void setHome(String home) {
-        this.home = home;
-    }
-
-
     /**
      * The link to a J2EE EJB definition.
      */
     private String link = null;
-
-    public String getLink() {
-        return (this.link);
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
-
-
     /**
      * The name of the EJB local implementation class.
      */
     private String local = null;
 
-    public String getLocal() {
+    public String getHome()
+    {
+        return (this.home);
+    }
+
+    public void setHome(String home)
+    {
+        this.home = home;
+    }
+
+    public String getLink()
+    {
+        return (this.link);
+    }
+
+    public void setLink(String link)
+    {
+        this.link = link;
+    }
+
+    public String getLocal()
+    {
         return (this.local);
     }
 
-    public void setLocal(String local) {
+    public void setLocal(String local)
+    {
         this.local = local;
     }
 
-    
+
     // --------------------------------------------------------- Public Methods
 
 
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ContextLocalEjb[");
         sb.append("name=");
         sb.append(getName());
-        if (getDescription() != null) {
+        if (getDescription() != null)
+        {
             sb.append(", description=");
             sb.append(getDescription());
         }
-        if (getType() != null) {
+        if (getType() != null)
+        {
             sb.append(", type=");
             sb.append(getType());
         }
-        if (home != null) {
+        if (home != null)
+        {
             sb.append(", home=");
             sb.append(home);
         }
-        if (link != null) {
+        if (link != null)
+        {
             sb.append(", link=");
             sb.append(link);
         }
-        if (local != null) {
+        if (local != null)
+        {
             sb.append(", local=");
             sb.append(local);
         }

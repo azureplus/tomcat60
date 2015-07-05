@@ -24,7 +24,8 @@ import org.apache.tomcat.util.buf.MessageBytes;
  *
  * @author Remy Maucherat
  */
-public class MappingData {
+public class MappingData
+{
 
     public Object host = null;
     public Object context = null;
@@ -38,7 +39,8 @@ public class MappingData {
 
     public MessageBytes redirectPath = MessageBytes.newInstance();
 
-    public void recycle() {
+    public void recycle()
+    {
         host = null;
         context = null;
         wrapper = null;

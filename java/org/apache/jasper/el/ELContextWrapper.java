@@ -24,54 +24,65 @@ import java.util.Locale;
 
 /**
  * Simple ELContextWrapper for runtime evaluation of EL w/ dynamic FunctionMappers
- * 
+ *
  * @author jhook
  */
-public final class ELContextWrapper extends ELContext {
+public final class ELContextWrapper extends ELContext
+{
 
     private final ELContext target;
     private final FunctionMapper fnMapper;
-    
-    public ELContextWrapper(ELContext target, FunctionMapper fnMapper) {
+
+    public ELContextWrapper(ELContext target, FunctionMapper fnMapper)
+    {
         this.target = target;
         this.fnMapper = fnMapper;
     }
 
-    public ELResolver getELResolver() {
+    public ELResolver getELResolver()
+    {
         return this.target.getELResolver();
     }
 
-    public FunctionMapper getFunctionMapper() {
+    public FunctionMapper getFunctionMapper()
+    {
         if (this.fnMapper != null) return this.fnMapper;
         return this.target.getFunctionMapper();
     }
 
-    public VariableMapper getVariableMapper() {
+    public VariableMapper getVariableMapper()
+    {
         return this.target.getVariableMapper();
     }
 
-    public Object getContext(Class key) {
+    public Object getContext(Class key)
+    {
         return this.target.getContext(key);
     }
 
-    public Locale getLocale() {
+    public Locale getLocale()
+    {
         return this.target.getLocale();
     }
 
-    public boolean isPropertyResolved() {
-        return this.target.isPropertyResolved();
-    }
-
-    public void putContext(Class key, Object contextObject) throws NullPointerException {
-        this.target.putContext(key, contextObject);
-    }
-
-    public void setLocale(Locale locale) {
+    public void setLocale(Locale locale)
+    {
         this.target.setLocale(locale);
     }
 
-    public void setPropertyResolved(boolean resolved) {
+    public boolean isPropertyResolved()
+    {
+        return this.target.isPropertyResolved();
+    }
+
+    public void setPropertyResolved(boolean resolved)
+    {
         this.target.setPropertyResolved(resolved);
+    }
+
+    public void putContext(Class key, Object contextObject) throws NullPointerException
+    {
+        this.target.putContext(key, contextObject);
     }
 
 }

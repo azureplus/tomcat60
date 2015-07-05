@@ -22,17 +22,17 @@ import org.apache.catalina.tribes.Member;
 import org.apache.catalina.tribes.group.InterceptorPayload;
 
 
-
 /**
  * A fast queue that remover thread lock the adder thread. <br/>Limit the queue
  * length when you have strange producer thread problemes.
- * 
+ * <p/>
  * FIXME add i18n support to log messages
+ *
  * @author Rainer Jung
  * @author Peter Rossbach
- *
  */
-public class FastQueue {
+public class FastQueue
+{
 
     private static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(FastQueue.class);
 
@@ -82,7 +82,7 @@ public class FastQueue {
      */
     private long addWaitTimeout = 10000L;
 
-    
+
     /**
      * removeWaitTimeout for consumer
      */
@@ -94,12 +94,12 @@ public class FastQueue {
     private boolean enabled = true;
 
     /**
-     *  max queue size
+     * max queue size
      */
     private int maxSize = 0;
 
     /**
-     *  avg size sample interval
+     * avg size sample interval
      */
     private int sampleInterval = 100;
 
@@ -107,7 +107,8 @@ public class FastQueue {
      * Generate Queue SingleRemoveSynchronizedAddLock and set add and wait
      * Timeouts
      */
-    public FastQueue() {
+    public FastQueue()
+    {
         lock = new SingleRemoveSynchronizedAddLock();
         lock.setAddWaitTimeout(addWaitTimeout);
         lock.setRemoveWaitTimeout(removeWaitTimeout);
@@ -115,60 +116,69 @@ public class FastQueue {
 
     /**
      * get current add wait timeout
-     * 
+     *
      * @return current wait timeout
      */
-    public long getAddWaitTimeout() {
+    public long getAddWaitTimeout()
+    {
         addWaitTimeout = lock.getAddWaitTimeout();
         return addWaitTimeout;
     }
 
     /**
      * Set add wait timeout (default 10000 msec)
-     * 
+     *
      * @param timeout
      */
-    public void setAddWaitTimeout(long timeout) {
+    public void setAddWaitTimeout(long timeout)
+    {
         addWaitTimeout = timeout;
         lock.setAddWaitTimeout(addWaitTimeout);
     }
 
     /**
      * get current remove wait timeout
-     * 
+     *
      * @return The timeout
      */
-    public long getRemoveWaitTimeout() {
+    public long getRemoveWaitTimeout()
+    {
         removeWaitTimeout = lock.getRemoveWaitTimeout();
         return removeWaitTimeout;
     }
 
     /**
      * set remove wait timeout ( default 30000 msec)
-     * 
+     *
      * @param timeout
      */
-    public void setRemoveWaitTimeout(long timeout) {
+    public void setRemoveWaitTimeout(long timeout)
+    {
         removeWaitTimeout = timeout;
         lock.setRemoveWaitTimeout(removeWaitTimeout);
     }
 
 
-    public int getMaxQueueLength() {
+    public int getMaxQueueLength()
+    {
         return maxQueueLength;
     }
 
-    public void setMaxQueueLength(int length) {
+    public void setMaxQueueLength(int length)
+    {
         maxQueueLength = length;
     }
 
-    public boolean isEnabled() {
+    public boolean isEnabled()
+    {
         return enabled;
     }
 
-    public void setEnabled(boolean enable) {
+    public void setEnabled(boolean enable)
+    {
         enabled = enable;
-        if (!enabled) {
+        if (!enabled)
+        {
             lock.abortRemove();
             last = first = null;
         }
@@ -177,66 +187,76 @@ public class FastQueue {
     /**
      * @return Returns the checkLock.
      */
-    public boolean isCheckLock() {
+    public boolean isCheckLock()
+    {
         return checkLock;
     }
 
     /**
      * @param checkLock The checkLock to set.
      */
-    public void setCheckLock(boolean checkLock) {
+    public void setCheckLock(boolean checkLock)
+    {
         this.checkLock = checkLock;
     }
 
-    
+
     /**
      * @return The max size
      */
-    public int getMaxSize() {
+    public int getMaxSize()
+    {
         return maxSize;
     }
 
     /**
      * @param size
      */
-    public void setMaxSize(int size) {
+    public void setMaxSize(int size)
+    {
         maxSize = size;
     }
 
-    
+
     /**
-     * unlock queue for next add 
+     * unlock queue for next add
      */
-    public void unlockAdd() {
+    public void unlockAdd()
+    {
         lock.unlockAdd(size > 0 ? true : false);
     }
 
     /**
-     * unlock queue for next remove 
+     * unlock queue for next remove
      */
-    public void unlockRemove() {
+    public void unlockRemove()
+    {
         lock.unlockRemove();
     }
 
     /**
      * start queuing
      */
-    public void start() {
+    public void start()
+    {
         setEnabled(true);
     }
 
     /**
      * start queuing
      */
-    public void stop() {
+    public void stop()
+    {
         setEnabled(false);
     }
 
-    public int getSize() {
+    public int getSize()
+    {
         return size;
     }
 
-    public SingleRemoveSynchronizedAddLock getLock() {
+    public SingleRemoveSynchronizedAddLock getLock()
+    {
         return lock;
     }
 
@@ -244,25 +264,31 @@ public class FastQueue {
      * Add new data to the queue
      * FIXME extract some method
      */
-    public boolean add(ChannelMessage msg, Member[] destination, InterceptorPayload payload) {
+    public boolean add(ChannelMessage msg, Member[] destination, InterceptorPayload payload)
+    {
         boolean ok = true;
         long time = 0;
 
-        if (!enabled) {
+        if (!enabled)
+        {
             if (log.isInfoEnabled())
                 log.info("FastQueue.add: queue disabled, add aborted");
             return false;
         }
 
-        if (timeWait) {
+        if (timeWait)
+        {
             time = System.currentTimeMillis();
         }
         lock.lockAdd();
-        try {
-            if (log.isTraceEnabled()) {
+        try
+        {
+            if (log.isTraceEnabled())
+            {
                 log.trace("FastQueue.add: starting with size " + size);
             }
-            if (checkLock) {
+            if (checkLock)
+            {
                 if (inAdd)
                     log.warn("FastQueue.add: Detected other add");
                 inAdd = true;
@@ -271,21 +297,28 @@ public class FastQueue {
                 inMutex = true;
             }
 
-            if ((maxQueueLength > 0) && (size >= maxQueueLength)) {
+            if ((maxQueueLength > 0) && (size >= maxQueueLength))
+            {
                 ok = false;
-                if (log.isTraceEnabled()) {
+                if (log.isTraceEnabled())
+                {
                     log.trace("FastQueue.add: Could not add, since queue is full (" + size + ">=" + maxQueueLength + ")");
                 }
-            } else {
-                LinkObject element = new LinkObject(msg,destination, payload);
-                if (size == 0) {
+            } else
+            {
+                LinkObject element = new LinkObject(msg, destination, payload);
+                if (size == 0)
+                {
                     first = last = element;
                     size = 1;
-                } else {
-                    if (last == null) {
+                } else
+                {
+                    if (last == null)
+                    {
                         ok = false;
-                        log.error("FastQueue.add: Could not add, since last is null although size is "+ size + " (>0)");
-                    } else {
+                        log.error("FastQueue.add: Could not add, since last is null although size is " + size + " (>0)");
+                    } else
+                    {
                         last.append(element);
                         last = element;
                         size++;
@@ -293,14 +326,17 @@ public class FastQueue {
                 }
             }
 
-            if (first == null) {
+            if (first == null)
+            {
                 log.error("FastQueue.add: first is null, size is " + size + " at end of add");
             }
-            if (last == null) {
-                log.error("FastQueue.add: last is null, size is " + size+ " at end of add");
+            if (last == null)
+            {
+                log.error("FastQueue.add: last is null, size is " + size + " at end of add");
             }
 
-            if (checkLock) {
+            if (checkLock)
+            {
                 if (!inMutex) log.warn("FastQueue.add: Cancelled by other mutex in add");
                 inMutex = false;
                 if (!inAdd) log.warn("FastQueue.add: Cancelled by other add");
@@ -308,7 +344,9 @@ public class FastQueue {
             }
             if (log.isTraceEnabled()) log.trace("FastQueue.add: add ending with size " + size);
 
-        } finally {
+        }
+        finally
+        {
             lock.unlockAdd(true);
         }
         return ok;
@@ -318,38 +356,47 @@ public class FastQueue {
      * remove the complete queued object list
      * FIXME extract some method
      */
-    public LinkObject remove() {
+    public LinkObject remove()
+    {
         LinkObject element;
         boolean gotLock;
         long time = 0;
 
-        if (!enabled) {
+        if (!enabled)
+        {
             if (log.isInfoEnabled())
                 log.info("FastQueue.remove: queue disabled, remove aborted");
             return null;
         }
 
-        if (timeWait) {
+        if (timeWait)
+        {
             time = System.currentTimeMillis();
         }
         gotLock = lock.lockRemove();
-        try {
+        try
+        {
 
-            if (!gotLock) {
-                if (enabled) {
+            if (!gotLock)
+            {
+                if (enabled)
+                {
                     if (log.isInfoEnabled())
                         log.info("FastQueue.remove: Remove aborted although queue enabled");
-                } else {
+                } else
+                {
                     if (log.isInfoEnabled())
                         log.info("FastQueue.remove: queue disabled, remove aborted");
                 }
                 return null;
             }
 
-            if (log.isTraceEnabled()) {
+            if (log.isTraceEnabled())
+            {
                 log.trace("FastQueue.remove: remove starting with size " + size);
             }
-            if (checkLock) {
+            if (checkLock)
+            {
                 if (inRemove)
                     log.warn("FastQueue.remove: Detected other remove");
                 inRemove = true;
@@ -363,7 +410,8 @@ public class FastQueue {
             first = last = null;
             size = 0;
 
-            if (checkLock) {
+            if (checkLock)
+            {
                 if (!inMutex)
                     log.warn("FastQueue.remove: Cancelled by other mutex in remove");
                 inMutex = false;
@@ -371,14 +419,18 @@ public class FastQueue {
                     log.warn("FastQueue.remove: Cancelled by other remove");
                 inRemove = false;
             }
-            if (log.isTraceEnabled()) {
+            if (log.isTraceEnabled())
+            {
                 log.trace("FastQueue.remove: remove ending with size " + size);
             }
 
-            if (timeWait) {
+            if (timeWait)
+            {
                 time = System.currentTimeMillis();
             }
-        } finally {
+        }
+        finally
+        {
             lock.unlockRemove();
         }
         return element;

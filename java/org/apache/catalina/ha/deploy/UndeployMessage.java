@@ -19,8 +19,11 @@ package org.apache.catalina.ha.deploy;
 
 import org.apache.catalina.ha.ClusterMessage;
 import org.apache.catalina.tribes.Member;
+
 import java.io.Serializable;
-public class UndeployMessage implements ClusterMessage,Serializable {
+
+public class UndeployMessage implements ClusterMessage, Serializable
+{
     private Member address;
     private long timestamp;
     private String uniqueId;
@@ -29,85 +32,107 @@ public class UndeployMessage implements ClusterMessage,Serializable {
     private int resend = 0;
     private int compress = 0;
 
-    public UndeployMessage() {} //for serialization
+    public UndeployMessage()
+    {
+    } //for serialization
+
     public UndeployMessage(Member address,
                            long timestamp,
                            String uniqueId,
                            String contextPath,
-                           boolean undeploy) {
-        this.address  = address;
-        this.timestamp= timestamp;
+                           boolean undeploy)
+    {
+        this.address = address;
+        this.timestamp = timestamp;
         this.undeploy = undeploy;
         this.uniqueId = uniqueId;
         this.undeploy = undeploy;
         this.contextPath = contextPath;
     }
 
-    public Member getAddress() {
+    public Member getAddress()
+    {
         return address;
     }
 
-    public void setAddress(Member address) {
+    public void setAddress(Member address)
+    {
         this.address = address;
     }
 
-    public long getTimestamp() {
+    public long getTimestamp()
+    {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(long timestamp)
+    {
         this.timestamp = timestamp;
     }
 
-    public String getUniqueId() {
+    public String getUniqueId()
+    {
         return uniqueId;
     }
 
-    public void setUniqueId(String uniqueId) {
+    public void setUniqueId(String uniqueId)
+    {
         this.uniqueId = uniqueId;
     }
 
-    public String getContextPath() {
+    public String getContextPath()
+    {
         return contextPath;
     }
 
-    public void setContextPath(String contextPath) {
+    public void setContextPath(String contextPath)
+    {
         this.contextPath = contextPath;
     }
 
-    public boolean getUndeploy() {
+    public boolean getUndeploy()
+    {
         return undeploy;
     }
 
-    public void setUndeploy(boolean undeploy) {
+    public void setUndeploy(boolean undeploy)
+    {
         this.undeploy = undeploy;
     }
+
     /**
      * @return Returns the compress.
-     * @since 5.5.10 
+     * @since 5.5.10
      */
-    public int getCompress() {
+    public int getCompress()
+    {
         return compress;
     }
+
     /**
      * @param compress The compress to set.
      * @since 5.5.10
      */
-    public void setCompress(int compress) {
+    public void setCompress(int compress)
+    {
         this.compress = compress;
     }
+
     /**
      * @return Returns the resend.
      * @since 5.5.10
      */
-    public int getResend() {
+    public int getResend()
+    {
         return resend;
     }
+
     /**
      * @param resend The resend to set.
      * @since 5.5.10
      */
-    public void setResend(int resend) {
+    public void setResend(int resend)
+    {
         this.resend = resend;
     }
 

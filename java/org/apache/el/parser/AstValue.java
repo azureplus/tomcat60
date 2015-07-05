@@ -33,41 +33,40 @@ import java.lang.reflect.Method;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstValue extends SimpleNode {
+public final class AstValue extends SimpleNode
+{
 
     protected static final boolean COERCE_TO_ZERO =
-        Boolean.valueOf(System.getProperty(
-                "org.apache.el.parser.COERCE_TO_ZERO", "true")).booleanValue();
-    
-    protected static class Target {
-        protected Object base;
+            Boolean.valueOf(System.getProperty(
+                    "org.apache.el.parser.COERCE_TO_ZERO", "true")).booleanValue();
 
-        protected Object property;
-    }
-
-    public AstValue(int id) {
+    public AstValue(int id)
+    {
         super(id);
     }
 
-    public Class getType(EvaluationContext ctx) throws ELException {
+    public Class getType(EvaluationContext ctx) throws ELException
+    {
         Target t = getTarget(ctx);
         ctx.setPropertyResolved(false);
         Class<?> result = ctx.getELResolver().getType(ctx, t.base, t.property);
-        if (!ctx.isPropertyResolved()) {
+        if (!ctx.isPropertyResolved())
+        {
             throw new PropertyNotFoundException(MessageFactory.get(
-                    "error.resolver.unhandled", t.base, t.property));            
+                    "error.resolver.unhandled", t.base, t.property));
         }
         return result;
     }
 
-    private final Target getTarget(EvaluationContext ctx) throws ELException {
+    private final Target getTarget(EvaluationContext ctx) throws ELException
+    {
         // evaluate expr-a to value-a
         Object base = this.children[0].getValue(ctx);
 
         // if our base is null (we know there are more properites to evaluate)
-        if (base == null) {
+        if (base == null)
+        {
             throw new PropertyNotFoundException(MessageFactory.get(
                     "error.unreachable.base", this.children[0].getImage()));
         }
@@ -79,8 +78,10 @@ public final class AstValue extends SimpleNode {
 
         // evaluate any properties before our target
         ELResolver resolver = ctx.getELResolver();
-        if (propCount > 1) {
-            while (base != null && i < propCount) {
+        if (propCount > 1)
+        {
+            while (base != null && i < propCount)
+            {
                 property = this.children[i].getValue(ctx);
                 ctx.setPropertyResolved(false);
                 base = resolver.getValue(ctx, base, property);
@@ -88,7 +89,8 @@ public final class AstValue extends SimpleNode {
             }
             // if we are in this block, we have more properties to resolve,
             // but our base was null
-            if (base == null || property == null) {
+            if (base == null || property == null)
+            {
                 throw new PropertyNotFoundException(MessageFactory.get(
                         "error.unreachable.property", property));
             }
@@ -96,7 +98,8 @@ public final class AstValue extends SimpleNode {
 
         property = this.children[i].getValue(ctx);
 
-        if (property == null) {
+        if (property == null)
+        {
             throw new PropertyNotFoundException(MessageFactory.get(
                     "error.unreachable.property", this.children[i]));
         }
@@ -107,43 +110,51 @@ public final class AstValue extends SimpleNode {
         return t;
     }
 
-    public Object getValue(EvaluationContext ctx) throws ELException {
+    public Object getValue(EvaluationContext ctx) throws ELException
+    {
         Object base = this.children[0].getValue(ctx);
         int propCount = this.jjtGetNumChildren();
         int i = 1;
         Object property = null;
         ELResolver resolver = ctx.getELResolver();
-        while (base != null && i < propCount) {
+        while (base != null && i < propCount)
+        {
             property = this.children[i].getValue(ctx);
-            if (property == null) {
+            if (property == null)
+            {
                 return null;
-            } else {
+            } else
+            {
                 ctx.setPropertyResolved(false);
                 base = resolver.getValue(ctx, base, property);
             }
             i++;
         }
-        if (!ctx.isPropertyResolved()) {
+        if (!ctx.isPropertyResolved())
+        {
             throw new PropertyNotFoundException(MessageFactory.get(
-                    "error.resolver.unhandled", base, property));            
+                    "error.resolver.unhandled", base, property));
         }
         return base;
     }
 
-    public boolean isReadOnly(EvaluationContext ctx) throws ELException {
+    public boolean isReadOnly(EvaluationContext ctx) throws ELException
+    {
         Target t = getTarget(ctx);
         ctx.setPropertyResolved(false);
         boolean result =
-            ctx.getELResolver().isReadOnly(ctx, t.base, t.property);
-        if (!ctx.isPropertyResolved()) {
+                ctx.getELResolver().isReadOnly(ctx, t.base, t.property);
+        if (!ctx.isPropertyResolved())
+        {
             throw new PropertyNotFoundException(MessageFactory.get(
-                    "error.resolver.unhandled", t.base, t.property));            
+                    "error.resolver.unhandled", t.base, t.property));
         }
         return result;
     }
 
     public void setValue(EvaluationContext ctx, Object value)
-            throws ELException {
+            throws ELException
+    {
         Target t = getTarget(ctx);
         ctx.setPropertyResolved(false);
         ELResolver resolver = ctx.getELResolver();
@@ -151,30 +162,36 @@ public final class AstValue extends SimpleNode {
         // coerce to the expected type
         Class<?> targetClass = resolver.getType(ctx, t.base, t.property);
         if (COERCE_TO_ZERO == true
-                || !isAssignable(value, targetClass)) {
+                || !isAssignable(value, targetClass))
+        {
             value = ELSupport.coerceToType(value, targetClass);
         }
         resolver.setValue(ctx, t.base, t.property, value);
-        if (!ctx.isPropertyResolved()) {
+        if (!ctx.isPropertyResolved())
+        {
             throw new PropertyNotFoundException(MessageFactory.get(
-                    "error.resolver.unhandled", t.base, t.property));            
+                    "error.resolver.unhandled", t.base, t.property));
         }
     }
 
-    private boolean isAssignable(Object value, Class<?> targetClass) {
-        if (targetClass == null) {
+    private boolean isAssignable(Object value, Class<?> targetClass)
+    {
+        if (targetClass == null)
+        {
             return false;
-        } else if (value != null && targetClass.isPrimitive()) {
+        } else if (value != null && targetClass.isPrimitive())
+        {
             return false;
-        } else if (value != null && !targetClass.isInstance(value)) {
+        } else if (value != null && !targetClass.isInstance(value))
+        {
             return false;
         }
         return true;
     }
 
-
     public MethodInfo getMethodInfo(EvaluationContext ctx, Class[] paramTypes)
-            throws ELException {
+            throws ELException
+    {
         Target t = getTarget(ctx);
         Method m = ReflectionUtil.getMethod(t.base, t.property, paramTypes);
         return new MethodInfo(m.getName(), m.getReturnType(), m
@@ -182,19 +199,34 @@ public final class AstValue extends SimpleNode {
     }
 
     public Object invoke(EvaluationContext ctx, Class[] paramTypes,
-            Object[] paramValues) throws ELException {
+                         Object[] paramValues) throws ELException
+    {
         Target t = getTarget(ctx);
         Method m = ReflectionUtil.getMethod(t.base, t.property, paramTypes);
         Object result = null;
-        try {
+        try
+        {
             result = m.invoke(t.base, (Object[]) paramValues);
-        } catch (IllegalAccessException iae) {
+        }
+        catch (IllegalAccessException iae)
+        {
             throw new ELException(iae);
-        } catch (IllegalArgumentException iae) {
+        }
+        catch (IllegalArgumentException iae)
+        {
             throw new ELException(iae);
-        } catch (InvocationTargetException ite) {
+        }
+        catch (InvocationTargetException ite)
+        {
             throw new ELException(ite.getCause());
         }
         return result;
+    }
+
+    protected static class Target
+    {
+        protected Object base;
+
+        protected Object property;
     }
 }

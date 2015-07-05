@@ -25,10 +25,10 @@ package org.apache.catalina;
  * is managing that instance.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface InstanceListener {
+public interface InstanceListener
+{
 
 
     /**

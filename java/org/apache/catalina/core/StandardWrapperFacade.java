@@ -28,28 +28,14 @@ import java.util.Enumeration;
  * Facade for the <b>StandardWrapper</b> object.
  *
  * @author Remy Maucharat
- *
  */
 
 public final class StandardWrapperFacade
-    implements ServletConfig {
+        implements ServletConfig
+{
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    /**
-     * Create a new facede around a StandardWrapper.
-     */
-    public StandardWrapperFacade(StandardWrapper config) {
-
-        super();
-        this.config = (ServletConfig) config;
-
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
 
 
     /**
@@ -58,22 +44,37 @@ public final class StandardWrapperFacade
     private ServletConfig config = null;
 
 
+    // ----------------------------------------------------- Instance Variables
     /**
      * Wrapped context (facade).
      */
     private ServletContext context = null;
 
 
+    /**
+     * Create a new facede around a StandardWrapper.
+     */
+    public StandardWrapperFacade(StandardWrapper config)
+    {
+
+        super();
+        this.config = (ServletConfig) config;
+
+    }
+
+
     // -------------------------------------------------- ServletConfig Methods
 
-
-    public String getServletName() {
+    public String getServletName()
+    {
         return config.getServletName();
     }
 
 
-    public ServletContext getServletContext() {
-        if (context == null) {
+    public ServletContext getServletContext()
+    {
+        if (context == null)
+        {
             context = config.getServletContext();
             if ((context != null) && (context instanceof ApplicationContext))
                 context = ((ApplicationContext) context).getFacade();
@@ -82,12 +83,14 @@ public final class StandardWrapperFacade
     }
 
 
-    public String getInitParameter(String name) {
+    public String getInitParameter(String name)
+    {
         return config.getInitParameter(name);
     }
 
 
-    public Enumeration getInitParameterNames() {
+    public Enumeration getInitParameterNames()
+    {
         return config.getInitParameterNames();
     }
 

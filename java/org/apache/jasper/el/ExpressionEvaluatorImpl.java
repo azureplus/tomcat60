@@ -21,37 +21,45 @@ import javax.el.ValueExpression;
 import javax.servlet.jsp.el.*;
 
 
-public final class ExpressionEvaluatorImpl extends ExpressionEvaluator {
+public final class ExpressionEvaluatorImpl extends ExpressionEvaluator
+{
 
-	private final ExpressionFactory factory;
-	
-	public ExpressionEvaluatorImpl(ExpressionFactory factory) {
-		this.factory = factory;
-	}
+    private final ExpressionFactory factory;
+
+    public ExpressionEvaluatorImpl(ExpressionFactory factory)
+    {
+        this.factory = factory;
+    }
 
     public Expression parseExpression(String expression,
-            @SuppressWarnings("unchecked") // API does not use generics
-            Class expectedType,
-			FunctionMapper fMapper) throws ELException {
-		try {
-			ELContextImpl ctx =
-			    new ELContextImpl(ELResolverImpl.getDefaultResolver());
-            if (fMapper != null) {
+                                      @SuppressWarnings("unchecked") // API does not use generics
+                                              Class expectedType,
+                                      FunctionMapper fMapper) throws ELException
+    {
+        try
+        {
+            ELContextImpl ctx =
+                    new ELContextImpl(ELResolverImpl.getDefaultResolver());
+            if (fMapper != null)
+            {
                 ctx.setFunctionMapper(new FunctionMapperImpl(fMapper));
             }
-			ValueExpression ve = this.factory.createValueExpression(ctx, expression, expectedType);
-			return new ExpressionImpl(ve);
-		} catch (javax.el.ELException e) {
-			throw new ELParseException(e.getMessage());
-		}
-	}
+            ValueExpression ve = this.factory.createValueExpression(ctx, expression, expectedType);
+            return new ExpressionImpl(ve);
+        }
+        catch (javax.el.ELException e)
+        {
+            throw new ELParseException(e.getMessage());
+        }
+    }
 
     public Object evaluate(String expression,
-            @SuppressWarnings("unchecked") // API does not use generics
-            Class expectedType,
-			VariableResolver vResolver, FunctionMapper fMapper)
-			throws ELException {
-		return this.parseExpression(expression, expectedType, fMapper).evaluate(vResolver);
-	}
+                           @SuppressWarnings("unchecked") // API does not use generics
+                                   Class expectedType,
+                           VariableResolver vResolver, FunctionMapper fMapper)
+            throws ELException
+    {
+        return this.parseExpression(expression, expectedType, fMapper).evaluate(vResolver);
+    }
 
 }

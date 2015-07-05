@@ -16,6 +16,12 @@
 
 package org.apache.catalina.tribes.group.interceptors;
 
+import org.apache.catalina.tribes.ChannelException;
+import org.apache.catalina.tribes.ChannelMessage;
+import org.apache.catalina.tribes.Member;
+import org.apache.catalina.tribes.group.ChannelInterceptorBase;
+import org.apache.catalina.tribes.group.InterceptorPayload;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,47 +29,17 @@ import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.catalina.tribes.ChannelException;
-import org.apache.catalina.tribes.ChannelMessage;
-import org.apache.catalina.tribes.Member;
-import org.apache.catalina.tribes.group.ChannelInterceptorBase;
-import org.apache.catalina.tribes.group.InterceptorPayload;
-
-
 
 /**
- *
- *
  * @author Filip Hanik
  * @version 1.0
  */
-public class GzipInterceptor extends ChannelInterceptorBase {
+public class GzipInterceptor extends ChannelInterceptorBase
+{
     public static final int DEFAULT_BUFFER_SIZE = 2048;
-    
-    public void sendMessage(Member[] destination, ChannelMessage msg, InterceptorPayload payload) throws ChannelException {
-        try {
-            byte[] data = compress(msg.getMessage().getBytes());
-            msg.getMessage().trim(msg.getMessage().getLength());
-            msg.getMessage().append(data,0,data.length);
-            getNext().sendMessage(destination, msg, payload);
-        } catch ( IOException x ) {
-            log.error("Unable to compress byte contents");
-            throw new ChannelException(x);
-        }
-    }
 
-    public void messageReceived(ChannelMessage msg) {
-        try {
-            byte[] data = decompress(msg.getMessage().getBytes());
-            msg.getMessage().trim(msg.getMessage().getLength());
-            msg.getMessage().append(data,0,data.length);
-            getPrevious().messageReceived(msg);
-        } catch ( IOException x ) {
-            log.error("Unable to decompress byte contents",x);
-        }
-    }
-    
-    public static byte[] compress(byte[] data) throws IOException {
+    public static byte[] compress(byte[] data) throws IOException
+    {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         GZIPOutputStream gout = new GZIPOutputStream(bout);
         gout.write(data);
@@ -71,33 +47,68 @@ public class GzipInterceptor extends ChannelInterceptorBase {
         gout.close();
         return bout.toByteArray();
     }
-    
+
     /**
-     * @param data  Data to decompress
-     * @return      Decompressed data
+     * @param data Data to decompress
+     * @return Decompressed data
      * @throws IOException
      */
-    public static byte[] decompress(byte[] data) throws IOException {
+    public static byte[] decompress(byte[] data) throws IOException
+    {
         ByteArrayOutputStream bout =
-            new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+                new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
         ByteArrayInputStream bin = new ByteArrayInputStream(data);
         GZIPInputStream gin = new GZIPInputStream(bin);
         byte[] tmp = new byte[DEFAULT_BUFFER_SIZE];
         int length = gin.read(tmp);
-        while (length > -1) {
+        while (length > -1)
+        {
             bout.write(tmp, 0, length);
             length = gin.read(tmp);
         }
         return bout.toByteArray();
     }
-    
-    public static void main(String[] arg) throws Exception {
+
+    public static void main(String[] arg) throws Exception
+    {
         byte[] data = new byte[1024];
-        Arrays.fill(data,(byte)1);
+        Arrays.fill(data, (byte) 1);
         byte[] compress = compress(data);
         byte[] decompress = decompress(compress);
         System.out.println("Debug test");
-        
+
     }
-    
+
+    public void sendMessage(Member[] destination, ChannelMessage msg, InterceptorPayload payload) throws
+            ChannelException
+    {
+        try
+        {
+            byte[] data = compress(msg.getMessage().getBytes());
+            msg.getMessage().trim(msg.getMessage().getLength());
+            msg.getMessage().append(data, 0, data.length);
+            getNext().sendMessage(destination, msg, payload);
+        }
+        catch (IOException x)
+        {
+            log.error("Unable to compress byte contents");
+            throw new ChannelException(x);
+        }
+    }
+
+    public void messageReceived(ChannelMessage msg)
+    {
+        try
+        {
+            byte[] data = decompress(msg.getMessage().getBytes());
+            msg.getMessage().trim(msg.getMessage().getLength());
+            msg.getMessage().append(data, 0, data.length);
+            getPrevious().messageReceived(msg);
+        }
+        catch (IOException x)
+        {
+            log.error("Unable to decompress byte contents", x);
+        }
+    }
+
 }

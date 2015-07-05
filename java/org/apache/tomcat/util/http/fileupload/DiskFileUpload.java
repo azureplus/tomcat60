@@ -19,21 +19,21 @@
 package org.apache.tomcat.util.http.fileupload;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 
 
 /**
  * <p>High level API for processing file uploads.</p>
- *
+ * <p/>
  * <p>This class handles multiple files per single HTML widget, sent using
  * <code>multipart/mixed</code> encoding type, as specified by
  * <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.  Use {@link
  * #parseRequest(HttpServletRequest)} to acquire a list of {@link
  * org.apache.tomcat.util.http.fileupload.FileItem}s associated with a given HTML
  * widget.</p>
- *
+ * <p/>
  * <p>Individual parts will be stored in temporary disk storage or in memory,
  * depending on their size, and will be available as {@link
  * org.apache.tomcat.util.http.fileupload.FileItem}s.</p>
@@ -44,12 +44,10 @@ import javax.servlet.http.HttpServletRequest;
  * @author <a href="mailto:jmcnally@collab.net">John McNally</a>
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
- *
- *
  */
 public class DiskFileUpload
-    extends FileUploadBase
- {
+        extends FileUploadBase
+{
 
     // ----------------------------------------------------------- Data members
 
@@ -121,7 +119,6 @@ public class DiskFileUpload
      * disk.
      *
      * @return The size threshold, in bytes.
-     *
      * @see #setSizeThreshold(int)
      */
     public int getSizeThreshold()
@@ -134,7 +131,6 @@ public class DiskFileUpload
      * Sets the size threshold beyond which files are written directly to disk.
      *
      * @param sizeThreshold The size threshold, in bytes.
-     *
      * @see #getSizeThreshold()
      */
     public void setSizeThreshold(int sizeThreshold)
@@ -148,7 +144,6 @@ public class DiskFileUpload
      * than the configured size threshold.
      *
      * @return The path to the temporary file location.
-     *
      * @see #setRepositoryPath(String)
      */
     public String getRepositoryPath()
@@ -162,7 +157,6 @@ public class DiskFileUpload
      * than the configured size threshold.
      *
      * @param repositoryPath The path to the temporary file location.
-     *
      * @see #getRepositoryPath()
      */
     public void setRepositoryPath(String repositoryPath)
@@ -183,17 +177,15 @@ public class DiskFileUpload
      * @param sizeThreshold The max size in bytes to be stored in memory.
      * @param sizeMax       The maximum allowed upload size, in bytes.
      * @param path          The location where the files should be stored.
-     *
      * @return A list of <code>FileItem</code> instances parsed from the
-     *         request, in the order that they were transmitted.
-     *
-     * @exception FileUploadException if there are problems reading/parsing
-     *                                the request or storing files.
+     * request, in the order that they were transmitted.
+     * @throws FileUploadException if there are problems reading/parsing
+     *                             the request or storing files.
      */
     public List /* FileItem */ parseRequest(HttpServletRequest req,
                                             int sizeThreshold,
                                             long sizeMax, String path)
-        throws FileUploadException
+            throws FileUploadException
     {
         setSizeThreshold(sizeThreshold);
         setSizeMax(sizeMax);

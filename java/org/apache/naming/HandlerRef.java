@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.apache.naming;
 
 import javax.naming.Context;
@@ -28,7 +28,8 @@ import java.util.Enumeration;
  * @author Fabien Carrion
  */
 public class HandlerRef
-    extends Reference {
+        extends Reference
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -37,75 +38,79 @@ public class HandlerRef
     /**
      * Default factory for this reference.
      */
-    public static final String DEFAULT_FACTORY = 
-        org.apache.naming.factory.Constants.DEFAULT_HANDLER_FACTORY;
+    public static final String DEFAULT_FACTORY =
+            org.apache.naming.factory.Constants.DEFAULT_HANDLER_FACTORY;
 
 
     /**
      * HandlerName address type.
      */
-    public static final String HANDLER_NAME  = "handlername";
+    public static final String HANDLER_NAME = "handlername";
 
 
     /**
      * Handler Classname address type.
      */
-    public static final String HANDLER_CLASS  = "handlerclass";
+    public static final String HANDLER_CLASS = "handlerclass";
 
 
     /**
      * Handler Classname address type.
      */
-    public static final String HANDLER_LOCALPART  = "handlerlocalpart";
+    public static final String HANDLER_LOCALPART = "handlerlocalpart";
 
 
     /**
      * Handler Classname address type.
      */
-    public static final String HANDLER_NAMESPACE  = "handlernamespace";
+    public static final String HANDLER_NAMESPACE = "handlernamespace";
 
 
     /**
      * Handler Classname address type.
      */
-    public static final String HANDLER_PARAMNAME  = "handlerparamname";
+    public static final String HANDLER_PARAMNAME = "handlerparamname";
 
 
     /**
      * Handler Classname address type.
      */
-    public static final String HANDLER_PARAMVALUE  = "handlerparamvalue";
+    public static final String HANDLER_PARAMVALUE = "handlerparamvalue";
 
 
     /**
      * Handler SoapRole address type.
      */
-    public static final String HANDLER_SOAPROLE  = "handlersoaprole";
+    public static final String HANDLER_SOAPROLE = "handlersoaprole";
 
 
     /**
      * Handler PortName address type.
      */
-    public static final String HANDLER_PORTNAME  = "handlerportname";
+    public static final String HANDLER_PORTNAME = "handlerportname";
 
 
     // ----------------------------------------------------------- Constructors
 
 
-    public HandlerRef(String refname, String handlerClass) {
+    public HandlerRef(String refname, String handlerClass)
+    {
         this(refname, handlerClass, null, null);
     }
 
 
     public HandlerRef(String refname, String handlerClass,
-                    String factory, String factoryLocation) {
+                      String factory, String factoryLocation)
+    {
         super(refname, factory, factoryLocation);
         StringRefAddr refAddr = null;
-        if (refname != null) {
+        if (refname != null)
+        {
             refAddr = new StringRefAddr(HANDLER_NAME, refname);
             add(refAddr);
         }
-        if (handlerClass != null) {
+        if (handlerClass != null)
+        {
             refAddr = new StringRefAddr(HANDLER_CLASS, handlerClass);
             add(refAddr);
         }
@@ -119,18 +124,23 @@ public class HandlerRef
 
 
     /**
-     * Retrieves the class name of the factory of the object to which this 
+     * Retrieves the class name of the factory of the object to which this
      * reference refers.
      */
-    public String getFactoryClassName() {
+    public String getFactoryClassName()
+    {
         String factory = super.getFactoryClassName();
-        if (factory != null) {
+        if (factory != null)
+        {
             return factory;
-        } else {
+        } else
+        {
             factory = System.getProperty(Context.OBJECT_FACTORIES);
-            if (factory != null) {
+            if (factory != null)
+            {
                 return null;
-            } else {
+            } else
+            {
                 return DEFAULT_FACTORY;
             }
         }
@@ -143,7 +153,8 @@ public class HandlerRef
     /**
      * Return a String rendering of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("HandlerRef[");
         sb.append("className=");
@@ -153,7 +164,8 @@ public class HandlerRef
         sb.append(",factoryClassName=");
         sb.append(getFactoryClassName());
         Enumeration refAddrs = getAll();
-        while (refAddrs.hasMoreElements()) {
+        while (refAddrs.hasMoreElements())
+        {
             RefAddr refAddr = (RefAddr) refAddrs.nextElement();
             sb.append(",{type=");
             sb.append(refAddr.getType());

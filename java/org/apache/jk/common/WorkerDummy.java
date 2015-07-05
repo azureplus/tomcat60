@@ -26,37 +26,41 @@ import org.apache.tomcat.util.buf.MessageBytes;
 import java.io.IOException;
 
 
-/** A dummy worker, will just send back a dummy response.
- *  Used for testing and tunning.
+/**
+ * A dummy worker, will just send back a dummy response.
+ * Used for testing and tunning.
  */
 public class WorkerDummy extends JkHandler
 {
+    private static final int dL = 0;
+
+    /* ==================== Start/stop ==================== */
+    MessageBytes body = MessageBytes.newInstance();
+    private int headersMsgNote;
     public WorkerDummy()
     {
-        String msg="HelloWorld";
-        byte b[]=msg.getBytes();
+        String msg = "HelloWorld";
+        byte b[] = msg.getBytes();
         body.setBytes(b, 0, b.length);
     }
 
-    /* ==================== Start/stop ==================== */
-
-    /** Initialize the worker. After this call the worker will be
-     *  ready to accept new requests.
+    /**
+     * Initialize the worker. After this call the worker will be
+     * ready to accept new requests.
      */
-    public void init() throws IOException {
-        headersMsgNote=wEnv.getNoteId( WorkerEnv.ENDPOINT_NOTE, "headerMsg" );
-    }
- 
-    MessageBytes body=MessageBytes.newInstance();
-    private int headersMsgNote;
-    
-    public int invoke( Msg in, MsgContext ep ) 
-        throws IOException
+    public void init() throws IOException
     {
-        MsgAjp msg=(MsgAjp)ep.getNote( headersMsgNote );
-        if( msg==null ) {
-            msg=new MsgAjp();
-            ep.setNote( headersMsgNote, msg );
+        headersMsgNote = wEnv.getNoteId(WorkerEnv.ENDPOINT_NOTE, "headerMsg");
+    }
+
+    public int invoke(Msg in, MsgContext ep)
+            throws IOException
+    {
+        MsgAjp msg = (MsgAjp) ep.getNote(headersMsgNote);
+        if (msg == null)
+        {
+            msg = new MsgAjp();
+            ep.setNote(headersMsgNote, msg);
         }
 
         msg.reset();
@@ -66,26 +70,24 @@ public class WorkerDummy extends JkHandler
 
         msg.appendInt(0);
 
-        ep.setType( JkHandler.HANDLE_SEND_PACKET );
-        ep.getSource().invoke( msg, ep );
+        ep.setType(JkHandler.HANDLE_SEND_PACKET);
+        ep.getSource().invoke(msg, ep);
         //         msg.dump("out:" );
 
         msg.reset();
-        msg.appendByte( AjpConstants.JK_AJP13_SEND_BODY_CHUNK);
-        msg.appendInt( body.getLength() );
-        msg.appendBytes( body );
+        msg.appendByte(AjpConstants.JK_AJP13_SEND_BODY_CHUNK);
+        msg.appendInt(body.getLength());
+        msg.appendBytes(body);
 
-        
+
         ep.getSource().invoke(msg, ep);
 
         msg.reset();
-        msg.appendByte( AjpConstants.JK_AJP13_END_RESPONSE );
-        msg.appendInt( 1 );
-        
-        ep.getSource().invoke(msg, ep );
+        msg.appendByte(AjpConstants.JK_AJP13_END_RESPONSE);
+        msg.appendInt(1);
+
+        ep.getSource().invoke(msg, ep);
         return OK;
     }
-    
-    private static final int dL=0;
 }
 

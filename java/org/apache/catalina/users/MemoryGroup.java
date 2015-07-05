@@ -31,26 +31,40 @@ import java.util.Iterator;
  * {@link MemoryUserDatabase} implementation of {@link UserDatabase}.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
-public class MemoryGroup extends AbstractGroup {
+public class MemoryGroup extends AbstractGroup
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
+     * The {@link MemoryUserDatabase} that owns this group.
+     */
+    protected MemoryUserDatabase database = null;
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * The set of {@link Role}s associated with this group.
+     */
+    protected ArrayList roles = new ArrayList();
+
+
+    /**
      * Package-private constructor used by the factory method in
      * {@link MemoryUserDatabase}.
      *
-     * @param database The {@link MemoryUserDatabase} that owns this group
-     * @param groupname Group name of this group
+     * @param database    The {@link MemoryUserDatabase} that owns this group
+     * @param groupname   Group name of this group
      * @param description Description of this group
      */
     MemoryGroup(MemoryUserDatabase database,
-                String groupname, String description) {
+                String groupname, String description)
+    {
 
         super();
         this.database = database;
@@ -60,30 +74,16 @@ public class MemoryGroup extends AbstractGroup {
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The {@link MemoryUserDatabase} that owns this group.
-     */
-    protected MemoryUserDatabase database = null;
-
-
-    /**
-     * The set of {@link Role}s associated with this group.
-     */
-    protected ArrayList roles = new ArrayList();
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return the set of {@link Role}s assigned specifically to this group.
      */
-    public Iterator getRoles() {
+    public Iterator getRoles()
+    {
 
-        synchronized (roles) {
+        synchronized (roles)
+        {
             return (roles.iterator());
         }
 
@@ -93,7 +93,8 @@ public class MemoryGroup extends AbstractGroup {
     /**
      * Return the {@link UserDatabase} within which this Group is defined.
      */
-    public UserDatabase getUserDatabase() {
+    public UserDatabase getUserDatabase()
+    {
 
         return (this.database);
 
@@ -103,13 +104,16 @@ public class MemoryGroup extends AbstractGroup {
     /**
      * Return the set of {@link org.apache.catalina.User}s that are members of this group.
      */
-    public Iterator getUsers() {
+    public Iterator getUsers()
+    {
 
         ArrayList results = new ArrayList();
         Iterator users = database.getUsers();
-        while (users.hasNext()) {
+        while (users.hasNext())
+        {
             MemoryUser user = (MemoryUser) users.next();
-            if (user.isInGroup(this)) {
+            if (user.isInGroup(this))
+            {
                 results.add(user);
             }
         }
@@ -126,10 +130,13 @@ public class MemoryGroup extends AbstractGroup {
      *
      * @param role The new role
      */
-    public void addRole(Role role) {
+    public void addRole(Role role)
+    {
 
-        synchronized (roles) {
-            if (!roles.contains(role)) {
+        synchronized (roles)
+        {
+            if (!roles.contains(role))
+            {
                 roles.add(role);
             }
         }
@@ -142,9 +149,11 @@ public class MemoryGroup extends AbstractGroup {
      *
      * @param role The role to check
      */
-    public boolean isInRole(Role role) {
+    public boolean isInRole(Role role)
+    {
 
-        synchronized (roles) {
+        synchronized (roles)
+        {
             return (roles.contains(role));
         }
 
@@ -156,9 +165,11 @@ public class MemoryGroup extends AbstractGroup {
      *
      * @param role The old role
      */
-    public void removeRole(Role role) {
+    public void removeRole(Role role)
+    {
 
-        synchronized (roles) {
+        synchronized (roles)
+        {
             roles.remove(role);
         }
 
@@ -168,9 +179,11 @@ public class MemoryGroup extends AbstractGroup {
     /**
      * Remove all {@link Role}s from those assigned to this group.
      */
-    public void removeRoles() {
+    public void removeRoles()
+    {
 
-        synchronized (roles) {
+        synchronized (roles)
+        {
             roles.clear();
         }
 
@@ -180,23 +193,29 @@ public class MemoryGroup extends AbstractGroup {
     /**
      * <p>Return a String representation of this group in XML format.</p>
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("<group groupname=\"");
         sb.append(groupname);
         sb.append("\"");
-        if (description != null) {
+        if (description != null)
+        {
             sb.append(" description=\"");
             sb.append(description);
             sb.append("\"");
         }
-        synchronized (roles) {
-            if (roles.size() > 0) {
+        synchronized (roles)
+        {
+            if (roles.size() > 0)
+            {
                 sb.append(" roles=\"");
                 int n = 0;
                 Iterator values = roles.iterator();
-                while (values.hasNext()) {
-                    if (n > 0) {
+                while (values.hasNext())
+                {
+                    if (n > 0)
+                    {
                         sb.append(',');
                     }
                     n++;

@@ -1,0 +1,1 @@
+-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -Dcatalina.home=D:/dev-tomcat/tomcat60 -Dcatalina.base=D:/dev-tomcat/tomcat60 -Djava.io.tmpdir=D:/dev-tomcat/tomcat60/temp

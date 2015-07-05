@@ -27,18 +27,20 @@ import java.net.URLClassLoader;
  *
  * @author Craig R. McClanahan
  * @author Remy Maucherat
- *
  */
 
 public class StandardClassLoader
-    extends URLClassLoader
-    implements StandardClassLoaderMBean {
+        extends URLClassLoader
+        implements StandardClassLoaderMBean
+{
 
-	public StandardClassLoader(URL repositories[]) {
+    public StandardClassLoader(URL repositories[])
+    {
         super(repositories);
     }
 
-    public StandardClassLoader(URL repositories[], ClassLoader parent) {
+    public StandardClassLoader(URL repositories[], ClassLoader parent)
+    {
         super(repositories, parent);
     }
 

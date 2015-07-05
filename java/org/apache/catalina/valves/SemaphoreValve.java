@@ -19,11 +19,6 @@
 package org.apache.catalina.valves;
 
 
-import java.io.IOException;
-import java.util.concurrent.Semaphore;
-
-import javax.servlet.ServletException;
-
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
@@ -32,20 +27,24 @@ import org.apache.catalina.connector.Response;
 import org.apache.catalina.util.LifecycleSupport;
 import org.apache.catalina.util.StringManager;
 
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.concurrent.Semaphore;
+
 
 /**
  * <p>Implementation of a Valve that limits concurrency.</p>
- *
+ * <p/>
  * <p>This Valve may be attached to any Container, depending on the granularity
  * of the concurrency control you wish to perform.</p>
  *
  * @author Remy Maucherat
- *
  */
 
 public class SemaphoreValve
-    extends ValveBase
-    implements Lifecycle {
+        extends ValveBase
+        implements Lifecycle
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -55,68 +54,84 @@ public class SemaphoreValve
      * The descriptive information related to this implementation.
      */
     private static final String info =
-        "org.apache.catalina.valves.SemaphoreValve/1.0";
-
-
-    /**
-     * The string manager for this package.
-     */
-    private StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-
+            "org.apache.catalina.valves.SemaphoreValve/1.0";
     /**
      * Semaphore.
      */
     protected Semaphore semaphore = null;
-    
-
     /**
      * The lifecycle event support for this component.
      */
     protected LifecycleSupport lifecycle = new LifecycleSupport(this);
+    /**
+     * Concurrency level of the semaphore.
+     */
+    protected int concurrency = 10;
+    /**
+     * Fairness of the semaphore.
+     */
+    protected boolean fairness = false;
 
 
+    // ------------------------------------------------------------- Properties
+    /**
+     * Block until a permit is available.
+     */
+    protected boolean block = true;
+    /**
+     * Block interruptibly until a permit is available.
+     */
+    protected boolean interruptible = false;
+    /**
+     * The string manager for this package.
+     */
+    private StringManager sm =
+            StringManager.getManager(Constants.Package);
     /**
      * Has this component been started yet?
      */
     private boolean started = false;
 
+    public int getConcurrency()
+    {
+        return concurrency;
+    }
 
-    // ------------------------------------------------------------- Properties
+    public void setConcurrency(int concurrency)
+    {
+        this.concurrency = concurrency;
+    }
 
-    
-    /**
-     * Concurrency level of the semaphore.
-     */
-    protected int concurrency = 10;
-    public int getConcurrency() { return concurrency; }
-    public void setConcurrency(int concurrency) { this.concurrency = concurrency; }
-    
+    public boolean getFairness()
+    {
+        return fairness;
+    }
 
-    /**
-     * Fairness of the semaphore.
-     */
-    protected boolean fairness = false;
-    public boolean getFairness() { return fairness; }
-    public void setFairness(boolean fairness) { this.fairness = fairness; }
-    
+    public void setFairness(boolean fairness)
+    {
+        this.fairness = fairness;
+    }
 
-    /**
-     * Block until a permit is available.
-     */
-    protected boolean block = true;
-    public boolean getBlock() { return block; }
-    public void setBlock(boolean block) { this.block = block; }
-    
+    public boolean getBlock()
+    {
+        return block;
+    }
 
-    /**
-     * Block interruptibly until a permit is available.
-     */
-    protected boolean interruptible = false;
-    public boolean getInterruptible() { return interruptible; }
-    public void setInterruptible(boolean interruptible) { this.interruptible = interruptible; }
-    
+    public void setBlock(boolean block)
+    {
+        this.block = block;
+    }
+
+    public boolean getInterruptible()
+    {
+        return interruptible;
+    }
+
+    public void setInterruptible(boolean interruptible)
+    {
+        this.interruptible = interruptible;
+    }
+
 
     // ------------------------------------------------------ Lifecycle Methods
 
@@ -126,7 +141,8 @@ public class SemaphoreValve
      *
      * @param listener The listener to add
      */
-    public void addLifecycleListener(LifecycleListener listener) {
+    public void addLifecycleListener(LifecycleListener listener)
+    {
 
         lifecycle.addLifecycleListener(listener);
 
@@ -137,7 +153,8 @@ public class SemaphoreValve
      * Get the lifecycle listeners associated with this lifecycle. If this
      * Lifecycle has no listeners registered, a zero-length array is returned.
      */
-    public LifecycleListener[] findLifecycleListeners() {
+    public LifecycleListener[] findLifecycleListeners()
+    {
 
         return lifecycle.findLifecycleListeners();
 
@@ -149,7 +166,8 @@ public class SemaphoreValve
      *
      * @param listener The listener to add
      */
-    public void removeLifecycleListener(LifecycleListener listener) {
+    public void removeLifecycleListener(LifecycleListener listener)
+    {
 
         lifecycle.removeLifecycleListener(listener);
 
@@ -161,15 +179,16 @@ public class SemaphoreValve
      * component.  This method should be called after <code>configure()</code>,
      * and before any of the public methods of the component are utilized.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
-    public void start() throws LifecycleException {
+    public void start() throws LifecycleException
+    {
 
         // Validate and update our current component state
         if (started)
             throw new LifecycleException
-                (sm.getString("semaphoreValve.alreadyStarted"));
+                    (sm.getString("semaphoreValve.alreadyStarted"));
         lifecycle.fireLifecycleEvent(START_EVENT, null);
         started = true;
 
@@ -183,15 +202,16 @@ public class SemaphoreValve
      * component.  This method should be the last one called on a given
      * instance of this component.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that needs to be reported
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that needs to be reported
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws LifecycleException
+    {
 
         // Validate and update our current component state
         if (!started)
             throw new LifecycleException
-                (sm.getString("semaphoreValve.notStarted"));
+                    (sm.getString("semaphoreValve.notStarted"));
         lifecycle.fireLifecycleEvent(STOP_EVENT, null);
         started = false;
 
@@ -199,14 +219,15 @@ public class SemaphoreValve
 
     }
 
-    
+
     // --------------------------------------------------------- Public Methods
 
 
     /**
      * Return descriptive information about this Valve implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
         return (info);
     }
 
@@ -214,64 +235,80 @@ public class SemaphoreValve
     /**
      * Do concurrency control on the request using the semaphore.
      *
-     * @param request The servlet request to be processed
+     * @param request  The servlet request to be processed
      * @param response The servlet response to be created
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet error occurs
      */
     public void invoke(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
-        if (controlConcurrency(request, response)) {
+        if (controlConcurrency(request, response))
+        {
             boolean shouldRelease = true;
-            try {
-                if (block) {
-                    if (interruptible) {
-                        try {
+            try
+            {
+                if (block)
+                {
+                    if (interruptible)
+                    {
+                        try
+                        {
                             semaphore.acquire();
-                        } catch (InterruptedException e) {
+                        }
+                        catch (InterruptedException e)
+                        {
                             shouldRelease = false;
                             permitDenied(request, response);
                             return;
-                        }  
-                    } else {
+                        }
+                    } else
+                    {
                         semaphore.acquireUninterruptibly();
                     }
-                } else {
-                    if (!semaphore.tryAcquire()) {
+                } else
+                {
+                    if (!semaphore.tryAcquire())
+                    {
                         shouldRelease = false;
                         permitDenied(request, response);
                         return;
                     }
                 }
                 getNext().invoke(request, response);
-            } finally {
-                if (shouldRelease) {
+            }
+            finally
+            {
+                if (shouldRelease)
+                {
                     semaphore.release();
                 }
             }
-        } else {
+        } else
+        {
             getNext().invoke(request, response);
         }
 
     }
 
-    
+
     /**
      * Subclass friendly method to add conditions.
      */
-    public boolean controlConcurrency(Request request, Response response) {
+    public boolean controlConcurrency(Request request, Response response)
+    {
         return true;
     }
-    
+
 
     /**
      * Subclass friendly method to add error handling when a permit isn't granted.
      */
     public void permitDenied(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
     }
-    
+
 
 }

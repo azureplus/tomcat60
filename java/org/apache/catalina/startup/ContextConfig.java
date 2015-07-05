@@ -16,38 +16,12 @@
  */
 package org.apache.catalina.startup;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.servlet.ServletContext;
-
-import org.apache.catalina.Authenticator;
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
-import org.apache.catalina.Engine;
-import org.apache.catalina.Globals;
-import org.apache.catalina.Host;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleEvent;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Pipeline;
-import org.apache.catalina.Valve;
-import org.apache.catalina.Wrapper;
+import org.apache.catalina.*;
 import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardHost;
-import org.apache.catalina.deploy.ErrorPage;
-import org.apache.catalina.deploy.FilterDef;
-import org.apache.catalina.deploy.FilterMap;
-import org.apache.catalina.deploy.LoginConfig;
-import org.apache.catalina.deploy.SecurityConstraint;
+import org.apache.catalina.deploy.*;
 import org.apache.catalina.util.StringManager;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -59,80 +33,99 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
+import javax.servlet.ServletContext;
+import java.io.*;
+import java.net.URL;
+import java.util.Map;
+import java.util.Properties;
+
 /**
  * Startup event listener for a <b>Context</b> that configures the properties
  * of that Context, and the associated defined servlets.
  *
  * @author Craig R. McClanahan
  * @author Jean-Francois Arcand
- *
  */
-public class ContextConfig implements LifecycleListener {
-
-    protected static Log log = LogFactory.getLog( ContextConfig.class );
+public class ContextConfig implements LifecycleListener
+{
 
     /**
      * The string resources for this package.
      */
     protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
+    protected static final LoginConfig DUMMY_LOGIN_CONFIG =
+            new LoginConfig("NONE", null, null, null);
 
 
     // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * Custom mappings of login methods to authenticators
-     */
-    protected Map customAuthenticators;
-
-
+    protected static Log log = LogFactory.getLog(ContextConfig.class);
     /**
      * The set of Authenticators that we know how to configure.  The key is
      * the name of the implemented authentication method, and the value is
      * the fully qualified Java class name of the corresponding Valve.
      */
     protected static Properties authenticators = null;
-
-
+    /**
+     * The <code>Digester</code> we will use to process web application
+     * context files.
+     */
+    protected static Digester contextDigester = null;
+    /**
+     * Attribute value used to turn on/off XML validation
+     *
+     * @deprecated Unused. Will be removed in Tomcat 7.0.x.
+     */
+    @Deprecated
+    protected static boolean xmlValidation = false;
+    /**
+     * Attribute value used to turn on/off XML namespace awarenes.
+     *
+     * @deprecated Unused. Will be removed in Tomcat 7.0.x.
+     */
+    @Deprecated
+    protected static boolean xmlNamespaceAware = false;
+    /**
+     * Deployment count.
+     */
+    protected static long deploymentCount = 0L;
+    /**
+     * Custom mappings of login methods to authenticators
+     */
+    protected Map customAuthenticators;
     /**
      * The Context we are associated with.
      */
     protected Context context = null;
-
-
     /**
      * The default web application's context file location.
      */
     protected String defaultContextXml = null;
-
-
     /**
      * The default web application's deployment descriptor location.
      */
     protected String defaultWebXml = null;
-
-
     /**
      * Track any fatal errors during startup configuration processing.
      */
     protected boolean ok = false;
-
-
     /**
      * Any parse error which occurred while parsing XML descriptors.
+     *
      * @deprecated Unused. Will be removed in Tomcat 7.0.x.
      */
     @Deprecated
     protected SAXParseException parseException = null;
-
-
     /**
      * Original docBase.
      */
     protected String originalDocBase = null;
-
-
+    /**
+     * The <code>Digester</code> we will use to process web application
+     * deployment descriptor files.
+     */
+    protected Digester webDigester = null;
+    protected WebRuleSet webRuleSet = null;
     /**
      * Anti-locking docBase. It is a path to a copy of the web application
      * in the java.io.tmpdir directory. This path is always an absolute one.
@@ -140,53 +133,16 @@ public class ContextConfig implements LifecycleListener {
     private File antiLockingDocBase = null;
 
 
-    /**
-     * The <code>Digester</code> we will use to process web application
-     * context files.
-     */
-    protected static Digester contextDigester = null;
-
-
-    /**
-     * The <code>Digester</code> we will use to process web application
-     * deployment descriptor files.
-     */
-    protected Digester webDigester = null;
-    protected WebRuleSet webRuleSet = null;
-
-    /**
-     * Attribute value used to turn on/off XML validation
-     * @deprecated Unused. Will be removed in Tomcat 7.0.x.
-     */
-    @Deprecated
-    protected static boolean xmlValidation = false;
-
-
-    /**
-     * Attribute value used to turn on/off XML namespace awarenes.
-     * @deprecated Unused. Will be removed in Tomcat 7.0.x.
-     */
-    @Deprecated
-    protected static boolean xmlNamespaceAware = false;
-
-
-    /**
-     * Deployment count.
-     */
-    protected static long deploymentCount = 0L;
-
-
-    protected static final LoginConfig DUMMY_LOGIN_CONFIG =
-                                new LoginConfig("NONE", null, null, null);
-
-
     // ------------------------------------------------------------- Properties
+
     /**
      * Return the location of the default deployment descriptor
      */
-    public String getDefaultWebXml() {
-        if( defaultWebXml == null ) {
-            defaultWebXml=Constants.DefaultWebXml;
+    public String getDefaultWebXml()
+    {
+        if (defaultWebXml == null)
+        {
+            defaultWebXml = Constants.DefaultWebXml;
         }
 
         return (this.defaultWebXml);
@@ -199,7 +155,8 @@ public class ContextConfig implements LifecycleListener {
      *
      * @param path Absolute/relative path to the default web.xml
      */
-    public void setDefaultWebXml(String path) {
+    public void setDefaultWebXml(String path)
+    {
 
         this.defaultWebXml = path;
 
@@ -209,9 +166,11 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Return the location of the default context file
      */
-    public String getDefaultContextXml() {
-        if( defaultContextXml == null ) {
-            defaultContextXml=Constants.DefaultContextXml;
+    public String getDefaultContextXml()
+    {
+        if (defaultContextXml == null)
+        {
+            defaultContextXml = Constants.DefaultContextXml;
         }
 
         return (this.defaultContextXml);
@@ -224,7 +183,8 @@ public class ContextConfig implements LifecycleListener {
      *
      * @param path Absolute/relative path to the default context.xml
      */
-    public void setDefaultContextXml(String path) {
+    public void setDefaultContextXml(String path)
+    {
 
         this.defaultContextXml = path;
 
@@ -235,9 +195,10 @@ public class ContextConfig implements LifecycleListener {
      * Sets custom mappings of login methods to authenticators.
      *
      * @param customAuthenticators Custom mappings of login methods to
-     * authenticators
+     *                             authenticators
      */
-    public void setCustomAuthenticators(Map customAuthenticators) {
+    public void setCustomAuthenticators(Map customAuthenticators)
+    {
         this.customAuthenticators = customAuthenticators;
     }
 
@@ -250,31 +211,42 @@ public class ContextConfig implements LifecycleListener {
      *
      * @param event The lifecycle event that has occurred
      */
-    public void lifecycleEvent(LifecycleEvent event) {
+    public void lifecycleEvent(LifecycleEvent event)
+    {
 
         // Identify the context we are associated with
-        try {
+        try
+        {
             context = (Context) event.getLifecycle();
-        } catch (ClassCastException e) {
+        }
+        catch (ClassCastException e)
+        {
             log.error(sm.getString("contextConfig.cce", event.getLifecycle()), e);
             return;
         }
 
         // Process the event that has occurred
-        if (event.getType().equals(Lifecycle.START_EVENT)) {
+        if (event.getType().equals(Lifecycle.START_EVENT))
+        {
             start();
-        } else if (event.getType().equals(StandardContext.BEFORE_START_EVENT)) {
+        } else if (event.getType().equals(StandardContext.BEFORE_START_EVENT))
+        {
             beforeStart();
-        } else if (event.getType().equals(StandardContext.AFTER_START_EVENT)) {
+        } else if (event.getType().equals(StandardContext.AFTER_START_EVENT))
+        {
             // Restore docBase for management tools
-            if (originalDocBase != null) {
+            if (originalDocBase != null)
+            {
                 context.setDocBase(originalDocBase);
             }
-        } else if (event.getType().equals(Lifecycle.STOP_EVENT)) {
+        } else if (event.getType().equals(Lifecycle.STOP_EVENT))
+        {
             stop();
-        } else if (event.getType().equals(Lifecycle.INIT_EVENT)) {
+        } else if (event.getType().equals(Lifecycle.INIT_EVENT))
+        {
             init();
-        } else if (event.getType().equals(Lifecycle.DESTROY_EVENT)) {
+        } else if (event.getType().equals(Lifecycle.DESTROY_EVENT))
+        {
             destroy();
         }
 
@@ -287,15 +259,17 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process the application classes annotations, if it exists.
      */
-    protected void applicationAnnotationsConfig() {
+    protected void applicationAnnotationsConfig()
+    {
 
-        long t1=System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
 
         WebAnnotationSet.loadApplicationAnnotations(context);
 
-        long t2=System.currentTimeMillis();
-        if (context instanceof StandardContext) {
-            ((StandardContext) context).setStartupTime(t2-t1+
+        long t2 = System.currentTimeMillis();
+        if (context instanceof StandardContext)
+        {
+            ((StandardContext) context).setStartupTime(t2 - t1 +
                     ((StandardContext) context).getStartupTime());
         }
     }
@@ -304,52 +278,66 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process the application configuration file, if it exists.
      */
-    protected void applicationWebConfig() {
+    protected void applicationWebConfig()
+    {
 
         String altDDName = null;
 
         // Open the application web.xml file, if it exists
         InputStream stream = null;
         ServletContext servletContext = context.getServletContext();
-        if (servletContext != null) {
-            altDDName = (String)servletContext.getAttribute(
-                                                        Globals.ALT_DD_ATTR);
-            if (altDDName != null) {
-                try {
+        if (servletContext != null)
+        {
+            altDDName = (String) servletContext.getAttribute(
+                    Globals.ALT_DD_ATTR);
+            if (altDDName != null)
+            {
+                try
+                {
                     stream = new FileInputStream(altDDName);
-                } catch (FileNotFoundException e) {
-                    log.error(sm.getString("contextConfig.altDDNotFound",
-                                           altDDName));
                 }
-            }
-            else {
+                catch (FileNotFoundException e)
+                {
+                    log.error(sm.getString("contextConfig.altDDNotFound",
+                            altDDName));
+                }
+            } else
+            {
                 stream = servletContext.getResourceAsStream
-                    (Constants.ApplicationWebXml);
+                        (Constants.ApplicationWebXml);
             }
         }
-        if (stream == null) {
-            if (log.isDebugEnabled()) {
+        if (stream == null)
+        {
+            if (log.isDebugEnabled())
+            {
                 log.debug(sm.getString("contextConfig.applicationMissing") + " " + context);
             }
             return;
         }
 
-        long t1=System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
 
-        URL url=null;
+        URL url = null;
         // Process the application web.xml file
-        synchronized (webDigester) {
-            try {
-                if (altDDName != null) {
+        synchronized (webDigester)
+        {
+            try
+            {
+                if (altDDName != null)
+                {
                     url = new File(altDDName).toURL();
-                } else {
+                } else
+                {
                     url = servletContext.getResource(
-                                                Constants.ApplicationWebXml);
+                            Constants.ApplicationWebXml);
                 }
-                if( url!=null ) {
+                if (url != null)
+                {
                     InputSource is = new InputSource(url.toExternalForm());
                     is.setByteStream(stream);
-                    if (context instanceof StandardContext) {
+                    if (context instanceof StandardContext)
+                    {
                         ((StandardContext) context).setReplaceWelcomeFiles(true);
                     }
 
@@ -358,45 +346,59 @@ public class ContextConfig implements LifecycleListener {
                     webDigester.push(context);
                     webDigester.setErrorHandler(handler);
 
-                    if(log.isDebugEnabled()) {
+                    if (log.isDebugEnabled())
+                    {
                         log.debug("Parsing application web.xml file at " + url.toExternalForm());
                     }
 
                     webDigester.parse(is);
 
                     if (handler.getWarnings().size() > 0 ||
-                            handler.getErrors().size() > 0) {
+                            handler.getErrors().size() > 0)
+                    {
                         ok = false;
                         handler.logFindings(log, is.getSystemId());
                     }
-                } else {
-                    log.info("No web.xml, using defaults " + context );
+                } else
+                {
+                    log.info("No web.xml, using defaults " + context);
                 }
-            } catch (SAXParseException e) {
+            }
+            catch (SAXParseException e)
+            {
                 log.error(sm.getString("contextConfig.applicationParse", url.toExternalForm()), e);
                 log.error(sm.getString("contextConfig.applicationPosition",
-                                 "" + e.getLineNumber(),
-                                 "" + e.getColumnNumber()));
+                        "" + e.getLineNumber(),
+                        "" + e.getColumnNumber()));
                 ok = false;
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 log.error(sm.getString("contextConfig.applicationParse", url.toExternalForm()), e);
                 ok = false;
-            } finally {
+            }
+            finally
+            {
                 webDigester.reset();
-                try {
-                    if (stream != null) {
+                try
+                {
+                    if (stream != null)
+                    {
                         stream.close();
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     log.error(sm.getString("contextConfig.applicationClose"), e);
                 }
             }
         }
         webRuleSet.recycle();
 
-        long t2=System.currentTimeMillis();
-        if (context instanceof StandardContext) {
-            ((StandardContext) context).setStartupTime(t2-t1);
+        long t2 = System.currentTimeMillis();
+        if (context instanceof StandardContext)
+        {
+            ((StandardContext) context).setStartupTime(t2 - t1);
         }
     }
 
@@ -405,14 +407,16 @@ public class ContextConfig implements LifecycleListener {
      * Set up an Authenticator automatically if required, and one has not
      * already been configured.
      */
-    protected synchronized void authenticatorConfig() {
+    protected synchronized void authenticatorConfig()
+    {
 
         // Does this Context require an Authenticator?
         SecurityConstraint constraints[] = context.findConstraints();
         if ((constraints == null) || (constraints.length == 0))
             return;
         LoginConfig loginConfig = context.getLoginConfig();
-        if (loginConfig == null) {
+        if (loginConfig == null)
+        {
             loginConfig = DUMMY_LOGIN_CONFIG;
             context.setLoginConfig(loginConfig);
         }
@@ -420,24 +424,29 @@ public class ContextConfig implements LifecycleListener {
         // Has an authenticator been configured already?
         if (context instanceof Authenticator)
             return;
-        if (context instanceof ContainerBase) {
+        if (context instanceof ContainerBase)
+        {
             Pipeline pipeline = ((ContainerBase) context).getPipeline();
-            if (pipeline != null) {
+            if (pipeline != null)
+            {
                 Valve basic = pipeline.getBasic();
                 if ((basic != null) && (basic instanceof Authenticator))
                     return;
                 Valve valves[] = pipeline.getValves();
-                for (int i = 0; i < valves.length; i++) {
+                for (int i = 0; i < valves.length; i++)
+                {
                     if (valves[i] instanceof Authenticator)
                         return;
                 }
             }
-        } else {
+        } else
+        {
             return;     // Cannot install a Valve even if it would be needed
         }
 
         // Has a Realm been configured for us to authenticate against?
-        if (context.getRealm() == null) {
+        if (context.getRealm() == null)
+        {
             log.error(sm.getString("contextConfig.missingRealm"));
             ok = false;
             return;
@@ -449,27 +458,35 @@ public class ContextConfig implements LifecycleListener {
          * org/apache/catalina/startup/Authenticators.properties.
          */
         Valve authenticator = null;
-        if (customAuthenticators != null) {
+        if (customAuthenticators != null)
+        {
             authenticator = (Valve)
-                customAuthenticators.get(loginConfig.getAuthMethod());
+                    customAuthenticators.get(loginConfig.getAuthMethod());
         }
-        if (authenticator == null) {
+        if (authenticator == null)
+        {
             // Load our mapping properties if necessary
-            if (authenticators == null) {
-                try {
-                    InputStream is=this.getClass().getClassLoader().getResourceAsStream("org/apache/catalina/startup/Authenticators.properties");
-                    if( is!=null ) {
+            if (authenticators == null)
+            {
+                try
+                {
+                    InputStream is = this.getClass().getClassLoader().getResourceAsStream("org/apache/catalina/startup/Authenticators.properties");
+                    if (is != null)
+                    {
                         authenticators = new Properties();
                         authenticators.load(is);
-                    } else {
+                    } else
+                    {
                         log.error(sm.getString(
                                 "contextConfig.authenticatorResources"));
-                        ok=false;
+                        ok = false;
                         return;
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     log.error(sm.getString(
-                                "contextConfig.authenticatorResources"), e);
+                            "contextConfig.authenticatorResources"), e);
                     ok = false;
                     return;
                 }
@@ -479,34 +496,41 @@ public class ContextConfig implements LifecycleListener {
             String authenticatorName = null;
             authenticatorName =
                     authenticators.getProperty(loginConfig.getAuthMethod());
-            if (authenticatorName == null) {
+            if (authenticatorName == null)
+            {
                 log.error(sm.getString("contextConfig.authenticatorMissing",
-                                 loginConfig.getAuthMethod()));
+                        loginConfig.getAuthMethod()));
                 ok = false;
                 return;
             }
 
             // Instantiate and install an Authenticator of the requested class
-            try {
+            try
+            {
                 Class authenticatorClass = Class.forName(authenticatorName);
                 authenticator = (Valve) authenticatorClass.newInstance();
-            } catch (Throwable t) {
+            }
+            catch (Throwable t)
+            {
                 log.error(sm.getString(
-                                    "contextConfig.authenticatorInstantiate",
-                                    authenticatorName),
-                          t);
+                                "contextConfig.authenticatorInstantiate",
+                                authenticatorName),
+                        t);
                 ok = false;
             }
         }
 
-        if (authenticator != null && context instanceof ContainerBase) {
+        if (authenticator != null && context instanceof ContainerBase)
+        {
             Pipeline pipeline = ((ContainerBase) context).getPipeline();
-            if (pipeline != null) {
+            if (pipeline != null)
+            {
                 ((ContainerBase) context).addValve(authenticator);
-                if (log.isDebugEnabled()) {
+                if (log.isDebugEnabled())
+                {
                     log.debug(sm.getString(
-                                    "contextConfig.authenticatorConfigured",
-                                    loginConfig.getAuthMethod()));
+                            "contextConfig.authenticatorConfigured",
+                            loginConfig.getAuthMethod()));
                 }
             }
         }
@@ -519,7 +543,8 @@ public class ContextConfig implements LifecycleListener {
      * web application deployment descriptor (web.xml).
      */
     protected void createWebXmlDigester(boolean namespaceAware,
-            boolean validation) {
+                                        boolean validation)
+    {
 
         boolean blockExternal = context.getXmlBlockExternal();
 
@@ -534,7 +559,8 @@ public class ContextConfig implements LifecycleListener {
      * Create (if necessary) and return a Digester configured to process the
      * context configuration descriptor for an application.
      */
-    protected Digester createContextDigester() {
+    protected Digester createContextDigester()
+    {
         Digester digester = new Digester();
         digester.setValidating(false);
         RuleSet contextRuleSet = new ContextRuleSet("", false);
@@ -545,10 +571,12 @@ public class ContextConfig implements LifecycleListener {
     }
 
 
-    protected String getBaseDir() {
-        Container engineC=context.getParent().getParent();
-        if( engineC instanceof StandardEngine ) {
-            return ((StandardEngine)engineC).getBaseDir();
+    protected String getBaseDir()
+    {
+        Container engineC = context.getParent().getParent();
+        if (engineC instanceof StandardEngine)
+        {
+            return ((StandardEngine) engineC).getBaseDir();
         }
         return System.getProperty("catalina.base");
     }
@@ -558,68 +586,81 @@ public class ContextConfig implements LifecycleListener {
      * The default config must be read with the container loader - so
      * container servlets can be loaded
      */
-    protected void defaultWebConfig() {
-        long t1=System.currentTimeMillis();
+    protected void defaultWebConfig()
+    {
+        long t1 = System.currentTimeMillis();
 
         // Open the default web.xml file, if it exists
-        if( defaultWebXml==null && context instanceof StandardContext ) {
-            defaultWebXml=((StandardContext)context).getDefaultWebXml();
+        if (defaultWebXml == null && context instanceof StandardContext)
+        {
+            defaultWebXml = ((StandardContext) context).getDefaultWebXml();
         }
         // set the default if we don't have any overrides
-        if( defaultWebXml==null ) getDefaultWebXml();
+        if (defaultWebXml == null) getDefaultWebXml();
 
         File file = new File(this.defaultWebXml);
-        if (!file.isAbsolute()) {
+        if (!file.isAbsolute())
+        {
             file = new File(getBaseDir(),
-                            this.defaultWebXml);
+                    this.defaultWebXml);
         }
 
         InputStream stream = null;
         InputSource source = null;
 
-        try {
-            if ( ! file.exists() ) {
+        try
+        {
+            if (!file.exists())
+            {
                 // Use getResource and getResourceAsStream
                 stream = getClass().getClassLoader()
-                    .getResourceAsStream(defaultWebXml);
-                if( stream != null ) {
+                        .getResourceAsStream(defaultWebXml);
+                if (stream != null)
+                {
                     source = new InputSource
                             (getClass().getClassLoader()
-                            .getResource(defaultWebXml).toString());
+                                    .getResource(defaultWebXml).toString());
                 }
-                if( stream== null ) {
+                if (stream == null)
+                {
                     // maybe embedded
                     stream = getClass().getClassLoader()
-                        .getResourceAsStream("web-embed.xml");
-                    if( stream != null ) {
+                            .getResourceAsStream("web-embed.xml");
+                    if (stream != null)
+                    {
                         source = new InputSource
-                        (getClass().getClassLoader()
-                                .getResource("web-embed.xml").toString());
+                                (getClass().getClassLoader()
+                                        .getResource("web-embed.xml").toString());
                     }
                 }
 
-                if( stream== null ) {
+                if (stream == null)
+                {
                     log.info("No default web.xml");
                 }
-            } else {
+            } else
+            {
                 source =
-                    new InputSource("file://" + file.getAbsolutePath());
+                        new InputSource("file://" + file.getAbsolutePath());
                 stream = new FileInputStream(file);
                 context.addWatchedResource(file.getAbsolutePath());
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             log.error(sm.getString("contextConfig.defaultMissing")
-                      + " " + defaultWebXml + " " + file , e);
+                    + " " + defaultWebXml + " " + file, e);
         }
 
-        if (stream != null) {
+        if (stream != null)
+        {
             processDefaultWebConfig(webDigester, stream, source);
             webRuleSet.recycle();
         }
 
-        long t2=System.currentTimeMillis();
-        if( (t2-t1) > 200 )
-            log.debug("Processed default web.xml " + file + " "  + ( t2-t1));
+        long t2 = System.currentTimeMillis();
+        if ((t2 - t1) > 200)
+            log.debug("Processed default web.xml " + file + " " + (t2 - t1));
 
         stream = null;
         source = null;
@@ -627,27 +668,34 @@ public class ContextConfig implements LifecycleListener {
         String resourceName = getHostConfigPath(Constants.HostWebXml);
         file = new File(getConfigBase(), resourceName);
 
-        try {
-            if ( ! file.exists() ) {
+        try
+        {
+            if (!file.exists())
+            {
                 // Use getResource and getResourceAsStream
                 stream = getClass().getClassLoader()
-                    .getResourceAsStream(resourceName);
-                if( stream != null ) {
+                        .getResourceAsStream(resourceName);
+                if (stream != null)
+                {
                     source = new InputSource
                             (getClass().getClassLoader()
-                            .getResource(resourceName).toString());
+                                    .getResource(resourceName).toString());
                 }
-            } else {
+            } else
+            {
                 source =
-                    new InputSource("file://" + file.getAbsolutePath());
+                        new InputSource("file://" + file.getAbsolutePath());
                 stream = new FileInputStream(file);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             log.error(sm.getString("contextConfig.defaultMissing")
-                      + " " + resourceName + " " + file , e);
+                    + " " + resourceName + " " + file, e);
         }
 
-        if (stream != null) {
+        if (stream != null)
+        {
             processDefaultWebConfig(webDigester, stream, source);
             webRuleSet.recycle();
         }
@@ -659,15 +707,18 @@ public class ContextConfig implements LifecycleListener {
      * Process a default web.xml.
      */
     protected void processDefaultWebConfig(Digester digester, InputStream stream,
-            InputSource source) {
+                                           InputSource source)
+    {
 
         if (log.isDebugEnabled())
             log.debug("Processing context [" + context.getName()
                     + "] web configuration resource " + source.getSystemId());
 
         // Process the default web.xml file
-        synchronized (digester) {
-            try {
+        synchronized (digester)
+        {
+            try
+            {
                 source.setByteStream(stream);
 
                 if (context instanceof StandardContext)
@@ -679,26 +730,37 @@ public class ContextConfig implements LifecycleListener {
                 digester.setErrorHandler(handler);
                 digester.parse(source);
                 if (handler.getWarnings().size() > 0 ||
-                        handler.getErrors().size() > 0) {
+                        handler.getErrors().size() > 0)
+                {
                     ok = false;
                     handler.logFindings(log, source.getSystemId());
                 }
-            } catch (SAXParseException e) {
+            }
+            catch (SAXParseException e)
+            {
                 log.error(sm.getString("contextConfig.defaultParse"), e);
                 log.error(sm.getString("contextConfig.defaultPosition",
-                                 "" + e.getLineNumber(),
-                                 "" + e.getColumnNumber()));
+                        "" + e.getLineNumber(),
+                        "" + e.getColumnNumber()));
                 ok = false;
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 log.error(sm.getString("contextConfig.defaultParse"), e);
                 ok = false;
-            } finally {
+            }
+            finally
+            {
                 digester.reset();
-                try {
-                    if (stream != null) {
+                try
+                {
+                    if (stream != null)
+                    {
                         stream.close();
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     log.error(sm.getString("contextConfig.defaultClose"), e);
                 }
             }
@@ -709,19 +771,23 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process the default configuration file, if it exists.
      */
-    protected void contextConfig() {
+    protected void contextConfig()
+    {
 
         // Open the default context.xml file, if it exists
-        if( defaultContextXml==null && context instanceof StandardContext ) {
-            defaultContextXml = ((StandardContext)context).getDefaultContextXml();
+        if (defaultContextXml == null && context instanceof StandardContext)
+        {
+            defaultContextXml = ((StandardContext) context).getDefaultContextXml();
         }
         // set the default if we don't have any overrides
-        if( defaultContextXml==null ) getDefaultContextXml();
+        if (defaultContextXml == null) getDefaultContextXml();
 
-        if (!context.getOverride()) {
+        if (!context.getOverride())
+        {
             File defaultContextFile = new File(defaultContextXml);
-            if (!defaultContextFile.isAbsolute()) {
-                defaultContextFile =new File(getBaseDir(), defaultContextXml);
+            if (!defaultContextFile.isAbsolute())
+            {
+                defaultContextFile = new File(getBaseDir(), defaultContextXml);
             }
             processContextConfig(defaultContextFile.getParentFile(), defaultContextFile.getName());
             processContextConfig(getConfigBase(), getHostConfigPath(Constants.HostContextXml));
@@ -735,7 +801,8 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process a context.xml.
      */
-    protected void processContextConfig(File baseDir, String resourceName) {
+    protected void processContextConfig(File baseDir, String resourceName)
+    {
 
         if (log.isDebugEnabled())
             log.debug("Processing context [" + context.getName()
@@ -745,39 +812,49 @@ public class ContextConfig implements LifecycleListener {
         InputStream stream = null;
 
         File file = baseDir;
-        if (resourceName != null) {
+        if (resourceName != null)
+        {
             file = new File(baseDir, resourceName);
         }
 
-        try {
-            if ( !file.exists() ) {
-                if (resourceName != null) {
+        try
+        {
+            if (!file.exists())
+            {
+                if (resourceName != null)
+                {
                     // Use getResource and getResourceAsStream
                     stream = getClass().getClassLoader()
-                        .getResourceAsStream(resourceName);
-                    if( stream != null ) {
+                            .getResourceAsStream(resourceName);
+                    if (stream != null)
+                    {
                         source = new InputSource
-                            (getClass().getClassLoader()
-                            .getResource(resourceName).toString());
+                                (getClass().getClassLoader()
+                                        .getResource(resourceName).toString());
                     }
                 }
-            } else {
+            } else
+            {
                 source =
-                    new InputSource("file://" + file.getAbsolutePath());
+                        new InputSource("file://" + file.getAbsolutePath());
                 stream = new FileInputStream(file);
                 // Add as watched resource so that cascade reload occurs if a default
                 // config file is modified/added/removed
                 context.addWatchedResource(file.getAbsolutePath());
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             log.error(sm.getString("contextConfig.contextMissing",
-                      resourceName + " " + file) , e);
+                    resourceName + " " + file), e);
         }
 
         if (source == null)
             return;
-        synchronized (contextDigester) {
-            try {
+        synchronized (contextDigester)
+        {
+            try
+            {
                 source.setByteStream(stream);
                 contextDigester.setClassLoader(this.getClass().getClassLoader());
                 contextDigester.setUseContextClassLoader(false);
@@ -787,31 +864,42 @@ public class ContextConfig implements LifecycleListener {
                 contextDigester.setErrorHandler(handler);
                 contextDigester.parse(source);
                 if (handler.getWarnings().size() > 0 ||
-                        handler.getErrors().size() > 0) {
+                        handler.getErrors().size() > 0)
+                {
                     ok = false;
                     handler.logFindings(log, source.getSystemId());
                 }
                 if (log.isDebugEnabled())
                     log.debug("Successfully processed context [" + context.getName()
                             + "] configuration file " + baseDir + " " + resourceName);
-            } catch (SAXParseException e) {
+            }
+            catch (SAXParseException e)
+            {
                 log.error(sm.getString("contextConfig.contextParse",
                         context.getName()), e);
                 log.error(sm.getString("contextConfig.defaultPosition",
-                                 "" + e.getLineNumber(),
-                                 "" + e.getColumnNumber()));
+                        "" + e.getLineNumber(),
+                        "" + e.getColumnNumber()));
                 ok = false;
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 log.error(sm.getString("contextConfig.contextParse",
                         context.getName()), e);
                 ok = false;
-            } finally {
+            }
+            finally
+            {
                 contextDigester.reset();
-                try {
-                    if (stream != null) {
+                try
+                {
+                    if (stream != null)
+                    {
                         stream.close();
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     log.error(sm.getString("contextConfig.contextClose"), e);
                 }
             }
@@ -823,102 +911,128 @@ public class ContextConfig implements LifecycleListener {
      * Adjust docBase.
      */
     protected void fixDocBase()
-        throws IOException {
+            throws IOException
+    {
 
         Host host = (Host) context.getParent();
         String appBase = host.getAppBase();
 
         boolean unpackWARs = true;
-        if (host instanceof StandardHost) {
+        if (host instanceof StandardHost)
+        {
             unpackWARs = ((StandardHost) host).isUnpackWARs()
-                && ((StandardContext) context).getUnpackWAR();
+                    && ((StandardContext) context).getUnpackWAR();
         }
 
         File canonicalAppBase = new File(appBase);
-        if (canonicalAppBase.isAbsolute()) {
+        if (canonicalAppBase.isAbsolute())
+        {
             canonicalAppBase = canonicalAppBase.getCanonicalFile();
-        } else {
+        } else
+        {
             canonicalAppBase =
-                new File(System.getProperty("catalina.base"), appBase)
-                .getCanonicalFile();
+                    new File(System.getProperty("catalina.base"), appBase)
+                            .getCanonicalFile();
         }
 
         String docBase = context.getDocBase();
-        if (docBase == null) {
+        if (docBase == null)
+        {
             // Trying to guess the docBase according to the path
             String path = context.getPath();
-            if (path == null) {
+            if (path == null)
+            {
                 return;
             }
-            if (path.equals("")) {
+            if (path.equals(""))
+            {
                 docBase = "ROOT";
-            } else {
-                if (path.startsWith("/")) {
+            } else
+            {
+                if (path.startsWith("/"))
+                {
                     docBase = path.substring(1).replace('/', '#');
-                } else {
+                } else
+                {
                     docBase = path.replace('/', '#');
                 }
             }
         }
 
         File file = new File(docBase);
-        if (!file.isAbsolute()) {
+        if (!file.isAbsolute())
+        {
             docBase = (new File(canonicalAppBase, docBase)).getPath();
-        } else {
+        } else
+        {
             docBase = file.getCanonicalPath();
         }
         file = new File(docBase);
         String origDocBase = docBase;
 
         String pathName = context.getPath();
-        if (pathName.equals("")) {
+        if (pathName.equals(""))
+        {
             pathName = "ROOT";
-        } else {
+        } else
+        {
             // Context path must start with '/'
             pathName = pathName.substring(1).replace('/', '#');
         }
-        if (docBase.toLowerCase().endsWith(".war") && !file.isDirectory() && unpackWARs) {
+        if (docBase.toLowerCase().endsWith(".war") && !file.isDirectory() && unpackWARs)
+        {
             URL war = new URL("jar:" + (new File(docBase)).toURI().toURL() + "!/");
             docBase = ExpandWar.expand(host, war, pathName);
             file = new File(docBase);
             docBase = file.getCanonicalPath();
-            if (context instanceof StandardContext) {
+            if (context instanceof StandardContext)
+            {
                 ((StandardContext) context).setOriginalDocBase(origDocBase);
             }
         } else if (docBase.toLowerCase().endsWith(".war") &&
-                !file.isDirectory() && !unpackWARs) {
+                !file.isDirectory() && !unpackWARs)
+        {
             URL war =
-                new URL("jar:" + (new File (docBase)).toURI().toURL() + "!/");
+                    new URL("jar:" + (new File(docBase)).toURI().toURL() + "!/");
             ExpandWar.validate(host, war, pathName);
-        } else {
+        } else
+        {
             File docDir = new File(docBase);
-            if (!docDir.exists()) {
+            if (!docDir.exists())
+            {
                 File warFile = new File(docBase + ".war");
-                if (warFile.exists()) {
+                if (warFile.exists())
+                {
                     URL war =
-                        new URL("jar:" + warFile.toURI().toURL() + "!/");
-                    if (unpackWARs) {
+                            new URL("jar:" + warFile.toURI().toURL() + "!/");
+                    if (unpackWARs)
+                    {
                         docBase = ExpandWar.expand(host, war, pathName);
                         file = new File(docBase);
                         docBase = file.getCanonicalPath();
-                    } else {
+                    } else
+                    {
                         docBase = warFile.getCanonicalPath();
                         ExpandWar.validate(host, war, pathName);
                     }
                 }
-                if (context instanceof StandardContext) {
+                if (context instanceof StandardContext)
+                {
                     ((StandardContext) context).setOriginalDocBase(origDocBase);
                 }
             }
         }
 
-        if (docBase.startsWith(canonicalAppBase.getPath() + File.separatorChar)) {
+        if (docBase.startsWith(canonicalAppBase.getPath() + File.separatorChar))
+        {
             docBase = docBase.substring(canonicalAppBase.getPath().length());
             docBase = docBase.replace(File.separatorChar, '/');
-            if (docBase.startsWith("/")) {
+            if (docBase.startsWith("/"))
+            {
                 docBase = docBase.substring(1);
             }
-        } else {
+        } else
+        {
             docBase = docBase.replace(File.separatorChar, '/');
         }
 
@@ -927,10 +1041,12 @@ public class ContextConfig implements LifecycleListener {
     }
 
 
-    protected void antiLocking() throws IOException {
+    protected void antiLocking() throws IOException
+    {
 
         if ((context instanceof StandardContext)
-            && ((StandardContext) context).getAntiResourceLocking()) {
+                && ((StandardContext) context).getAntiResourceLocking())
+        {
 
             Host host = (Host) context.getParent();
             String appBase = host.getAppBase();
@@ -940,33 +1056,42 @@ public class ContextConfig implements LifecycleListener {
             originalDocBase = docBase;
 
             File docBaseFile = new File(docBase);
-            if (!docBaseFile.isAbsolute()) {
+            if (!docBaseFile.isAbsolute())
+            {
                 File file = new File(appBase);
-                if (!file.isAbsolute()) {
+                if (!file.isAbsolute())
+                {
                     file = new File(System.getProperty("catalina.base"), appBase);
                 }
                 docBaseFile = new File(file, docBase);
             }
 
             String path = context.getPath();
-            if (path == null) {
+            if (path == null)
+            {
                 return;
             }
-            if (path.equals("")) {
+            if (path.equals(""))
+            {
                 docBase = "ROOT";
-            } else {
-                if (path.startsWith("/")) {
-                    docBase = path.substring(1).replace('/','#');
-                } else {
-                    docBase = path.replace('/','#');
+            } else
+            {
+                if (path.startsWith("/"))
+                {
+                    docBase = path.substring(1).replace('/', '#');
+                } else
+                {
+                    docBase = path.replace('/', '#');
                 }
             }
 
-            if (originalDocBase.toLowerCase().endsWith(".war")) {
+            if (originalDocBase.toLowerCase().endsWith(".war"))
+            {
                 antiLockingDocBase = new File(
                         System.getProperty("java.io.tmpdir"),
                         deploymentCount++ + "-" + docBase + ".war");
-            } else {
+            } else
+            {
                 antiLockingDocBase = new File(
                         System.getProperty("java.io.tmpdir"),
                         deploymentCount++ + "-" + docBase);
@@ -980,7 +1105,8 @@ public class ContextConfig implements LifecycleListener {
 
             // Cleanup just in case an old deployment is lying around
             ExpandWar.delete(antiLockingDocBase);
-            if (ExpandWar.copy(docBaseFile, antiLockingDocBase)) {
+            if (ExpandWar.copy(docBaseFile, antiLockingDocBase))
+            {
                 context.setDocBase(antiLockingDocBase.getPath());
             }
         }
@@ -990,10 +1116,12 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process a "init" event for this Context.
      */
-    protected void init() {
+    protected void init()
+    {
         // Called from StandardContext.init()
 
-        if (contextDigester == null){
+        if (contextDigester == null)
+        {
             contextDigester = createContextDigester();
             contextDigester.getParser();
         }
@@ -1005,9 +1133,12 @@ public class ContextConfig implements LifecycleListener {
 
         contextConfig();
 
-        try {
+        try
+        {
             fixDocBase();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             log.error(sm.getString(
                     "contextConfig.fixDocBase", context.getPath()), e);
         }
@@ -1020,11 +1151,15 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process a "before start" event for this Context.
      */
-    protected synchronized void beforeStart() {
+    protected synchronized void beforeStart()
+    {
 
-        try {
+        try
+        {
             antiLocking();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             log.error(sm.getString("contextConfig.antiLocking"), e);
         }
 
@@ -1034,7 +1169,8 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process a "start" event for this Context.
      */
-    protected synchronized void start() {
+    protected synchronized void start()
+    {
         // Called from StandardContext.start()
 
         if (log.isDebugEnabled())
@@ -1043,10 +1179,12 @@ public class ContextConfig implements LifecycleListener {
         // Process the default and application web.xml files
         defaultWebConfig();
         applicationWebConfig();
-        if (!context.getIgnoreAnnotations()) {
+        if (!context.getIgnoreAnnotations())
+        {
             applicationAnnotationsConfig();
         }
-        if (ok) {
+        if (ok)
+        {
             validateSecurityRoles();
         }
 
@@ -1055,14 +1193,17 @@ public class ContextConfig implements LifecycleListener {
             authenticatorConfig();
 
         // Dump the contents of this pipeline if requested
-        if ((log.isDebugEnabled()) && (context instanceof ContainerBase)) {
+        if ((log.isDebugEnabled()) && (context instanceof ContainerBase))
+        {
             log.debug("Pipeline Configuration:");
             Pipeline pipeline = ((ContainerBase) context).getPipeline();
             Valve valves[] = null;
             if (pipeline != null)
                 valves = pipeline.getValves();
-            if (valves != null) {
-                for (int i = 0; i < valves.length; i++) {
+            if (valves != null)
+            {
+                for (int i = 0; i < valves.length; i++)
+                {
                     log.debug("  " + valves[i].getInfo());
                 }
             }
@@ -1072,7 +1213,8 @@ public class ContextConfig implements LifecycleListener {
         // Make our application available if no problems were encountered
         if (ok)
             context.setConfigured(true);
-        else {
+        else
+        {
             log.error(sm.getString("contextConfig.unavailable"));
             context.setConfigured(false);
         }
@@ -1083,7 +1225,8 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process a "stop" event for this Context.
      */
-    protected synchronized void stop() {
+    protected synchronized void stop()
+    {
 
         if (log.isDebugEnabled())
             log.debug(sm.getString("contextConfig.stop"));
@@ -1092,7 +1235,8 @@ public class ContextConfig implements LifecycleListener {
 
         // Removing children
         Container[] children = context.findChildren();
-        for (i = 0; i < children.length; i++) {
+        for (i = 0; i < children.length; i++)
+        {
             context.removeChild(children[i]);
         }
 
@@ -1108,7 +1252,8 @@ public class ContextConfig implements LifecycleListener {
 
         // Removing security constraints
         SecurityConstraint[] securityConstraints = context.findConstraints();
-        for (i = 0; i < securityConstraints.length; i++) {
+        for (i = 0; i < securityConstraints.length; i++)
+        {
             context.removeConstraint(securityConstraints[i]);
         }
 
@@ -1130,19 +1275,22 @@ public class ContextConfig implements LifecycleListener {
 
         // Removing errors pages
         ErrorPage[] errorPages = context.findErrorPages();
-        for (i = 0; i < errorPages.length; i++) {
+        for (i = 0; i < errorPages.length; i++)
+        {
             context.removeErrorPage(errorPages[i]);
         }
 
         // Removing filter defs
         FilterDef[] filterDefs = context.findFilterDefs();
-        for (i = 0; i < filterDefs.length; i++) {
+        for (i = 0; i < filterDefs.length; i++)
+        {
             context.removeFilterDef(filterDefs[i]);
         }
 
         // Removing filter maps
         FilterMap[] filterMaps = context.findFilterMaps();
-        for (i = 0; i < filterMaps.length; i++) {
+        for (i = 0; i < filterMaps.length; i++)
+        {
             context.removeFilterMap(filterMaps[i]);
         }
 
@@ -1156,13 +1304,15 @@ public class ContextConfig implements LifecycleListener {
 
         // Removing Mime mappings
         String[] mimeMappings = context.findMimeMappings();
-        for (i = 0; i < mimeMappings.length; i++) {
+        for (i = 0; i < mimeMappings.length; i++)
+        {
             context.removeMimeMapping(mimeMappings[i]);
         }
 
         // Removing parameters
         String[] parameters = context.findParameters();
-        for (i = 0; i < parameters.length; i++) {
+        for (i = 0; i < parameters.length; i++)
+        {
             context.removeParameter(parameters[i]);
         }
 
@@ -1193,13 +1343,15 @@ public class ContextConfig implements LifecycleListener {
 
         // Removing security role
         String[] securityRoles = context.findSecurityRoles();
-        for (i = 0; i < securityRoles.length; i++) {
+        for (i = 0; i < securityRoles.length; i++)
+        {
             context.removeSecurityRole(securityRoles[i]);
         }
 
         // Removing servlet mappings
         String[] servletMappings = context.findServletMappings();
-        for (i = 0; i < servletMappings.length; i++) {
+        for (i = 0; i < servletMappings.length; i++)
+        {
             context.removeServletMapping(servletMappings[i]);
         }
 
@@ -1207,30 +1359,35 @@ public class ContextConfig implements LifecycleListener {
 
         // Removing taglibs
         String[] taglibs = context.findTaglibs();
-        for (i = 0; i < taglibs.length; i++) {
+        for (i = 0; i < taglibs.length; i++)
+        {
             context.removeTaglib(taglibs[i]);
         }
 
         // Removing welcome files
         String[] welcomeFiles = context.findWelcomeFiles();
-        for (i = 0; i < welcomeFiles.length; i++) {
+        for (i = 0; i < welcomeFiles.length; i++)
+        {
             context.removeWelcomeFile(welcomeFiles[i]);
         }
 
         // Removing wrapper lifecycles
         String[] wrapperLifecycles = context.findWrapperLifecycles();
-        for (i = 0; i < wrapperLifecycles.length; i++) {
+        for (i = 0; i < wrapperLifecycles.length; i++)
+        {
             context.removeWrapperLifecycle(wrapperLifecycles[i]);
         }
 
         // Removing wrapper listeners
         String[] wrapperListeners = context.findWrapperListeners();
-        for (i = 0; i < wrapperListeners.length; i++) {
+        for (i = 0; i < wrapperListeners.length; i++)
+        {
             context.removeWrapperListener(wrapperListeners[i]);
         }
 
         // Remove (partially) folders and files created by antiLocking
-        if (antiLockingDocBase != null) {
+        if (antiLockingDocBase != null)
+        {
             // No need to log failure - it is expected in this case
             ExpandWar.delete(antiLockingDocBase, false);
         }
@@ -1243,7 +1400,8 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Process a "destroy" event for this Context.
      */
-    protected synchronized void destroy() {
+    protected synchronized void destroy()
+    {
         // Called from StandardContext.destroy()
         if (log.isDebugEnabled())
             log.debug(sm.getString("contextConfig.destroy"));
@@ -1262,15 +1420,19 @@ public class ContextConfig implements LifecycleListener {
      * (To make these problems fatal instead, simply set the <code>ok</code>
      * instance variable to <code>false</code> as well).
      */
-    protected void validateSecurityRoles() {
+    protected void validateSecurityRoles()
+    {
 
         // Check role names used in <security-constraint> elements
         SecurityConstraint constraints[] = context.findConstraints();
-        for (int i = 0; i < constraints.length; i++) {
+        for (int i = 0; i < constraints.length; i++)
+        {
             String roles[] = constraints[i].findAuthRoles();
-            for (int j = 0; j < roles.length; j++) {
+            for (int j = 0; j < roles.length; j++)
+            {
                 if (!"*".equals(roles[j]) &&
-                    !context.findSecurityRole(roles[j])) {
+                        !context.findSecurityRole(roles[j]))
+                {
                     log.warn(sm.getString("contextConfig.role.auth", roles[j]));
                     context.addSecurityRole(roles[j]);
                 }
@@ -1279,17 +1441,21 @@ public class ContextConfig implements LifecycleListener {
 
         // Check role names used in <servlet> elements
         Container wrappers[] = context.findChildren();
-        for (int i = 0; i < wrappers.length; i++) {
+        for (int i = 0; i < wrappers.length; i++)
+        {
             Wrapper wrapper = (Wrapper) wrappers[i];
             String runAs = wrapper.getRunAs();
-            if ((runAs != null) && !context.findSecurityRole(runAs)) {
+            if ((runAs != null) && !context.findSecurityRole(runAs))
+            {
                 log.warn(sm.getString("contextConfig.role.runas", runAs));
                 context.addSecurityRole(runAs);
             }
             String names[] = wrapper.findSecurityReferences();
-            for (int j = 0; j < names.length; j++) {
+            for (int j = 0; j < names.length; j++)
+            {
                 String link = wrapper.findSecurityReference(names[j]);
-                if ((link != null) && !context.findSecurityRole(link)) {
+                if ((link != null) && !context.findSecurityRole(link))
+                {
                     log.warn(sm.getString("contextConfig.role.link", link));
                     context.addSecurityRole(link);
                 }
@@ -1302,33 +1468,40 @@ public class ContextConfig implements LifecycleListener {
     /**
      * Get config base.
      */
-    protected File getConfigBase() {
+    protected File getConfigBase()
+    {
         File configBase =
-            new File(System.getProperty("catalina.base"), "conf");
-        if (!configBase.exists()) {
+                new File(System.getProperty("catalina.base"), "conf");
+        if (!configBase.exists())
+        {
             return null;
-        } else {
+        } else
+        {
             return configBase;
         }
     }
 
 
-    protected String getHostConfigPath(String resourceName) {
+    protected String getHostConfigPath(String resourceName)
+    {
         StringBuffer result = new StringBuffer();
         Container container = context;
         Container host = null;
         Container engine = null;
-        while (container != null) {
+        while (container != null)
+        {
             if (container instanceof Host)
                 host = container;
             if (container instanceof Engine)
                 engine = container;
             container = container.getParent();
         }
-        if (engine != null) {
+        if (engine != null)
+        {
             result.append(engine.getName()).append('/');
         }
-        if (host != null) {
+        if (host != null)
+        {
             result.append(host.getName()).append('/');
         }
         result.append(resourceName);
@@ -1338,21 +1511,25 @@ public class ContextConfig implements LifecycleListener {
 
     /**
      * @deprecated Unused. Use {@link XmlErrorHandler}. Will be removed in
-     *             Tomcat 7.0.x
+     * Tomcat 7.0.x
      */
     @Deprecated
     protected class ContextErrorHandler
-        implements ErrorHandler {
+            implements ErrorHandler
+    {
 
-        public void error(SAXParseException exception) {
+        public void error(SAXParseException exception)
+        {
             parseException = exception;
         }
 
-        public void fatalError(SAXParseException exception) {
+        public void fatalError(SAXParseException exception)
+        {
             parseException = exception;
         }
 
-        public void warning(SAXParseException exception) {
+        public void warning(SAXParseException exception)
+        {
             parseException = exception;
         }
 

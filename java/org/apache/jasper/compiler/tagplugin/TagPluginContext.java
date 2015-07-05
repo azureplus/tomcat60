@@ -24,7 +24,8 @@ package org.apache.jasper.compiler.tagplugin;
  * direct Java codes in place of tag handler invocations.
  */
 
-public interface TagPluginContext {
+public interface TagPluginContext
+{
     /**
      * @return true if the body of the tag is scriptless.
      */
@@ -43,6 +44,7 @@ public interface TagPluginContext {
 
     /**
      * Generate an import statement
+     *
      * @param s Name of the import class, '*' allowed.
      */
     void generateImport(String s);
@@ -50,11 +52,12 @@ public interface TagPluginContext {
     /**
      * Generate a declaration in the of the generated class.  This can be
      * used to declare an innter class, a method, or a class variable.
-     * @param id An unique ID identifying the declaration.  It is not
-     *           part of the declaration, and is used to ensure that the
-     *           declaration will only appear once.  If this method is
-     *           invoked with the same id more than once in the translation
-     *           unit, only the first declaration will be taken.
+     *
+     * @param id   An unique ID identifying the declaration.  It is not
+     *             part of the declaration, and is used to ensure that the
+     *             declaration will only appear once.  If this method is
+     *             invoked with the same id more than once in the translation
+     *             unit, only the first declaration will be taken.
      * @param text The text of the declaration.
      **/
     void generateDeclaration(String id, String text);
@@ -66,14 +69,14 @@ public interface TagPluginContext {
 
     /**
      * @return true if the attribute is specified and its value is a
-     *         translation-time constant.
+     * translation-time constant.
      */
     boolean isConstantAttribute(String attribute);
 
     /**
      * @return A string that is the value of a constant attribute.  Undefined
-     *         if the attribute is not a (translation-time) constant.
-     *         null if the attribute is not specified.
+     * if the attribute is not a (translation-time) constant.
+     * null if the attribute is not specified.
      */
     String getConstantAttribute(String attribute);
 
@@ -81,6 +84,7 @@ public interface TagPluginContext {
      * Generate codesto evaluate value of a attribute in the custom tag
      * The codes is a Java expression.
      * NOTE: Currently cannot handle attributes that are fragments.
+     *
      * @param attribute The specified attribute
      */
     void generateAttribute(String attribute);
@@ -103,9 +107,10 @@ public interface TagPluginContext {
      * The operations available for PluginContext so obtained is limited
      * to getPluginAttribute and setPluginAttribute, and queries (e.g.
      * isScriptless().  There should be no calls to generate*().
+     *
      * @return The pluginContext for the parent node.
-     *         null if the parent is not a custom tag, or if the pluginConxt
-     *         if not available (because useTagPlugin is false, e.g).
+     * null if the parent is not a custom tag, or if the pluginConxt
+     * if not available (because useTagPlugin is false, e.g).
      */
     TagPluginContext getParentContext();
 

@@ -16,55 +16,64 @@
  */
 package org.apache.tomcat.util.descriptor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.juli.logging.Log;
 import org.apache.tomcat.util.res.StringManager;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class XmlErrorHandler implements ErrorHandler {
+import java.util.ArrayList;
+import java.util.List;
+
+public class XmlErrorHandler implements ErrorHandler
+{
 
     private static final StringManager sm =
-        StringManager.getManager(Constants.PACKAGE_NAME);
+            StringManager.getManager(Constants.PACKAGE_NAME);
 
     private final List<SAXParseException> errors = new ArrayList<SAXParseException>();
 
     private final List<SAXParseException> warnings = new ArrayList<SAXParseException>();
 
-    public void error(SAXParseException exception) throws SAXException {
+    public void error(SAXParseException exception) throws SAXException
+    {
         // Collect non-fatal errors
         errors.add(exception);
     }
 
-    public void fatalError(SAXParseException exception) throws SAXException {
+    public void fatalError(SAXParseException exception) throws SAXException
+    {
         // Re-throw fatal errors
         throw exception;
     }
 
-    public void warning(SAXParseException exception) throws SAXException {
+    public void warning(SAXParseException exception) throws SAXException
+    {
         // Collect warnings
         warnings.add(exception);
     }
 
-    public List<SAXParseException> getErrors() {
+    public List<SAXParseException> getErrors()
+    {
         // Internal use only - don't worry about immutability
         return errors;
     }
 
-    public List<SAXParseException> getWarnings() {
+    public List<SAXParseException> getWarnings()
+    {
         // Internal use only - don't worry about immutability
         return warnings;
     }
 
-    public void logFindings(Log log, String source) {
-        for (SAXParseException e : getWarnings()) {
+    public void logFindings(Log log, String source)
+    {
+        for (SAXParseException e : getWarnings())
+        {
             log.warn(sm.getString(
                     "xmlErrorHandler.warning", e.getMessage(), source));
         }
-        for (SAXParseException e : getErrors()) {
+        for (SAXParseException e : getErrors())
+        {
             log.warn(sm.getString(
                     "xmlErrorHandler.error", e.getMessage(), source));
         }

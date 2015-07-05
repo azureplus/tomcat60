@@ -24,7 +24,7 @@ package javax.servlet.jsp.el;
  * notion of "implicit variables" which override any other variables.
  * An instance of this class should be passed when evaluating
  * an expression.</p>
- *
+ * <p/>
  * <p>An instance of this class includes the context against which resolution
  * will happen</p>
  *
@@ -34,19 +34,19 @@ package javax.servlet.jsp.el;
 @SuppressWarnings("dep-ann") // TCK signature test fails with annotation
 public interface VariableResolver
 {
-  //-------------------------------------
-  /**
-   * Resolves the specified variable.
-   * Returns null if the variable is not found.
-   * 
-   * @param pName the name of the variable to resolve
-   * @return the result of the variable resolution
-   *
-   * @throws ELException if a failure occurred while trying to resolve
-   *     the given variable
-   **/
-  public Object resolveVariable (String pName)
-    throws ELException;
-					
-  //-------------------------------------
+    //-------------------------------------
+
+    /**
+     * Resolves the specified variable.
+     * Returns null if the variable is not found.
+     *
+     * @param pName the name of the variable to resolve
+     * @return the result of the variable resolution
+     * @throws ELException if a failure occurred while trying to resolve
+     *                     the given variable
+     **/
+    public Object resolveVariable(String pName)
+            throws ELException;
+
+    //-------------------------------------
 }

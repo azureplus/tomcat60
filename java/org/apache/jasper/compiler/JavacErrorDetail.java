@@ -29,7 +29,8 @@ import java.util.List;
  * @author Jan Luehe
  * @author Kin-man Chung
  */
-public class JavacErrorDetail {
+public class JavacErrorDetail
+{
 
     private String javaFileName;
     private int javaLineNum;
@@ -41,14 +42,15 @@ public class JavacErrorDetail {
     /**
      * Constructor.
      *
-     * @param javaFileName The name of the Java file in which the 
-     * compilation error occurred
-     * @param javaLineNum The compilation error line number
-     * @param errMsg The compilation error message
+     * @param javaFileName The name of the Java file in which the
+     *                     compilation error occurred
+     * @param javaLineNum  The compilation error line number
+     * @param errMsg       The compilation error message
      */
     public JavacErrorDetail(String javaFileName,
                             int javaLineNum,
-                            StringBuffer errMsg) {
+                            StringBuffer errMsg)
+    {
 
         this.javaFileName = javaFileName;
         this.javaLineNum = javaLineNum;
@@ -59,99 +61,120 @@ public class JavacErrorDetail {
     /**
      * Constructor.
      *
-     * @param javaFileName The name of the Java file in which the 
-     * compilation error occurred
-     * @param javaLineNum The compilation error line number
-     * @param jspFileName The name of the JSP file from which the Java source
-     * file was generated
+     * @param javaFileName    The name of the Java file in which the
+     *                        compilation error occurred
+     * @param javaLineNum     The compilation error line number
+     * @param jspFileName     The name of the JSP file from which the Java source
+     *                        file was generated
      * @param jspBeginLineNum The start line number of the JSP element
-     * responsible for the compilation error
-     * @param errMsg The compilation error message
+     *                        responsible for the compilation error
+     * @param errMsg          The compilation error message
      */
     public JavacErrorDetail(String javaFileName,
                             int javaLineNum,
                             String jspFileName,
                             int jspBeginLineNum,
-                            StringBuffer errMsg) {
+                            StringBuffer errMsg)
+    {
 
         this(javaFileName, javaLineNum, jspFileName, jspBeginLineNum, errMsg,
                 null);
     }
 
     public JavacErrorDetail(String javaFileName,
-            int javaLineNum,
-            String jspFileName,
-            int jspBeginLineNum,
-            StringBuffer errMsg,
-            JspCompilationContext ctxt) {
-        
+                            int javaLineNum,
+                            String jspFileName,
+                            int jspBeginLineNum,
+                            StringBuffer errMsg,
+                            JspCompilationContext ctxt)
+    {
+
         this(javaFileName, javaLineNum, errMsg);
         this.jspFileName = jspFileName;
         this.jspBeginLineNum = jspBeginLineNum;
-        
-        if (jspBeginLineNum > 0 && ctxt != null) {
+
+        if (jspBeginLineNum > 0 && ctxt != null)
+        {
             InputStream is = null;
-            FileInputStream  fis = null;
-            
-            try {
+            FileInputStream fis = null;
+
+            try
+            {
                 // Read both files in, so we can inspect them
                 is = ctxt.getResourceAsStream(jspFileName);
                 String[] jspLines = readFile(is);
-    
+
                 fis = new FileInputStream(ctxt.getServletJavaFileName());
                 String[] javaLines = readFile(fis);
-    
-                if (jspLines.length < jspBeginLineNum) {
+
+                if (jspLines.length < jspBeginLineNum)
+                {
                     // Avoid ArrayIndexOutOfBoundsException
                     // Probably bug 48498 but could be some other cause
                     jspExtract = Localizer.getMessage("jsp.error.bug48498");
                     return;
                 }
-                
+
                 // If the line contains the opening of a multi-line scriptlet
                 // block, then the JSP line number we got back is probably
                 // faulty.  Scan forward to match the java line...
-                if (jspLines[jspBeginLineNum-1].lastIndexOf("<%") >
-                    jspLines[jspBeginLineNum-1].lastIndexOf("%>")) {
-                    String javaLine = javaLines[javaLineNum-1].trim();
-    
-                    for (int i=jspBeginLineNum-1; i<jspLines.length; i++) {
-                        if (jspLines[i].indexOf(javaLine) != -1) {
+                if (jspLines[jspBeginLineNum - 1].lastIndexOf("<%") >
+                        jspLines[jspBeginLineNum - 1].lastIndexOf("%>"))
+                {
+                    String javaLine = javaLines[javaLineNum - 1].trim();
+
+                    for (int i = jspBeginLineNum - 1; i < jspLines.length; i++)
+                    {
+                        if (jspLines[i].indexOf(javaLine) != -1)
+                        {
                             // Update jsp line number
-                            this.jspBeginLineNum = i+1;
+                            this.jspBeginLineNum = i + 1;
                             break;
                         }
                     }
                 }
-    
+
                 // copy out a fragment of JSP to display to the user
                 StringBuffer fragment = new StringBuffer(1024);
-                int startIndex = Math.max(0, this.jspBeginLineNum-1-3);
+                int startIndex = Math.max(0, this.jspBeginLineNum - 1 - 3);
                 int endIndex = Math.min(
-                        jspLines.length-1, this.jspBeginLineNum-1+3);
-    
-                for (int i=startIndex;i<=endIndex; ++i) {
-                    fragment.append(i+1);
+                        jspLines.length - 1, this.jspBeginLineNum - 1 + 3);
+
+                for (int i = startIndex; i <= endIndex; ++i)
+                {
+                    fragment.append(i + 1);
                     fragment.append(": ");
                     fragment.append(jspLines[i]);
                     fragment.append("\n");
                 }
                 jspExtract = fragment.toString();
-    
-            } catch (IOException ioe) {
+
+            }
+            catch (IOException ioe)
+            {
                 // Can't read files - ignore
-            } finally {
-                if (is != null) {
-                    try {
+            }
+            finally
+            {
+                if (is != null)
+                {
+                    try
+                    {
                         is.close();
-                    } catch (IOException ioe) {
+                    }
+                    catch (IOException ioe)
+                    {
                         // Ignore
                     }
                 }
-                if (fis != null) {
-                    try {
+                if (fis != null)
+                {
+                    try
+                    {
                         fis.close();
-                    } catch (IOException ioe) {
+                    }
+                    catch (IOException ioe)
+                    {
                         // Ignore
                     }
                 }
@@ -165,16 +188,18 @@ public class JavacErrorDetail {
      *
      * @return Java source file name
      */
-    public String getJavaFileName() {
+    public String getJavaFileName()
+    {
         return this.javaFileName;
     }
 
     /**
      * Gets the compilation error line number.
-     * 
+     *
      * @return Compilation error line number
      */
-    public int getJavaLineNumber() {
+    public int getJavaLineNumber()
+    {
         return this.javaLineNum;
     }
 
@@ -184,7 +209,8 @@ public class JavacErrorDetail {
      *
      * @return JSP file from which the Java source file was generated.
      */
-    public String getJspFileName() {
+    public String getJspFileName()
+    {
         return this.jspFileName;
     }
 
@@ -195,7 +221,8 @@ public class JavacErrorDetail {
      * @return Start line number of the JSP element responsible for the
      * compilation error
      */
-    public int getJspBeginLineNumber() {
+    public int getJspBeginLineNumber()
+    {
         return this.jspBeginLineNum;
     }
 
@@ -204,32 +231,36 @@ public class JavacErrorDetail {
      *
      * @return Compilation error message
      */
-    public String getErrorMessage() {
+    public String getErrorMessage()
+    {
         return this.errMsg.toString();
     }
-    
+
     /**
      * Gets the extract of the JSP that corresponds to this message.
      *
      * @return Extract of JSP where error occurred
      */
-    public String getJspExtract() {
+    public String getJspExtract()
+    {
         return this.jspExtract;
     }
-    
+
     /**
      * Reads a text file from an input stream into a String[]. Used to read in
      * the JSP and generated Java file when generating error messages.
      */
-    private String[] readFile(InputStream s) throws IOException {
+    private String[] readFile(InputStream s) throws IOException
+    {
         BufferedReader reader = new BufferedReader(new InputStreamReader(s));
         List lines = new ArrayList();
         String line;
 
-        while ( (line = reader.readLine()) != null ) {
+        while ((line = reader.readLine()) != null)
+        {
             lines.add(line);
         }
 
-        return (String[]) lines.toArray( new String[lines.size()] );
+        return (String[]) lines.toArray(new String[lines.size()]);
     }
 }

@@ -17,8 +17,9 @@
 
 package org.apache.tomcat.util.net;
 
-import java.net.Socket;
 import org.apache.tomcat.util.threads.ThreadPoolRunnable;
+
+import java.net.Socket;
 
 /*
  * I switched the threading model here.
@@ -30,7 +31,8 @@ import org.apache.tomcat.util.threads.ThreadPoolRunnable;
  * Instead I am now using a pool of threads, all the threads are
  * simmetric in their execution and no thread switch is needed.
  */
-class LeaderFollowerWorkerThread implements ThreadPoolRunnable {
+class LeaderFollowerWorkerThread implements ThreadPoolRunnable
+{
     /* This is not a normal Runnable - it gets attached to an existing
        thread, runs and when run() ends - the thread keeps running.
 
@@ -38,50 +40,63 @@ class LeaderFollowerWorkerThread implements ThreadPoolRunnable {
        We also want to use per/thread data and avoid sync wherever possible.
     */
     PoolTcpEndpoint endpoint;
-    
-    public LeaderFollowerWorkerThread(PoolTcpEndpoint endpoint) {
+
+    public LeaderFollowerWorkerThread(PoolTcpEndpoint endpoint)
+    {
         this.endpoint = endpoint;
     }
 
-    public Object[] getInitData() {
+    public Object[] getInitData()
+    {
         // no synchronization overhead, but 2 array access 
-        Object obj[]=new Object[2];
-        obj[1]= endpoint.getConnectionHandler().init();
-        obj[0]=new TcpConnection();
+        Object obj[] = new Object[2];
+        obj[1] = endpoint.getConnectionHandler().init();
+        obj[0] = new TcpConnection();
         return obj;
     }
-    
-    public void runIt(Object perThrData[]) {
+
+    public void runIt(Object perThrData[])
+    {
 
         // Create per-thread cache
-        if (endpoint.isRunning()) {
+        if (endpoint.isRunning())
+        {
 
             // Loop if endpoint is paused
-            while (endpoint.isPaused()) {
-                try {
+            while (endpoint.isPaused())
+            {
+                try
+                {
                     Thread.sleep(1000);
-                } catch (InterruptedException e) {
+                }
+                catch (InterruptedException e)
+                {
                     // Ignore
                 }
             }
 
             // Accept a new connection
             Socket s = null;
-            try {
+            try
+            {
                 s = endpoint.acceptSocket();
-            } finally {
+            }
+            finally
+            {
                 // Continue accepting on another thread...
-                if (endpoint.isRunning()) {
+                if (endpoint.isRunning())
+                {
                     endpoint.tp.runIt(this);
                 }
             }
 
             // Process the connection
-            if (null != s) {
+            if (null != s)
+            {
                 endpoint.processSocket(s, (TcpConnection) perThrData[0], (Object[]) perThrData[1]);
             }
 
         }
     }
-    
+
 }

@@ -37,11 +37,11 @@ import java.net.URLConnection;
  * undeploying applications.  These tasks require Ant 1.4 or later.
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
-public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
+public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -49,7 +49,7 @@ public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
 
     /**
      * manager webapp's encoding.
-     */ 
+     */
     private static String CHARSET = "utf-8";
 
 
@@ -60,54 +60,56 @@ public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
      * The charset used during URL encoding.
      */
     protected String charset = "ISO-8859-1";
-
-    public String getCharset() {
-        return (this.charset);
-    }
-
-    public void setCharset(String charset) {
-        this.charset = charset;
-    }
-
-
     /**
      * The login password for the <code>Manager</code> application.
      */
     protected String password = null;
-
-    public String getPassword() {
-        return (this.password);
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-
     /**
      * The URL of the <code>Manager</code> application to be used.
      */
     protected String url = "http://localhost:8080/manager";
-
-    public String getUrl() {
-        return (this.url);
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-
     /**
      * The login username for the <code>Manager</code> application.
      */
     protected String username = null;
 
-    public String getUsername() {
+    public String getCharset()
+    {
+        return (this.charset);
+    }
+
+    public void setCharset(String charset)
+    {
+        this.charset = charset;
+    }
+
+    public String getPassword()
+    {
+        return (this.password);
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
+    }
+
+    public String getUrl()
+    {
+        return (this.url);
+    }
+
+    public void setUrl(String url)
+    {
+        this.url = url;
+    }
+
+    public String getUsername()
+    {
         return (this.username);
     }
 
-    public void setUsername(String username) {
+    public void setUsername(String username)
+    {
         this.username = username;
     }
 
@@ -120,13 +122,15 @@ public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
      * attribute validation required by all subclasses; it does not perform
      * any functional logic directly.
      *
-     * @exception BuildException if a validation error occurs
+     * @throws BuildException if a validation error occurs
      */
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
 
-        if ((username == null) || (password == null) || (url == null)) {
+        if ((username == null) || (password == null) || (url == null))
+        {
             throw new BuildException
-                ("Must specify all of 'username', 'password', and 'url'");
+                    ("Must specify all of 'username', 'password', and 'url'");
         }
 
     }
@@ -139,10 +143,10 @@ public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
      * Execute the specified command, based on the configured properties.
      *
      * @param command Command to be executed
-     *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
-    public void execute(String command) throws BuildException {
+    public void execute(String command) throws BuildException
+    {
 
         execute(command, null, null, -1);
 
@@ -154,20 +158,21 @@ public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
      * The input stream will be closed upon completion of this task, whether
      * it was executed successfully or not.
      *
-     * @param command Command to be executed
-     * @param istream InputStream to include in an HTTP PUT, if any
-     * @param contentType Content type to specify for the input, if any
+     * @param command       Command to be executed
+     * @param istream       InputStream to include in an HTTP PUT, if any
+     * @param contentType   Content type to specify for the input, if any
      * @param contentLength Content length to specify for the input, if any
-     *
-     * @exception BuildException if an error occurs
+     * @throws BuildException if an error occurs
      */
     public void execute(String command, InputStream istream,
                         String contentType, int contentLength)
-        throws BuildException {
+            throws BuildException
+    {
 
         URLConnection conn = null;
         InputStreamReader reader = null;
-        try {
+        try
+        {
 
             // Create a connection for this command
             conn = (new URL(url + command)).openConnection();
@@ -177,42 +182,49 @@ public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
             hconn.setAllowUserInteraction(false);
             hconn.setDoInput(true);
             hconn.setUseCaches(false);
-            if (istream != null) {
+            if (istream != null)
+            {
                 hconn.setDoOutput(true);
                 hconn.setRequestMethod("PUT");
-                if (contentType != null) {
+                if (contentType != null)
+                {
                     hconn.setRequestProperty("Content-Type", contentType);
                 }
-                if (contentLength >= 0) {
+                if (contentLength >= 0)
+                {
                     hconn.setRequestProperty("Content-Length",
-                                             "" + contentLength);
-                    
+                            "" + contentLength);
+
                     hconn.setFixedLengthStreamingMode(contentLength);
                 }
-            } else {
+            } else
+            {
                 hconn.setDoOutput(false);
                 hconn.setRequestMethod("GET");
             }
             hconn.setRequestProperty("User-Agent",
-                                     "Catalina-Ant-Task/1.0");
+                    "Catalina-Ant-Task/1.0");
 
             // Set up an authorization header with our credentials
             String input = username + ":" + password;
             String output = new String(Base64.encode(input.getBytes()));
             hconn.setRequestProperty("Authorization",
-                                     "Basic " + output);
+                    "Basic " + output);
 
             // Establish the connection with the server
             hconn.connect();
 
             // Send the request data (if any)
-            if (istream != null) {
+            if (istream != null)
+            {
                 BufferedOutputStream ostream =
-                    new BufferedOutputStream(hconn.getOutputStream(), 1024);
+                        new BufferedOutputStream(hconn.getOutputStream(), 1024);
                 byte buffer[] = new byte[1024];
-                while (true) {
+                while (true)
+                {
                     int n = istream.read(buffer);
-                    if (n < 0) {
+                    if (n < 0)
+                    {
                         break;
                     }
                     ostream.write(buffer, 0, n);
@@ -228,19 +240,25 @@ public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
             String error = null;
             int msgPriority = Project.MSG_INFO;
             boolean first = true;
-            while (true) {
+            while (true)
+            {
                 int ch = reader.read();
-                if (ch < 0) {
+                if (ch < 0)
+                {
                     break;
-                } else if ((ch == '\r') || (ch == '\n')) {
+                } else if ((ch == '\r') || (ch == '\n'))
+                {
                     // in Win \r\n would cause handleOutput() to be called
                     // twice, the second time with an empty string,
                     // producing blank lines
-                    if (buff.length() > 0) {
+                    if (buff.length() > 0)
+                    {
                         String line = buff.toString();
                         buff.setLength(0);
-                        if (first) {
-                            if (!line.startsWith("OK -")) {
+                        if (first)
+                        {
+                            if (!line.startsWith("OK -"))
+                            {
                                 error = line;
                                 msgPriority = Project.MSG_ERR;
                             }
@@ -248,38 +266,55 @@ public abstract class AbstractCatalinaTask extends BaseRedirectorHelperTask {
                         }
                         handleOutput(line, msgPriority);
                     }
-                } else {
+                } else
+                {
                     buff.append((char) ch);
                 }
             }
-            if (buff.length() > 0) {
+            if (buff.length() > 0)
+            {
                 handleOutput(buff.toString(), msgPriority);
             }
-            if (error != null && isFailOnError()) {
+            if (error != null && isFailOnError())
+            {
                 // exception should be thrown only if failOnError == true
                 // or error line will be logged twice
                 throw new BuildException(error);
             }
-        } catch (Throwable t) {
-            if (isFailOnError()) {
+        }
+        catch (Throwable t)
+        {
+            if (isFailOnError())
+            {
                 throw new BuildException(t);
-            } else {
+            } else
+            {
                 handleErrorOutput(t.getMessage());
             }
-        } finally {
+        }
+        finally
+        {
             closeRedirector();
-            if (reader != null) {
-                try {
+            if (reader != null)
+            {
+                try
+                {
                     reader.close();
-                } catch (Throwable u) {
+                }
+                catch (Throwable u)
+                {
                     ;
                 }
                 reader = null;
             }
-            if (istream != null) {
-                try {
+            if (istream != null)
+            {
+                try
+                {
                     istream.close();
-                } catch (Throwable u) {
+                }
+                catch (Throwable u)
+                {
                     ;
                 }
                 istream = null;

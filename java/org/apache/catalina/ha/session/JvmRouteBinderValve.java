@@ -16,33 +16,22 @@
  */
 package org.apache.catalina.ha.session;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
-import org.apache.catalina.Engine;
-import org.apache.catalina.Globals;
-import org.apache.catalina.Host;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Manager;
-import org.apache.catalina.Session;
+import org.apache.catalina.*;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
 import org.apache.catalina.ha.CatalinaCluster;
 import org.apache.catalina.ha.ClusterManager;
 import org.apache.catalina.ha.ClusterMessage;
 import org.apache.catalina.ha.ClusterValve;
-import org.apache.catalina.ha.session.DeltaSession;
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
 import org.apache.catalina.session.ManagerBase;
 import org.apache.catalina.session.PersistentManager;
 import org.apache.catalina.util.LifecycleSupport;
 import org.apache.catalina.util.StringManager;
 import org.apache.catalina.valves.ValveBase;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import java.io.IOException;
 
 /**
  * Valve to handle Tomcat jvmRoute takeover using mod_jk module after node
@@ -56,8 +45,8 @@ import org.apache.catalina.valves.ValveBase;
  * nodes. After all that, the session stickyness will work directly to the
  * backup node and the traffic will not go back to the failed node after it is
  * restarted!
- * 
- * <p>
+ * <p/>
+ * <p/>
  * For this valve to function correctly, so that all nodes of the cluster
  * receive the sessionid change notifications that it generates, the following
  * ClusterListener MUST be configured at all nodes of the cluster:
@@ -65,50 +54,48 @@ import org.apache.catalina.valves.ValveBase;
  * JvmRouteSessionIDBinderListener} since Tomcat 5.5.10, and both
  * JvmRouteSessionIDBinderListener and JvmRouteSessionIDBinderLifecycleListener
  * for earlier versions of Tomcat.
- * 
- * <p>
+ * <p/>
+ * <p/>
  * Add this Valve to your host definition at conf/server.xml .
- * 
+ * <p/>
  * Since 5.5.10 as direct cluster valve:<br/>
- * 
+ * <p/>
  * <pre>
  *  &lt;Cluster&gt;
- *  &lt;Valve className=&quot;org.apache.catalina.ha.session.JvmRouteBinderValve&quot; /&gt;  
+ *  &lt;Valve className=&quot;org.apache.catalina.ha.session.JvmRouteBinderValve&quot; /&gt;
  *  &lt;/Cluster&gt;
  * </pre>
- * 
+ * <p/>
  * <br />
  * Before 5.5.10 as Host element:<br/>
- * 
+ * <p/>
  * <pre>
  *  &lt;Host&gt;
- *  &lt;Valve className=&quot;org.apache.catalina.ha.session.JvmRouteBinderValve&quot; /&gt;  
+ *  &lt;Valve className=&quot;org.apache.catalina.ha.session.JvmRouteBinderValve&quot; /&gt;
  *  &lt;/Host&gt;
  * </pre>
- * 
+ * <p/>
  * <em>A Trick:</em><br/>
  * You can enable this mod_jk turnover mode via JMX before you drop a node to
  * all backup nodes! Set enable true on all JvmRouteBinderValve backups, disable
  * worker at mod_jk and then drop node and restart it! Then enable mod_jk worker
  * and disable JvmRouteBinderValves again. This use case means that only
  * requested sessions are migrated.
- * 
- * @author Peter Rossbach
  *
+ * @author Peter Rossbach
  */
-public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Lifecycle {
-
-    /*--Static Variables----------------------------------------*/
-    public static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory
-            .getLog(JvmRouteBinderValve.class);
+public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Lifecycle
+{
 
     /**
      * The descriptive information about this implementation.
      */
     protected static final String info = "org.apache.catalina.ha.session.JvmRouteBinderValve/1.2";
+    /*--Static Variables----------------------------------------*/
+    public static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory
+            .getLog(JvmRouteBinderValve.class);
 
     /*--Instance Variables--------------------------------------*/
-
     /**
      * the cluster
      */
@@ -146,7 +133,8 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
     /**
      * Return descriptive information about this implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -154,74 +142,75 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
 
     /**
      * set session id attribute to failed node for request.
-     * 
+     *
      * @return Returns the sessionIdAttribute.
      */
-    public String getSessionIdAttribute() {
+    public String getSessionIdAttribute()
+    {
         return sessionIdAttribute;
     }
 
     /**
      * get name of failed reqeust session attribute
-     * 
-     * @param sessionIdAttribute
-     *            The sessionIdAttribute to set.
+     *
+     * @param sessionIdAttribute The sessionIdAttribute to set.
      */
-    public void setSessionIdAttribute(String sessionIdAttribute) {
+    public void setSessionIdAttribute(String sessionIdAttribute)
+    {
         this.sessionIdAttribute = sessionIdAttribute;
     }
 
     /**
      * @return Returns the number of migrated sessions.
      */
-    public long getNumberOfSessions() {
+    public long getNumberOfSessions()
+    {
         return numberOfSessions;
     }
 
     /**
      * @return Returns the enabled.
      */
-    public boolean getEnabled() {
+    public boolean getEnabled()
+    {
         return enabled;
     }
 
     /**
-     * @param enabled
-     *            The enabled to set.
+     * @param enabled The enabled to set.
      */
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled)
+    {
         this.enabled = enabled;
     }
 
     /**
      * Detect possible the JVMRoute change at cluster backup node..
-     * 
-     * @param request
-     *            tomcat request being processed
-     * @param response
-     *            tomcat response being processed
-     * @exception IOException
-     *                if an input/output error has occurred
-     * @exception ServletException
-     *                if a servlet error has occurred
+     *
+     * @param request  tomcat request being processed
+     * @param response tomcat response being processed
+     * @throws IOException      if an input/output error has occurred
+     * @throws ServletException if a servlet error has occurred
      */
     public void invoke(Request request, Response response) throws IOException,
-            ServletException {
+            ServletException
+    {
 
-         if (getEnabled() 
-             && request.getContext() != null
-             && request.getContext().getDistributable() ) {
-             // valve cluster can access manager - other cluster handle turnover 
-             // at host level - hopefully!
-             Manager manager = request.getContext().getManager();
+        if (getEnabled()
+                && request.getContext() != null
+                && request.getContext().getDistributable())
+        {
+            // valve cluster can access manager - other cluster handle turnover 
+            // at host level - hopefully!
+            Manager manager = request.getContext().getManager();
 
-             if (manager != null && (
-                     (manager instanceof ClusterManager
-                       && getCluster() != null
-                       && getCluster().getManager(((ClusterManager)manager).getName()) != null)
-                     ||
-                     (manager instanceof PersistentManager)))
-                 handlePossibleTurnover(request, response);
+            if (manager != null && (
+                    (manager instanceof ClusterManager
+                            && getCluster() != null
+                            && getCluster().getManager(((ClusterManager) manager).getName()) != null)
+                            ||
+                            (manager instanceof PersistentManager)))
+                handlePossibleTurnover(request, response);
         }
         // Pass this request on to the next valve in our pipeline
         getNext().invoke(request, response);
@@ -229,23 +218,27 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
 
     /**
      * handle possible session turn over.
-     * 
-     * @see JvmRouteBinderValve#handleJvmRoute(Request, Response, String, String)
-     * @param request current request
+     *
+     * @param request  current request
      * @param response current response
+     * @see JvmRouteBinderValve#handleJvmRoute(Request, Response, String, String)
      */
-    protected void handlePossibleTurnover(Request request, Response response) {
-        String sessionID = request.getRequestedSessionId() ;
-        if (sessionID != null) {
+    protected void handlePossibleTurnover(Request request, Response response)
+    {
+        String sessionID = request.getRequestedSessionId();
+        if (sessionID != null)
+        {
             long t1 = System.currentTimeMillis();
             String jvmRoute = getLocalJvmRoute(request);
-            if (jvmRoute == null) {
+            if (jvmRoute == null)
+            {
                 if (log.isDebugEnabled())
                     log.debug(sm.getString("jvmRoute.missingJvmRouteAttribute"));
                 return;
             }
-            handleJvmRoute( request, response, sessionID, jvmRoute);
-            if (log.isDebugEnabled()) {
+            handleJvmRoute(request, response, sessionID, jvmRoute);
+            if (log.isDebugEnabled())
+            {
                 long t2 = System.currentTimeMillis();
                 long time = t2 - t1;
                 log.debug(sm.getString("jvmRoute.turnoverInfo", new Long(time)));
@@ -255,30 +248,33 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
 
     /**
      * get jvmroute from engine
-     * 
+     *
      * @param request current request
      * @return return jvmRoute from ManagerBase or null
      */
-    protected String getLocalJvmRoute(Request request) {
+    protected String getLocalJvmRoute(Request request)
+    {
         Manager manager = getManager(request);
-        if(manager instanceof ManagerBase)
+        if (manager instanceof ManagerBase)
             return ((ManagerBase) manager).getJvmRoute();
-        return null ;
+        return null;
     }
 
     /**
      * get Cluster DeltaManager
-     * 
+     *
      * @param request current request
      * @return manager or null
      */
-    protected Manager getManager(Request request) {
+    protected Manager getManager(Request request)
+    {
         Manager manager = request.getContext().getManager();
-        if (log.isDebugEnabled()) {
-            if(manager != null)
-                log.debug(sm.getString("jvmRoute.foundManager", manager,  request.getContext().getName()));
-            else 
-                log.debug(sm.getString("jvmRoute.notFoundManager", manager,  request.getContext().getName()));
+        if (log.isDebugEnabled())
+        {
+            if (manager != null)
+                log.debug(sm.getString("jvmRoute.foundManager", manager, request.getContext().getName()));
+            else
+                log.debug(sm.getString("jvmRoute.notFoundManager", manager, request.getContext().getName()));
         }
         return manager;
     }
@@ -286,69 +282,83 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
     /**
      * @return Returns the cluster.
      */
-    public CatalinaCluster getCluster() {
+    public CatalinaCluster getCluster()
+    {
         return cluster;
     }
-    
+
     /**
      * @param cluster The cluster to set.
      */
-    public void setCluster(CatalinaCluster cluster) {
+    public void setCluster(CatalinaCluster cluster)
+    {
         this.cluster = cluster;
     }
-    
+
     /**
      * Handle jvmRoute stickyness after tomcat instance failed. After this
      * correction a new Cookie send to client with new jvmRoute and the
      * SessionID change propage to the other cluster nodes.
-     * 
-     * @param request current request
-     * @param response
-     *            Tomcat Response
-     * @param sessionId
-     *            request SessionID from Cookie
-     * @param localJvmRoute
-     *            local jvmRoute
+     *
+     * @param request       current request
+     * @param response      Tomcat Response
+     * @param sessionId     request SessionID from Cookie
+     * @param localJvmRoute local jvmRoute
      */
     protected void handleJvmRoute(
-            Request request, Response response,String sessionId, String localJvmRoute) {
+            Request request, Response response, String sessionId, String localJvmRoute)
+    {
         // get requested jvmRoute.
         String requestJvmRoute = null;
         int index = sessionId.indexOf(".");
-        if (index > 0) {
+        if (index > 0)
+        {
             requestJvmRoute = sessionId
                     .substring(index + 1, sessionId.length());
         }
-        if (requestJvmRoute != null && !requestJvmRoute.equals(localJvmRoute)) {
-            if (log.isDebugEnabled()) {
+        if (requestJvmRoute != null && !requestJvmRoute.equals(localJvmRoute))
+        {
+            if (log.isDebugEnabled())
+            {
                 log.debug(sm.getString("jvmRoute.failover", requestJvmRoute,
                         localJvmRoute, sessionId));
             }
             Session catalinaSession = null;
-            try {
+            try
+            {
                 catalinaSession = getManager(request).findSession(sessionId);
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 // Hups!
             }
             String id = sessionId.substring(0, index);
             String newSessionID = id + "." + localJvmRoute;
             // OK - turnover the session and inform other cluster nodes
-            if (catalinaSession != null) {
+            if (catalinaSession != null)
+            {
                 changeSessionID(request, response, sessionId, newSessionID,
                         catalinaSession);
                 numberOfSessions++;
-            } else {
-                try {
+            } else
+            {
+                try
+                {
                     catalinaSession = getManager(request).findSession(newSessionID);
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     // Hups!
                 }
-                if (catalinaSession != null) {
+                if (catalinaSession != null)
+                {
                     // session is rewrite at other request, rewrite this also
                     changeRequestSessionID(request, response, sessionId, newSessionID);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug(sm.getString("jvmRoute.cannotFindSession",sessionId));
+                } else
+                {
+                    if (log.isDebugEnabled())
+                    {
+                        log.debug(sm.getString("jvmRoute.cannotFindSession", sessionId));
                     }
                 }
             }
@@ -357,18 +367,16 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
 
     /**
      * change session id and send to all cluster nodes
-     * 
-     * @param request current request
-     * @param response current response
-     * @param sessionId
-     *            original session id
-     * @param newSessionID
-     *            new session id for node migration
-     * @param catalinaSession
-     *            current session with original session id
+     *
+     * @param request         current request
+     * @param response        current response
+     * @param sessionId       original session id
+     * @param newSessionID    new session id for node migration
+     * @param catalinaSession current session with original session id
      */
     protected void changeSessionID(Request request,
-            Response response, String sessionId, String newSessionID, Session catalinaSession) {
+                                   Response response, String sessionId, String newSessionID, Session catalinaSession)
+    {
         lifecycle.fireLifecycleEvent("Before session migration",
                 catalinaSession);
         catalinaSession.setId(newSessionID, false);
@@ -378,64 +386,69 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
             ((DeltaSession) catalinaSession).resetDeltaRequest();
         changeRequestSessionID(request, response, sessionId, newSessionID);
 
-        if (getCluster() != null) {
+        if (getCluster() != null)
+        {
             // now sending the change to all other clusternode!
-            ClusterManager manager = (ClusterManager)catalinaSession.getManager();
-            sendSessionIDClusterBackup(manager,request,sessionId, newSessionID);
+            ClusterManager manager = (ClusterManager) catalinaSession.getManager();
+            sendSessionIDClusterBackup(manager, request, sessionId, newSessionID);
         }
 
         lifecycle.fireLifecycleEvent("After session migration", catalinaSession);
-        if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled())
+        {
             log.debug(sm.getString("jvmRoute.changeSession", sessionId,
                     newSessionID));
-        }   
+        }
     }
 
     /**
      * Change Request Session id
-     * @param request current request
-     * @param response current response
-     * @param sessionId
-     *            original session id
-     * @param newSessionID
-     *            new session id for node migration
+     *
+     * @param request      current request
+     * @param response     current response
+     * @param sessionId    original session id
+     * @param newSessionID new session id for node migration
      */
-    protected void changeRequestSessionID(Request request, Response response, String sessionId, String newSessionID) {
+    protected void changeRequestSessionID(Request request, Response response, String sessionId, String newSessionID)
+    {
         request.changeSessionId(newSessionID);
 
         // set orginal sessionid at request, to allow application detect the
         // change
-        if (sessionIdAttribute != null && !"".equals(sessionIdAttribute)) {
-            if (log.isDebugEnabled()) {
-                log.debug(sm.getString("jvmRoute.set.orignalsessionid",sessionIdAttribute,sessionId));
+        if (sessionIdAttribute != null && !"".equals(sessionIdAttribute))
+        {
+            if (log.isDebugEnabled())
+            {
+                log.debug(sm.getString("jvmRoute.set.orignalsessionid", sessionIdAttribute, sessionId));
             }
             request.setAttribute(sessionIdAttribute, sessionId);
         }
     }
-    
+
     /**
      * Send the changed Sessionid to all clusternodes.
-     * 
+     *
+     * @param manager      ClusterManager
+     * @param sessionId    current failed sessionid
+     * @param newSessionID new session id, bind to the new cluster node
      * @see JvmRouteSessionIDBinderListener#messageReceived(ClusterMessage)
-     * @param manager
-     *            ClusterManager
-     * @param sessionId
-     *            current failed sessionid
-     * @param newSessionID
-     *            new session id, bind to the new cluster node
      */
-    protected void sendSessionIDClusterBackup(ClusterManager manager,Request request,String sessionId,
-            String newSessionID) {
-        if (!(getManager(request) instanceof BackupManager)) {
+    protected void sendSessionIDClusterBackup(ClusterManager manager, Request request, String sessionId,
+                                              String newSessionID)
+    {
+        if (!(getManager(request) instanceof BackupManager))
+        {
             SessionIDMessage msg = new SessionIDMessage();
             msg.setOrignalSessionID(sessionId);
             msg.setBackupSessionID(newSessionID);
             Context context = request.getContext();
             msg.setContextPath(context.getPath());
             msg.setHost(context.getParent().getName());
-            if(manager.doDomainReplication()) {
+            if (manager.doDomainReplication())
+            {
                 cluster.sendClusterDomain(msg);
-            } else {
+            } else
+            {
                 cluster.send(msg);
             }
         }
@@ -444,52 +457,63 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
     /**
      * Sets a new cookie for the given session id and response and see
      * {@link org.apache.catalina.connector.Request#configureSessionCookie(javax.servlet.http.Cookie)}
-     * 
-     * @param request current request
-     * @param response Tomcat Response
+     *
+     * @param request   current request
+     * @param response  Tomcat Response
      * @param sessionId The session id
-     * 
      * @deprecated Use {@link Request#changeSessionId(String)}
      */
     protected void setNewSessionCookie(Request request,
-                                       Response response, String sessionId) {
-        if (response != null) {
+                                       Response response, String sessionId)
+    {
+        if (response != null)
+        {
             Context context = request.getContext();
-            if (context.getCookies()) {
+            if (context.getCookies())
+            {
                 // set a new session cookie
                 String scName = context.getSessionCookieName();
-                if (scName == null) {
+                if (scName == null)
+                {
                     scName = Globals.SESSION_COOKIE_NAME;
                 }
                 Cookie newCookie = new Cookie(scName, sessionId);
-                
+
                 newCookie.setMaxAge(-1);
-                
+
                 String contextPath = null;
                 if (!response.getConnector().getEmptySessionPath() &&
-                        (context != null)) {
-                    if (context.getSessionCookiePath() != null) {
+                        (context != null))
+                {
+                    if (context.getSessionCookiePath() != null)
+                    {
                         contextPath = context.getSessionCookiePath();
-                    } else {
+                    } else
+                    {
                         contextPath = context.getEncodedPath();
                     }
                 }
-                if ((contextPath != null) && (contextPath.length() > 0)) {
+                if ((contextPath != null) && (contextPath.length() > 0))
+                {
                     newCookie.setPath(contextPath);
-                } else {
+                } else
+                {
                     newCookie.setPath("/");
                 }
-                
-                if (context.getSessionCookieDomain() != null) {
+
+                if (context.getSessionCookieDomain() != null)
+                {
                     newCookie.setDomain(context.getSessionCookieDomain());
                 }
 
-                if (request.isSecure()) {
+                if (request.isSecure())
+                {
                     newCookie.setSecure(true);
                 }
 
-                if (log.isDebugEnabled()) {
-                    Object[] args = new Object[] {sessionId,
+                if (log.isDebugEnabled())
+                {
+                    Object[] args = new Object[]{sessionId,
                             newCookie.getName(),
                             newCookie.getPath(),
                             new Boolean(newCookie.getSecure()),
@@ -505,11 +529,11 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
 
     /**
      * Add a lifecycle event listener to this component.
-     * 
-     * @param listener
-     *            The listener to add
+     *
+     * @param listener The listener to add
      */
-    public void addLifecycleListener(LifecycleListener listener) {
+    public void addLifecycleListener(LifecycleListener listener)
+    {
 
         lifecycle.addLifecycleListener(listener);
 
@@ -519,7 +543,8 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
      * Get the lifecycle listeners associated with this lifecycle. If this
      * Lifecycle has no listeners registered, a zero-length array is returned.
      */
-    public LifecycleListener[] findLifecycleListeners() {
+    public LifecycleListener[] findLifecycleListeners()
+    {
 
         return lifecycle.findLifecycleListeners();
 
@@ -527,11 +552,11 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
 
     /**
      * Remove a lifecycle event listener from this component.
-     * 
-     * @param listener
-     *            The listener to add
+     *
+     * @param listener The listener to add
      */
-    public void removeLifecycleListener(LifecycleListener listener) {
+    public void removeLifecycleListener(LifecycleListener listener)
+    {
 
         lifecycle.removeLifecycleListener(listener);
 
@@ -541,12 +566,12 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
      * Prepare for the beginning of active use of the public methods of this
      * component. This method should be called after <code>configure()</code>,
      * and before any of the public methods of the component are utilized.
-     * 
-     * @exception LifecycleException
-     *                if this component detects a fatal error that prevents this
-     *                component from being used
+     *
+     * @throws LifecycleException if this component detects a fatal error that prevents this
+     *                            component from being used
      */
-    public void start() throws LifecycleException {
+    public void start() throws LifecycleException
+    {
 
         // Validate and update our current component state
         if (started)
@@ -554,28 +579,34 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
                     .getString("jvmRoute.valve.alreadyStarted"));
         lifecycle.fireLifecycleEvent(START_EVENT, null);
         started = true;
-        if (cluster == null) {
+        if (cluster == null)
+        {
             Container hostContainer = getContainer();
             // compatibility with JvmRouteBinderValve version 1.1
             // ( setup at context.xml or context.xml.default )
-            if (!(hostContainer instanceof Host)) {
+            if (!(hostContainer instanceof Host))
+            {
                 if (log.isWarnEnabled())
                     log.warn(sm.getString("jvmRoute.configure.warn"));
                 hostContainer = hostContainer.getParent();
             }
             if (hostContainer instanceof Host
-                    && ((Host) hostContainer).getCluster() != null) {
+                    && ((Host) hostContainer).getCluster() != null)
+            {
                 cluster = (CatalinaCluster) ((Host) hostContainer).getCluster();
-            } else {
-                Container engine = hostContainer.getParent() ;
+            } else
+            {
+                Container engine = hostContainer.getParent();
                 if (engine instanceof Engine
-                        && ((Engine) engine).getCluster() != null) {
+                        && ((Engine) engine).getCluster() != null)
+                {
                     cluster = (CatalinaCluster) ((Engine) engine).getCluster();
                 }
             }
         }
-        
-        if (log.isInfoEnabled()) {
+
+        if (log.isInfoEnabled())
+        {
             log.info(sm.getString("jvmRoute.valve.started"));
             if (cluster == null)
                 log.info(sm.getString("jvmRoute.noCluster"));
@@ -587,12 +618,12 @@ public class JvmRouteBinderValve extends ValveBase implements ClusterValve, Life
      * Gracefully terminate the active use of the public methods of this
      * component. This method should be the last one called on a given instance
      * of this component.
-     * 
-     * @exception LifecycleException
-     *                if this component detects a fatal error that needs to be
-     *                reported
+     *
+     * @throws LifecycleException if this component detects a fatal error that needs to be
+     *                            reported
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws LifecycleException
+    {
 
         // Validate and update our current component state
         if (!started)

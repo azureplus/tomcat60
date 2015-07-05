@@ -27,21 +27,19 @@ import java.io.OutputStream;
  * data have been written to it. The event can be used, for example, to throw
  * an exception if a maximum has been reached, or to switch the underlying
  * stream type when the threshold is exceeded.
- * <p>
+ * <p/>
  * This class overrides all <code>OutputStream</code> methods. However, these
  * overrides ultimately call the corresponding methods in the underlying output
  * stream implementation.
- * <p>
+ * <p/>
  * NOTE: This implementation may trigger the event <em>before</em> the threshold
  * is actually reached, since it triggers when a pending write operation would
  * cause the threshold to be exceeded.
  *
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- *
- *
  */
 public abstract class ThresholdingOutputStream
-    extends OutputStream
+        extends OutputStream
 {
 
     // ----------------------------------------------------------- Data members
@@ -87,8 +85,7 @@ public abstract class ThresholdingOutputStream
      * Writes the specified byte to this output stream.
      *
      * @param b The byte to be written.
-     *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     public void write(int b) throws IOException
     {
@@ -103,8 +100,7 @@ public abstract class ThresholdingOutputStream
      * output stream.
      *
      * @param b The array of bytes to be written.
-     *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     public void write(byte b[]) throws IOException
     {
@@ -121,8 +117,7 @@ public abstract class ThresholdingOutputStream
      * @param b   The byte array from which the data will be written.
      * @param off The start offset in the byte array.
      * @param len The number of bytes to write.
-     *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     public void write(byte b[], int off, int len) throws IOException
     {
@@ -136,7 +131,7 @@ public abstract class ThresholdingOutputStream
      * Flushes this output stream and forces any buffered output bytes to be
      * written out.
      *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     public void flush() throws IOException
     {
@@ -148,7 +143,7 @@ public abstract class ThresholdingOutputStream
      * Closes this output stream and releases any system resources associated
      * with this stream.
      *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     public void close() throws IOException
     {
@@ -194,7 +189,7 @@ public abstract class ThresholdingOutputStream
      * this output stream.
      *
      * @return <code>true</code> if the threshold has been reached;
-     *         <code>false</code> otherwise.
+     * <code>false</code> otherwise.
      */
     public boolean isThresholdExceeded()
     {
@@ -212,8 +207,7 @@ public abstract class ThresholdingOutputStream
      *
      * @param count The number of bytes about to be written to the underlying
      *              output stream.
-     *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     protected void checkThreshold(int count) throws IOException
     {
@@ -233,8 +227,7 @@ public abstract class ThresholdingOutputStream
      * <code>OutputStream</code> methods in this class will ultimately delegate.
      *
      * @return The underlying output stream.
-     *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     protected abstract OutputStream getStream() throws IOException;
 
@@ -244,7 +237,7 @@ public abstract class ThresholdingOutputStream
      * subclass should take whatever action necessary on this event. This may
      * include changing the underlying output stream.
      *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     protected abstract void thresholdReached() throws IOException;
 }

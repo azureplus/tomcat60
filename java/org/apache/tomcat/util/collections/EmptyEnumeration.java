@@ -23,23 +23,28 @@ import java.util.NoSuchElementException;
 /**
  * @deprecated
  */
-public class EmptyEnumeration implements Enumeration {
+public class EmptyEnumeration implements Enumeration
+{
 
-    static EmptyEnumeration staticInstance=new EmptyEnumeration();
+    static EmptyEnumeration staticInstance = new EmptyEnumeration();
 
-    public EmptyEnumeration() {
+    public EmptyEnumeration()
+    {
     }
 
-    public static Enumeration getEmptyEnumeration() {
-	return staticInstance;
-    }
-    
-    public Object nextElement( ) {
-	throw new NoSuchElementException( "EmptyEnumeration");
+    public static Enumeration getEmptyEnumeration()
+    {
+        return staticInstance;
     }
 
-    public boolean hasMoreElements() {
-	return false;
+    public Object nextElement()
+    {
+        throw new NoSuchElementException("EmptyEnumeration");
     }
-    
+
+    public boolean hasMoreElements()
+    {
+        return false;
+    }
+
 }

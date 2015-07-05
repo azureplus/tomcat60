@@ -16,13 +16,13 @@
  */
 package org.apache.catalina.tribes.tipis;
 
-import java.io.Serializable;
-
 import org.apache.catalina.tribes.Channel;
 import org.apache.catalina.tribes.ChannelException;
 import org.apache.catalina.tribes.Member;
-import org.apache.catalina.tribes.util.Arrays;
 import org.apache.catalina.tribes.UniqueId;
+import org.apache.catalina.tribes.util.Arrays;
+
+import java.io.Serializable;
 
 /**
  * A smart implementation of a stateful replicated map. uses primary/secondary backup strategy.
@@ -42,158 +42,176 @@ import org.apache.catalina.tribes.UniqueId;
  * If you implement a smart AOP mechanism to detect changes in underlying objects, you can replicate
  * only those changes by implementing the ReplicatedMapEntry interface, and return true when isDiffable()
  * is invoked.<br><br>
- *
+ * <p/>
  * This map implementation doesn't have a background thread running to replicate changes.
  * If you do have changes without invoking put/remove then you need to invoke one of the following methods:
  * <ul>
  * <li><code>replicate(Object,boolean)</code> - replicates only the object that belongs to the key</li>
  * <li><code>replicate(boolean)</code> - Scans the entire map for changes and replicates data</li>
- *  </ul>
+ * </ul>
  * the <code>boolean</code> value in the <code>replicate</code> method used to decide
  * whether to only replicate objects that implement the <code>ReplicatedMapEntry</code> interface
  * or to replicate all objects. If an object doesn't implement the <code>ReplicatedMapEntry</code> interface
  * each time the object gets replicated the entire object gets serialized, hence a call to <code>replicate(true)</code>
  * will replicate all objects in this map that are using this node as primary.
- *
+ * <p/>
  * <br><br><b>REMBER TO CALL <code>breakdown()</code> or <code>finalize()</code> when you are done with the map to
  * avoid memory leaks.<br><br>
- *
+ * <p/>
  * TODO implement periodic sync/transfer thread
  *
  * @author Filip Hanik
  * @version 1.0
  */
-public class LazyReplicatedMap<K,V> extends AbstractReplicatedMap<K,V> {
+public class LazyReplicatedMap<K, V> extends AbstractReplicatedMap<K, V>
+{
     private static final long serialVersionUID = 1L;
     protected static org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(LazyReplicatedMap.class);
-
 
 
 //------------------------------------------------------------------------------
 //              CONSTRUCTORS / DESTRUCTORS
 //------------------------------------------------------------------------------
+
     /**
      * Creates a new map
-     * @param channel The channel to use for communication
-     * @param timeout long - timeout for RPC messags
-     * @param mapContextName String - unique name for this map, to allow multiple maps per channel
+     *
+     * @param channel         The channel to use for communication
+     * @param timeout         long - timeout for RPC messags
+     * @param mapContextName  String - unique name for this map, to allow multiple maps per channel
      * @param initialCapacity int - the size of this map, see HashMap
-     * @param loadFactor float - load factor, see HashMap
+     * @param loadFactor      float - load factor, see HashMap
      */
-    public LazyReplicatedMap(MapOwner owner, Channel channel, long timeout, String mapContextName, int initialCapacity, float loadFactor, ClassLoader[] cls) {
-        super(owner,channel,timeout,mapContextName,initialCapacity,loadFactor, Channel.SEND_OPTIONS_DEFAULT,cls, true);
+    public LazyReplicatedMap(MapOwner owner, Channel channel, long timeout, String mapContextName, int initialCapacity, float loadFactor, ClassLoader[] cls)
+    {
+        super(owner, channel, timeout, mapContextName, initialCapacity, loadFactor, Channel.SEND_OPTIONS_DEFAULT, cls, true);
     }
 
     /**
      * Creates a new map
-     * @param channel The channel to use for communication
-     * @param timeout long - timeout for RPC messags
-     * @param mapContextName String - unique name for this map, to allow multiple maps per channel
+     *
+     * @param channel         The channel to use for communication
+     * @param timeout         long - timeout for RPC messags
+     * @param mapContextName  String - unique name for this map, to allow multiple maps per channel
      * @param initialCapacity int - the size of this map, see HashMap
      */
-    public LazyReplicatedMap(MapOwner owner, Channel channel, long timeout, String mapContextName, int initialCapacity, ClassLoader[] cls) {
-        super(owner, channel,timeout,mapContextName,initialCapacity, AbstractReplicatedMap.DEFAULT_LOAD_FACTOR, Channel.SEND_OPTIONS_DEFAULT, cls, true);
+    public LazyReplicatedMap(MapOwner owner, Channel channel, long timeout, String mapContextName, int initialCapacity, ClassLoader[] cls)
+    {
+        super(owner, channel, timeout, mapContextName, initialCapacity, AbstractReplicatedMap.DEFAULT_LOAD_FACTOR, Channel.SEND_OPTIONS_DEFAULT, cls, true);
     }
 
     /**
      * Creates a new map
-     * @param channel The channel to use for communication
-     * @param timeout long - timeout for RPC messags
+     *
+     * @param channel        The channel to use for communication
+     * @param timeout        long - timeout for RPC messags
      * @param mapContextName String - unique name for this map, to allow multiple maps per channel
      */
-    public LazyReplicatedMap(MapOwner owner, Channel channel, long timeout, String mapContextName, ClassLoader[] cls) {
-        super(owner, channel,timeout,mapContextName, AbstractReplicatedMap.DEFAULT_INITIAL_CAPACITY,AbstractReplicatedMap.DEFAULT_LOAD_FACTOR,Channel.SEND_OPTIONS_DEFAULT, cls, true);
+    public LazyReplicatedMap(MapOwner owner, Channel channel, long timeout, String mapContextName, ClassLoader[] cls)
+    {
+        super(owner, channel, timeout, mapContextName, AbstractReplicatedMap.DEFAULT_INITIAL_CAPACITY, AbstractReplicatedMap.DEFAULT_LOAD_FACTOR, Channel.SEND_OPTIONS_DEFAULT, cls, true);
     }
 
     /**
      * Creates a new map
-     * @param channel The channel to use for communication
-     * @param timeout long - timeout for RPC messags
+     *
+     * @param channel        The channel to use for communication
+     * @param timeout        long - timeout for RPC messags
      * @param mapContextName String - unique name for this map, to allow multiple maps per channel
-     * @param terminate boolean - Flag for whether to terminate this map that failed to start.
+     * @param terminate      boolean - Flag for whether to terminate this map that failed to start.
      */
-    public LazyReplicatedMap(MapOwner owner, Channel channel, long timeout, String mapContextName, ClassLoader[] cls, boolean terminate) {
-        super(owner, channel,timeout,mapContextName, AbstractReplicatedMap.DEFAULT_INITIAL_CAPACITY,
-                AbstractReplicatedMap.DEFAULT_LOAD_FACTOR,Channel.SEND_OPTIONS_DEFAULT, cls, terminate);
+    public LazyReplicatedMap(MapOwner owner, Channel channel, long timeout, String mapContextName, ClassLoader[] cls, boolean terminate)
+    {
+        super(owner, channel, timeout, mapContextName, AbstractReplicatedMap.DEFAULT_INITIAL_CAPACITY,
+                AbstractReplicatedMap.DEFAULT_LOAD_FACTOR, Channel.SEND_OPTIONS_DEFAULT, cls, terminate);
     }
 
 
-//------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------
 //              METHODS TO OVERRIDE
 //------------------------------------------------------------------------------
     @Override
-    protected int getStateMessageType() {
+    protected int getStateMessageType()
+    {
         return AbstractReplicatedMap.MapMessage.MSG_STATE;
     }
 
     /**
      * publish info about a map pair (key/value) to other nodes in the cluster
-     * @param key Object
+     *
+     * @param key   Object
      * @param value Object
      * @return Member - the backup node
      * @throws ChannelException
      */
     @Override
-    protected Member[] publishEntryInfo(Object key, Object value) throws ChannelException {
-        if  (! (key instanceof Serializable && value instanceof Serializable)  ) return new Member[0];
+    protected Member[] publishEntryInfo(Object key, Object value) throws ChannelException
+    {
+        if (!(key instanceof Serializable && value instanceof Serializable)) return new Member[0];
         Member[] members = getMapMembers();
         int firstIdx = getNextBackupIndex();
         int nextIdx = firstIdx;
         Member[] backup = new Member[0];
 
         //there are no backups
-        if ( members.length == 0 || firstIdx == -1 ) return backup;
+        if (members.length == 0 || firstIdx == -1) return backup;
 
         boolean success = false;
-        do {
+        do
+        {
             //select a backup node
             Member next = members[nextIdx];
 
             //increment for the next round of back up selection
             nextIdx = nextIdx + 1;
-            if ( nextIdx >= members.length ) nextIdx = 0;
+            if (nextIdx >= members.length) nextIdx = 0;
 
-            if (next == null) {
+            if (next == null)
+            {
                 continue;
             }
             MapMessage msg = null;
-            try {
+            try
+            {
                 backup = wrap(next);
                 //publish the backup data to one node
                 msg = new MapMessage(getMapContextName(), MapMessage.MSG_BACKUP, false,
-                                     (Serializable) key, (Serializable) value, null, channel.getLocalMember(false), backup);
-                if ( log.isTraceEnabled() )
-                    log.trace("Publishing backup data:"+msg+" to: "+next.getName());
+                        (Serializable) key, (Serializable) value, null, channel.getLocalMember(false), backup);
+                if (log.isTraceEnabled())
+                    log.trace("Publishing backup data:" + msg + " to: " + next.getName());
                 UniqueId id = getChannel().send(backup, msg, getChannelSendOptions());
-                if ( log.isTraceEnabled() )
-                    log.trace("Data published:"+msg+" msg Id:"+id);
+                if (log.isTraceEnabled())
+                    log.trace("Data published:" + msg + " msg Id:" + id);
                 //we published out to a backup, mark the test success
                 success = true;
-            }catch ( ChannelException x ) {
-                log.error("Unable to replicate backup key:"+key+" to backup:"+next+". Reason:"+x.getMessage(),x);
             }
-            try {
+            catch (ChannelException x)
+            {
+                log.error("Unable to replicate backup key:" + key + " to backup:" + next + ". Reason:" + x.getMessage(), x);
+            }
+            try
+            {
                 //publish the data out to all nodes
                 Member[] proxies = excludeFromSet(backup, getMapMembers());
-                if (success && proxies.length > 0 ) {
+                if (success && proxies.length > 0)
+                {
                     msg = new MapMessage(getMapContextName(), MapMessage.MSG_PROXY, false,
-                                         (Serializable) key, null, null, channel.getLocalMember(false),backup);
-                    if ( log.isTraceEnabled() )
-                    log.trace("Publishing proxy data:"+msg+" to: "+Arrays.toNameString(proxies));
+                            (Serializable) key, null, null, channel.getLocalMember(false), backup);
+                    if (log.isTraceEnabled())
+                        log.trace("Publishing proxy data:" + msg + " to: " + Arrays.toNameString(proxies));
                     getChannel().send(proxies, msg, getChannelSendOptions());
                 }
-            }catch  ( ChannelException x ) {
+            }
+            catch (ChannelException x)
+            {
                 //log the error, but proceed, this should only happen if a node went down,
                 //and if the node went down, then it can't receive the message, the others
                 //should still get it.
-                log.error("Unable to replicate proxy key:"+key+" to backup:"+next+". Reason:"+x.getMessage(),x);
+                log.error("Unable to replicate proxy key:" + key + " to backup:" + next + ". Reason:" + x.getMessage(), x);
             }
-        } while ( !success && (firstIdx!=nextIdx));
+        } while (!success && (firstIdx != nextIdx));
         return backup;
     }
-
-
-
 
 
 }

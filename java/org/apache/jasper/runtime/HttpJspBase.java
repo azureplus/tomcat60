@@ -32,55 +32,62 @@ import java.io.IOException;
  *
  * @author Anil K. Vijendran
  */
-public abstract class HttpJspBase 
-    extends HttpServlet 
-    implements HttpJspPage 
-        
-    
+public abstract class HttpJspBase
+        extends HttpServlet
+        implements HttpJspPage
+
+
 {
-    
-    protected HttpJspBase() {
+
+    protected HttpJspBase()
+    {
     }
 
-    public final void init(ServletConfig config) 
-	throws ServletException 
+    public final void init(ServletConfig config)
+            throws ServletException
     {
         super.init(config);
-	jspInit();
+        jspInit();
         _jspInit();
     }
-    
-    public String getServletInfo() {
-	return Localizer.getMessage("jsp.engine.info");
+
+    public String getServletInfo()
+    {
+        return Localizer.getMessage("jsp.engine.info");
     }
 
-    public final void destroy() {
-	jspDestroy();
-	_jspDestroy();
+    public final void destroy()
+    {
+        jspDestroy();
+        _jspDestroy();
     }
 
     /**
      * Entry point into service.
      */
-    public final void service(HttpServletRequest request, HttpServletResponse response) 
-	throws ServletException, IOException 
+    public final void service(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException
     {
         _jspService(request, response);
     }
-    
-    public void jspInit() {
+
+    public void jspInit()
+    {
     }
 
-    public void _jspInit() {
+    public void _jspInit()
+    {
     }
 
-    public void jspDestroy() {
+    public void jspDestroy()
+    {
     }
 
-    protected void _jspDestroy() {
+    protected void _jspDestroy()
+    {
     }
 
-    public abstract void _jspService(HttpServletRequest request, 
-				     HttpServletResponse response) 
-	throws ServletException, IOException;
+    public abstract void _jspService(HttpServletRequest request,
+                                     HttpServletResponse response)
+            throws ServletException, IOException;
 }

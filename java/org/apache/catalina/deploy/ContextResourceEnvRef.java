@@ -27,10 +27,10 @@ import java.io.Serializable;
  *
  * @author Craig R. McClanahan
  * @author Peter Rossbach (pero@apache.org)
- *
  */
 
-public class ContextResourceEnvRef extends ResourceBase implements Serializable {
+public class ContextResourceEnvRef extends ResourceBase implements Serializable
+{
 
 
     // ------------------------------------------------------------- Properties
@@ -41,26 +41,30 @@ public class ContextResourceEnvRef extends ResourceBase implements Serializable 
      */
     private boolean override = true;
 
-    public boolean getOverride() {
+    public boolean getOverride()
+    {
         return (this.override);
     }
 
-    public void setOverride(boolean override) {
+    public void setOverride(boolean override)
+    {
         this.override = override;
     }
-    
+
     // --------------------------------------------------------- Public Methods
 
 
     /**
      * Return a String representation of this object.
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("ContextResourceEnvRef[");
         sb.append("name=");
         sb.append(getName());
-        if (getType() != null) {
+        if (getType() != null)
+        {
             sb.append(", type=");
             sb.append(getType());
         }
@@ -70,7 +74,6 @@ public class ContextResourceEnvRef extends ResourceBase implements Serializable 
         return (sb.toString());
 
     }
-
 
 
 }

@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -25,11 +25,11 @@ import javax.naming.Reference;
  * Represents a reference address to a transaction.
  *
  * @author Remy Maucherat
- *
  */
 
 public class TransactionRef
-    extends Reference {
+        extends Reference
+{
 
 
     // -------------------------------------------------------------- Constants
@@ -38,8 +38,8 @@ public class TransactionRef
     /**
      * Default factory for this reference.
      */
-    public static final String DEFAULT_FACTORY = 
-        org.apache.naming.factory.Constants.DEFAULT_TRANSACTION_FACTORY;
+    public static final String DEFAULT_FACTORY =
+            org.apache.naming.factory.Constants.DEFAULT_TRANSACTION_FACTORY;
 
 
     // ----------------------------------------------------------- Constructors
@@ -48,7 +48,8 @@ public class TransactionRef
     /**
      * Resource Reference.
      */
-    public TransactionRef() {
+    public TransactionRef()
+    {
         this(null, null);
     }
 
@@ -56,10 +57,11 @@ public class TransactionRef
     /**
      * Resource Reference.
      *
-     * @param factory The factory class
+     * @param factory         The factory class
      * @param factoryLocation The factory location
      */
-    public TransactionRef(String factory, String factoryLocation) {
+    public TransactionRef(String factory, String factoryLocation)
+    {
         super("javax.transaction.UserTransaction", factory, factoryLocation);
     }
 
@@ -71,18 +73,23 @@ public class TransactionRef
 
 
     /**
-     * Retrieves the class name of the factory of the object to which this 
+     * Retrieves the class name of the factory of the object to which this
      * reference refers.
      */
-    public String getFactoryClassName() {
+    public String getFactoryClassName()
+    {
         String factory = super.getFactoryClassName();
-        if (factory != null) {
+        if (factory != null)
+        {
             return factory;
-        } else {
+        } else
+        {
             factory = System.getProperty(Context.OBJECT_FACTORIES);
-            if (factory != null) {
+            if (factory != null)
+            {
                 return null;
-            } else {
+            } else
+            {
                 return DEFAULT_FACTORY;
             }
         }

@@ -24,10 +24,11 @@ import java.util.List;
  * Represents a source map (SMAP), which serves to associate lines
  * of the input JSP file(s) to lines in the generated servlet in the
  * final .class file, according to the JSR-045 spec.
- * 
+ *
  * @author Shawn Bayern
  */
-public class SmapGenerator {
+public class SmapGenerator
+{
 
     //*********************************************************************
     // Overview
@@ -54,12 +55,39 @@ public class SmapGenerator {
     //*********************************************************************
     // Methods for adding mapping data
 
+    public static void main(String args[])
+    {
+        SmapGenerator g = new SmapGenerator();
+        g.setOutputFileName("foo.java");
+        SmapStratum s = new SmapStratum("JSP");
+        s.addFile("foo.jsp");
+        s.addFile("bar.jsp", "/foo/foo/bar.jsp");
+        s.addLineData(1, "foo.jsp", 1, 1, 1);
+        s.addLineData(2, "foo.jsp", 1, 6, 1);
+        s.addLineData(3, "foo.jsp", 2, 10, 5);
+        s.addLineData(20, "bar.jsp", 1, 30, 1);
+        g.addStratum(s, true);
+        System.out.print(g);
+
+        System.out.println("---");
+
+        SmapGenerator embedded = new SmapGenerator();
+        embedded.setOutputFileName("blargh.tier2");
+        s = new SmapStratum("Tier2");
+        s.addFile("1.tier2");
+        s.addLineData(1, "1.tier2", 1, 1, 1);
+        embedded.addStratum(s, true);
+        g.addSmap(embedded.toString(), "JSP");
+        System.out.println(g);
+    }
+
     /**
      * Sets the filename (without path information) for the generated
      * source file.  E.g., "foo$jsp.java".
      */
-    public synchronized void setOutputFileName(String x) {
-	outputFileName = x;
+    public synchronized void setOutputFileName(String x)
+    {
+        outputFileName = x;
     }
 
     /**
@@ -69,30 +97,35 @@ public class SmapGenerator {
      * stratum is made the default stratum, overriding any previously
      * set default.
      *
-     * @param stratum the SmapStratum object to add
+     * @param stratum        the SmapStratum object to add
      * @param defaultStratum if <tt>true</tt>, this SmapStratum is considered
-     *                to represent the default SMAP stratum unless
-     *                overwritten
+     *                       to represent the default SMAP stratum unless
+     *                       overwritten
      */
     public synchronized void addStratum(SmapStratum stratum,
-					boolean defaultStratum) {
-	strata.add(stratum);
-	if (defaultStratum)
-	    this.defaultStratum = stratum.getStratumName();
+                                        boolean defaultStratum)
+    {
+        strata.add(stratum);
+        if (defaultStratum)
+            this.defaultStratum = stratum.getStratumName();
     }
 
     /**
      * Adds the given string as an embedded SMAP with the given stratum name.
      *
-     * @param smap the SMAP to embed
+     * @param smap        the SMAP to embed
      * @param stratumName the name of the stratum output by the compilation
      *                    that produced the <tt>smap</tt> to be embedded
      */
-    public synchronized void addSmap(String smap, String stratumName) {
-	embedded.add("*O " + stratumName + "\n"
-		   + smap
-		   + "*C " + stratumName + "\n");
+    public synchronized void addSmap(String smap, String stratumName)
+    {
+        embedded.add("*O " + stratumName + "\n"
+                + smap
+                + "*C " + stratumName + "\n");
     }
+
+    //*********************************************************************
+    // Methods for serializing the logical SMAP
 
     /**
      * Instructs the SmapGenerator whether to actually print any embedded
@@ -100,72 +133,52 @@ public class SmapGenerator {
      *
      * @param status If <tt>false</tt>, ignore any embedded SMAPs.
      */
-    public void setDoEmbedded(boolean status) {
-	doEmbedded = status;
+    public void setDoEmbedded(boolean status)
+    {
+        doEmbedded = status;
     }
 
-    //*********************************************************************
-    // Methods for serializing the logical SMAP
-
-    public synchronized String getString() {
-	// check state and initialize buffer
-	if (outputFileName == null)
-	    throw new IllegalStateException();
+    public synchronized String getString()
+    {
+        // check state and initialize buffer
+        if (outputFileName == null)
+            throw new IllegalStateException();
         StringBuffer out = new StringBuffer();
 
-	// start the SMAP
-	out.append("SMAP\n");
-	out.append(outputFileName + '\n');
-	out.append(defaultStratum + '\n');
+        // start the SMAP
+        out.append("SMAP\n");
+        out.append(outputFileName + '\n');
+        out.append(defaultStratum + '\n');
 
-	// include embedded SMAPs
-	if (doEmbedded) {
-	    int nEmbedded = embedded.size();
-	    for (int i = 0; i < nEmbedded; i++) {
-	        out.append(embedded.get(i));
-	    }
-	}
+        // include embedded SMAPs
+        if (doEmbedded)
+        {
+            int nEmbedded = embedded.size();
+            for (int i = 0; i < nEmbedded; i++)
+            {
+                out.append(embedded.get(i));
+            }
+        }
 
-	// print our StratumSections, FileSections, and LineSections
-	int nStrata = strata.size();
-	for (int i = 0; i < nStrata; i++) {
-	    SmapStratum s = (SmapStratum) strata.get(i);
-	    out.append(s.getString());
-	}
+        // print our StratumSections, FileSections, and LineSections
+        int nStrata = strata.size();
+        for (int i = 0; i < nStrata; i++)
+        {
+            SmapStratum s = (SmapStratum) strata.get(i);
+            out.append(s.getString());
+        }
 
-	// end the SMAP
-	out.append("*E\n");
+        // end the SMAP
+        out.append("*E\n");
 
-	return out.toString();
+        return out.toString();
     }
-
-    public String toString() { return getString(); }
 
     //*********************************************************************
     // For testing (and as an example of use)...
 
-    public static void main(String args[]) {
-	SmapGenerator g = new SmapGenerator();
-	g.setOutputFileName("foo.java");
-	SmapStratum s = new SmapStratum("JSP");
-	s.addFile("foo.jsp");
-	s.addFile("bar.jsp", "/foo/foo/bar.jsp");
-	s.addLineData(1, "foo.jsp", 1, 1, 1);
-	s.addLineData(2, "foo.jsp", 1, 6, 1);
-	s.addLineData(3, "foo.jsp", 2, 10, 5);
-	s.addLineData(20, "bar.jsp", 1, 30, 1);
-	g.addStratum(s, true);
-	System.out.print(g);
-
-	System.out.println("---");
-
-	SmapGenerator embedded = new SmapGenerator();
-	embedded.setOutputFileName("blargh.tier2");
-	s = new SmapStratum("Tier2");
-	s.addFile("1.tier2");
-	s.addLineData(1, "1.tier2", 1, 1, 1);
-	embedded.addStratum(s, true);
-	g.addSmap(embedded.toString(), "JSP");
-	System.out.println(g);
+    public String toString()
+    {
+        return getString();
     }
 }

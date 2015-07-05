@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming.factory;
@@ -25,15 +25,16 @@ import java.sql.SQLException;
 import java.util.Hashtable;
 
 
-
 /**
  * <p>Object factory for resource links for shared data sources.</p>
- * 
+ *
  * @author Filip Hanik
  */
-public class DataSourceLinkFactory extends ResourceLinkFactory {
+public class DataSourceLinkFactory extends ResourceLinkFactory
+{
 
-    public static void setGlobalContext(Context newGlobalContext) {
+    public static void setGlobalContext(Context newGlobalContext)
+    {
         ResourceLinkFactory.setGlobalContext(newGlobalContext);
     }
     // ------------------------------------------------- ObjectFactory Methods
@@ -41,90 +42,110 @@ public class DataSourceLinkFactory extends ResourceLinkFactory {
 
     /**
      * Create a new DataSource instance.
-     * 
+     *
      * @param obj The reference object describing the DataSource
      */
     @Override
     public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable environment)
-        throws NamingException {
+            throws NamingException
+    {
         Object result = super.getObjectInstance(obj, name, nameCtx, environment);
         // Can we process this request?
-        if (result!=null) {
+        if (result != null)
+        {
             Reference ref = (Reference) obj;
             RefAddr userAttr = ref.get("username");
             RefAddr passAttr = ref.get("password");
-            if (userAttr.getContent()!=null && passAttr.getContent()!=null) {
-                result = wrapDataSource(result,userAttr.getContent().toString(), passAttr.getContent().toString());
+            if (userAttr.getContent() != null && passAttr.getContent() != null)
+            {
+                result = wrapDataSource(result, userAttr.getContent().toString(), passAttr.getContent().toString());
             }
         }
         return result;
     }
-    
-    protected Object wrapDataSource(Object datasource, String username, String password) throws NamingException {
-        try {
+
+    protected Object wrapDataSource(Object datasource, String username, String password) throws NamingException
+    {
+        try
+        {
             Class<?> proxyClass = Proxy.getProxyClass(datasource.getClass().getClassLoader(), datasource.getClass().getInterfaces());
-            Constructor<?> proxyConstructor = proxyClass.getConstructor(new Class[] { InvocationHandler.class });
-            DataSourceHandler handler = new DataSourceHandler((DataSource)datasource, username, password);
-            return proxyConstructor.newInstance(handler);    
-        }catch (Exception x) {
-            if (x instanceof NamingException) throw (NamingException)x;
-            else {
+            Constructor<?> proxyConstructor = proxyClass.getConstructor(new Class[]{InvocationHandler.class});
+            DataSourceHandler handler = new DataSourceHandler((DataSource) datasource, username, password);
+            return proxyConstructor.newInstance(handler);
+        }
+        catch (Exception x)
+        {
+            if (x instanceof NamingException) throw (NamingException) x;
+            else
+            {
                 NamingException nx = new NamingException(x.getMessage());
                 nx.initCause(x);
                 throw nx;
             }
         }
     }
-    
+
     /**
      * Simple wrapper class that will allow a user to configure a ResourceLink for a data source
-     * so that when {@link javax.sql.DataSource#getConnection()} is called, it will invoke 
+     * so that when {@link javax.sql.DataSource#getConnection()} is called, it will invoke
      * {@link javax.sql.DataSource#getConnection(String, String)} with the preconfigured username and password.
      */
-    public static class DataSourceHandler implements InvocationHandler {
-        private final DataSource ds; 
-        private final String username; 
+    public static class DataSourceHandler implements InvocationHandler
+    {
+        private final DataSource ds;
+        private final String username;
         private final String password;
         private final Method getConnection;
-        public DataSourceHandler(DataSource ds, String username, String password) throws Exception {
+
+        public DataSourceHandler(DataSource ds, String username, String password) throws Exception
+        {
             this.ds = ds;
             this.username = username;
             this.password = password;
             getConnection = ds.getClass().getMethod("getConnection", String.class, String.class);
         }
-        
 
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            
-            if ("getConnection".equals(method.getName()) && (args==null || args.length==0)) {
-                args = new String[] {username,password};
+
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+        {
+
+            if ("getConnection".equals(method.getName()) && (args == null || args.length == 0))
+            {
+                args = new String[]{username, password};
                 method = getConnection;
-            } else if ("unwrap".equals(method.getName())) {
-                return unwrap((Class<?>)args[0]);
+            } else if ("unwrap".equals(method.getName()))
+            {
+                return unwrap((Class<?>) args[0]);
             }
-            try {
-                return method.invoke(ds,args);
-            }catch (Throwable t) {
-                if (t instanceof InvocationTargetException) {
-                    InvocationTargetException it = (InvocationTargetException)t;
-                    throw it.getCause()!=null?it.getCause():it;
-                } else {
+            try
+            {
+                return method.invoke(ds, args);
+            }
+            catch (Throwable t)
+            {
+                if (t instanceof InvocationTargetException)
+                {
+                    InvocationTargetException it = (InvocationTargetException) t;
+                    throw it.getCause() != null ? it.getCause() : it;
+                } else
+                {
                     throw t;
                 }
             }
         }
-        
-        public Object unwrap(Class<?> iface) throws SQLException {
-            if (iface == DataSource.class) {
+
+        public Object unwrap(Class<?> iface) throws SQLException
+        {
+            if (iface == DataSource.class)
+            {
                 return ds;
-            } else {
-                throw new SQLException("Not a wrapper of "+iface.getName());
+            } else
+            {
+                throw new SQLException("Not a wrapper of " + iface.getName());
             }
         }
-        
+
     }
-    
-    
 
 
 }

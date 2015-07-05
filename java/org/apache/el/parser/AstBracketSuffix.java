@@ -25,15 +25,17 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstBracketSuffix extends SimpleNode {
-    public AstBracketSuffix(int id) {
+public final class AstBracketSuffix extends SimpleNode
+{
+    public AstBracketSuffix(int id)
+    {
         super(id);
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return this.children[0].getValue(ctx);
     }
 }

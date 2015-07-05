@@ -30,9 +30,9 @@ import java.util.Arrays;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public abstract class SimpleNode extends ELSupport implements Node {
+public abstract class SimpleNode extends ELSupport implements Node
+{
     protected Node parent;
 
     protected Node[] children;
@@ -41,28 +41,36 @@ public abstract class SimpleNode extends ELSupport implements Node {
 
     protected String image;
 
-    public SimpleNode(int i) {
+    public SimpleNode(int i)
+    {
         id = i;
     }
 
-    public void jjtOpen() {
+    public void jjtOpen()
+    {
     }
 
-    public void jjtClose() {
+    public void jjtClose()
+    {
     }
 
-    public void jjtSetParent(Node n) {
+    public void jjtSetParent(Node n)
+    {
         parent = n;
     }
 
-    public Node jjtGetParent() {
+    public Node jjtGetParent()
+    {
         return parent;
     }
 
-    public void jjtAddChild(Node n, int i) {
-        if (children == null) {
+    public void jjtAddChild(Node n, int i)
+    {
+        if (children == null)
+        {
             children = new Node[i + 1];
-        } else if (i >= children.length) {
+        } else if (i >= children.length)
+        {
             Node c[] = new Node[i + 1];
             System.arraycopy(children, 0, c, 0, children.length);
             children = c;
@@ -70,11 +78,13 @@ public abstract class SimpleNode extends ELSupport implements Node {
         children[i] = n;
     }
 
-    public Node jjtGetChild(int i) {
+    public Node jjtGetChild(int i)
+    {
         return children[i];
     }
 
-    public int jjtGetNumChildren() {
+    public int jjtGetNumChildren()
+    {
         return (children == null) ? 0 : children.length;
     }
 
@@ -85,15 +95,18 @@ public abstract class SimpleNode extends ELSupport implements Node {
      * otherwise overriding toString() is probably all you need to do.
      */
 
-    public String toString() {
-        if (this.image != null) {
+    public String toString()
+    {
+        if (this.image != null)
+        {
             return ELParserTreeConstants.jjtNodeName[id] + "[" + this.image
                     + "]";
         }
         return ELParserTreeConstants.jjtNodeName[id];
     }
 
-    public String toString(String prefix) {
+    public String toString(String prefix)
+    {
         return prefix + toString();
     }
 
@@ -102,65 +115,81 @@ public abstract class SimpleNode extends ELSupport implements Node {
      * children.
      */
 
-    public void dump(String prefix) {
+    public void dump(String prefix)
+    {
         System.out.println(toString(prefix));
-        if (children != null) {
-            for (int i = 0; i < children.length; ++i) {
+        if (children != null)
+        {
+            for (int i = 0; i < children.length; ++i)
+            {
                 SimpleNode n = (SimpleNode) children[i];
-                if (n != null) {
+                if (n != null)
+                {
                     n.dump(prefix + " ");
                 }
             }
         }
     }
 
-    public String getImage() {
+    public String getImage()
+    {
         return image;
     }
 
-    public void setImage(String image) {
+    public void setImage(String image)
+    {
         this.image = image;
     }
 
     public Class getType(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         throw new UnsupportedOperationException();
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         throw new UnsupportedOperationException();
     }
 
     public boolean isReadOnly(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return true;
     }
 
     public void setValue(EvaluationContext ctx, Object value)
-            throws ELException {
+            throws ELException
+    {
         throw new PropertyNotWritableException(MessageFactory.get("error.syntax.set"));
     }
 
-    public void accept(NodeVisitor visitor) throws Exception {
+    public void accept(NodeVisitor visitor) throws Exception
+    {
         visitor.visit(this);
-        if (this.children != null && this.children.length > 0) {
-            for (int i = 0; i < this.children.length; i++) {
+        if (this.children != null && this.children.length > 0)
+        {
+            for (int i = 0; i < this.children.length; i++)
+            {
                 this.children[i].accept(visitor);
             }
         }
     }
 
-    public Object invoke(EvaluationContext ctx, Class[] paramTypes, Object[] paramValues) throws ELException {
+    public Object invoke(EvaluationContext ctx, Class[] paramTypes, Object[] paramValues) throws ELException
+    {
         throw new UnsupportedOperationException();
     }
 
-    public MethodInfo getMethodInfo(EvaluationContext ctx, Class[] paramTypes) throws ELException {
+    public MethodInfo getMethodInfo(EvaluationContext ctx, Class[] paramTypes) throws ELException
+    {
         throw new UnsupportedOperationException();
-    }    
-    
+    }
+
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(children);
@@ -170,28 +199,37 @@ public abstract class SimpleNode extends ELSupport implements Node {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
             return true;
         }
-        if (obj == null) {
+        if (obj == null)
+        {
             return false;
         }
-        if (!(obj instanceof SimpleNode)) {
+        if (!(obj instanceof SimpleNode))
+        {
             return false;
         }
         SimpleNode other = (SimpleNode) obj;
-        if (!Arrays.equals(children, other.children)) {
+        if (!Arrays.equals(children, other.children))
+        {
             return false;
         }
-        if (id != other.id) {
+        if (id != other.id)
+        {
             return false;
         }
-        if (image == null) {
-            if (other.image != null) {
+        if (image == null)
+        {
+            if (other.image != null)
+            {
                 return false;
             }
-        } else if (!image.equals(other.image)) {
+        } else if (!image.equals(other.image))
+        {
             return false;
         }
         return true;

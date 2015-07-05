@@ -18,16 +18,17 @@ package org.apache.catalina.ssi;
 
 
 import java.io.PrintWriter;
+
 /**
  * Return the result associated with the supplied Server Variable.
- * 
+ *
  * @author Bip Thelin
  * @author Paul Speed
  * @author Dan Sandberg
  * @author David Becker
- *
  */
-public class SSIEcho implements SSICommand {
+public class SSIEcho implements SSICommand
+{
     protected final static String DEFAULT_ENCODING = "entity";
     protected final static String MISSING_VARIABLE_VALUE = "(none)";
 
@@ -36,30 +37,38 @@ public class SSIEcho implements SSICommand {
      * @see SSICommand
      */
     public long process(SSIMediator ssiMediator, String commandName,
-            String[] paramNames, String[] paramValues, PrintWriter writer) {
+                        String[] paramNames, String[] paramValues, PrintWriter writer)
+    {
         String encoding = DEFAULT_ENCODING;
         String originalValue = null;
         String errorMessage = ssiMediator.getConfigErrMsg();
-        for (int i = 0; i < paramNames.length; i++) {
+        for (int i = 0; i < paramNames.length; i++)
+        {
             String paramName = paramNames[i];
             String paramValue = paramValues[i];
-            if (paramName.equalsIgnoreCase("var")) {
+            if (paramName.equalsIgnoreCase("var"))
+            {
                 originalValue = paramValue;
-            } else if (paramName.equalsIgnoreCase("encoding")) {
-                if (isValidEncoding(paramValue)) {
+            } else if (paramName.equalsIgnoreCase("encoding"))
+            {
+                if (isValidEncoding(paramValue))
+                {
                     encoding = paramValue;
-                } else {
+                } else
+                {
                     ssiMediator.log("#echo--Invalid encoding: " + paramValue);
                     writer.write(errorMessage);
                 }
-            } else {
+            } else
+            {
                 ssiMediator.log("#echo--Invalid attribute: " + paramName);
                 writer.write(errorMessage);
             }
         }
         String variableValue = ssiMediator.getVariableValue(
                 originalValue, encoding);
-        if (variableValue == null) {
+        if (variableValue == null)
+        {
             variableValue = MISSING_VARIABLE_VALUE;
         }
         writer.write(variableValue);
@@ -67,7 +76,8 @@ public class SSIEcho implements SSICommand {
     }
 
 
-    protected boolean isValidEncoding(String encoding) {
+    protected boolean isValidEncoding(String encoding)
+    {
         return encoding.equalsIgnoreCase("url")
                 || encoding.equalsIgnoreCase("entity")
                 || encoding.equalsIgnoreCase("none");

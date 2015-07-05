@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.tomcat.util.digester;
@@ -25,8 +25,8 @@ import java.util.List;
 /**
  * <p><code>AbstractRuleImpl</code> provides basic services for <code>Rules</code> implementations.
  * Extending this class should make it easier to create a <code>Rules</code> implementation.</p>
- * 
- * <p><code>AbstractRuleImpl</code> manages the <code>Digester</code> 
+ * <p/>
+ * <p><code>AbstractRuleImpl</code> manages the <code>Digester</code>
  * and <code>namespaceUri</code> properties.
  * If the subclass overrides {@link #registerRule} (rather than {@link #add}),
  * then the <code>Digester</code> and <code>namespaceURI</code> of the <code>Rule</code>
@@ -36,22 +36,28 @@ import java.util.List;
  * @since 1.5
  */
 
-abstract public class AbstractRulesImpl implements Rules {
+abstract public class AbstractRulesImpl implements Rules
+{
 
     // ------------------------------------------------------------- Fields
-    
-    /** Digester using this <code>Rules</code> implementation */
+
+    /**
+     * Digester using this <code>Rules</code> implementation
+     */
     private Digester digester;
-    /** Namespace uri to assoicate with subsequent <code>Rule</code>'s */
+    /**
+     * Namespace uri to assoicate with subsequent <code>Rule</code>'s
+     */
     private String namespaceURI;
-    
+
     // ------------------------------------------------------------- Properties
 
     /**
      * Return the Digester instance with which this Rules instance is
      * associated.
      */
-    public Digester getDigester() {
+    public Digester getDigester()
+    {
         return digester;
     }
 
@@ -60,7 +66,8 @@ abstract public class AbstractRulesImpl implements Rules {
      *
      * @param digester The newly associated Digester instance
      */
-    public void setDigester(Digester digester) {
+    public void setDigester(Digester digester)
+    {
         this.digester = digester;
     }
 
@@ -68,7 +75,8 @@ abstract public class AbstractRulesImpl implements Rules {
      * Return the namespace URI that will be applied to all subsequently
      * added <code>Rule</code> objects.
      */
-    public String getNamespaceURI() {
+    public String getNamespaceURI()
+    {
         return namespaceURI;
     }
 
@@ -77,10 +85,11 @@ abstract public class AbstractRulesImpl implements Rules {
      * added <code>Rule</code> objects.
      *
      * @param namespaceURI Namespace URI that must match on all
-     *  subsequently added rules, or <code>null</code> for matching
-     *  regardless of the current namespace URI
+     *                     subsequently added rules, or <code>null</code> for matching
+     *                     regardless of the current namespace URI
      */
-    public void setNamespaceURI(String namespaceURI) {
+    public void setNamespaceURI(String namespaceURI)
+    {
         this.namespaceURI = namespaceURI;
     }
 
@@ -92,30 +101,33 @@ abstract public class AbstractRulesImpl implements Rules {
      * <code>namespaceURI</code> on the <code>Rule</code> before calling {@link #registerRule}.
      *
      * @param pattern Nesting pattern to be matched for this Rule
-     * @param rule Rule instance to be registered
+     * @param rule    Rule instance to be registered
      */
-    public void add(String pattern, Rule rule) {
+    public void add(String pattern, Rule rule)
+    {
         // set up rule
-        if (this.digester != null) {
+        if (this.digester != null)
+        {
             rule.setDigester(this.digester);
         }
-        
-        if (this.namespaceURI != null) {
+
+        if (this.namespaceURI != null)
+        {
             rule.setNamespaceURI(this.namespaceURI);
         }
-        
+
         registerRule(pattern, rule);
-        
+
     }
-    
-    /** 
+
+    /**
      * Register rule at given pattern.
      * The the Digester and namespaceURI properties of the given <code>Rule</code>
      * can be assumed to have been set properly before this method is called.
      *
      * @param pattern Nesting pattern to be matched for this Rule
-     * @param rule Rule instance to be registered
-     */ 
+     * @param rule    Rule instance to be registered
+     */
     abstract protected void registerRule(String pattern, Rule rule);
 
     /**
@@ -132,10 +144,10 @@ abstract public class AbstractRulesImpl implements Rules {
      * method.
      *
      * @param pattern Nesting pattern to be matched
-     *
      * @deprecated Call match(namespaceURI,pattern) instead.
      */
-    public List match(String pattern) {
+    public List match(String pattern)
+    {
         return match(namespaceURI, pattern);
     }
 
@@ -148,8 +160,8 @@ abstract public class AbstractRulesImpl implements Rules {
      * method.
      *
      * @param namespaceURI Namespace URI for which to select matching rules,
-     *  or <code>null</code> to match regardless of namespace URI
-     * @param pattern Nesting pattern to be matched
+     *                     or <code>null</code> to match regardless of namespace URI
+     * @param pattern      Nesting pattern to be matched
      */
     abstract public List match(String namespaceURI, String pattern);
 

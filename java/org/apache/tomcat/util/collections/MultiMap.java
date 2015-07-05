@@ -22,106 +22,102 @@ import org.apache.tomcat.util.buf.MessageBytes;
 // Originally MimeHeaders
 
 /**
- * An efficient representation for certain type of map. The keys 
+ * An efficient representation for certain type of map. The keys
  * can have a single or multi values, but most of the time there are
  * single values.
- *
+ * <p/>
  * The data is of "MessageBytes" type, meaning bytes[] that can be
  * converted to Strings ( if needed, and encoding is lazy-binded ).
- *
+ * <p/>
  * This is a base class for MimeHeaders, Parameters and Cookies.
- *
+ * <p/>
  * Data structures: each field is a single-valued key/value.
  * The fields are allocated when needed, and are recycled.
  * The current implementation does linear search, in future we'll
  * also use the hashkey.
- * 
+ *
  * @author dac@eng.sun.com
  * @author James Todd [gonzo@eng.sun.com]
  * @author Costin Manolache
  */
-public class MultiMap {
+public class MultiMap
+{
 
+    // workaround for JDK1.1.8/solaris
+    static final int NEED_NEXT = -2;
+    static final int LAST = -1;
     protected Field[] fields;
     // fields in use
     protected int count;
 
+    // -------------------- Idx access to headers ----------
+    // This allows external iterators.
+
     /**
-     * 
+     *
      */
-    public MultiMap(int initial_size) {
-	fields=new Field[initial_size];
+    public MultiMap(int initial_size)
+    {
+        fields = new Field[initial_size];
     }
 
     /**
      * Clears all header fields.
      */
-    public void recycle() {
-	for (int i = 0; i < count; i++) {
-	    fields[i].recycle();
-	}
-	count = 0;
+    public void recycle()
+    {
+        for (int i = 0; i < count; i++)
+        {
+            fields[i].recycle();
+        }
+        count = 0;
     }
 
-    // -------------------- Idx access to headers ----------
-    // This allows external iterators.
-    
     /**
      * Returns the current number of header fields.
      */
-    public int size() {
-	return count;
+    public int size()
+    {
+        return count;
     }
 
     /**
      * Returns the Nth header name
      * This may be used to iterate through all header fields.
-     *
+     * <p/>
      * An exception is thrown if the index is not valid ( <0 or >size )
      */
-    public MessageBytes getName(int n) {
-	// n >= 0 && n < count ? headers[n].getName() : null
-	return fields[n].name;
+    public MessageBytes getName(int n)
+    {
+        // n >= 0 && n < count ? headers[n].getName() : null
+        return fields[n].name;
     }
 
     /**
      * Returns the Nth header value
      * This may be used to iterate through all header fields.
      */
-    public MessageBytes getValue(int n) {
-	return fields[n].value;
+    public MessageBytes getValue(int n)
+    {
+        return fields[n].value;
     }
 
-    /** Find the index of a field with the given name.
+    /**
+     * Find the index of a field with the given name.
      */
-    public int find( String name, int starting ) {
-	// We can use a hash - but it's not clear how much
-	// benefit you can get - there is an  overhead 
-	// and the number of headers is small (4-5 ?)
-	// Another problem is that we'll pay the overhead
-	// of constructing the hashtable
+    public int find(String name, int starting)
+    {
+        // We can use a hash - but it's not clear how much
+        // benefit you can get - there is an  overhead 
+        // and the number of headers is small (4-5 ?)
+        // Another problem is that we'll pay the overhead
+        // of constructing the hashtable
 
-	// A custom search tree may be better
-        for (int i = starting; i < count; i++) {
-	    if (fields[i].name.equals(name)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /** Find the index of a field with the given name.
-     */
-    public int findIgnoreCase( String name, int starting ) {
-	// We can use a hash - but it's not clear how much
-	// benefit you can get - there is an  overhead 
-	// and the number of headers is small (4-5 ?)
-	// Another problem is that we'll pay the overhead
-	// of constructing the hashtable
-
-	// A custom search tree may be better
-        for (int i = starting; i < count; i++) {
-	    if (fields[i].name.equalsIgnoreCase(name)) {
+        // A custom search tree may be better
+        for (int i = starting; i < count; i++)
+        {
+            if (fields[i].name.equals(name))
+            {
                 return i;
             }
         }
@@ -129,108 +125,144 @@ public class MultiMap {
     }
 
     /**
-     * Removes the field at the specified position.  
-     *
+     * Find the index of a field with the given name.
+     */
+    public int findIgnoreCase(String name, int starting)
+    {
+        // We can use a hash - but it's not clear how much
+        // benefit you can get - there is an  overhead 
+        // and the number of headers is small (4-5 ?)
+        // Another problem is that we'll pay the overhead
+        // of constructing the hashtable
+
+        // A custom search tree may be better
+        for (int i = starting; i < count; i++)
+        {
+            if (fields[i].name.equalsIgnoreCase(name))
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Removes the field at the specified position.
+     * <p/>
      * MultiMap will preserve the order of field add unless remove()
      * is called. This is not thread-safe, and will invalidate all
-     * iterators. 
-     *
+     * iterators.
+     * <p/>
      * This is not a frequent operation for Headers and Parameters -
      * there are better ways ( like adding a "isValid" field )
      */
-    public void remove( int i ) {
-	// reset and swap with last header
-	Field mh = fields[i];
-	// reset the field
-	mh.recycle();
-	
-	fields[i] = fields[count - 1];
-	fields[count - 1] = mh;
-	count--;
+    public void remove(int i)
+    {
+        // reset and swap with last header
+        Field mh = fields[i];
+        // reset the field
+        mh.recycle();
+
+        fields[i] = fields[count - 1];
+        fields[count - 1] = mh;
+        count--;
     }
 
-    /** Create a new, unitialized entry. 
+    /**
+     * Create a new, unitialized entry.
      */
-    public int addField() {
-	int len = fields.length;
-	int pos=count;
-	if (count >= len) {
-	    // expand header list array
-	    Field tmp[] = new Field[pos * 2];
-	    System.arraycopy(fields, 0, tmp, 0, len);
-	    fields = tmp;
-	}
-	if (fields[pos] == null) {
-	    fields[pos] = new Field();
-	}
-	count++;
-	return pos;
+    public int addField()
+    {
+        int len = fields.length;
+        int pos = count;
+        if (count >= len)
+        {
+            // expand header list array
+            Field tmp[] = new Field[pos * 2];
+            System.arraycopy(fields, 0, tmp, 0, len);
+            fields = tmp;
+        }
+        if (fields[pos] == null)
+        {
+            fields[pos] = new Field();
+        }
+        count++;
+        return pos;
     }
 
-    public MessageBytes get( String name) {
-        for (int i = 0; i < count; i++) {
-	    if (fields[i].name.equals(name)) {
-		return fields[i].value;
-	    }
-	}
+    public MessageBytes get(String name)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            if (fields[i].name.equals(name))
+            {
+                return fields[i].value;
+            }
+        }
         return null;
     }
 
-    public int findFirst( String name ) {
-        for (int i = 0; i < count; i++) {
-	    if (fields[i].name.equals(name)) {
-		return i;
-	    }
-	}
+    public int findFirst(String name)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            if (fields[i].name.equals(name))
+            {
+                return i;
+            }
+        }
         return -1;
     }
 
-    public int findNext( int startPos ) {
-	int next= fields[startPos].nextPos;
-	if( next != MultiMap.NEED_NEXT ) {
-	    return next;
-	}
+    public int findNext(int startPos)
+    {
+        int next = fields[startPos].nextPos;
+        if (next != MultiMap.NEED_NEXT)
+        {
+            return next;
+        }
 
-	// next==NEED_NEXT, we never searched for this header
-	MessageBytes name=fields[startPos].name;
-        for (int i = startPos; i < count; i++) {
-	    if (fields[i].name.equals(name)) {
-		// cache the search result
-		fields[startPos].nextPos=i;
-		return i;
-	    }
-	}
-	fields[startPos].nextPos= MultiMap.LAST;
+        // next==NEED_NEXT, we never searched for this header
+        MessageBytes name = fields[startPos].name;
+        for (int i = startPos; i < count; i++)
+        {
+            if (fields[i].name.equals(name))
+            {
+                // cache the search result
+                fields[startPos].nextPos = i;
+                return i;
+            }
+        }
+        fields[startPos].nextPos = MultiMap.LAST;
         return -1;
     }
-
-    // workaround for JDK1.1.8/solaris
-    static final int NEED_NEXT=-2;
-    static final int LAST=-1;
 
     // -------------------- Internal representation --------------------
-    final class Field {
-	MessageBytes name;
-	MessageBytes value;
+    final class Field
+    {
+        MessageBytes name;
+        MessageBytes value;
 
-	// Extra info for speed
-	
-	//  multiple fields with same name - a linked list will
-	// speed up multiple name enumerations and search.
-	int nextPos;
+        // Extra info for speed
 
-	// hashkey
-	int hash;
-	Field nextSameHash;
+        //  multiple fields with same name - a linked list will
+        // speed up multiple name enumerations and search.
+        int nextPos;
 
-	Field() {
-	    nextPos=MultiMap.NEED_NEXT;
-	}
-	
-	void recycle() {
-	    name.recycle();
-	    value.recycle();
-	    nextPos=MultiMap.NEED_NEXT;
-	}
+        // hashkey
+        int hash;
+        Field nextSameHash;
+
+        Field()
+        {
+            nextPos = MultiMap.NEED_NEXT;
+        }
+
+        void recycle()
+        {
+            name.recycle();
+            value.recycle();
+            nextPos = MultiMap.NEED_NEXT;
+        }
     }
 }

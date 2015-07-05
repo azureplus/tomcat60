@@ -18,29 +18,29 @@
 
 package org.apache.catalina.tribes.util;
 
+import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.net.URLClassLoader;
 
 /**
  * An internationalization / localization helper class which reduces
  * the bother of handling ResourceBundles and takes care of the
  * common cases of message formating which otherwise require the
  * creation of Object arrays and such.
- *
+ * <p/>
  * <p>The StringManager operates on a package basis. One StringManager
  * per package can be created and accessed via the getManager method
  * call.
- *
+ * <p/>
  * <p>The StringManager will look for a ResourceBundle named by
  * the package name given plus the suffix of "LocalStrings". In
  * practice, this means that the localized information will be contained
  * in a LocalStrings.properties file located in the package
  * directory of the classpath.
- *
+ * <p/>
  * <p>Please see the documentation for java.util.ResourceBundle for
  * more information.
  *
@@ -48,16 +48,17 @@ import java.net.URLClassLoader;
  * @author James Todd [gonzo@eng.sun.com]
  */
 
-public class StringManager {
+public class StringManager
+{
 
+    private static org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(StringManager.class);
+    private static Hashtable managers = new Hashtable();
     /**
      * The ResourceBundle for this StringManager.
      */
 
     private ResourceBundle bundle;
-
-    private static org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog( StringManager.class );
 
     /**
      * Creates a new StringManager for a given package. This is a
@@ -68,32 +69,61 @@ public class StringManager {
      * @param packageName Name of package to create StringManager for.
      */
 
-    private StringManager(String packageName) {
+    private StringManager(String packageName)
+    {
         String bundleName = packageName + ".LocalStrings";
-        try {
+        try
+        {
             bundle = ResourceBundle.getBundle(bundleName);
             return;
-        } catch( MissingResourceException ex ) {
+        }
+        catch (MissingResourceException ex)
+        {
             // Try from the current loader ( that's the case for trusted apps )
-            ClassLoader cl=Thread.currentThread().getContextClassLoader();
-            if( cl != null ) {
-                try {
-                    bundle=ResourceBundle.getBundle(bundleName, Locale.getDefault(), cl);
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            if (cl != null)
+            {
+                try
+                {
+                    bundle = ResourceBundle.getBundle(bundleName, Locale.getDefault(), cl);
                     return;
-                } catch(MissingResourceException ex2) {
+                }
+                catch (MissingResourceException ex2)
+                {
                 }
             }
-            if( cl==null )
-                cl=this.getClass().getClassLoader();
+            if (cl == null)
+                cl = this.getClass().getClassLoader();
 
             if (log.isDebugEnabled())
                 log.debug("Can't find resource " + bundleName +
-                    " " + cl);
-            if( cl instanceof URLClassLoader ) {
-                if (log.isDebugEnabled()) 
-                    log.debug( ((URLClassLoader)cl).getURLs());
+                        " " + cl);
+            if (cl instanceof URLClassLoader)
+            {
+                if (log.isDebugEnabled())
+                    log.debug(((URLClassLoader) cl).getURLs());
             }
         }
+    }
+
+    /**
+     * Get the StringManager for a particular package. If a manager for
+     * a package already exists, it will be reused, else a new
+     * StringManager will be created and returned.
+     *
+     * @param packageName The package name
+     */
+
+    public synchronized static StringManager getManager(String packageName)
+    {
+        StringManager mgr = (StringManager) managers.get(packageName);
+
+        if (mgr == null)
+        {
+            mgr = new StringManager(packageName);
+            managers.put(packageName, mgr);
+        }
+        return mgr;
     }
 
     /**
@@ -101,13 +131,15 @@ public class StringManager {
      *
      * @param key The resource name
      */
-    public String getString(String key) {
-        return MessageFormat.format(getStringInternal(key), (Object [])null);
+    public String getString(String key)
+    {
+        return MessageFormat.format(getStringInternal(key), (Object[]) null);
     }
 
-
-    protected String getStringInternal(String key) {
-        if (key == null) {
+    protected String getStringInternal(String key)
+    {
+        if (key == null)
+        {
             String msg = "key is null";
 
             throw new NullPointerException(msg);
@@ -115,11 +147,14 @@ public class StringManager {
 
         String str = null;
 
-        if( bundle==null )
+        if (bundle == null)
             return key;
-        try {
+        try
+        {
             str = bundle.getString(key);
-        } catch (MissingResourceException mre) {
+        }
+        catch (MissingResourceException mre)
+        {
             str = "Cannot find message associated with key '" + key + "'";
         }
 
@@ -130,11 +165,12 @@ public class StringManager {
      * Get a string from the underlying resource bundle and format
      * it with the given set of arguments.
      *
-     * @param key The resource name
+     * @param key  The resource name
      * @param args Formatting directives
      */
 
-    public String getString(String key, Object[] args) {
+    public String getString(String key, Object[] args)
+    {
         String iString = null;
         String value = getStringInternal(key);
 
@@ -142,21 +178,27 @@ public class StringManager {
         // VM's don't do an automatic toString() on the passed in
         // objects and barf out
 
-        try {
+        try
+        {
             // ensure the arguments are not null so pre 1.2 VM's don't barf
             Object nonNullArgs[] = args;
-            for (int i=0; i<args.length; i++) {
-                if (args[i] == null) {
-                    if (nonNullArgs==args) nonNullArgs=(Object[])args.clone();
+            for (int i = 0; i < args.length; i++)
+            {
+                if (args[i] == null)
+                {
+                    if (nonNullArgs == args) nonNullArgs = (Object[]) args.clone();
                     nonNullArgs[i] = "null";
                 }
             }
 
             iString = MessageFormat.format(value, nonNullArgs);
-        } catch (IllegalArgumentException iae) {
+        }
+        catch (IllegalArgumentException iae)
+        {
             StringBuffer buf = new StringBuffer();
             buf.append(value);
-            for (int i = 0; i < args.length; i++) {
+            for (int i = 0; i < args.length; i++)
+            {
                 buf.append(" arg[" + i + "]=" + args[i]);
             }
             iString = buf.toString();
@@ -173,8 +215,9 @@ public class StringManager {
      * @param arg Formatting directive
      */
 
-    public String getString(String key, Object arg) {
-        Object[] args = new Object[] {arg};
+    public String getString(String key, Object arg)
+    {
+        Object[] args = new Object[]{arg};
         return getString(key, args);
     }
 
@@ -183,30 +226,35 @@ public class StringManager {
      * with the given object arguments. These arguments can of course
      * be String objects.
      *
-     * @param key The resource name
+     * @param key  The resource name
      * @param arg1 Formatting directive
      * @param arg2 Formatting directive
      */
 
-    public String getString(String key, Object arg1, Object arg2) {
-        Object[] args = new Object[] {arg1, arg2};
+    public String getString(String key, Object arg1, Object arg2)
+    {
+        Object[] args = new Object[]{arg1, arg2};
         return getString(key, args);
     }
+    // --------------------------------------------------------------
+    // STATIC SUPPORT METHODS
+    // --------------------------------------------------------------
 
     /**
      * Get a string from the underlying resource bundle and format it
      * with the given object arguments. These arguments can of course
      * be String objects.
      *
-     * @param key The resource name
+     * @param key  The resource name
      * @param arg1 Formatting directive
      * @param arg2 Formatting directive
      * @param arg3 Formatting directive
      */
 
     public String getString(String key, Object arg1, Object arg2,
-                            Object arg3) {
-        Object[] args = new Object[] {arg1, arg2, arg3};
+                            Object arg3)
+    {
+        Object[] args = new Object[]{arg1, arg2, arg3};
         return getString(key, args);
     }
 
@@ -215,7 +263,7 @@ public class StringManager {
      * with the given object arguments. These arguments can of course
      * be String objects.
      *
-     * @param key The resource name
+     * @param key  The resource name
      * @param arg1 Formatting directive
      * @param arg2 Formatting directive
      * @param arg3 Formatting directive
@@ -223,31 +271,9 @@ public class StringManager {
      */
 
     public String getString(String key, Object arg1, Object arg2,
-                            Object arg3, Object arg4) {
-        Object[] args = new Object[] {arg1, arg2, arg3, arg4};
+                            Object arg3, Object arg4)
+    {
+        Object[] args = new Object[]{arg1, arg2, arg3, arg4};
         return getString(key, args);
-    }
-    // --------------------------------------------------------------
-    // STATIC SUPPORT METHODS
-    // --------------------------------------------------------------
-
-    private static Hashtable managers = new Hashtable();
-
-    /**
-     * Get the StringManager for a particular package. If a manager for
-     * a package already exists, it will be reused, else a new
-     * StringManager will be created and returned.
-     *
-     * @param packageName The package name
-     */
-
-    public synchronized static StringManager getManager(String packageName) {
-        StringManager mgr = (StringManager)managers.get(packageName);
-
-        if (mgr == null) {
-            mgr = new StringManager(packageName);
-            managers.put(packageName, mgr);
-        }
-        return mgr;
     }
 }

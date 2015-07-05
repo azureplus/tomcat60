@@ -24,19 +24,21 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public class ArithmeticNode extends SimpleNode {
+public class ArithmeticNode extends SimpleNode
+{
 
     /**
      * @param i
      */
-    public ArithmeticNode(int i) {
+    public ArithmeticNode(int i)
+    {
         super(i);
     }
 
     public Class getType(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return Number.class;
     }
 }

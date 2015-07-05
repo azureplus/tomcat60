@@ -17,16 +17,11 @@
 
 package org.apache.catalina.mbeans;
 
-import javax.management.Attribute;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.ReflectionException;
-import javax.management.RuntimeOperationsException;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
-
 import org.apache.catalina.connector.Connector;
 import org.apache.tomcat.util.IntrospectionUtils;
+
+import javax.management.*;
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
 
 
 /**
@@ -34,10 +29,10 @@ import org.apache.tomcat.util.IntrospectionUtils;
  * <code>org.apache.coyote.tomcat5.CoyoteConnector</code> component.</p>
  *
  * @author Amy Roh
- *
  */
 
-public class ConnectorMBean extends ClassNameMBean {
+public class ConnectorMBean extends ClassNameMBean
+{
 
 
     // ----------------------------------------------------------- Constructors
@@ -47,13 +42,14 @@ public class ConnectorMBean extends ClassNameMBean {
      * Construct a <code>ModelMBean</code> with default
      * <code>ModelMBeanInfo</code> information.
      *
-     * @exception MBeanException if the initializer of an object
-     *  throws an exception
-     * @exception RuntimeOperationsException if an IllegalArgumentException
-     *  occurs
+     * @throws MBeanException             if the initializer of an object
+     *                                    throws an exception
+     * @throws RuntimeOperationsException if an IllegalArgumentException
+     *                                    occurs
      */
     public ConnectorMBean()
-        throws MBeanException, RuntimeOperationsException {
+            throws MBeanException, RuntimeOperationsException
+    {
 
         super();
 
@@ -67,16 +63,16 @@ public class ConnectorMBean extends ClassNameMBean {
      * Obtain and return the value of a specific attribute of this MBean.
      *
      * @param name Name of the requested attribute
-     *
-     * @exception AttributeNotFoundException if this attribute is not
-     *  supported by this MBean
-     * @exception MBeanException if the initializer of an object
-     *  throws an exception
-     * @exception ReflectionException if a Java reflection exception
-     *  occurs when invoking the getter
+     * @throws AttributeNotFoundException if this attribute is not
+     *                                    supported by this MBean
+     * @throws MBeanException             if the initializer of an object
+     *                                    throws an exception
+     * @throws ReflectionException        if a Java reflection exception
+     *                                    occurs when invoking the getter
      */
     public Object getAttribute(String name) throws AttributeNotFoundException,
-            MBeanException, ReflectionException {
+            MBeanException, ReflectionException
+    {
 
         Object attribute = null;
         // Validate the input parameters
@@ -85,12 +81,17 @@ public class ConnectorMBean extends ClassNameMBean {
                     "Attribute name is null"), "Attribute name is null");
 
         Object result = null;
-        try {
+        try
+        {
             Connector connector = (Connector) getManagedResource();
             result = IntrospectionUtils.getProperty(connector, name);
-        } catch (InstanceNotFoundException e) {
+        }
+        catch (InstanceNotFoundException e)
+        {
             throw new MBeanException(e);
-        } catch (InvalidTargetObjectTypeException e) {
+        }
+        catch (InvalidTargetObjectTypeException e)
+        {
             throw new MBeanException(e);
         }
 
@@ -98,23 +99,23 @@ public class ConnectorMBean extends ClassNameMBean {
 
     }
 
-    
+
     /**
      * Set the value of a specific attribute of this MBean.
      *
      * @param attribute The identification of the attribute to be set
-     *  and the new value
-     *
-     * @exception AttributeNotFoundException if this attribute is not
-     *  supported by this MBean
-     * @exception MBeanException if the initializer of an object
-     *  throws an exception
-     * @exception ReflectionException if a Java reflection exception
-     *  occurs when invoking the getter
+     *                  and the new value
+     * @throws AttributeNotFoundException if this attribute is not
+     *                                    supported by this MBean
+     * @throws MBeanException             if the initializer of an object
+     *                                    throws an exception
+     * @throws ReflectionException        if a Java reflection exception
+     *                                    occurs when invoking the getter
      */
-     public void setAttribute(Attribute attribute)
+    public void setAttribute(Attribute attribute)
             throws AttributeNotFoundException, MBeanException,
-            ReflectionException {
+            ReflectionException
+    {
 
         // Validate the input parameters
         if (attribute == null)
@@ -126,15 +127,20 @@ public class ConnectorMBean extends ClassNameMBean {
             throw new RuntimeOperationsException(new IllegalArgumentException(
                     "Attribute name is null"), "Attribute name is null");
 
-        try {
+        try
+        {
             Connector connector = (Connector) getManagedResource();
             IntrospectionUtils.setProperty(connector, name, String.valueOf(value));
-        } catch (InstanceNotFoundException e) {
-            throw new MBeanException(e);
-        } catch (InvalidTargetObjectTypeException e) {
+        }
+        catch (InstanceNotFoundException e)
+        {
             throw new MBeanException(e);
         }
-  
+        catch (InvalidTargetObjectTypeException e)
+        {
+            throw new MBeanException(e);
+        }
+
     }
 
 

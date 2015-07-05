@@ -30,11 +30,11 @@ import java.util.Iterator;
  * <p>Convenience base class for {@link User} implementations.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
-public abstract class AbstractUser implements User {
+public abstract class AbstractUser implements User
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -64,7 +64,8 @@ public abstract class AbstractUser implements User {
     /**
      * Return the full name of this user.
      */
-    public String getFullName() {
+    public String getFullName()
+    {
 
         return (this.fullName);
 
@@ -76,7 +77,8 @@ public abstract class AbstractUser implements User {
      *
      * @param fullName The new full name
      */
-    public void setFullName(String fullName) {
+    public void setFullName(String fullName)
+    {
 
         this.fullName = fullName;
 
@@ -94,7 +96,8 @@ public abstract class AbstractUser implements User {
      * identifier of an encoding scheme surrounded by curly braces, such as
      * <code>{md5}xxxxx</code>.
      */
-    public String getPassword() {
+    public String getPassword()
+    {
 
         return (this.password);
 
@@ -108,7 +111,8 @@ public abstract class AbstractUser implements User {
      *
      * @param password The new logon password
      */
-    public void setPassword(String password) {
+    public void setPassword(String password)
+    {
 
         this.password = password;
 
@@ -125,7 +129,8 @@ public abstract class AbstractUser implements User {
      * Return the logon username of this user, which must be unique
      * within the scope of a {@link org.apache.catalina.UserDatabase}.
      */
-    public String getUsername() {
+    public String getUsername()
+    {
 
         return (this.username);
 
@@ -138,7 +143,8 @@ public abstract class AbstractUser implements User {
      *
      * @param username The new logon username
      */
-    public void setUsername(String username) {
+    public void setUsername(String username)
+    {
 
         this.username = username;
 
@@ -216,7 +222,8 @@ public abstract class AbstractUser implements User {
     /**
      * Make the principal name the same as the group name.
      */
-    public String getName() {
+    public String getName()
+    {
 
         return (getUsername());
 

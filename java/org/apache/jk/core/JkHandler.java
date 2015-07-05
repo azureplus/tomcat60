@@ -24,111 +24,135 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- *
  * @author Costin Manolache
  */
-public class JkHandler implements MBeanRegistration, NotificationListener {
-    public static final int OK=0;
-    public static final int LAST=1;
-    public static final int ERROR=2;
-
-    protected Properties properties=new Properties();
-    protected WorkerEnv wEnv;
-    protected JkHandler next;
-    protected String nextName=null;
-    protected String name;
-    protected int id;
-
+public class JkHandler implements MBeanRegistration, NotificationListener
+{
+    public static final int OK = 0;
+    public static final int LAST = 1;
+    public static final int ERROR = 2;
     // XXX Will be replaced with notes and (configurable) ids
     // Each represents a 'chain' - similar with ActionCode in Coyote ( the concepts
     // will be merged ).    
-    public static final int HANDLE_RECEIVE_PACKET   = 10;
-    public static final int HANDLE_SEND_PACKET      = 11;
-    public static final int HANDLE_FLUSH            = 12;
-    public static final int HANDLE_THREAD_END       = 13;
-    
-    public void setWorkerEnv( WorkerEnv we ) {
-        this.wEnv=we;
+    public static final int HANDLE_RECEIVE_PACKET = 10;
+    public static final int HANDLE_SEND_PACKET = 11;
+    public static final int HANDLE_FLUSH = 12;
+    public static final int HANDLE_THREAD_END = 13;
+    protected Properties properties = new Properties();
+    protected WorkerEnv wEnv;
+    protected JkHandler next;
+    protected String nextName = null;
+    protected String name;
+    protected int id;
+    protected String domain;
+    protected ObjectName oname;
+    protected MBeanServer mserver;
+
+    public void setWorkerEnv(WorkerEnv we)
+    {
+        this.wEnv = we;
     }
 
-    /** Set the name of the handler. Will allways be called by
-     *  worker env after creating the worker.
-     */
-    public void setName(String s ) {
-        name=s;
-    }
-
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    /** Set the id of the worker. We use an id for faster dispatch.
-     *  Since we expect a decent number of handler in system, the
-     *  id is unique - that means we may have to allocate bigger
-     *  dispatch tables. ( easy to fix if needed )
+    /**
+     * Set the name of the handler. Will allways be called by
+     * worker env after creating the worker.
      */
-    public void setId( int id ) {
-        this.id=id;
+    public void setName(String s)
+    {
+        name = s;
     }
 
-    public int getId() {
+    public int getId()
+    {
         return id;
     }
-    
-    /** Catalina-style "recursive" invocation.
-     *  A chain is used for Apache/3.3 style iterative invocation.
+
+    /**
+     * Set the id of the worker. We use an id for faster dispatch.
+     * Since we expect a decent number of handler in system, the
+     * id is unique - that means we may have to allocate bigger
+     * dispatch tables. ( easy to fix if needed )
      */
-    public void setNext( JkHandler h ) {
-        next=h;
+    public void setId(int id)
+    {
+        this.id = id;
     }
 
-    public void setNext( String s ) {
-        nextName=s;
+    /**
+     * Catalina-style "recursive" invocation.
+     * A chain is used for Apache/3.3 style iterative invocation.
+     */
+    public void setNext(JkHandler h)
+    {
+        next = h;
     }
 
-    public String getNext() {
-        if( nextName==null ) {
-            if( next!=null)
-                nextName=next.getName();
+    public String getNext()
+    {
+        if (nextName == null)
+        {
+            if (next != null)
+                nextName = next.getName();
         }
         return nextName;
     }
 
-    /** Should register the request types it can handle,
-     *   same style as apache2.
-     */
-    public void init() throws IOException {
+    public void setNext(String s)
+    {
+        nextName = s;
     }
 
-    /** Clean up and stop the handler
+    /**
+     * Should register the request types it can handle,
+     * same style as apache2.
      */
-    public void destroy() throws IOException {
+    public void init() throws IOException
+    {
     }
 
-    public MsgContext createMsgContext() {
-        return new MsgContext(8*1024);
+    /**
+     * Clean up and stop the handler
+     */
+    public void destroy() throws IOException
+    {
     }
-    
-    public MsgContext createMsgContext(int bsize) {
+
+    public MsgContext createMsgContext()
+    {
+        return new MsgContext(8 * 1024);
+    }
+
+    public MsgContext createMsgContext(int bsize)
+    {
         return new MsgContext(bsize);
     }
 
-    public int invoke(Msg msg, MsgContext mc )  throws IOException {
+    public int invoke(Msg msg, MsgContext mc) throws IOException
+    {
         return OK;
     }
-    
-    public void setProperty( String name, String value ) {
-        properties.put( name, value );
+
+    public void setProperty(String name, String value)
+    {
+        properties.put(name, value);
     }
 
-    public String getProperty( String name ) {
-        return properties.getProperty(name) ;
+    public String getProperty(String name)
+    {
+        return properties.getProperty(name);
     }
 
-    /** Experimental, will be replaced. This allows handlers to be
-     *  notified when other handlers are added.
+    /**
+     * Experimental, will be replaced. This allows handlers to be
+     * notified when other handlers are added.
      */
-    public void addHandlerCallback( JkHandler w ) {
+    public void addHandlerCallback(JkHandler w)
+    {
 
     }
 
@@ -142,55 +166,62 @@ public class JkHandler implements MBeanRegistration, NotificationListener {
 
     }
 
-    protected String domain;
-    protected ObjectName oname;
-    protected MBeanServer mserver;
-
-    public ObjectName getObjectName() {
+    public ObjectName getObjectName()
+    {
         return oname;
     }
 
-    public String getDomain() {
+    public String getDomain()
+    {
         return domain;
     }
 
     public ObjectName preRegister(MBeanServer server,
-                                  ObjectName oname) throws Exception {
-        this.oname=oname;
-        mserver=server;
-        domain=oname.getDomain();
-        if( name==null ) {
-            name=oname.getKeyProperty("name");
+                                  ObjectName oname) throws Exception
+    {
+        this.oname = oname;
+        mserver = server;
+        domain = oname.getDomain();
+        if (name == null)
+        {
+            name = oname.getKeyProperty("name");
         }
-        
+
         // we need to create a workerEnv or set one.
-        ObjectName wEnvName=new ObjectName(domain + ":type=JkWorkerEnv");
-        if ( wEnv == null ) {
-            wEnv=new WorkerEnv();
+        ObjectName wEnvName = new ObjectName(domain + ":type=JkWorkerEnv");
+        if (wEnv == null)
+        {
+            wEnv = new WorkerEnv();
         }
-        if( ! mserver.isRegistered(wEnvName )) {
+        if (!mserver.isRegistered(wEnvName))
+        {
             Registry.getRegistry(null, null).registerComponent(wEnv, wEnvName, null);
         }
-        mserver.invoke( wEnvName, "addHandler", 
-                new Object[] {name, this}, 
-                new String[] {"java.lang.String", 
-                              "org.apache.jk.core.JkHandler"});
+        mserver.invoke(wEnvName, "addHandler",
+                new Object[]{name, this},
+                new String[]{"java.lang.String",
+                        "org.apache.jk.core.JkHandler"});
         return oname;
     }
-    
-    public void postRegister(Boolean registrationDone) {
+
+    public void postRegister(Boolean registrationDone)
+    {
     }
 
-    public void preDeregister() throws Exception {
+    public void preDeregister() throws Exception
+    {
     }
 
-    public void postDeregister() {
+    public void postDeregister()
+    {
     }
 
-    public void pause() throws Exception {
+    public void pause() throws Exception
+    {
     }
 
-    public void resume() throws Exception {
+    public void resume() throws Exception
+    {
     }
 
 }

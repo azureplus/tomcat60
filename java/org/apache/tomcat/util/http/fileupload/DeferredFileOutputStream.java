@@ -18,11 +18,7 @@
 
 package org.apache.tomcat.util.http.fileupload;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * <p>An output stream which will retain data in memory until a specified
@@ -31,11 +27,9 @@ import java.io.OutputStream;
  * disk at all.</p>
  *
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- *
- *
  */
 public class DeferredFileOutputStream
-    extends ThresholdingOutputStream
+        extends ThresholdingOutputStream
 {
 
     // ----------------------------------------------------------- Data members
@@ -84,10 +78,12 @@ public class DeferredFileOutputStream
         super(threshold);
         this.outputFile = outputFile;
 
-        if (threshold < DefaultFileItemFactory.DEFAULT_SIZE_THRESHOLD) {
+        if (threshold < DefaultFileItemFactory.DEFAULT_SIZE_THRESHOLD)
+        {
             // Small threshold, use it
             memoryOutputStream = new ByteArrayOutputStream(threshold);
-        } else {
+        } else
+        {
             // Large threshold. Use default and array will expand if required
             memoryOutputStream = new ByteArrayOutputStream(
                     DefaultFileItemFactory.DEFAULT_SIZE_THRESHOLD);
@@ -104,8 +100,7 @@ public class DeferredFileOutputStream
      * based, depending on the current state with respect to the threshold.
      *
      * @return The underlying output stream.
-     *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     protected OutputStream getStream() throws IOException
     {
@@ -119,7 +114,7 @@ public class DeferredFileOutputStream
      * much data is being written to keep in memory, so we elect to switch to
      * disk-based storage.
      *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     protected void thresholdReached() throws IOException
     {
@@ -140,7 +135,7 @@ public class DeferredFileOutputStream
      * retained in memory.
      *
      * @return <code>true</code> if the data is available in memory;
-     *         <code>false</code> otherwise.
+     * <code>false</code> otherwise.
      */
     public boolean isInMemory()
     {
@@ -154,7 +149,7 @@ public class DeferredFileOutputStream
      * disk, this method returns <code>null</code>.
      *
      * @return The data for this output stream, or <code>null</code> if no such
-     *         data is available.
+     * data is available.
      */
     public byte[] getData()
     {
@@ -172,7 +167,7 @@ public class DeferredFileOutputStream
      * this method returns <code>null</code>.
      *
      * @return The file for this output stream, or <code>null</code> if no such
-     *         file exists.
+     * file exists.
      */
     public File getFile()
     {

@@ -23,17 +23,17 @@ package org.apache.catalina;
  * Global constants that are applicable to multiple packages within Catalina.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public final class Globals {
+public final class Globals
+{
 
     /**
      * The servlet context attribute under which we store the alternate
-     * deployment descriptor for this web application 
+     * deployment descriptor for this web application
      */
-    public static final String ALT_DD_ATTR = 
-        "org.apache.catalina.deploy.alt_dd";
+    public static final String ALT_DD_ATTR =
+            "org.apache.catalina.deploy.alt_dd";
 
     /**
      * The request attribute under which we store the array of X509Certificate
@@ -41,7 +41,7 @@ public final class Globals {
      * if any.
      */
     public static final String CERTIFICATES_ATTR =
-        "javax.servlet.request.X509Certificate";
+            "javax.servlet.request.X509Certificate";
 
     /**
      * The request attribute under which we store the name of the cipher suite
@@ -49,7 +49,7 @@ public final class Globals {
      * java.lang.String).
      */
     public static final String CIPHER_SUITE_ATTR =
-        "javax.servlet.request.cipher_suite";
+            "javax.servlet.request.cipher_suite";
 
 
     /**
@@ -57,26 +57,26 @@ public final class Globals {
      * used for loading servlets (as an object of type java.lang.ClassLoader).
      */
     public static final String CLASS_LOADER_ATTR =
-        "org.apache.catalina.classloader";
+            "org.apache.catalina.classloader";
 
     /**
      * Request dispatcher state.
      */
-    public static final String DISPATCHER_TYPE_ATTR = 
-        "org.apache.catalina.core.DISPATCHER_TYPE";
+    public static final String DISPATCHER_TYPE_ATTR =
+            "org.apache.catalina.core.DISPATCHER_TYPE";
 
     /**
      * Request dispatcher path.
      */
-    public static final String DISPATCHER_REQUEST_PATH_ATTR = 
-        "org.apache.catalina.core.DISPATCHER_REQUEST_PATH";
+    public static final String DISPATCHER_REQUEST_PATH_ATTR =
+            "org.apache.catalina.core.DISPATCHER_REQUEST_PATH";
 
     /**
      * The JNDI directory context which is associated with the context. This
      * context can be used to manipulate static files.
      */
     public static final String RESOURCES_ATTR =
-        "org.apache.catalina.resources";
+            "org.apache.catalina.resources";
 
 
     /**
@@ -85,7 +85,7 @@ public final class Globals {
      * delimited with the appropriate path delimiter for this platform.
      */
     public static final String CLASS_PATH_ATTR =
-        "org.apache.catalina.jsp_classpath";
+            "org.apache.catalina.jsp_classpath";
 
 
     /**
@@ -93,7 +93,7 @@ public final class Globals {
      * (as an object of type Throwable) to an error page.
      */
     public static final String EXCEPTION_ATTR =
-        "javax.servlet.error.exception";
+            "javax.servlet.error.exception";
 
 
     /**
@@ -101,7 +101,7 @@ public final class Globals {
      * (as an object of type String) of the page on which an error occurred.
      */
     public static final String EXCEPTION_PAGE_ATTR =
-        "javax.servlet.error.request_uri";
+            "javax.servlet.error.request_uri";
 
 
     /**
@@ -109,7 +109,7 @@ public final class Globals {
      * (as an object of type Class) to an error page.
      */
     public static final String EXCEPTION_TYPE_ATTR =
-        "javax.servlet.error.exception_type";
+            "javax.servlet.error.exception_type";
 
 
     /**
@@ -117,7 +117,7 @@ public final class Globals {
      * (as an object of type STring) to an error page.
      */
     public static final String ERROR_MESSAGE_ATTR =
-        "javax.servlet.error.message";
+            "javax.servlet.error.message";
 
 
     /**
@@ -126,7 +126,7 @@ public final class Globals {
      * indirectly instead of through a servlet mapping.
      */
     public static final String INVOKED_ATTR =
-        "org.apache.catalina.INVOKED";
+            "org.apache.catalina.INVOKED";
 
 
     /**
@@ -135,7 +135,7 @@ public final class Globals {
      * if any.
      */
     public static final String JSP_FILE_ATTR =
-        "org.apache.catalina.jsp_file";
+            "org.apache.catalina.jsp_file";
 
 
     /**
@@ -143,14 +143,14 @@ public final class Globals {
      * this SSL connection (as an object of type java.lang.Integer).
      */
     public static final String KEY_SIZE_ATTR =
-        "javax.servlet.request.key_size";
+            "javax.servlet.request.key_size";
 
     /**
      * The request attribute under which we store the session id being used
      * for this SSL connection (as an object of type java.lang.String).
      */
     public static final String SSL_SESSION_ID_ATTR =
-        "javax.servlet.request.ssl_session";
+            "javax.servlet.request.ssl_session";
 
 
     /**
@@ -158,7 +158,7 @@ public final class Globals {
      * will be stored for privileged contexts (if enabled).
      */
     public static final String MBEAN_REGISTRY_ATTR =
-        "org.apache.catalina.Registry";
+            "org.apache.catalina.Registry";
 
 
     /**
@@ -166,7 +166,7 @@ public final class Globals {
      * for privileged contexts (if enabled).
      */
     public static final String MBEAN_SERVER_ATTR =
-        "org.apache.catalina.MBeanServer";
+            "org.apache.catalina.MBeanServer";
 
 
     /**
@@ -174,7 +174,7 @@ public final class Globals {
      * named dispatcher request.
      */
     public static final String NAMED_DISPATCHER_ATTR =
-        "org.apache.catalina.NAMED";
+            "org.apache.catalina.NAMED";
 
 
     /**
@@ -182,7 +182,7 @@ public final class Globals {
      * servlet is stored on an included dispatcher request.
      */
     public static final String INCLUDE_REQUEST_URI_ATTR =
-        "javax.servlet.include.request_uri";
+            "javax.servlet.include.request_uri";
 
 
     /**
@@ -190,7 +190,7 @@ public final class Globals {
      * servlet is stored on an included dispatcher request.
      */
     public static final String INCLUDE_CONTEXT_PATH_ATTR =
-        "javax.servlet.include.context_path";
+            "javax.servlet.include.context_path";
 
 
     /**
@@ -198,7 +198,7 @@ public final class Globals {
      * servlet is stored on an included dispatcher request.
      */
     public static final String INCLUDE_PATH_INFO_ATTR =
-        "javax.servlet.include.path_info";
+            "javax.servlet.include.path_info";
 
 
     /**
@@ -206,7 +206,7 @@ public final class Globals {
      * servlet is stored on an included dispatcher request.
      */
     public static final String INCLUDE_SERVLET_PATH_ATTR =
-        "javax.servlet.include.servlet_path";
+            "javax.servlet.include.servlet_path";
 
 
     /**
@@ -214,7 +214,7 @@ public final class Globals {
      * servlet is stored on an included dispatcher request.
      */
     public static final String INCLUDE_QUERY_STRING_ATTR =
-        "javax.servlet.include.query_string";
+            "javax.servlet.include.query_string";
 
 
     /**
@@ -222,15 +222,15 @@ public final class Globals {
      * on an forwarded dispatcher request.
      */
     public static final String FORWARD_REQUEST_URI_ATTR =
-        "javax.servlet.forward.request_uri";
-    
-    
+            "javax.servlet.forward.request_uri";
+
+
     /**
      * The request attribute under which the original context path is stored
      * on an forwarded dispatcher request.
      */
     public static final String FORWARD_CONTEXT_PATH_ATTR =
-        "javax.servlet.forward.context_path";
+            "javax.servlet.forward.context_path";
 
 
     /**
@@ -238,7 +238,7 @@ public final class Globals {
      * on an forwarded dispatcher request.
      */
     public static final String FORWARD_PATH_INFO_ATTR =
-        "javax.servlet.forward.path_info";
+            "javax.servlet.forward.path_info";
 
 
     /**
@@ -246,7 +246,7 @@ public final class Globals {
      * on an forwarded dispatcher request.
      */
     public static final String FORWARD_SERVLET_PATH_ATTR =
-        "javax.servlet.forward.servlet_path";
+            "javax.servlet.forward.servlet_path";
 
 
     /**
@@ -254,7 +254,7 @@ public final class Globals {
      * on an forwarded dispatcher request.
      */
     public static final String FORWARD_QUERY_STRING_ATTR =
-        "javax.servlet.forward.query_string";
+            "javax.servlet.forward.query_string";
 
 
     /**
@@ -262,16 +262,16 @@ public final class Globals {
      * an error page.
      */
     public static final String SERVLET_NAME_ATTR =
-        "javax.servlet.error.servlet_name";
+            "javax.servlet.error.servlet_name";
 
-    
+
     /**
      * The name of the cookie used to pass the session identifier back
      * and forth with the client.
      */
     public static final String SESSION_COOKIE_NAME =
-        System.getProperty("org.apache.catalina.SESSION_COOKIE_NAME",
-                "JSESSIONID");
+            System.getProperty("org.apache.catalina.SESSION_COOKIE_NAME",
+                    "JSESSIONID");
 
 
     /**
@@ -279,8 +279,8 @@ public final class Globals {
      * back and forth with the client.
      */
     public static final String SESSION_PARAMETER_NAME =
-        System.getProperty("org.apache.catalina.SESSION_PARAMETER_NAME",
-                "jsessionid");
+            System.getProperty("org.apache.catalina.SESSION_PARAMETER_NAME",
+                    "jsessionid");
 
 
     /**
@@ -290,8 +290,8 @@ public final class Globals {
      * the CGIServlet in conjunction with the SSI servlet. (value stored
      * as an object of type String)
      */
-     public static final String SSI_FLAG_ATTR =
-         "org.apache.catalina.ssi.SSIServlet";
+    public static final String SSI_FLAG_ATTR =
+            "org.apache.catalina.ssi.SSIServlet";
 
 
     /**
@@ -299,22 +299,22 @@ public final class Globals {
      * (as an object of type Integer) to an error page.
      */
     public static final String STATUS_CODE_ATTR =
-        "javax.servlet.error.status_code";
+            "javax.servlet.error.status_code";
 
 
     /**
      * The subject under which the AccessControlContext is running.
      */
     public static final String SUBJECT_ATTR =
-        "javax.security.auth.subject";
+            "javax.security.auth.subject";
 
-    
+
     /**
      * The servlet context attribute under which we record the set of
      * welcome files (as an object of type String[]) for this application.
      */
     public static final String WELCOME_FILES_ATTR =
-        "org.apache.catalina.WELCOME_FILES";
+            "org.apache.catalina.WELCOME_FILES";
 
 
     /**
@@ -323,7 +323,7 @@ public final class Globals {
      * within this web application.
      */
     public static final String WORK_DIR_ATTR =
-        "javax.servlet.context.tempdir";
+            "javax.servlet.context.tempdir";
 
 
     /**
@@ -334,28 +334,28 @@ public final class Globals {
      * happened during parameter parsing.
      */
     public static final String PARAMETER_PARSE_FAILED_ATTR =
-        "org.apache.catalina.parameter_parse_failed";
+            "org.apache.catalina.parameter_parse_failed";
 
 
     /**
-     * The master flag which controls strict servlet specification 
+     * The master flag which controls strict servlet specification
      * compliance.
      */
     public static final boolean STRICT_SERVLET_COMPLIANCE =
-        Boolean.valueOf(System.getProperty("org.apache.catalina.STRICT_SERVLET_COMPLIANCE", "false")).booleanValue();
+            Boolean.valueOf(System.getProperty("org.apache.catalina.STRICT_SERVLET_COMPLIANCE", "false")).booleanValue();
 
 
     /**
      * Has security been turned on?
      */
     public static final boolean IS_SECURITY_ENABLED =
-        (System.getSecurityManager() != null);
+            (System.getSecurityManager() != null);
 
 
     /**
      * Name of the ServletContext init-param that determines if the JSP engine
      * should validate *.tld files when parsing them.
-     * <p>
+     * <p/>
      * This must be kept in sync with org.apache.jasper.Constants
      */
     public static final String JASPER_XML_VALIDATION_TLD_INIT_PARAM =
@@ -365,7 +365,7 @@ public final class Globals {
     /**
      * Name of the ServletContext init-param that determines if the JSP engine
      * should validate web.xml files when parsing them.
-     * <p>
+     * <p/>
      * This must be kept in sync with org.apache.jasper.Constants
      */
     public static final String JASPER_XML_VALIDATION_INIT_PARAM =
@@ -376,7 +376,7 @@ public final class Globals {
      * Name of the ServletContext init-param that determines if the JSP engine
      * will block external entities from being used in *.tld, *.jspx, *.tagx and
      * tagplugin.xml files.
-     * <p>
+     * <p/>
      * This must be kept in sync with org.apache.jasper.Constants
      */
     public static final String JASPER_XML_BLOCK_EXTERNAL_INIT_PARAM =

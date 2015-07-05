@@ -16,11 +16,7 @@
  */
 package org.apache.catalina.tribes;
 
-import java.io.Serializable;
-import java.io.Externalizable;
-import java.io.ObjectInput;
-import java.io.IOException;
-import java.io.ObjectOutput;
+import java.io.*;
 
 /**
  * A byte message is not serialized and deserialized by the channel
@@ -36,11 +32,12 @@ import java.io.ObjectOutput;
  * If you are using multiple applications on top of Tribes you should add some sort of header
  * so that you can decide with the <code>ChannelListener.accept()</code> whether this message was intended
  * for you.
- * @author Filip Hanik
  *
+ * @author Filip Hanik
  */
 
-public class ByteMessage implements Serializable, Externalizable {
+public class ByteMessage implements Serializable, Externalizable
+{
     /**
      * Storage for the message to be sent
      */
@@ -51,52 +48,61 @@ public class ByteMessage implements Serializable, Externalizable {
      * Creates an empty byte message
      * Constructor also for deserialization
      */
-    public ByteMessage() {
+    public ByteMessage()
+    {
     }
 
     /**
      * Creates a byte message wit h
+     *
      * @param data byte[] - the message contents
      */
-    public ByteMessage(byte[] data) {
+    public ByteMessage(byte[] data)
+    {
         message = data;
     }
 
     /**
      * Returns the message contents of this byte message
+     *
      * @return byte[] - message contents, can be null
      */
-    public byte[] getMessage() {
+    public byte[] getMessage()
+    {
         return message;
     }
 
     /**
      * Sets the message contents of this byte message
+     *
      * @param message byte[]
      */
-    public void setMessage(byte[] message) {
+    public void setMessage(byte[] message)
+    {
         this.message = message;
     }
 
     /**
-     * @see java.io.Externalizable#readExternal
      * @param in ObjectInput
      * @throws IOException
+     * @see java.io.Externalizable#readExternal
      */
-    public void readExternal(ObjectInput in ) throws IOException {
+    public void readExternal(ObjectInput in) throws IOException
+    {
         int length = in.readInt();
         message = new byte[length];
         in.readFully(message);
     }
 
     /**
-     * @see java.io.Externalizable#writeExternal
      * @param out ObjectOutput
      * @throws IOException
+     * @see java.io.Externalizable#writeExternal
      */
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(message!=null?message.length:0);
-        if ( message!=null ) out.write(message,0,message.length);
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
+        out.writeInt(message != null ? message.length : 0);
+        if (message != null) out.write(message, 0, message.length);
     }
 
 }

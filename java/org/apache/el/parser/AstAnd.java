@@ -25,18 +25,21 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstAnd extends BooleanNode {
-    public AstAnd(int id) {
+public final class AstAnd extends BooleanNode
+{
+    public AstAnd(int id)
+    {
         super(id);
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         Object obj = children[0].getValue(ctx);
         Boolean b = coerceToBoolean(obj);
-        if (!b.booleanValue()) {
+        if (!b.booleanValue())
+        {
             return b;
         }
         obj = children[1].getValue(ctx);

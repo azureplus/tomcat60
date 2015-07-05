@@ -23,33 +23,44 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public final class JspMethodExpression extends MethodExpression implements
-        Externalizable {
+        Externalizable
+{
 
     private String mark;
 
     private MethodExpression target;
 
-    public JspMethodExpression() {
+    public JspMethodExpression()
+    {
         super();
     }
 
-    public JspMethodExpression(String mark, MethodExpression target) {
+    public JspMethodExpression(String mark, MethodExpression target)
+    {
         this.target = target;
         this.mark = mark;
     }
 
     public MethodInfo getMethodInfo(ELContext context)
             throws NullPointerException, PropertyNotFoundException,
-            MethodNotFoundException, ELException {
-        try {
+            MethodNotFoundException, ELException
+    {
+        try
+        {
             return this.target.getMethodInfo(context);
-        } catch (MethodNotFoundException e) {
+        }
+        catch (MethodNotFoundException e)
+        {
             if (e instanceof JspMethodNotFoundException) throw e;
             throw new JspMethodNotFoundException(this.mark, e);
-        } catch (PropertyNotFoundException e) {
+        }
+        catch (PropertyNotFoundException e)
+        {
             if (e instanceof JspPropertyNotFoundException) throw e;
             throw new JspPropertyNotFoundException(this.mark, e);
-        } catch (ELException e) {
+        }
+        catch (ELException e)
+        {
             if (e instanceof JspELException) throw e;
             throw new JspELException(this.mark, e);
         }
@@ -57,44 +68,58 @@ public final class JspMethodExpression extends MethodExpression implements
 
     public Object invoke(ELContext context, Object[] params)
             throws NullPointerException, PropertyNotFoundException,
-            MethodNotFoundException, ELException {
-        try {
+            MethodNotFoundException, ELException
+    {
+        try
+        {
             return this.target.invoke(context, params);
-        } catch (MethodNotFoundException e) {
+        }
+        catch (MethodNotFoundException e)
+        {
             if (e instanceof JspMethodNotFoundException) throw e;
             throw new JspMethodNotFoundException(this.mark, e);
-        } catch (PropertyNotFoundException e) {
+        }
+        catch (PropertyNotFoundException e)
+        {
             if (e instanceof JspPropertyNotFoundException) throw e;
             throw new JspPropertyNotFoundException(this.mark, e);
-        } catch (ELException e) {
+        }
+        catch (ELException e)
+        {
             if (e instanceof JspELException) throw e;
             throw new JspELException(this.mark, e);
         }
     }
 
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         return this.target.equals(obj);
     }
 
-    public int hashCode() {
+    public int hashCode()
+    {
         return this.target.hashCode();
     }
 
-    public String getExpressionString() {
+    public String getExpressionString()
+    {
         return this.target.getExpressionString();
     }
 
-    public boolean isLiteralText() {
+    public boolean isLiteralText()
+    {
         return this.target.isLiteralText();
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
         out.writeUTF(this.mark);
         out.writeObject(this.target);
     }
 
     public void readExternal(ObjectInput in) throws IOException,
-            ClassNotFoundException {
+            ClassNotFoundException
+    {
         this.mark = in.readUTF();
         this.target = (MethodExpression) in.readObject();
     }

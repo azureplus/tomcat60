@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming.resources;
@@ -23,10 +23,11 @@ package org.apache.naming.resources;
  * Static constants for this package.
  */
 
-public final class Constants {
+public final class Constants
+{
 
-    public static final String PROTOCOL_HANDLER_VARIABLE = 
-        "java.protocol.handler.pkgs";
+    public static final String PROTOCOL_HANDLER_VARIABLE =
+            "java.protocol.handler.pkgs";
 
     public static final String Package = "org.apache.naming.resources";
 

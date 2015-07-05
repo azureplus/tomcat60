@@ -23,37 +23,20 @@ import java.util.EmptyStackException;
 import java.util.Stack;
 
 /**
- * This helper class may be used to do sophisticated redirection of 
+ * This helper class may be used to do sophisticated redirection of
  * System.out and System.err on a per Thread basis.
- * 
+ * <p/>
  * A stack is implemented per Thread so that nested startCapture
  * and stopCapture can be used.
  *
  * @author Remy Maucherat
  * @author Glenn L. Nielsen
  */
-public class SystemLogHandler extends PrintStream {
+public class SystemLogHandler extends PrintStream
+{
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    /**
-     * Construct the handler to capture the output of the given steam.
-     */
-    public SystemLogHandler(PrintStream wrapped) {
-        super(wrapped);
-        out = wrapped;
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * Wrapped PrintStream.
-     */
-    protected PrintStream out = null;
 
 
     /**
@@ -62,31 +45,52 @@ public class SystemLogHandler extends PrintStream {
     protected static ThreadLocal logs = new ThreadLocal();
 
 
+    // ----------------------------------------------------- Instance Variables
     /**
      * Spare CaptureLog ready for reuse.
      */
     protected static Stack reuse = new Stack();
+    /**
+     * Wrapped PrintStream.
+     */
+    protected PrintStream out = null;
+
+
+    /**
+     * Construct the handler to capture the output of the given steam.
+     */
+    public SystemLogHandler(PrintStream wrapped)
+    {
+        super(wrapped);
+        out = wrapped;
+    }
 
 
     // --------------------------------------------------------- Public Methods
 
-
     /**
      * Start capturing thread's output.
      */
-    public static void startCapture() {
+    public static void startCapture()
+    {
         CaptureLog log = null;
-        if (!reuse.isEmpty()) {
-            try {
-                log = (CaptureLog)reuse.pop();
-            } catch (EmptyStackException e) {
+        if (!reuse.isEmpty())
+        {
+            try
+            {
+                log = (CaptureLog) reuse.pop();
+            }
+            catch (EmptyStackException e)
+            {
                 log = new CaptureLog();
             }
-        } else {
+        } else
+        {
             log = new CaptureLog();
         }
-        Stack stack = (Stack)logs.get();
-        if (stack == null) {
+        Stack stack = (Stack) logs.get();
+        if (stack == null)
+        {
             stack = new Stack();
             logs.set(stack);
         }
@@ -97,13 +101,16 @@ public class SystemLogHandler extends PrintStream {
     /**
      * Stop capturing thread's output and return captured data as a String.
      */
-    public static String stopCapture() {
-        Stack stack = (Stack)logs.get();
-        if (stack == null || stack.isEmpty()) {
+    public static String stopCapture()
+    {
+        Stack stack = (Stack) logs.get();
+        if (stack == null || stack.isEmpty())
+        {
             return null;
         }
-        CaptureLog log = (CaptureLog)stack.pop();
-        if (log == null) {
+        CaptureLog log = (CaptureLog) stack.pop();
+        if (log == null)
+        {
             return null;
         }
         String capture = log.getCapture();
@@ -119,13 +126,17 @@ public class SystemLogHandler extends PrintStream {
     /**
      * Find PrintStream to which the output must be written to.
      */
-    protected PrintStream findStream() {
-        Stack stack = (Stack)logs.get();
-        if (stack != null && !stack.isEmpty()) {
-            CaptureLog log = (CaptureLog)stack.peek();
-            if (log != null) {
+    protected PrintStream findStream()
+    {
+        Stack stack = (Stack) logs.get();
+        if (stack != null && !stack.isEmpty())
+        {
+            CaptureLog log = (CaptureLog) stack.peek();
+            if (log != null)
+            {
                 PrintStream ps = log.getStream();
-                if (ps != null) {
+                if (ps != null)
+                {
                     return ps;
                 }
             }
@@ -137,108 +148,134 @@ public class SystemLogHandler extends PrintStream {
     // ---------------------------------------------------- PrintStream Methods
 
 
-    public void flush() {
+    public void flush()
+    {
         findStream().flush();
     }
 
-    public void close() {
+    public void close()
+    {
         findStream().close();
     }
 
-    public boolean checkError() {
+    public boolean checkError()
+    {
         return findStream().checkError();
     }
 
-    protected void setError() {
+    protected void setError()
+    {
         //findStream().setError();
     }
 
-    public void write(int b) {
+    public void write(int b)
+    {
         findStream().write(b);
     }
 
     public void write(byte[] b)
-        throws IOException {
+            throws IOException
+    {
         findStream().write(b);
     }
 
-    public void write(byte[] buf, int off, int len) {
+    public void write(byte[] buf, int off, int len)
+    {
         findStream().write(buf, off, len);
     }
 
-    public void print(boolean b) {
+    public void print(boolean b)
+    {
         findStream().print(b);
     }
 
-    public void print(char c) {
+    public void print(char c)
+    {
         findStream().print(c);
     }
 
-    public void print(int i) {
+    public void print(int i)
+    {
         findStream().print(i);
     }
 
-    public void print(long l) {
+    public void print(long l)
+    {
         findStream().print(l);
     }
 
-    public void print(float f) {
+    public void print(float f)
+    {
         findStream().print(f);
     }
 
-    public void print(double d) {
+    public void print(double d)
+    {
         findStream().print(d);
     }
 
-    public void print(char[] s) {
+    public void print(char[] s)
+    {
         findStream().print(s);
     }
 
-    public void print(String s) {
+    public void print(String s)
+    {
         findStream().print(s);
     }
 
-    public void print(Object obj) {
+    public void print(Object obj)
+    {
         findStream().print(obj);
     }
 
-    public void println() {
+    public void println()
+    {
         findStream().println();
     }
 
-    public void println(boolean x) {
+    public void println(boolean x)
+    {
         findStream().println(x);
     }
 
-    public void println(char x) {
+    public void println(char x)
+    {
         findStream().println(x);
     }
 
-    public void println(int x) {
+    public void println(int x)
+    {
         findStream().println(x);
     }
 
-    public void println(long x) {
+    public void println(long x)
+    {
         findStream().println(x);
     }
 
-    public void println(float x) {
+    public void println(float x)
+    {
         findStream().println(x);
     }
 
-    public void println(double x) {
+    public void println(double x)
+    {
         findStream().println(x);
     }
 
-    public void println(char[] x) {
+    public void println(char[] x)
+    {
         findStream().println(x);
     }
 
-    public void println(String x) {
+    public void println(String x)
+    {
         findStream().println(x);
     }
 
-    public void println(Object x) {
+    public void println(Object x)
+    {
         findStream().println(x);
     }
 

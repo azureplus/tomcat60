@@ -27,26 +27,36 @@ import org.apache.catalina.UserDatabase;
  * {@link MemoryUserDatabase} implementation of {@link UserDatabase}.</p>
  *
  * @author Craig R. McClanahan
- *
  * @since 4.1
  */
 
-public class MemoryRole extends AbstractRole {
+public class MemoryRole extends AbstractRole
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
+     * The {@link MemoryUserDatabase} that owns this role.
+     */
+    protected MemoryUserDatabase database = null;
+
+
+    // ----------------------------------------------------- Instance Variables
+
+
+    /**
      * Package-private constructor used by the factory method in
      * {@link MemoryUserDatabase}.
      *
-     * @param database The {@link MemoryUserDatabase} that owns this role
-     * @param rolename Role name of this role
+     * @param database    The {@link MemoryUserDatabase} that owns this role
+     * @param rolename    Role name of this role
      * @param description Description of this role
      */
     MemoryRole(MemoryUserDatabase database,
-               String rolename, String description) {
+               String rolename, String description)
+    {
 
         super();
         this.database = database;
@@ -56,22 +66,13 @@ public class MemoryRole extends AbstractRole {
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The {@link MemoryUserDatabase} that owns this role.
-     */
-    protected MemoryUserDatabase database = null;
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return the {@link UserDatabase} within which this role is defined.
      */
-    public UserDatabase getUserDatabase() {
+    public UserDatabase getUserDatabase()
+    {
 
         return (this.database);
 
@@ -84,12 +85,14 @@ public class MemoryRole extends AbstractRole {
     /**
      * <p>Return a String representation of this role in XML format.</p>
      */
-    public String toString() {
+    public String toString()
+    {
 
         StringBuffer sb = new StringBuffer("<role rolename=\"");
         sb.append(rolename);
         sb.append("\"");
-        if (description != null) {
+        if (description != null)
+        {
             sb.append(" description=\"");
             sb.append(description);
             sb.append("\"");

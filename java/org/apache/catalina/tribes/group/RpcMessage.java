@@ -17,41 +17,42 @@
 
 package org.apache.catalina.tribes.group;
 
-import java.io.ObjectInput;
-import java.io.Serializable;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectOutput;
 import org.apache.catalina.tribes.util.Arrays;
+
+import java.io.*;
 
 /**
  * <p>Title: </p>
- *
+ * <p/>
  * <p>Description: </p>
- *
+ * <p/>
  * <p>Company: </p>
  *
  * @author not attributable
  * @version 1.0
  */
-public class RpcMessage implements Externalizable {
+public class RpcMessage implements Externalizable
+{
 
     protected Serializable message;
     protected byte[] uuid;
     protected byte[] rpcId;
     protected boolean reply = false;
 
-    public RpcMessage() {
+    public RpcMessage()
+    {
         //for serialization
     }
 
-    public RpcMessage(byte[] rpcId, byte[] uuid, Serializable message) {
+    public RpcMessage(byte[] rpcId, byte[] uuid, Serializable message)
+    {
         this.rpcId = rpcId;
         this.uuid = uuid;
         this.message = message;
     }
 
-    public void readExternal(ObjectInput in) throws IOException,ClassNotFoundException {
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
+    {
         reply = in.readBoolean();
         int length = in.readInt();
         uuid = new byte[length];
@@ -59,10 +60,11 @@ public class RpcMessage implements Externalizable {
         length = in.readInt();
         rpcId = new byte[length];
         in.read(rpcId, 0, length);
-        message = (Serializable)in.readObject();
+        message = (Serializable) in.readObject();
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
         out.writeBoolean(reply);
         out.writeInt(uuid.length);
         out.write(uuid, 0, uuid.length);
@@ -70,8 +72,9 @@ public class RpcMessage implements Externalizable {
         out.write(rpcId, 0, rpcId.length);
         out.writeObject(message);
     }
-    
-    public String toString() {
+
+    public String toString()
+    {
         StringBuffer buf = new StringBuffer("RpcMessage[");
         buf.append(super.toString());
         buf.append("] rpcId=");
@@ -82,18 +85,22 @@ public class RpcMessage implements Externalizable {
         buf.append(message);
         return buf.toString();
     }
-    
-    public static class NoRpcChannelReply extends RpcMessage {
-        public NoRpcChannelReply() {
-            
+
+    public static class NoRpcChannelReply extends RpcMessage
+    {
+        public NoRpcChannelReply()
+        {
+
         }
 
-        public NoRpcChannelReply(byte[] rpcid, byte[] uuid) {
-            super(rpcid,uuid,null);
+        public NoRpcChannelReply(byte[] rpcid, byte[] uuid)
+        {
+            super(rpcid, uuid, null);
             reply = true;
         }
 
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
+        {
             reply = true;
             int length = in.readInt();
             uuid = new byte[length];
@@ -103,13 +110,14 @@ public class RpcMessage implements Externalizable {
             in.read(rpcId, 0, length);
         }
 
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(ObjectOutput out) throws IOException
+        {
             out.writeInt(uuid.length);
             out.write(uuid, 0, uuid.length);
             out.writeInt(rpcId.length);
             out.write(rpcId, 0, rpcId.length);
         }
-    }    
+    }
 
 
 }

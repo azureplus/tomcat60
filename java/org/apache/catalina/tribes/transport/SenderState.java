@@ -18,18 +18,19 @@
 package org.apache.catalina.tribes.transport;
 
 import org.apache.catalina.tribes.Member;
+
 import java.util.HashMap;
 
 
 /**
- * 
  * @author Filip Hanik
  * @version 1.0
  * @since 5.5.16
  */
 
-public class SenderState {
-    
+public class SenderState
+{
+
     public static final int READY = 0;
     public static final int SUSPECT = 1;
     public static final int FAILING = 2;
@@ -37,78 +38,90 @@ public class SenderState {
      * The descriptive information about this implementation.
      */
     private static final String info = "SenderState/1.0";
-    
-    
+
+
     protected static HashMap memberStates = new HashMap();
-    
-    public static SenderState getSenderState(Member member) {
-        return getSenderState(member,true);
+    private int state = READY;
+
+    private SenderState()
+    {
+        this(READY);
     }
 
-    public static SenderState getSenderState(Member member, boolean create) {
-        SenderState state = (SenderState)memberStates.get(member);
-        if ( state == null && create) {
-            synchronized ( memberStates ) {
-                state = (SenderState)memberStates.get(member);
-                if ( state == null ) {
+    private SenderState(int state)
+    {
+        this.state = state;
+    }
+
+
+    // ----------------------------------------------------- Instance Variables
+
+    public static SenderState getSenderState(Member member)
+    {
+        return getSenderState(member, true);
+    }
+
+    //  ----------------------------------------------------- Constructor
+
+    public static SenderState getSenderState(Member member, boolean create)
+    {
+        SenderState state = (SenderState) memberStates.get(member);
+        if (state == null && create)
+        {
+            synchronized (memberStates)
+            {
+                state = (SenderState) memberStates.get(member);
+                if (state == null)
+                {
                     state = new SenderState();
-                    memberStates.put(member,state);
+                    memberStates.put(member, state);
                 }
             }
         }
         return state;
     }
-    
-    public static void removeSenderState(Member member) {
-        synchronized ( memberStates ) {
+
+    public static void removeSenderState(Member member)
+    {
+        synchronized (memberStates)
+        {
             memberStates.remove(member);
         }
     }
-    
 
-    // ----------------------------------------------------- Instance Variables
-
-    private int state = READY;
-
-    //  ----------------------------------------------------- Constructor
-
-    
-    private SenderState() {
-        this(READY);
-    }
-
-    private SenderState(int state) {
-        this.state = state;
-    }
-    
     /**
-     * 
      * @return boolean
      */
-    public boolean isSuspect() {
+    public boolean isSuspect()
+    {
         return (state == SUSPECT) || (state == FAILING);
     }
 
-    public void setSuspect() {
+    public void setSuspect()
+    {
         state = SUSPECT;
     }
-    
-    public boolean isReady() {
+
+    public boolean isReady()
+    {
         return state == READY;
     }
-    
-    public void setReady() {
+
+    public void setReady()
+    {
         state = READY;
     }
-    
-    public boolean isFailing() {
+
+    public boolean isFailing()
+    {
         return state == FAILING;
     }
-    
-    public void setFailing() {
+
+    public void setFailing()
+    {
         state = FAILING;
     }
-    
+
 
     //  ----------------------------------------------------- Public Properties
 

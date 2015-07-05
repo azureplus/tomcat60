@@ -19,18 +19,17 @@
 package org.apache.tomcat.util.modeler;
 
 
-import java.util.HashSet;
-
 import javax.management.Notification;
 import javax.management.NotificationFilter;
+import java.util.HashSet;
 
 
 /**
  * Special NotificationFilter that allows modeler to optimize its notifications.
- *
+ * <p/>
  * This class is immutable - after you construct it it'll filter based on
  * a fixed set of notification names.
- *
+ * <p/>
  * The JMX specification requires the filters to be called before the
  * notifications are sent. We can call this filter well in advance, when
  * the listener is added. Based on the result we can maintain separate
@@ -38,14 +37,15 @@ import javax.management.NotificationFilter;
  *
  * @author Costin Manolache
  */
-public class FixedNotificationFilter implements NotificationFilter {
+public class FixedNotificationFilter implements NotificationFilter
+{
 
+    String namesA[] = null;
     /**
      * The set of attribute names that are accepted by this filter.  If this
      * list is empty, all attribute names are accepted.
      */
     private HashSet names = new HashSet();
-    String namesA[]=null;
 
     /**
      * Construct a new filter that accepts only the specified notification
@@ -53,7 +53,8 @@ public class FixedNotificationFilter implements NotificationFilter {
      *
      * @param names Names of the notification types
      */
-    public FixedNotificationFilter(String names[]) {
+    public FixedNotificationFilter(String names[])
+    {
         super();
     }
 
@@ -62,8 +63,10 @@ public class FixedNotificationFilter implements NotificationFilter {
      * filter accepts all attribute names, a zero length array will be
      * returned.
      */
-    public String[] getNames() {
-        synchronized (names) {
+    public String[] getNames()
+    {
+        synchronized (names)
+        {
             return ((String[]) names.toArray(new String[names.size()]));
         }
     }
@@ -74,15 +77,17 @@ public class FixedNotificationFilter implements NotificationFilter {
      * Return true if:</p>
      * <ul>
      * <li>Either the set of accepted names is empty (implying that all
-     *     attribute names are of interest) or the set of accepted names
-     *     includes the name of the attribute in this notification</li>
+     * attribute names are of interest) or the set of accepted names
+     * includes the name of the attribute in this notification</li>
      * </ul>
      */
-    public boolean isNotificationEnabled(Notification notification) {
+    public boolean isNotificationEnabled(Notification notification)
+    {
 
         if (notification == null)
             return (false);
-        synchronized (names) {
+        synchronized (names)
+        {
             if (names.size() < 1)
                 return (true);
             else

@@ -15,25 +15,24 @@
 * limitations under the License.
 */
 
- 
-package javax.servlet.jsp.tagext;
 
+package javax.servlet.jsp.tagext;
 
 
 /**
  * The auxiliary interface of a Tag, IterationTag or BodyTag tag
  * handler that wants additional hooks for managing resources.
- *
+ * <p/>
  * <p>This interface provides two new methods: doCatch(Throwable)
  * and doFinally().  The prototypical invocation is as follows:
- *
+ * <p/>
  * <pre>
  * h = get a Tag();  // get a tag handler, perhaps from pool
  *
  * h.setPageContext(pc);  // initialize as desired
  * h.setParent(null);
  * h.setFoo("foo");
- * 
+ *
  * // tag invocation protocol; see Tag.java
  * try {
  *   doStartTag()...
@@ -46,36 +45,37 @@ package javax.servlet.jsp.tagext;
  *   // restore data invariants and release per-invocation resources
  *   h.doFinally();
  * }
- * 
+ *
  * ... other invocations perhaps with some new setters
  * ...
  * h.release();  // release long-term resources
  * </pre>
  */
 
-public interface TryCatchFinally {
+public interface TryCatchFinally
+{
 
     /**
      * Invoked if a Throwable occurs while evaluating the BODY
      * inside a tag or in any of the following methods:
      * Tag.doStartTag(), Tag.doEndTag(),
      * IterationTag.doAfterBody() and BodyTag.doInitBody().
-     *
+     * <p/>
      * <p>This method is not invoked if the Throwable occurs during
      * one of the setter methods.
-     *
+     * <p/>
      * <p>This method may throw an exception (the same or a new one)
      * that will be propagated further up the nest chain.  If an exception
      * is thrown, doFinally() will be invoked.
-     *
+     * <p/>
      * <p>This method is intended to be used to respond to an exceptional
      * condition.
      *
      * @param t The throwable exception navigating through this tag.
-     * @throws Throwable if the exception is to be rethrown further up 
-     *     the nest chain.
+     * @throws Throwable if the exception is to be rethrown further up
+     *                   the nest chain.
      */
- 
+
     void doCatch(Throwable t) throws Throwable;
 
     /**
@@ -85,12 +85,12 @@ public interface TryCatchFinally {
      * or in any of the following methods:
      * Tag.doStartTag(), Tag.doEndTag(),
      * IterationTag.doAfterBody() and BodyTag.doInitBody().
-     *
+     * <p/>
      * <p>This method is not invoked if the Throwable occurs during
      * one of the setter methods.
-     *
+     * <p/>
      * <p>This method should not throw an Exception.
-     *
+     * <p/>
      * <p>This method is intended to maintain per-invocation data
      * integrity and resource management actions.
      */

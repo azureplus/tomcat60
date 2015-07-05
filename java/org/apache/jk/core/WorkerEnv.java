@@ -31,113 +31,132 @@ import java.util.Hashtable;
  * @author Kevin Seguin
  * @author Costin Manolache
  */
-public class WorkerEnv {
+public class WorkerEnv
+{
 
+    public static final int ENDPOINT_NOTE = 0;
+    public static final int REQUEST_NOTE = 1;
+    public static final int SSL_CERT_NOTE = 16;
     Hashtable properties;
-
-    public static final int ENDPOINT_NOTE=0;
-    public static final int REQUEST_NOTE=1;
-    public static final int SSL_CERT_NOTE=16;
-    int noteId[]=new int[4];
-    String noteName[][]=new String[4][];
-    private Object notes[]=new Object[32];
-
-    Hashtable handlersMap=new Hashtable();
-    JkHandler handlersTable[]=new JkHandler[20];
-    int handlerCount=0;
-    
+    int noteId[] = new int[4];
+    String noteName[][] = new String[4][];
+    Hashtable handlersMap = new Hashtable();
+    JkHandler handlersTable[] = new JkHandler[20];
+    int handlerCount = 0;
     // base dir for the jk webapp
     String home;
-    int localId=0;
-    
-    public WorkerEnv() {
-        for( int i=0; i<noteId.length; i++ ) {
-            noteId[i]=7;
-            noteName[i]=new String[20];
+    int localId = 0;
+    private Object notes[] = new Object[32];
+
+    public WorkerEnv()
+    {
+        for (int i = 0; i < noteId.length; i++)
+        {
+            noteId[i] = 7;
+            noteName[i] = new String[20];
         }
     }
 
-    public void setLocalId(int id) {
-        localId=id;
-    }
-    
-    public int getLocalId() {
+    public int getLocalId()
+    {
         return localId;
     }
-    
-    public void setJkHome( String s ) {
-        home=s;
+
+    public void setLocalId(int id)
+    {
+        localId = id;
     }
 
-    public String getJkHome() {
+    public String getJkHome()
+    {
         return home;
     }
-    
-    public final Object getNote(int i ) {
+
+    public void setJkHome(String s)
+    {
+        home = s;
+    }
+
+    public final Object getNote(int i)
+    {
         return notes[i];
     }
 
-    public final void setNote(int i, Object o ) {
-        notes[i]=o;
+    public final void setNote(int i, Object o)
+    {
+        notes[i] = o;
     }
 
-    public int getNoteId( int type, String name ) {
-        for( int i=0; i<noteId[type]; i++ ) {
-            if( name.equals( noteName[type][i] ))
+    public int getNoteId(int type, String name)
+    {
+        for (int i = 0; i < noteId[type]; i++)
+        {
+            if (name.equals(noteName[type][i]))
                 return i;
         }
-        int id=noteId[type]++;
-        noteName[type][id]=name;
+        int id = noteId[type]++;
+        noteName[type][id] = name;
         return id;
     }
 
-    public void addHandler( String name, JkHandler w ) {
+    public void addHandler(String name, JkHandler w)
+    {
         JkHandler oldH = getHandler(name);
-        if(oldH == w) {
+        if (oldH == w)
+        {
             // Already added
             return;
         }
-        w.setWorkerEnv( this );
-        w.setName( name );
-        handlersMap.put( name, w );
-        if( handlerCount > handlersTable.length ) {
-            JkHandler newT[]=new JkHandler[ 2 * handlersTable.length ];
-            System.arraycopy( handlersTable, 0, newT, 0, handlersTable.length );
-            handlersTable=newT;
+        w.setWorkerEnv(this);
+        w.setName(name);
+        handlersMap.put(name, w);
+        if (handlerCount > handlersTable.length)
+        {
+            JkHandler newT[] = new JkHandler[2 * handlersTable.length];
+            System.arraycopy(handlersTable, 0, newT, 0, handlersTable.length);
+            handlersTable = newT;
         }
-        if(oldH == null) {
-            handlersTable[handlerCount]=w;
-            w.setId( handlerCount );
+        if (oldH == null)
+        {
+            handlersTable[handlerCount] = w;
+            w.setId(handlerCount);
             handlerCount++;
-        } else {
-            handlersTable[oldH.getId()]=w;
+        } else
+        {
+            handlersTable[oldH.getId()] = w;
             w.setId(oldH.getId());
         }
 
         // Notify all other handlers of the new one
         // XXX Could be a Coyote action ?
-        for( int i=0; i< handlerCount ; i++ ) {
-            handlersTable[i].addHandlerCallback( w );
+        for (int i = 0; i < handlerCount; i++)
+        {
+            handlersTable[i].addHandlerCallback(w);
         }
     }
 
-    public final JkHandler getHandler( String name ) {
-        return (JkHandler)handlersMap.get(name);
+    public final JkHandler getHandler(String name)
+    {
+        return (JkHandler) handlersMap.get(name);
     }
 
-    public final JkHandler getHandler( int id ) {
+    public final JkHandler getHandler(int id)
+    {
         return handlersTable[id];
     }
 
-    public final int getHandlerCount() {
+    public final int getHandlerCount()
+    {
         return handlerCount;
     }
-    
-    public ObjectName[] getHandlersObjectName() {
-        
-        ObjectName onames[]=new ObjectName[ handlerCount ];
-        for( int i=0; i<handlerCount; i++ ) {
-            onames[i]=handlersTable[i].getObjectName();
+
+    public ObjectName[] getHandlersObjectName()
+    {
+
+        ObjectName onames[] = new ObjectName[handlerCount];
+        for (int i = 0; i < handlerCount; i++)
+        {
+            onames[i] = handlersTable[i].getObjectName();
         }
         return onames;
     }

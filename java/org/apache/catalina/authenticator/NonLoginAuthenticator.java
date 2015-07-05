@@ -19,12 +19,11 @@
 package org.apache.catalina.authenticator;
 
 
-import java.io.IOException;
-
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.deploy.LoginConfig;
 
+import java.io.IOException;
 
 
 /**
@@ -32,11 +31,11 @@ import org.apache.catalina.deploy.LoginConfig;
  * only security constraints not involving user authentication.
  *
  * @author Craig R. McClanahan
- *
  */
 
 public final class NonLoginAuthenticator
-    extends AuthenticatorBase {
+        extends AuthenticatorBase
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -46,7 +45,7 @@ public final class NonLoginAuthenticator
      * Descriptive information about this implementation.
      */
     private static final String info =
-        "org.apache.catalina.authenticator.NonLoginAuthenticator/1.0";
+            "org.apache.catalina.authenticator.NonLoginAuthenticator/1.0";
 
 
     // ------------------------------------------------------------- Properties
@@ -55,7 +54,8 @@ public final class NonLoginAuthenticator
     /**
      * Return descriptive information about this Valve implementation.
      */
-    public String getInfo() {
+    public String getInfo()
+    {
 
         return (info);
 
@@ -71,17 +71,17 @@ public final class NonLoginAuthenticator
      * constraint has been satisfied, or <code>false</code> if we have
      * created a response challenge already.
      *
-     * @param request Request we are processing
+     * @param request  Request we are processing
      * @param response Response we are creating
-     * @param config    Login configuration describing how authentication
-     *              should be performed
-     *
-     * @exception IOException if an input/output error occurs
+     * @param config   Login configuration describing how authentication
+     *                 should be performed
+     * @throws IOException if an input/output error occurs
      */
     public boolean authenticate(Request request,
                                 Response response,
                                 LoginConfig config)
-        throws IOException {
+            throws IOException
+    {
 
         /*  Associating this request's session with an SSO would allow
             coordinated session invalidation, but should the session for
@@ -91,7 +91,7 @@ public final class NonLoginAuthenticator
         if (ssoId != null)
             associate(ssoId, getSession(request, true));
         */
-        
+
         if (containerLog.isDebugEnabled())
             containerLog.debug("User authentication is not required");
         return (true);

@@ -17,29 +17,31 @@
 
 package org.apache.coyote.http11.filters;
 
-import java.io.IOException;
-
 import org.apache.coyote.InputBuffer;
 import org.apache.coyote.http11.InputFilter;
 import org.apache.tomcat.util.buf.ByteChunk;
+
+import java.io.IOException;
 
 /**
  * Input filter responsible for replaying the request body when restoring the
  * saved request after FORM authentication.
  */
-public class SavedRequestInputFilter implements InputFilter {
+public class SavedRequestInputFilter implements InputFilter
+{
 
-	/**
+    /**
      * The original request body.
-	 */
+     */
     protected ByteChunk input = null;
 
     /**
      * Create a new SavedRequestInputFilter.
-     * 
+     *
      * @param input The saved request body to be replayed.
      */
-    public SavedRequestInputFilter(ByteChunk input) {
+    public SavedRequestInputFilter(ByteChunk input)
+    {
         this.input = input;
     }
 
@@ -47,63 +49,72 @@ public class SavedRequestInputFilter implements InputFilter {
      * Read bytes.
      */
     public int doRead(ByteChunk chunk, org.apache.coyote.Request request)
-            throws IOException {
+            throws IOException
+    {
         int writeLength = 0;
-        
-        if (chunk.getLimit() > 0 && chunk.getLimit() < input.getLength()) {
+
+        if (chunk.getLimit() > 0 && chunk.getLimit() < input.getLength())
+        {
             writeLength = chunk.getLimit();
-        } else {
-        	writeLength = input.getLength();
+        } else
+        {
+            writeLength = input.getLength();
         }
-        
-        if(input.getOffset()>= input.getEnd())
+
+        if (input.getOffset() >= input.getEnd())
             return -1;
-        
+
         input.substract(chunk.getBuffer(), 0, writeLength);
         chunk.setOffset(0);
         chunk.setEnd(writeLength);
-        
+
         return writeLength;
     }
 
     /**
      * Set the content length on the request.
      */
-    public void setRequest(org.apache.coyote.Request request) {
+    public void setRequest(org.apache.coyote.Request request)
+    {
         request.setContentLength(input.getLength());
     }
 
     /**
      * Make the filter ready to process the next request.
      */
-    public void recycle() {
+    public void recycle()
+    {
         input = null;
     }
 
     /**
      * Return the name of the associated encoding; here, the value is null.
      */
-    public ByteChunk getEncodingName() {
+    public ByteChunk getEncodingName()
+    {
         return null;
     }
 
     /**
      * Set the next buffer in the filter pipeline (has no effect).
      */
-    public void setBuffer(InputBuffer buffer) {
+    public void setBuffer(InputBuffer buffer)
+    {
     }
 
     /**
      * Amount of bytes still available in a buffer.
      */
-    public int available() {
+    public int available()
+    {
         return input.getLength();
     }
-    
+
     /**
      * End the current request (has no effect).
      */
-    public long end() throws IOException {
+    public long end() throws IOException
+    {
         return 0;
     }
 

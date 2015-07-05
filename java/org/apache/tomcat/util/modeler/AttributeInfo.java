@@ -19,9 +19,8 @@
 package org.apache.tomcat.util.modeler;
 
 
-import java.io.Serializable;
-
 import javax.management.MBeanAttributeInfo;
+import java.io.Serializable;
 
 
 /**
@@ -30,7 +29,8 @@ import javax.management.MBeanAttributeInfo;
  *
  * @author Craig R. McClanahan
  */
-public class AttributeInfo extends FeatureInfo implements Serializable {
+public class AttributeInfo extends FeatureInfo implements Serializable
+{
     static final long serialVersionUID = -2511626862303972143L;
 
     // ----------------------------------------------------- Instance Variables
@@ -42,41 +42,47 @@ public class AttributeInfo extends FeatureInfo implements Serializable {
     protected boolean readable = true;
     protected boolean writeable = true;
     protected boolean is = false;
-    
+
     // ------------------------------------------------------------- Properties
 
     /**
      * The display name of this attribute.
      */
-    public String getDisplayName() {
+    public String getDisplayName()
+    {
         return (this.displayName);
     }
 
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(String displayName)
+    {
         this.displayName = displayName;
     }
 
     /**
      * The name of the property getter method, if non-standard.
      */
-    public String getGetMethod() {
-        if(getMethod == null) 
+    public String getGetMethod()
+    {
+        if (getMethod == null)
             getMethod = getMethodName(getName(), true, isIs());
         return (this.getMethod);
     }
 
-    public void setGetMethod(String getMethod) {
+    public void setGetMethod(String getMethod)
+    {
         this.getMethod = getMethod;
     }
 
     /**
      * Is this a boolean attribute with an "is" getter?
      */
-    public boolean isIs() {
+    public boolean isIs()
+    {
         return (this.is);
     }
 
-    public void setIs(boolean is) {
+    public void setIs(boolean is)
+    {
         this.is = is;
     }
 
@@ -84,11 +90,13 @@ public class AttributeInfo extends FeatureInfo implements Serializable {
     /**
      * Is this attribute readable by management applications?
      */
-    public boolean isReadable() {
+    public boolean isReadable()
+    {
         return (this.readable);
     }
 
-    public void setReadable(boolean readable) {
+    public void setReadable(boolean readable)
+    {
         this.readable = readable;
     }
 
@@ -96,24 +104,28 @@ public class AttributeInfo extends FeatureInfo implements Serializable {
     /**
      * The name of the property setter method, if non-standard.
      */
-    public String getSetMethod() {
-        if( setMethod == null )
+    public String getSetMethod()
+    {
+        if (setMethod == null)
             setMethod = getMethodName(getName(), false, false);
         return (this.setMethod);
     }
 
-    public void setSetMethod(String setMethod) {
+    public void setSetMethod(String setMethod)
+    {
         this.setMethod = setMethod;
     }
 
     /**
      * Is this attribute writeable by management applications?
      */
-    public boolean isWriteable() {
+    public boolean isWriteable()
+    {
         return (this.writeable);
     }
 
-    public void setWriteable(boolean writeable) {
+    public void setWriteable(boolean writeable)
+    {
         this.writeable = writeable;
     }
 
@@ -124,13 +136,15 @@ public class AttributeInfo extends FeatureInfo implements Serializable {
      * Create and return a <code>ModelMBeanAttributeInfo</code> object that
      * corresponds to the attribute described by this instance.
      */
-    MBeanAttributeInfo createAttributeInfo() {
+    MBeanAttributeInfo createAttributeInfo()
+    {
         // Return our cached information (if any)
-        if (info == null) {
+        if (info == null)
+        {
             info = new MBeanAttributeInfo(getName(), getType(), getDescription(),
-                            isReadable(), isWriteable(), false);
+                    isReadable(), isWriteable(), false);
         }
-        return (MBeanAttributeInfo)info;
+        return (MBeanAttributeInfo) info;
     }
 
     // -------------------------------------------------------- Private Methods
@@ -140,14 +154,16 @@ public class AttributeInfo extends FeatureInfo implements Serializable {
      * Create and return the name of a default property getter or setter
      * method, according to the specified values.
      *
-     * @param name Name of the property itself
+     * @param name   Name of the property itself
      * @param getter Do we want a get method (versus a set method)?
-     * @param is If returning a getter, do we want the "is" form?
+     * @param is     If returning a getter, do we want the "is" form?
      */
-    private String getMethodName(String name, boolean getter, boolean is) {
+    private String getMethodName(String name, boolean getter, boolean is)
+    {
 
         StringBuffer sb = new StringBuffer();
-        if (getter) {
+        if (getter)
+        {
             if (is)
                 sb.append("is");
             else

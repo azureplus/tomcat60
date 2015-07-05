@@ -13,11 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming.factory.webservices;
 
+import javax.xml.namespace.QName;
+import javax.xml.rpc.Service;
+import javax.xml.rpc.ServiceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,35 +28,29 @@ import java.rmi.Remote;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import javax.xml.namespace.QName;
-import javax.xml.rpc.Service;
-import javax.xml.rpc.ServiceException;
-
 /**
  * Object proxy for Web Services.
- * 
+ *
  * @author Fabien Carrion
  */
 
 public class ServiceProxy
-    implements InvocationHandler {
-
-    /**
-     * Service object.
-     * used for delegation
-     */
-    private Service service = null;
+        implements InvocationHandler
+{
 
     /**
      * changing behavior to method : Service.getPort(QName, Class)
      */
     private static Method portQNameClass = null;
-
     /**
      * changing behavior to method : Service.getPort(Class)
      */
     private static Method portClass = null;
-
+    /**
+     * Service object.
+     * used for delegation
+     */
+    private Service service = null;
     /**
      * PortComponentRef list
      */
@@ -61,15 +58,20 @@ public class ServiceProxy
 
     /**
      * Constructs a new ServiceProxy wrapping given Service instance.
+     *
      * @param service the wrapped Service instance
      * @throws ServiceException should be never thrown
      */
-    public ServiceProxy(Service service) throws ServiceException {
+    public ServiceProxy(Service service) throws ServiceException
+    {
         this.service = service;
-        try {
+        try
+        {
             portQNameClass = Service.class.getDeclaredMethod("getPort", new Class[]{QName.class, Class.class});
             portClass = Service.class.getDeclaredMethod("getPort", new Class[]{Class.class});
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new ServiceException(e);
         }
     }
@@ -77,19 +79,25 @@ public class ServiceProxy
     /**
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+    {
 
-        if (portQNameClass.equals(method)) {
+        if (portQNameClass.equals(method))
+        {
             return getProxyPortQNameClass(args);
         }
 
-        if (portClass.equals(method)) {
+        if (portClass.equals(method))
+        {
             return getProxyPortClass(args);
         }
 
-        try {
+        try
+        {
             return method.invoke(service, args);
-        } catch (InvocationTargetException ite) {
+        }
+        catch (InvocationTargetException ite)
+        {
             throw ite.getTargetException();
         }
     }
@@ -100,15 +108,18 @@ public class ServiceProxy
      * @throws ServiceException if port's QName is an unknown Port (not defined in WSDL).
      */
     private Object getProxyPortQNameClass(Object[] args)
-    throws ServiceException {
+            throws ServiceException
+    {
         QName name = (QName) args[0];
         String nameString = name.getLocalPart();
         Class serviceendpointClass = (Class) args[1];
 
-        for (Iterator ports = service.getPorts(); ports.hasNext();) {
+        for (Iterator ports = service.getPorts(); ports.hasNext(); )
+        {
             QName portName = (QName) ports.next();
             String portnameString = portName.getLocalPart();
-            if (portnameString.equals(nameString)) {
+            if (portnameString.equals(nameString))
+            {
                 return service.getPort(name, serviceendpointClass);
             }
         }
@@ -120,7 +131,8 @@ public class ServiceProxy
     /**
      * @param portComponentRef List
      */
-    public void setPortComponentRef(Hashtable portComponentRef) {
+    public void setPortComponentRef(Hashtable portComponentRef)
+    {
         this.portComponentRef = portComponentRef;
     }
 
@@ -129,17 +141,20 @@ public class ServiceProxy
      * @return Returns the correct Port
      * @throws ServiceException if port's QName is an unknown Port
      */
-    private Remote getProxyPortClass(Object[] args) 
-    throws ServiceException {
+    private Remote getProxyPortClass(Object[] args)
+            throws ServiceException
+    {
         Class serviceendpointClass = (Class) args[0];
 
         if (this.portComponentRef == null)
             return service.getPort(serviceendpointClass);
 
         QName portname = (QName) this.portComponentRef.get(serviceendpointClass.getName());
-        if (portname != null) {
+        if (portname != null)
+        {
             return service.getPort(portname, serviceendpointClass);
-        } else {
+        } else
+        {
             return service.getPort(serviceendpointClass);
         }
     }

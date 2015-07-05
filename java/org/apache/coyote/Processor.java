@@ -24,22 +24,21 @@ import java.io.OutputStream;
 
 /**
  * Processor.
- *
- * Not really used, should be deprecated. 
+ * <p/>
+ * Not really used, should be deprecated.
  *
  * @author Remy Maucherat
  */
-public interface Processor {
-
-
-    public void setAdapter(Adapter adapter);
+public interface Processor
+{
 
 
     public Adapter getAdapter();
 
+    public void setAdapter(Adapter adapter);
 
     public void process(InputStream input, OutputStream output)
-        throws IOException;
+            throws IOException;
 
 
 }

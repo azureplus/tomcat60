@@ -25,81 +25,97 @@ import java.util.Map;
 
 /**
  * Implementation of ELContext
- * 
+ *
  * @author Jacob Hookom
  */
-public final class ELContextImpl extends ELContext {
+public final class ELContextImpl extends ELContext
+{
 
-    private final static FunctionMapper NullFunctionMapper = new FunctionMapper() {
-        public Method resolveFunction(String prefix, String localName) {
+    private final static FunctionMapper NullFunctionMapper = new FunctionMapper()
+    {
+        public Method resolveFunction(String prefix, String localName)
+        {
             return null;
         }
     };
+    private final ELResolver resolver;
+    private FunctionMapper functionMapper;
+    private VariableMapper variableMapper;
 
-    private final static class VariableMapperImpl extends VariableMapper {
+    public ELContextImpl()
+    {
+        this(ELResolverImpl.getDefaultResolver());
+        if (Constants.IS_SECURITY_ENABLED)
+        {
+            functionMapper = new FunctionMapper()
+            {
+                public Method resolveFunction(String prefix, String localName)
+                {
+                    return null;
+                }
+            };
+        } else
+        {
+            functionMapper = NullFunctionMapper;
+        }
+    }
+
+    public ELContextImpl(ELResolver resolver)
+    {
+        this.resolver = resolver;
+    }
+
+    public ELResolver getELResolver()
+    {
+        return this.resolver;
+    }
+
+    public FunctionMapper getFunctionMapper()
+    {
+        return this.functionMapper;
+    }
+
+    public void setFunctionMapper(FunctionMapper functionMapper)
+    {
+        this.functionMapper = functionMapper;
+    }
+
+    public VariableMapper getVariableMapper()
+    {
+        if (this.variableMapper == null)
+        {
+            this.variableMapper = new VariableMapperImpl();
+        }
+        return this.variableMapper;
+    }
+
+    public void setVariableMapper(VariableMapper variableMapper)
+    {
+        this.variableMapper = variableMapper;
+    }
+
+    private final static class VariableMapperImpl extends VariableMapper
+    {
 
         private Map<String, ValueExpression> vars;
 
-        public ValueExpression resolveVariable(String variable) {
-            if (vars == null) {
+        public ValueExpression resolveVariable(String variable)
+        {
+            if (vars == null)
+            {
                 return null;
             }
             return vars.get(variable);
         }
 
         public ValueExpression setVariable(String variable,
-                ValueExpression expression) {
+                                           ValueExpression expression)
+        {
             if (vars == null)
                 vars = new HashMap<String, ValueExpression>();
             return vars.put(variable, expression);
         }
 
-    }
-
-    private final ELResolver resolver;
-
-    private FunctionMapper functionMapper;
-
-    private VariableMapper variableMapper;
-
-    public ELContextImpl() {
-        this(ELResolverImpl.getDefaultResolver());
-        if (Constants.IS_SECURITY_ENABLED) {
-            functionMapper = new FunctionMapper() {
-                public Method resolveFunction(String prefix, String localName) {
-                    return null;
-                }
-            };
-        } else {
-            functionMapper = NullFunctionMapper;
-        }
-    }
-
-    public ELContextImpl(ELResolver resolver) {
-        this.resolver = resolver;
-    }
-
-    public ELResolver getELResolver() {
-        return this.resolver;
-    }
-
-    public FunctionMapper getFunctionMapper() {
-        return this.functionMapper;
-    }
-
-    public VariableMapper getVariableMapper() {
-        if (this.variableMapper == null) {
-            this.variableMapper = new VariableMapperImpl();
-        }
-        return this.variableMapper;
-    }
-
-    public void setFunctionMapper(FunctionMapper functionMapper) {
-        this.functionMapper = functionMapper;
-    }
-
-    public void setVariableMapper(VariableMapper variableMapper) {
-        this.variableMapper = variableMapper;
     }
 
 }

@@ -15,27 +15,26 @@
  * limitations under the License.
  */
 package org.apache.catalina.ha.session;
+
 import org.apache.catalina.ha.ClusterMessage;
 
 /**
- *
  * <B>Class Description:</B><BR>
  * The SessionMessage class is a class that is used when a session has been
  * created, modified, expired in a Tomcat cluster node.<BR>
- *
+ * <p/>
  * The following events are currently available:
  * <ul>
- *   <li><pre>public static final int EVT_SESSION_CREATED</pre><li>
- *   <li><pre>public static final int EVT_SESSION_EXPIRED</pre><li>
- *   <li><pre>public static final int EVT_SESSION_ACCESSED</pre><li>
- *   <li><pre>public static final int EVT_GET_ALL_SESSIONS</pre><li>
- *   <li><pre>public static final int EVT_SESSION_DELTA</pre><li>
- *   <li><pre>public static final int EVT_ALL_SESSION_DATA</pre><li>
- *   <li><pre>public static final int EVT_ALL_SESSION_TRANSFERCOMPLETE</pre><li>
- *   <li><pre>public static final int EVT_CHANGE_SESSION_ID</pre><li>
- *   <li><pre>public static final int EVT_ALL_SESSION_NOCONTEXTMANAGER</pre><li>
+ * <li><pre>public static final int EVT_SESSION_CREATED</pre><li>
+ * <li><pre>public static final int EVT_SESSION_EXPIRED</pre><li>
+ * <li><pre>public static final int EVT_SESSION_ACCESSED</pre><li>
+ * <li><pre>public static final int EVT_GET_ALL_SESSIONS</pre><li>
+ * <li><pre>public static final int EVT_SESSION_DELTA</pre><li>
+ * <li><pre>public static final int EVT_ALL_SESSION_DATA</pre><li>
+ * <li><pre>public static final int EVT_ALL_SESSION_TRANSFERCOMPLETE</pre><li>
+ * <li><pre>public static final int EVT_CHANGE_SESSION_ID</pre><li>
+ * <li><pre>public static final int EVT_ALL_SESSION_NOCONTEXTMANAGER</pre><li>
  * </ul>
- *
  */
 
 public interface SessionMessage extends ClusterMessage, java.io.Serializable
@@ -66,13 +65,13 @@ public interface SessionMessage extends ClusterMessage, java.io.Serializable
      * Event type used when an attribute has been added to a session,
      * the attribute will be sent to all the other nodes in the cluster
      */
-    public static final int EVT_SESSION_DELTA  = 13;
+    public static final int EVT_SESSION_DELTA = 13;
 
     /**
      * When a session state is transferred, this is the event.
      */
     public static final int EVT_ALL_SESSION_DATA = 12;
-    
+
     /**
      * When a session state is complete transferred, this is the event.
      */
@@ -85,28 +84,30 @@ public interface SessionMessage extends ClusterMessage, java.io.Serializable
 
     /**
      * Event type used when context manager doesn't exist.
-     * This is used when the manager which send a session state does not exist. 
+     * This is used when the manager which send a session state does not exist.
      */
     public static final int EVT_ALL_SESSION_NOCONTEXTMANAGER = 16;
 
     public String getContextName();
-    
+
     public String getEventTypeString();
-    
+
     /**
      * returns the event type
+     *
      * @return one of the event types EVT_XXXX
      */
-    public int getEventType(); 
+    public int getEventType();
+
     /**
      * @return the serialized data for the session
      */
     public byte[] getSession();
+
     /**
      * @return the session ID for the session
      */
     public String getSessionID();
-    
 
 
 }//SessionMessage

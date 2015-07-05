@@ -19,7 +19,8 @@
 package org.apache.catalina.authenticator;
 
 
-public class Constants {
+public class Constants
+{
 
     public static final String Package = "org.apache.catalina.authenticator";
 
@@ -41,9 +42,9 @@ public class Constants {
 
     // Cookie name for single sign on support
     public static final String SINGLE_SIGN_ON_COOKIE =
-        System.getProperty(
-                "org.apache.catalina.authenticator.Constants.SSO_SESSION_COOKIE_NAME",
-                "JSESSIONIDSSO");
+            System.getProperty(
+                    "org.apache.catalina.authenticator.Constants.SSO_SESSION_COOKIE_NAME",
+                    "JSESSIONIDSSO");
 
 
     // --------------------------------------------------------- Request Notes
@@ -74,14 +75,14 @@ public class Constants {
      * The notes key for the password used to authenticate this user.
      */
     public static final String REQ_PASSWORD_NOTE =
-      "org.apache.catalina.request.PASSWORD";
+            "org.apache.catalina.request.PASSWORD";
 
 
     /**
      * The notes key for the username used to authenticate this user.
      */
     public static final String REQ_USERNAME_NOTE =
-      "org.apache.catalina.request.USERNAME";
+            "org.apache.catalina.request.USERNAME";
 
 
     /**
@@ -89,7 +90,7 @@ public class Constants {
      * request is associated.
      */
     public static final String REQ_SSOID_NOTE =
-      "org.apache.catalina.request.SSOID";
+            "org.apache.catalina.request.SSOID";
 
 
     // ---------------------------------------------------------- Session Notes
@@ -107,14 +108,14 @@ public class Constants {
      * The notes key for the password used to authenticate this user.
      */
     public static final String SESS_PASSWORD_NOTE =
-      "org.apache.catalina.session.PASSWORD";
+            "org.apache.catalina.session.PASSWORD";
 
 
     /**
      * The notes key for the username used to authenticate this user.
      */
     public static final String SESS_USERNAME_NOTE =
-      "org.apache.catalina.session.USERNAME";
+            "org.apache.catalina.session.USERNAME";
 
 
     /**
@@ -127,7 +128,7 @@ public class Constants {
      * The previously authenticated principal (if caching is disabled).
      */
     public static final String FORM_PRINCIPAL_NOTE =
-        "org.apache.catalina.authenticator.PRINCIPAL";
+            "org.apache.catalina.authenticator.PRINCIPAL";
 
 
     /**
@@ -135,7 +136,7 @@ public class Constants {
      * redirected if authentication succeeds.
      */
     public static final String FORM_REQUEST_NOTE =
-        "org.apache.catalina.authenticator.REQUEST";
+            "org.apache.catalina.authenticator.REQUEST";
 
 
 }

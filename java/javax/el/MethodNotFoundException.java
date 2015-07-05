@@ -20,19 +20,22 @@ package javax.el;
 /**
  *
  */
-public class MethodNotFoundException extends ELException {
+public class MethodNotFoundException extends ELException
+{
 
     /**
-     * 
+     *
      */
-    public MethodNotFoundException() {
+    public MethodNotFoundException()
+    {
         super();
     }
 
     /**
      * @param message
      */
-    public MethodNotFoundException(String message) {
+    public MethodNotFoundException(String message)
+    {
         super(message);
     }
 
@@ -40,14 +43,16 @@ public class MethodNotFoundException extends ELException {
      * @param message
      * @param cause
      */
-    public MethodNotFoundException(String message, Throwable cause) {
+    public MethodNotFoundException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
     /**
      * @param cause
      */
-    public MethodNotFoundException(Throwable cause) {
+    public MethodNotFoundException(Throwable cause)
+    {
         super(cause);
     }
 }

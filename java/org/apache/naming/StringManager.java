@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
@@ -28,17 +28,17 @@ import java.util.ResourceBundle;
  * the bother of handling ResourceBundles and takes care of the
  * common cases of message formating which otherwise require the
  * creation of Object arrays and such.
- *
+ * <p/>
  * <p>The StringManager operates on a package basis. One StringManager
  * per package can be created and accessed via the getManager method
  * call.
- *
+ * <p/>
  * <p>The StringManager will look for a ResourceBundle named by
  * the package name given plus the suffix of "LocalStrings". In
  * practice, this means that the localized information will be contained
  * in a LocalStrings.properties file located in the package
  * directory of the classpath.
- *
+ * <p/>
  * <p>Please see the documentation for java.util.ResourceBundle for
  * more information.
  *
@@ -46,12 +46,14 @@ import java.util.ResourceBundle;
  * @author James Todd [gonzo@eng.sun.com]
  */
 
-public class StringManager {
+public class StringManager
+{
 
+    private static Hashtable managers = new Hashtable();
     /**
      * The ResourceBundle for this StringManager.
      */
-    
+
     private ResourceBundle bundle;
 
     /**
@@ -63,19 +65,41 @@ public class StringManager {
      * @param packageName Name of package to create StringManager for.
      */
 
-    private StringManager(String packageName) {
-	String bundleName = packageName + ".LocalStrings";
-	bundle = ResourceBundle.getBundle(bundleName);
+    private StringManager(String packageName)
+    {
+        String bundleName = packageName + ".LocalStrings";
+        bundle = ResourceBundle.getBundle(bundleName);
+    }
+
+    /**
+     * Get the StringManager for a particular package. If a manager for
+     * a package already exists, it will be reused, else a new
+     * StringManager will be created and returned.
+     *
+     * @param packageName
+     */
+
+    public synchronized static StringManager getManager(String packageName)
+    {
+        StringManager mgr = (StringManager) managers.get(packageName);
+        if (mgr == null)
+        {
+            mgr = new StringManager(packageName);
+            managers.put(packageName, mgr);
+        }
+        return mgr;
     }
 
     /**
      * Get a string from the underlying resource bundle.
      *
-     * @param key 
+     * @param key
      */
-    
-    public String getString(String key) {
-        if (key == null) {
+
+    public String getString(String key)
+    {
+        if (key == null)
+        {
             String msg = "key is null";
 
             throw new NullPointerException(msg);
@@ -83,9 +107,12 @@ public class StringManager {
 
         String str = null;
 
-        try {
-	    str = bundle.getString(key);
-        } catch (MissingResourceException mre) {
+        try
+        {
+            str = bundle.getString(key);
+        }
+        catch (MissingResourceException mre)
+        {
             str = "Cannot find message associated with key '" + key + "'";
         }
 
@@ -100,34 +127,41 @@ public class StringManager {
      * @param args
      */
 
-    public String getString(String key, Object[] args) {
-	String iString = null;
+    public String getString(String key, Object[] args)
+    {
+        String iString = null;
         String value = getString(key);
 
-	// this check for the runtime exception is some pre 1.1.6
-	// VM's don't do an automatic toString() on the passed in
-	// objects and barf out
-	
-	try {
+        // this check for the runtime exception is some pre 1.1.6
+        // VM's don't do an automatic toString() on the passed in
+        // objects and barf out
+
+        try
+        {
             // ensure the arguments are not null so pre 1.2 VM's don't barf
             Object nonNullArgs[] = args;
-            for (int i=0; i<args.length; i++) {
-		if (args[i] == null) {
-		    if (nonNullArgs==args) nonNullArgs=(Object[])args.clone();
-		    nonNullArgs[i] = "null";
-		}
-	    }
- 
+            for (int i = 0; i < args.length; i++)
+            {
+                if (args[i] == null)
+                {
+                    if (nonNullArgs == args) nonNullArgs = (Object[]) args.clone();
+                    nonNullArgs[i] = "null";
+                }
+            }
+
             iString = MessageFormat.format(value, nonNullArgs);
-	} catch (IllegalArgumentException iae) {
-	    StringBuffer buf = new StringBuffer();
-	    buf.append(value);
-	    for (int i = 0; i < args.length; i++) {
-		buf.append(" arg[" + i + "]=" + args[i]);
-	    }
-	    iString = buf.toString();
-	}
-	return iString;
+        }
+        catch (IllegalArgumentException iae)
+        {
+            StringBuffer buf = new StringBuffer();
+            buf.append(value);
+            for (int i = 0; i < args.length; i++)
+            {
+                buf.append(" arg[" + i + "]=" + args[i]);
+            }
+            iString = buf.toString();
+        }
+        return iString;
     }
 
     /**
@@ -139,9 +173,10 @@ public class StringManager {
      * @param arg
      */
 
-    public String getString(String key, Object arg) {
-	Object[] args = new Object[] {arg};
-	return getString(key, args);
+    public String getString(String key, Object arg)
+    {
+        Object[] args = new Object[]{arg};
+        return getString(key, args);
     }
 
     /**
@@ -154,11 +189,15 @@ public class StringManager {
      * @param arg2
      */
 
-    public String getString(String key, Object arg1, Object arg2) {
-	Object[] args = new Object[] {arg1, arg2};
-	return getString(key, args);
+    public String getString(String key, Object arg1, Object arg2)
+    {
+        Object[] args = new Object[]{arg1, arg2};
+        return getString(key, args);
     }
-    
+    // --------------------------------------------------------------
+    // STATIC SUPPORT METHODS
+    // --------------------------------------------------------------
+
     /**
      * Get a string from the underlying resource bundle and format it
      * with the given object arguments. These arguments can of course
@@ -171,11 +210,12 @@ public class StringManager {
      */
 
     public String getString(String key, Object arg1, Object arg2,
-			    Object arg3) {
-	Object[] args = new Object[] {arg1, arg2, arg3};
-	return getString(key, args);
+                            Object arg3)
+    {
+        Object[] args = new Object[]{arg1, arg2, arg3};
+        return getString(key, args);
     }
-    
+
     /**
      * Get a string from the underlying resource bundle and format it
      * with the given object arguments. These arguments can of course
@@ -189,30 +229,9 @@ public class StringManager {
      */
 
     public String getString(String key, Object arg1, Object arg2,
-			    Object arg3, Object arg4) {
-	Object[] args = new Object[] {arg1, arg2, arg3, arg4};
-	return getString(key, args);
-    }   
-    // --------------------------------------------------------------
-    // STATIC SUPPORT METHODS
-    // --------------------------------------------------------------
-
-    private static Hashtable managers = new Hashtable();
-
-    /**
-     * Get the StringManager for a particular package. If a manager for
-     * a package already exists, it will be reused, else a new
-     * StringManager will be created and returned.
-     *
-     * @param packageName
-     */
-
-    public synchronized static StringManager getManager(String packageName) {
-	StringManager mgr = (StringManager)managers.get(packageName);
-	if (mgr == null) {
-	    mgr = new StringManager(packageName);
-	    managers.put(packageName, mgr);
-	}
-	return mgr;
+                            Object arg3, Object arg4)
+    {
+        Object[] args = new Object[]{arg1, arg2, arg3, arg4};
+        return getString(key, args);
     }
 }

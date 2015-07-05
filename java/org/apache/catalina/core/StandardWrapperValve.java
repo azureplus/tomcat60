@@ -44,15 +44,20 @@ import java.io.IOException;
  * <code>StandardWrapper</code> container implementation.
  *
  * @author Craig R. McClanahan
- *
  */
 
 final class StandardWrapperValve
-    extends ValveBase {
+        extends ValveBase
+{
 
     // ----------------------------------------------------- Instance Variables
 
 
+    /**
+     * The string manager for this package.
+     */
+    private static final StringManager sm =
+            StringManager.getManager(Constants.Package);
     // Some JMX statistics. This vavle is associated with a StandardWrapper.
     // We expose the StandardWrapper as JMX ( j2eeType=Servlet ). The fields
     // are here for performance.
@@ -63,58 +68,54 @@ final class StandardWrapperValve
     private volatile int errorCount;
 
 
-    /**
-     * The string manager for this package.
-     */
-    private static final StringManager sm =
-        StringManager.getManager(Constants.Package);
-
-
     // --------------------------------------------------------- Public Methods
-
 
     /**
      * Invoke the servlet we are managing, respecting the rules regarding
      * servlet lifecycle and SingleThreadModel support.
      *
-     * @param request Request to be processed
-     * @param response Response to be produced
+     * @param request      Request to be processed
+     * @param response     Response to be produced
      * @param valveContext Valve context used to forward to the next Valve
-     *
-     * @exception IOException if an input/output error occurred
-     * @exception ServletException if a servlet error occurred
+     * @throws IOException      if an input/output error occurred
+     * @throws ServletException if a servlet error occurred
      */
     public final void invoke(Request request, Response response)
-        throws IOException, ServletException {
+            throws IOException, ServletException
+    {
 
         // Initialize local variables we may need
         boolean unavailable = false;
         Throwable throwable = null;
         // This should be a Request attribute...
-        long t1=System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
         requestCount++;
         StandardWrapper wrapper = (StandardWrapper) getContainer();
         Servlet servlet = null;
         Context context = (Context) wrapper.getParent();
-        
+
         // Check for the application being marked unavailable
-        if (!context.getAvailable()) {
-        	response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                           sm.getString("standardContext.isUnavailable"));
+        if (!context.getAvailable())
+        {
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                    sm.getString("standardContext.isUnavailable"));
             unavailable = true;
         }
 
         // Check for the servlet being marked unavailable
-        if (!unavailable && wrapper.isUnavailable()) {
+        if (!unavailable && wrapper.isUnavailable())
+        {
             container.getLogger().info(sm.getString("standardWrapper.isUnavailable",
                     wrapper.getName()));
             long available = wrapper.getAvailable();
-            if ((available > 0L) && (available < Long.MAX_VALUE)) {
+            if ((available > 0L) && (available < Long.MAX_VALUE))
+            {
                 response.setDateHeader("Retry-After", available);
                 response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
                         sm.getString("standardWrapper.isUnavailable",
                                 wrapper.getName()));
-            } else if (available == Long.MAX_VALUE) {
+            } else if (available == Long.MAX_VALUE)
+            {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND,
                         sm.getString("standardWrapper.notFound",
                                 wrapper.getName()));
@@ -123,34 +124,44 @@ final class StandardWrapperValve
         }
 
         // Allocate a servlet instance to process this request
-        try {
-            if (!unavailable) {
+        try
+        {
+            if (!unavailable)
+            {
                 servlet = wrapper.allocate();
             }
-        } catch (UnavailableException e) {
+        }
+        catch (UnavailableException e)
+        {
             container.getLogger().error(
                     sm.getString("standardWrapper.allocateException",
                             wrapper.getName()), e);
             long available = wrapper.getAvailable();
-            if ((available > 0L) && (available < Long.MAX_VALUE)) {
-            	response.setDateHeader("Retry-After", available);
-            	response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                           sm.getString("standardWrapper.isUnavailable",
-                                        wrapper.getName()));
-            } else if (available == Long.MAX_VALUE) {
-            	response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                           sm.getString("standardWrapper.notFound",
-                                        wrapper.getName()));
+            if ((available > 0L) && (available < Long.MAX_VALUE))
+            {
+                response.setDateHeader("Retry-After", available);
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                        sm.getString("standardWrapper.isUnavailable",
+                                wrapper.getName()));
+            } else if (available == Long.MAX_VALUE)
+            {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        sm.getString("standardWrapper.notFound",
+                                wrapper.getName()));
             }
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.allocateException",
-                             wrapper.getName()), StandardWrapper.getRootCause(e));
+                    wrapper.getName()), StandardWrapper.getRootCause(e));
             throwable = e;
             exception(request, response, e);
             servlet = null;
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.allocateException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             throwable = e;
             exception(request, response, e);
             servlet = null;
@@ -158,151 +169,191 @@ final class StandardWrapperValve
 
         // Identify if the request is Comet related now that the servlet has been allocated
         boolean comet = false;
-        if (servlet instanceof CometProcessor 
-                && request.getAttribute("org.apache.tomcat.comet.support") == Boolean.TRUE) {
+        if (servlet instanceof CometProcessor
+                && request.getAttribute("org.apache.tomcat.comet.support") == Boolean.TRUE)
+        {
             comet = true;
             request.setComet(true);
         }
-        
+
         // Acknowledge the request
-        try {
+        try
+        {
             response.sendAcknowledgement();
-        } catch (IOException e) {
-        	request.removeAttribute(Globals.JSP_FILE_ATTR);
+        }
+        catch (IOException e)
+        {
+            request.removeAttribute(Globals.JSP_FILE_ATTR);
             container.getLogger().warn(sm.getString("standardWrapper.acknowledgeException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             throwable = e;
             exception(request, response, e);
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.acknowledgeException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             throwable = e;
             exception(request, response, e);
             servlet = null;
         }
         MessageBytes requestPathMB = null;
-        if (request != null) {
+        if (request != null)
+        {
             requestPathMB = request.getRequestPathMB();
         }
         request.setAttribute
-            (ApplicationFilterFactory.DISPATCHER_TYPE_ATTR,
-             ApplicationFilterFactory.REQUEST_INTEGER);
+                (ApplicationFilterFactory.DISPATCHER_TYPE_ATTR,
+                        ApplicationFilterFactory.REQUEST_INTEGER);
         request.setAttribute
-            (ApplicationFilterFactory.DISPATCHER_REQUEST_PATH_ATTR,
-             requestPathMB);
+                (ApplicationFilterFactory.DISPATCHER_REQUEST_PATH_ATTR,
+                        requestPathMB);
         // Create the filter chain for this request
         ApplicationFilterFactory factory =
-            ApplicationFilterFactory.getInstance();
+                ApplicationFilterFactory.getInstance();
         ApplicationFilterChain filterChain =
-            factory.createFilterChain(request, wrapper, servlet);
+                factory.createFilterChain(request, wrapper, servlet);
         // Reset comet flag value after creating the filter chain
         request.setComet(false);
 
         // Call the filter chain for this request
         // NOTE: This also calls the servlet's service() method
-        try {
+        try
+        {
             String jspFile = wrapper.getJspFile();
             if (jspFile != null)
-            	request.setAttribute(Globals.JSP_FILE_ATTR, jspFile);
+                request.setAttribute(Globals.JSP_FILE_ATTR, jspFile);
             else
-            	request.removeAttribute(Globals.JSP_FILE_ATTR);
-            if ((servlet != null) && (filterChain != null)) {
+                request.removeAttribute(Globals.JSP_FILE_ATTR);
+            if ((servlet != null) && (filterChain != null))
+            {
                 // Swallow output if needed
-                if (context.getSwallowOutput()) {
-                    try {
+                if (context.getSwallowOutput())
+                {
+                    try
+                    {
                         SystemLogHandler.startCapture();
-                        if (comet) {
+                        if (comet)
+                        {
                             filterChain.doFilterEvent(request.getEvent());
                             request.setComet(true);
-                        } else {
-                            filterChain.doFilter(request.getRequest(), 
+                        } else
+                        {
+                            filterChain.doFilter(request.getRequest(),
                                     response.getResponse());
                         }
-                    } finally {
+                    }
+                    finally
+                    {
                         String log = SystemLogHandler.stopCapture();
-                        if (log != null && log.length() > 0) {
+                        if (log != null && log.length() > 0)
+                        {
                             context.getLogger().info(log);
                         }
                     }
-                } else {
-                    if (comet) {
+                } else
+                {
+                    if (comet)
+                    {
                         request.setComet(true);
                         filterChain.doFilterEvent(request.getEvent());
-                    } else {
+                    } else
+                    {
                         filterChain.doFilter
-                            (request.getRequest(), response.getResponse());
+                                (request.getRequest(), response.getResponse());
                     }
                 }
 
             }
             request.removeAttribute(Globals.JSP_FILE_ATTR);
-        } catch (ClientAbortException e) {
-        	request.removeAttribute(Globals.JSP_FILE_ATTR);
+        }
+        catch (ClientAbortException e)
+        {
+            request.removeAttribute(Globals.JSP_FILE_ATTR);
             throwable = e;
             exception(request, response, e);
-        } catch (IOException e) {
-        	request.removeAttribute(Globals.JSP_FILE_ATTR);
+        }
+        catch (IOException e)
+        {
+            request.removeAttribute(Globals.JSP_FILE_ATTR);
             container.getLogger().error(sm.getString("standardWrapper.serviceException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             throwable = e;
             exception(request, response, e);
-        } catch (UnavailableException e) {
-        	request.removeAttribute(Globals.JSP_FILE_ATTR);
+        }
+        catch (UnavailableException e)
+        {
+            request.removeAttribute(Globals.JSP_FILE_ATTR);
             container.getLogger().error(sm.getString("standardWrapper.serviceException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             //            throwable = e;
             //            exception(request, response, e);
             wrapper.unavailable(e);
             long available = wrapper.getAvailable();
-            if ((available > 0L) && (available < Long.MAX_VALUE)) {
+            if ((available > 0L) && (available < Long.MAX_VALUE))
+            {
                 response.setDateHeader("Retry-After", available);
                 response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                           sm.getString("standardWrapper.isUnavailable",
-                                        wrapper.getName()));
-            } else if (available == Long.MAX_VALUE) {
-            	response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                            sm.getString("standardWrapper.notFound",
-                                        wrapper.getName()));
+                        sm.getString("standardWrapper.isUnavailable",
+                                wrapper.getName()));
+            } else if (available == Long.MAX_VALUE)
+            {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        sm.getString("standardWrapper.notFound",
+                                wrapper.getName()));
             }
             // Do not save exception in 'throwable', because we
             // do not want to do exception(request, response, e) processing
-        } catch (ServletException e) {
-        	request.removeAttribute(Globals.JSP_FILE_ATTR);
+        }
+        catch (ServletException e)
+        {
+            request.removeAttribute(Globals.JSP_FILE_ATTR);
             Throwable rootCause = StandardWrapper.getRootCause(e);
-            if (!(rootCause instanceof ClientAbortException)) {
+            if (!(rootCause instanceof ClientAbortException))
+            {
                 container.getLogger().error(sm.getString("standardWrapper.serviceException",
-                                 wrapper.getName()), rootCause);
+                        wrapper.getName()), rootCause);
             }
             throwable = e;
             exception(request, response, e);
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             request.removeAttribute(Globals.JSP_FILE_ATTR);
             container.getLogger().error(sm.getString("standardWrapper.serviceException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             throwable = e;
             exception(request, response, e);
         }
 
         // Release the filter chain (if any) for this request
-        if (filterChain != null) {
-            if (request.isComet()) {
+        if (filterChain != null)
+        {
+            if (request.isComet())
+            {
                 // If this is a Comet request, then the same chain will be used for the
                 // processing of all subsequent events.
                 filterChain.reuse();
-            } else {
+            } else
+            {
                 filterChain.release();
             }
         }
 
         // Deallocate the allocated servlet instance
-        try {
-            if (servlet != null) {
+        try
+        {
+            if (servlet != null)
+            {
                 wrapper.deallocate(servlet);
             }
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.deallocateException",
-                             wrapper.getName()), e);
-            if (throwable == null) {
+                    wrapper.getName()), e);
+            if (throwable == null)
+            {
                 throwable = e;
                 exception(request, response, e);
             }
@@ -310,25 +361,30 @@ final class StandardWrapperValve
 
         // If this servlet has been marked permanently unavailable,
         // unload it and release this instance
-        try {
+        try
+        {
             if ((servlet != null) &&
-                (wrapper.getAvailable() == Long.MAX_VALUE)) {
+                    (wrapper.getAvailable() == Long.MAX_VALUE))
+            {
                 wrapper.unload();
             }
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.unloadException",
-                             wrapper.getName()), e);
-            if (throwable == null) {
+                    wrapper.getName()), e);
+            if (throwable == null)
+            {
                 throwable = e;
                 exception(request, response, e);
             }
         }
-        long t2=System.currentTimeMillis();
+        long t2 = System.currentTimeMillis();
 
-        long time=t2-t1;
+        long time = t2 - t1;
         processingTime += time;
-        if( time > maxTime) maxTime=time;
-        if( time < minTime) minTime=time;
+        if (time > maxTime) maxTime = time;
+        if (time < minTime) minTime = time;
 
     }
 
@@ -336,23 +392,23 @@ final class StandardWrapperValve
     /**
      * Process a Comet event. The main differences here are to not use sendError
      * (the response is committed), to avoid creating a new filter chain
-     * (which would work but be pointless), and a few very minor tweaks. 
+     * (which would work but be pointless), and a few very minor tweaks.
      *
-     * @param request The servlet request to be processed
+     * @param request  The servlet request to be processed
      * @param response The servlet response to be created
-     *
-     * @exception IOException if an input/output error occurs, or is thrown
-     *  by a subsequently invoked Valve, Filter, or Servlet
-     * @exception ServletException if a servlet error occurs, or is thrown
-     *  by a subsequently invoked Valve, Filter, or Servlet
+     * @throws IOException      if an input/output error occurs, or is thrown
+     *                          by a subsequently invoked Valve, Filter, or Servlet
+     * @throws ServletException if a servlet error occurs, or is thrown
+     *                          by a subsequently invoked Valve, Filter, or Servlet
      */
     public void event(Request request, Response response, CometEvent event)
-        throws IOException, ServletException {
-        
+            throws IOException, ServletException
+    {
+
         // Initialize local variables we may need
         Throwable throwable = null;
         // This should be a Request attribute...
-        long t1=System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
         // FIXME: Add a flag to count the total amount of events processed ? requestCount++;
         StandardWrapper wrapper = (StandardWrapper) getContainer();
         Servlet servlet = null;
@@ -360,116 +416,150 @@ final class StandardWrapperValve
 
         // Check for the application being marked unavailable
         boolean unavailable = !context.getAvailable() || wrapper.isUnavailable();
-        
+
         // Allocate a servlet instance to process this request
-        try {
-            if (!unavailable) {
+        try
+        {
+            if (!unavailable)
+            {
                 servlet = wrapper.allocate();
             }
-        } catch (UnavailableException e) {
+        }
+        catch (UnavailableException e)
+        {
             // The response is already committed, so it's not possible to do anything
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.allocateException",
-                             wrapper.getName()), StandardWrapper.getRootCause(e));
+                    wrapper.getName()), StandardWrapper.getRootCause(e));
             throwable = e;
             exception(request, response, e);
             servlet = null;
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.allocateException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             throwable = e;
             exception(request, response, e);
             servlet = null;
         }
 
         MessageBytes requestPathMB = null;
-        if (request != null) {
+        if (request != null)
+        {
             requestPathMB = request.getRequestPathMB();
         }
         request.setAttribute
-            (ApplicationFilterFactory.DISPATCHER_TYPE_ATTR,
-             ApplicationFilterFactory.REQUEST_INTEGER);
+                (ApplicationFilterFactory.DISPATCHER_TYPE_ATTR,
+                        ApplicationFilterFactory.REQUEST_INTEGER);
         request.setAttribute
-            (ApplicationFilterFactory.DISPATCHER_REQUEST_PATH_ATTR,
-             requestPathMB);
+                (ApplicationFilterFactory.DISPATCHER_REQUEST_PATH_ATTR,
+                        requestPathMB);
         // Get the current (unchanged) filter chain for this request
-        ApplicationFilterChain filterChain = 
-            (ApplicationFilterChain) request.getFilterChain();
+        ApplicationFilterChain filterChain =
+                (ApplicationFilterChain) request.getFilterChain();
 
         // Call the filter chain for this request
         // NOTE: This also calls the servlet's event() method
-        try {
+        try
+        {
             String jspFile = wrapper.getJspFile();
             if (jspFile != null)
                 request.setAttribute(Globals.JSP_FILE_ATTR, jspFile);
             else
                 request.removeAttribute(Globals.JSP_FILE_ATTR);
-            if ((servlet != null) && (filterChain != null)) {
+            if ((servlet != null) && (filterChain != null))
+            {
 
                 // Swallow output if needed
-                if (context.getSwallowOutput()) {
-                    try {
+                if (context.getSwallowOutput())
+                {
+                    try
+                    {
                         SystemLogHandler.startCapture();
                         filterChain.doFilterEvent(request.getEvent());
-                    } finally {
+                    }
+                    finally
+                    {
                         String log = SystemLogHandler.stopCapture();
-                        if (log != null && log.length() > 0) {
+                        if (log != null && log.length() > 0)
+                        {
                             context.getLogger().info(log);
                         }
                     }
-                } else {
+                } else
+                {
                     filterChain.doFilterEvent(request.getEvent());
                 }
 
             }
             request.removeAttribute(Globals.JSP_FILE_ATTR);
-        } catch (ClientAbortException e) {
+        }
+        catch (ClientAbortException e)
+        {
             request.removeAttribute(Globals.JSP_FILE_ATTR);
             throwable = e;
             exception(request, response, e);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             request.removeAttribute(Globals.JSP_FILE_ATTR);
             container.getLogger().error(sm.getString("standardWrapper.serviceException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             throwable = e;
             exception(request, response, e);
-        } catch (UnavailableException e) {
+        }
+        catch (UnavailableException e)
+        {
             request.removeAttribute(Globals.JSP_FILE_ATTR);
             container.getLogger().error(sm.getString("standardWrapper.serviceException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             // Do not save exception in 'throwable', because we
             // do not want to do exception(request, response, e) processing
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             request.removeAttribute(Globals.JSP_FILE_ATTR);
             Throwable rootCause = StandardWrapper.getRootCause(e);
-            if (!(rootCause instanceof ClientAbortException)) {
+            if (!(rootCause instanceof ClientAbortException))
+            {
                 container.getLogger().error(sm.getString("standardWrapper.serviceException",
-                                 wrapper.getName()), rootCause);
+                        wrapper.getName()), rootCause);
             }
             throwable = e;
             exception(request, response, e);
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             request.removeAttribute(Globals.JSP_FILE_ATTR);
             container.getLogger().error(sm.getString("standardWrapper.serviceException",
-                             wrapper.getName()), e);
+                    wrapper.getName()), e);
             throwable = e;
             exception(request, response, e);
         }
 
         // Release the filter chain (if any) for this request
-        if (filterChain != null) {
+        if (filterChain != null)
+        {
             filterChain.reuse();
         }
 
         // Deallocate the allocated servlet instance
-        try {
-            if (servlet != null) {
+        try
+        {
+            if (servlet != null)
+            {
                 wrapper.deallocate(servlet);
             }
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.deallocateException",
-                             wrapper.getName()), e);
-            if (throwable == null) {
+                    wrapper.getName()), e);
+            if (throwable == null)
+            {
                 throwable = e;
                 exception(request, response, e);
             }
@@ -477,26 +567,31 @@ final class StandardWrapperValve
 
         // If this servlet has been marked permanently unavailable,
         // unload it and release this instance
-        try {
+        try
+        {
             if ((servlet != null) &&
-                (wrapper.getAvailable() == Long.MAX_VALUE)) {
+                    (wrapper.getAvailable() == Long.MAX_VALUE))
+            {
                 wrapper.unload();
             }
-        } catch (Throwable e) {
+        }
+        catch (Throwable e)
+        {
             container.getLogger().error(sm.getString("standardWrapper.unloadException",
-                             wrapper.getName()), e);
-            if (throwable == null) {
+                    wrapper.getName()), e);
+            if (throwable == null)
+            {
                 throwable = e;
                 exception(request, response, e);
             }
         }
 
-        long t2=System.currentTimeMillis();
+        long t2 = System.currentTimeMillis();
 
-        long time=t2-t1;
+        long time = t2 - t1;
         processingTime += time;
-        if( time > maxTime) maxTime=time;
-        if( time < minTime) minTime=time;
+        if (time > maxTime) maxTime = time;
+        if (time < minTime) minTime = time;
 
     }
 
@@ -510,55 +605,66 @@ final class StandardWrapperValve
      * exceptions that occur during generation of the exception report are
      * logged and swallowed.
      *
-     * @param request The request being processed
-     * @param response The response being generated
+     * @param request   The request being processed
+     * @param response  The response being generated
      * @param exception The exception that occurred (which possibly wraps
-     *  a root cause exception
+     *                  a root cause exception
      */
     private void exception(Request request, Response response,
-                           Throwable exception) {
-    	request.setAttribute(Globals.EXCEPTION_ATTR, exception);
+                           Throwable exception)
+    {
+        request.setAttribute(Globals.EXCEPTION_ATTR, exception);
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
     }
 
-    public long getProcessingTime() {
+    public long getProcessingTime()
+    {
         return processingTime;
     }
 
-    public void setProcessingTime(long processingTime) {
+    public void setProcessingTime(long processingTime)
+    {
         this.processingTime = processingTime;
     }
 
-    public long getMaxTime() {
+    public long getMaxTime()
+    {
         return maxTime;
     }
 
-    public void setMaxTime(long maxTime) {
+    public void setMaxTime(long maxTime)
+    {
         this.maxTime = maxTime;
     }
 
-    public long getMinTime() {
+    public long getMinTime()
+    {
         return minTime;
     }
 
-    public void setMinTime(long minTime) {
+    public void setMinTime(long minTime)
+    {
         this.minTime = minTime;
     }
 
-    public int getRequestCount() {
+    public int getRequestCount()
+    {
         return requestCount;
     }
 
-    public void setRequestCount(int requestCount) {
+    public void setRequestCount(int requestCount)
+    {
         this.requestCount = requestCount;
     }
 
-    public int getErrorCount() {
+    public int getErrorCount()
+    {
         return errorCount;
     }
 
-    public void setErrorCount(int errorCount) {
+    public void setErrorCount(int errorCount)
+    {
         this.errorCount = errorCount;
     }
 

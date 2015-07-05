@@ -26,72 +26,84 @@ import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
-/** Shm implementation using JDK1.4 nio.
- *
+/**
+ * Shm implementation using JDK1.4 nio.
  *
  * @author Costin Manolache
  */
-public class Shm14 extends Shm {
-    
-    
+public class Shm14 extends Shm
+{
+
+
     // Not ready yet.
-    
-    private static org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog( Shm14.class );
-    
+
+    private static org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(Shm14.class);
+
     MappedByteBuffer bb;
 
-    public void init() {
-        try {
-            RandomAccessFile f=new RandomAccessFile( file, "rw" );
-            FileChannel fc=f.getChannel();
-            
-            bb=fc.map( FileChannel.MapMode.READ_WRITE, 0, f.length());
-        } catch( IOException ex ) {
+    public static void main(String args[])
+    {
+        try
+        {
+            Shm14 shm = new Shm14();
+
+            if (args.length == 0 ||
+                    ("-?".equals(args[0])))
+            {
+                shm.setHelp(true);
+                return;
+            }
+
+            IntrospectionUtils.processArgs(shm, args);
+            shm.execute();
+        }
+        catch (Exception ex)
+        {
             ex.printStackTrace();
         }
     }
 
-    public void dumpScoreboard(String file) {
+    public void init()
+    {
+        try
+        {
+            RandomAccessFile f = new RandomAccessFile(file, "rw");
+            FileChannel fc = f.getChannel();
+
+            bb = fc.map(FileChannel.MapMode.READ_WRITE, 0, f.length());
+        }
+        catch (IOException ex)
+        {
+            ex.printStackTrace();
+        }
+    }
+
+    public void dumpScoreboard(String file)
+    {
         // We can only sync with our backing store.
         bb.force();
         // XXX we should copy the content to the file
     }
 
-    public void resetScoreboard() throws IOException {
+    public void resetScoreboard() throws IOException
+    {
         // XXX Need to write the head
     }
 
-
-    public  int invoke(Msg msg, MsgContext ep )
-        throws IOException
+    public int invoke(Msg msg, MsgContext ep)
+            throws IOException
     {
         if (log.isDebugEnabled())
-            log.debug("ChannelShm14.invoke: "  + ep );
+            log.debug("ChannelShm14.invoke: " + ep);
 
         // 
-        
-        return 0;
-    }    
 
-    public void initCli() {
+        return 0;
     }
 
-    public static void main( String args[] ) {
-        try {
-            Shm14 shm=new Shm14();
-
-            if( args.length == 0 ||
-                ( "-?".equals(args[0]) ) ) {
-                shm.setHelp( true );
-                return;
-            }
-
-            IntrospectionUtils.processArgs( shm, args);
-            shm.execute();
-        } catch( Exception ex ) {
-            ex.printStackTrace();
-        }
+    public void initCli()
+    {
     }
 
 }

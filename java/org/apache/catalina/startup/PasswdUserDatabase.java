@@ -22,8 +22,8 @@ package org.apache.catalina.startup;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 
 /**
@@ -31,27 +31,14 @@ import java.util.Enumeration;
  * that processes the <code>/etc/passwd</code> file on a Unix system.
  *
  * @author Craig R. McClanahan
- *
  */
 
 public final class PasswdUserDatabase
-    implements UserDatabase {
+        implements UserDatabase
+{
 
 
     // --------------------------------------------------------- Constructors
-
-
-    /**
-     * Initialize a new instance of this user database component.
-     */
-    public PasswdUserDatabase() {
-
-        super();
-
-    }
-
-
-    // --------------------------------------------------- Instance Variables
 
 
     /**
@@ -60,25 +47,35 @@ public final class PasswdUserDatabase
     private static final String PASSWORD_FILE = "/etc/passwd";
 
 
+    // --------------------------------------------------- Instance Variables
     /**
      * The set of home directories for all defined users, keyed by username.
      */
     private Hashtable homes = new Hashtable();
-
-
     /**
      * The UserConfig listener with which we are associated.
      */
     private UserConfig userConfig = null;
 
 
-    // ----------------------------------------------------------- Properties
+    /**
+     * Initialize a new instance of this user database component.
+     */
+    public PasswdUserDatabase()
+    {
 
+        super();
+
+    }
+
+
+    // ----------------------------------------------------------- Properties
 
     /**
      * Return the UserConfig listener with which we are associated.
      */
-    public UserConfig getUserConfig() {
+    public UserConfig getUserConfig()
+    {
 
         return (this.userConfig);
 
@@ -90,7 +87,8 @@ public final class PasswdUserDatabase
      *
      * @param userConfig The new UserConfig listener
      */
-    public void setUserConfig(UserConfig userConfig) {
+    public void setUserConfig(UserConfig userConfig)
+    {
 
         this.userConfig = userConfig;
         init();
@@ -106,7 +104,8 @@ public final class PasswdUserDatabase
      *
      * @param user User for which a home directory should be retrieved
      */
-    public String getHome(String user) {
+    public String getHome(String user)
+    {
 
         return ((String) homes.get(user));
 
@@ -116,7 +115,8 @@ public final class PasswdUserDatabase
     /**
      * Return an enumeration of the usernames defined on this server.
      */
-    public Enumeration getUsers() {
+    public Enumeration getUsers()
+    {
 
         return (homes.keys());
 
@@ -129,18 +129,22 @@ public final class PasswdUserDatabase
     /**
      * Initialize our set of users and home directories.
      */
-    private void init() {
+    private void init()
+    {
 
         BufferedReader reader = null;
-        try {
+        try
+        {
 
             reader = new BufferedReader(new FileReader(PASSWORD_FILE));
 
-            while (true) {
+            while (true)
+            {
 
                 // Accumulate the next line
                 StringBuffer buffer = new StringBuffer();
-                while (true) {
+                while (true)
+                {
                     int ch = reader.read();
                     if ((ch < 0) || (ch == '\n'))
                         break;
@@ -155,13 +159,16 @@ public final class PasswdUserDatabase
                 String tokens[] = new String[7];
                 for (int i = 0; i < tokens.length; i++)
                     tokens[i] = null;
-                while (n < tokens.length) {
+                while (n < tokens.length)
+                {
                     String token = null;
                     int colon = line.indexOf(':');
-                    if (colon >= 0) {
+                    if (colon >= 0)
+                    {
                         token = line.substring(0, colon);
                         line = line.substring(colon + 1);
-                    } else {
+                    } else
+                    {
                         token = line;
                         line = "";
                     }
@@ -177,11 +184,17 @@ public final class PasswdUserDatabase
             reader.close();
             reader = null;
 
-        } catch (Exception e) {
-            if (reader != null) {
-                try {
+        }
+        catch (Exception e)
+        {
+            if (reader != null)
+            {
+                try
+                {
                     reader.close();
-                } catch (IOException f) {
+                }
+                catch (IOException f)
+                {
                     ;
                 }
                 reader = null;

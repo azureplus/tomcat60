@@ -27,16 +27,17 @@ import org.apache.juli.logging.Log;
  * <li>NOTHING: Log nothing.</li>
  * <li>DEBUG_ALL: Log all problems at DEBUG log level.</li>
  * <li>INFO_THEN_DEBUG: Log first problem at INFO log level and any further
- *     issues in the following TBD (configurable) seconds at DEBUG level</li>
+ * issues in the following TBD (configurable) seconds at DEBUG level</li>
  * <li>INFO_ALL: Log all problems at INFO log level.</li>
  * </ul>
  * By default, INFO_THEN_DEBUG is used with a suppression time of 24 hours.
- *
+ * <p/>
  * NOTE: This class is not completely thread-safe. When using INFO_THEN_DEBUG it
  * is possible that several INFO messages will be logged before dropping to
  * DEBUG.
  */
-public class UserDataHelper {
+public class UserDataHelper
+{
 
     private final Log log;
 
@@ -50,18 +51,24 @@ public class UserDataHelper {
     private volatile long lastInfoTime = 0;
 
 
-    public UserDataHelper(Log log) {
+    public UserDataHelper(Log log)
+    {
         this.log = log;
 
         Config tempConfig;
         String configString = System.getProperty(
                 "org.apache.juli.logging.UserDataHelper.CONFIG");
-        if (configString == null) {
+        if (configString == null)
+        {
             tempConfig = Config.INFO_THEN_DEBUG;
-        } else {
-            try {
+        } else
+        {
+            try
+            {
                 tempConfig = Config.valueOf(configString);
-            } catch (IllegalArgumentException iae) {
+            }
+            catch (IllegalArgumentException iae)
+            {
                 // Ignore - use default
                 tempConfig = Config.INFO_THEN_DEBUG;
             }
@@ -72,7 +79,8 @@ public class UserDataHelper {
                 "org.apache.juli.logging.UserDataHelper.SUPPRESSION_TIME",
                 60 * 60 * 24).intValue() * 1000L;
 
-        if (suppressionTime == 0) {
+        if (suppressionTime == 0)
+        {
             tempConfig = Config.INFO_ALL;
         }
 
@@ -83,25 +91,32 @@ public class UserDataHelper {
     /**
      * Returns log mode for the next log message, or <code>null</code> if the
      * message should not be logged.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * If <code>INFO_THEN_DEBUG</code> configuration option is enabled, this
      * method might change internal state of this object.
      *
      * @return Log mode, or <code>null</code>
      */
-    public Mode getNextMode() {
-        if (Config.NONE == config) {
+    public Mode getNextMode()
+    {
+        if (Config.NONE == config)
+        {
             return null;
-        } else if (Config.DEBUG_ALL == config) {
+        } else if (Config.DEBUG_ALL == config)
+        {
             return log.isDebugEnabled() ? Mode.DEBUG : null;
-        } else if (Config.INFO_THEN_DEBUG == config) {
-            if (logAtInfo()) {
+        } else if (Config.INFO_THEN_DEBUG == config)
+        {
+            if (logAtInfo())
+            {
                 return log.isInfoEnabled() ? Mode.INFO_THEN_DEBUG : null;
-            } else {
+            } else
+            {
                 return log.isDebugEnabled() ? Mode.DEBUG : null;
             }
-        } else if (Config.INFO_ALL == config) {
+        } else if (Config.INFO_ALL == config)
+        {
             return log.isInfoEnabled() ? Mode.INFO : null;
         }
         // Should never happen
@@ -114,15 +129,18 @@ public class UserDataHelper {
      * see a simple enough way to make it completely thread-safe that was not
      * likely to compromise performance.
      */
-    private boolean logAtInfo() {
+    private boolean logAtInfo()
+    {
 
-        if (suppressionTime < 0 && lastInfoTime > 0) {
+        if (suppressionTime < 0 && lastInfoTime > 0)
+        {
             return false;
         }
 
         long now = System.currentTimeMillis();
 
-        if (lastInfoTime + suppressionTime > now) {
+        if (lastInfoTime + suppressionTime > now)
+        {
             return false;
         }
 
@@ -131,7 +149,8 @@ public class UserDataHelper {
     }
 
 
-    private static enum Config {
+    private static enum Config
+    {
         NONE,
         DEBUG_ALL,
         INFO_THEN_DEBUG,
@@ -141,7 +160,8 @@ public class UserDataHelper {
     /**
      * Log mode for the next log message.
      */
-    public static enum Mode {
+    public static enum Mode
+    {
         DEBUG,
         INFO_THEN_DEBUG,
         INFO

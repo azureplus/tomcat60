@@ -25,44 +25,54 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstString extends SimpleNode {
-    public AstString(int id) {
+public final class AstString extends SimpleNode
+{
+    private volatile String string;
+
+    public AstString(int id)
+    {
         super(id);
     }
 
-    private volatile String string;
-
-    public String getString() {
-        if (this.string == null) {
+    public String getString()
+    {
+        if (this.string == null)
+        {
             this.string = this.image.substring(1, this.image.length() - 1);
         }
         return this.string;
     }
 
     public Class getType(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return String.class;
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return this.getString();
     }
 
-    public void setImage(String image) {
-        if (image.indexOf('\\') == -1) {
+    public void setImage(String image)
+    {
+        if (image.indexOf('\\') == -1)
+        {
             this.image = image;
             return;
         }
         int size = image.length();
         StringBuffer buf = new StringBuffer(size);
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++)
+        {
             char c = image.charAt(i);
-            if (c == '\\' && i + 1 < size) {
+            if (c == '\\' && i + 1 < size)
+            {
                 char c1 = image.charAt(i + 1);
-                if (c1 == '\\' || c1 == '"' || c1 == '\'') {
+                if (c1 == '\\' || c1 == '"' || c1 == '\'')
+                {
                     c = c1;
                     i++;
                 }

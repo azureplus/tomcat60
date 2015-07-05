@@ -25,20 +25,23 @@ import javax.el.ELException;
 
 /**
  * @author Jacob Hookom [jacob@hookom.net]
- *
  */
-public final class AstNot extends SimpleNode {
-    public AstNot(int id) {
+public final class AstNot extends SimpleNode
+{
+    public AstNot(int id)
+    {
         super(id);
     }
 
     public Class getType(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         return Boolean.class;
     }
 
     public Object getValue(EvaluationContext ctx)
-            throws ELException {
+            throws ELException
+    {
         Object obj = this.children[0].getValue(ctx);
         Boolean b = coerceToBoolean(obj);
         return Boolean.valueOf(!b.booleanValue());

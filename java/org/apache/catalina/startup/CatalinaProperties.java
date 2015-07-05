@@ -30,21 +30,22 @@ import java.util.Properties;
  * Utility class to read the bootstrap Catalina configuration.
  *
  * @author Remy Maucherat
- *
  */
 
-public class CatalinaProperties {
+public class CatalinaProperties
+{
 
 
     // ------------------------------------------------------- Static Variables
 
-    private static org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog( CatalinaProperties.class );
+    private static org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(CatalinaProperties.class);
 
     private static Properties properties = null;
 
 
-    static {
+    static
+    {
 
         loadProperties();
 
@@ -57,8 +58,9 @@ public class CatalinaProperties {
     /**
      * Return specified property value.
      */
-    public static String getProperty(String name) {
-	
+    public static String getProperty(String name)
+    {
+
         return properties.getProperty(name);
 
     }
@@ -67,7 +69,8 @@ public class CatalinaProperties {
     /**
      * Return specified property value.
      */
-    public static String getProperty(String name, String defaultValue) {
+    public static String getProperty(String name, String defaultValue)
+    {
 
         return properties.getProperty(name, defaultValue);
 
@@ -80,63 +83,83 @@ public class CatalinaProperties {
     /**
      * Load properties.
      */
-    private static void loadProperties() {
+    private static void loadProperties()
+    {
 
         InputStream is = null;
         Throwable error = null;
 
-        try {
+        try
+        {
             String configUrl = getConfigUrl();
-            if (configUrl != null) {
+            if (configUrl != null)
+            {
                 is = (new URL(configUrl)).openStream();
             }
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
             // Ignore
         }
 
-        if (is == null) {
-            try {
+        if (is == null)
+        {
+            try
+            {
                 File home = new File(getCatalinaBase());
                 File conf = new File(home, "conf");
                 File properties = new File(conf, "catalina.properties");
                 is = new FileInputStream(properties);
-            } catch (Throwable t) {
+            }
+            catch (Throwable t)
+            {
                 // Ignore
             }
         }
 
-        if (is == null) {
-            try {
+        if (is == null)
+        {
+            try
+            {
                 is = CatalinaProperties.class.getResourceAsStream
-                    ("/org/apache/catalina/startup/catalina.properties");
-            } catch (Throwable t) {
+                        ("/org/apache/catalina/startup/catalina.properties");
+            }
+            catch (Throwable t)
+            {
                 // Ignore
             }
         }
 
-        if (is != null) {
-            try {
+        if (is != null)
+        {
+            try
+            {
                 properties = new Properties();
                 properties.load(is);
                 is.close();
-            } catch (Throwable t) {
+            }
+            catch (Throwable t)
+            {
                 error = t;
             }
         }
 
-        if ((is == null) || (error != null)) {
+        if ((is == null) || (error != null))
+        {
             // Do something
             log.warn("Failed to load catalina.properties", error);
             // That's fine - we have reasonable defaults.
-            properties=new Properties();
+            properties = new Properties();
         }
 
         // Register the properties as system properties
         Enumeration enumeration = properties.propertyNames();
-        while (enumeration.hasMoreElements()) {
+        while (enumeration.hasMoreElements())
+        {
             String name = (String) enumeration.nextElement();
             String value = properties.getProperty(name);
-            if (value != null) {
+            if (value != null)
+            {
                 System.setProperty(name, value);
             }
         }
@@ -147,16 +170,18 @@ public class CatalinaProperties {
     /**
      * Get the value of the catalina.home environment variable.
      */
-    private static String getCatalinaHome() {
+    private static String getCatalinaHome()
+    {
         return System.getProperty("catalina.home",
-                                  System.getProperty("user.dir"));
+                System.getProperty("user.dir"));
     }
-    
-    
+
+
     /**
      * Get the value of the catalina.base environment variable.
      */
-    private static String getCatalinaBase() {
+    private static String getCatalinaBase()
+    {
         return System.getProperty("catalina.base", getCatalinaHome());
     }
 
@@ -164,7 +189,8 @@ public class CatalinaProperties {
     /**
      * Get the value of the configuration URL.
      */
-    private static String getConfigUrl() {
+    private static String getConfigUrl()
+    {
         return System.getProperty("catalina.config");
     }
 

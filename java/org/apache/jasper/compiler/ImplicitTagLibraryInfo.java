@@ -38,7 +38,8 @@ import java.util.*;
  *
  * @author Jan Luehe
  */
-class ImplicitTagLibraryInfo extends TagLibraryInfo {
+class ImplicitTagLibraryInfo extends TagLibraryInfo
+{
 
     private static final String WEB_INF_TAGS = "/WEB-INF/tags";
     private static final String TAG_FILE_SUFFIX = ".tag";
@@ -59,11 +60,12 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
      * Constructor.
      */
     public ImplicitTagLibraryInfo(JspCompilationContext ctxt,
-            ParserController pc,
-            PageInfo pi,
-            String prefix,
-            String tagdir,
-            ErrorDispatcher err) throws JasperException {
+                                  ParserController pc,
+                                  PageInfo pi,
+                                  String prefix,
+                                  String tagdir,
+                                  ErrorDispatcher err) throws JasperException
+    {
         super(prefix, null);
         this.pc = pc;
         this.pi = pi;
@@ -76,28 +78,34 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
         tlibversion = TLIB_VERSION;
         jspversion = JSP_VERSION;
 
-        if (!tagdir.startsWith(WEB_INF_TAGS)) {
+        if (!tagdir.startsWith(WEB_INF_TAGS))
+        {
             err.jspError("jsp.error.invalid.tagdir", tagdir);
         }
 
         // Determine the value of the <short-name> subelement of the
         // "imaginary" <taglib> element
         if (tagdir.equals(WEB_INF_TAGS)
-                || tagdir.equals( WEB_INF_TAGS + "/")) {
+                || tagdir.equals(WEB_INF_TAGS + "/"))
+        {
             shortname = TAGS_SHORTNAME;
-        } else {
+        } else
+        {
             shortname = tagdir.substring(WEB_INF_TAGS.length());
             shortname = shortname.replace('/', '-');
         }
 
         // Populate mapping of tag names to tag file paths
         Set dirList = ctxt.getResourcePaths(tagdir);
-        if (dirList != null) {
+        if (dirList != null)
+        {
             Iterator it = dirList.iterator();
-            while (it.hasNext()) {
+            while (it.hasNext())
+            {
                 String path = (String) it.next();
                 if (path.endsWith(TAG_FILE_SUFFIX)
-                        || path.endsWith(TAGX_FILE_SUFFIX)) {
+                        || path.endsWith(TAGX_FILE_SUFFIX))
+                {
                     /*
                      * Use the filename of the tag file, without the .tag or
                      * .tagx extension, respectively, as the <name> subelement
@@ -109,14 +117,18 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
                     tagName = tagName.substring(0,
                             tagName.lastIndexOf(suffix));
                     tagFileMap.put(tagName, path);
-                } else if (path.endsWith(IMPLICIT_TLD)) {
+                } else if (path.endsWith(IMPLICIT_TLD))
+                {
                     InputStream in = null;
-                    try {
+                    try
+                    {
                         in = ctxt.getResourceAsStream(path);
-                        if (in != null) {
+                        if (in != null)
+                        {
 
                             // Add implicit TLD to dependency list
-                            if (pi != null) {
+                            if (pi != null)
+                            {
                                 pi.addDependant(path);
                             }
 
@@ -128,53 +140,71 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
                                     servletContext.getInitParameter(
                                             Constants.XML_BLOCK_EXTERNAL_INIT_PARAM);
                             boolean blockExternal;
-                            if (blockExternalString == null) {
+                            if (blockExternalString == null)
+                            {
                                 blockExternal = true;
-                            } else {
+                            } else
+                            {
                                 blockExternal = Boolean.parseBoolean(blockExternalString);
                             }
 
                             ParserUtils pu = new ParserUtils(validate, blockExternal);
                             TreeNode tld = pu.parseXMLDocument(uri, in);
 
-                            if (tld.findAttribute("version") != null) {
+                            if (tld.findAttribute("version") != null)
+                            {
                                 this.jspversion = tld.findAttribute("version");
                             }
 
                             // Process each child element of our <taglib> element
                             Iterator list = tld.findChildren();
 
-                            while (list.hasNext()) {
+                            while (list.hasNext())
+                            {
                                 TreeNode element = (TreeNode) list.next();
                                 String tname = element.getName();
 
                                 if ("tlibversion".equals(tname) // JSP 1.1
-                                        || "tlib-version".equals(tname)) { // JSP 1.2
+                                        || "tlib-version".equals(tname))
+                                { // JSP 1.2
                                     this.tlibversion = element.getBody();
                                 } else if ("jspversion".equals(tname)
-                                        || "jsp-version".equals(tname)) {
+                                        || "jsp-version".equals(tname))
+                                {
                                     this.jspversion = element.getBody();
-                                } else if ("shortname".equals(tname) || "short-name".equals(tname)) {
+                                } else if ("shortname".equals(tname) || "short-name".equals(tname))
+                                {
                                     // Ignore
-                                } else {
+                                } else
+                                {
                                     // All other elements are invalid
                                     err.jspError("jsp.error.invalid.implicit", path);
                                 }
                             }
-                            try {
+                            try
+                            {
                                 double version = Double.parseDouble(this.jspversion);
-                                if (version < 2.0) {
+                                if (version < 2.0)
+                                {
                                     err.jspError("jsp.error.invalid.implicit.version", path);
                                 }
-                            } catch (NumberFormatException e) {
+                            }
+                            catch (NumberFormatException e)
+                            {
                                 err.jspError("jsp.error.invalid.implicit.version", path);
                             }
                         }
-                    } finally {
-                        if (in != null) {
-                            try {
+                    }
+                    finally
+                    {
+                        if (in != null)
+                        {
+                            try
+                            {
                                 in.close();
-                            } catch (Throwable t) {
+                            }
+                            catch (Throwable t)
+                            {
                             }
                         }
                     }
@@ -191,23 +221,29 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
      * @return The TagFileInfo corresponding to the given tag name, or null if
      * the given tag name is not implemented as a tag file
      */
-    public TagFileInfo getTagFile(String shortName) {
+    public TagFileInfo getTagFile(String shortName)
+    {
 
         TagFileInfo tagFile = super.getTagFile(shortName);
-        if (tagFile == null) {
+        if (tagFile == null)
+        {
             String path = (String) tagFileMap.get(shortName);
-            if (path == null) {
+            if (path == null)
+            {
                 return null;
             }
 
             TagInfo tagInfo = null;
-            try {
+            try
+            {
                 tagInfo = TagFileProcessor.parseTagFileDirectives(pc,
                         shortName,
                         path,
                         pc.getJspCompilationContext().getTagFileJarUrl(path),
                         this);
-            } catch (JasperException je) {
+            }
+            catch (JasperException je)
+            {
                 throw new RuntimeException(je.toString(), je);
             }
 
@@ -221,7 +257,8 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
         return tagFile;
     }
 
-    public TagLibraryInfo[] getTagLibraryInfos() {
+    public TagLibraryInfo[] getTagLibraryInfos()
+    {
         Collection coll = pi.getTaglibs();
         return (TagLibraryInfo[]) coll.toArray(new TagLibraryInfo[0]);
     }

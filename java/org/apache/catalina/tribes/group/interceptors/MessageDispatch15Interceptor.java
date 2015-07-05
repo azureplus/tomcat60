@@ -15,28 +15,28 @@
  */
 package org.apache.catalina.tribes.group.interceptors;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.catalina.tribes.ChannelMessage;
 import org.apache.catalina.tribes.Member;
 import org.apache.catalina.tribes.group.InterceptorPayload;
 import org.apache.catalina.tribes.transport.bio.util.LinkObject;
 import org.apache.catalina.tribes.util.TcclThreadFactory;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
- * 
  * Same implementation as the MessageDispatchInterceptor
  * except is ues an atomic long for the currentSize calculation
  * and uses a thread pool for message sending.
- * 
+ *
  * @author Filip Hanik
  * @version 1.0
  */
 
-public class MessageDispatch15Interceptor extends MessageDispatchInterceptor {
+public class MessageDispatch15Interceptor extends MessageDispatchInterceptor
+{
 
     protected AtomicLong currentSize = new AtomicLong(0);
     protected ThreadPoolExecutor executor = null;
@@ -45,23 +45,29 @@ public class MessageDispatch15Interceptor extends MessageDispatchInterceptor {
     protected long keepAliveTime = 5000;
     protected LinkedBlockingQueue<Runnable> runnablequeue = new LinkedBlockingQueue<Runnable>();
 
-    public long getCurrentSize() {
+    public long getCurrentSize()
+    {
         return currentSize.get();
     }
 
-    public long addAndGetCurrentSize(long inc) {
+    public long addAndGetCurrentSize(long inc)
+    {
         return currentSize.addAndGet(inc);
     }
 
-    public long setAndGetCurrentSize(long value) {
+    public long setAndGetCurrentSize(long value)
+    {
         currentSize.set(value);
         return value;
     }
-    
-    public boolean addToQueue(ChannelMessage msg, Member[] destination, InterceptorPayload payload) {
-        final LinkObject obj = new LinkObject(msg,destination,payload);
-        Runnable r = new Runnable() {
-            public void run() {
+
+    public boolean addToQueue(ChannelMessage msg, Member[] destination, InterceptorPayload payload)
+    {
+        final LinkObject obj = new LinkObject(msg, destination, payload);
+        Runnable r = new Runnable()
+        {
+            public void run()
+            {
                 sendAsyncData(obj);
             }
         };
@@ -69,46 +75,55 @@ public class MessageDispatch15Interceptor extends MessageDispatchInterceptor {
         return true;
     }
 
-    public LinkObject removeFromQueue() {
+    public LinkObject removeFromQueue()
+    {
         return null; //not used, thread pool contains its own queue.
     }
 
-    public void startQueue() {
-        if ( run ) return;
+    public void startQueue()
+    {
+        if (run) return;
         executor = new ThreadPoolExecutor(maxSpareThreads, maxThreads,
                 keepAliveTime, TimeUnit.MILLISECONDS, runnablequeue,
                 new TcclThreadFactory());
         run = true;
     }
 
-    public void stopQueue() {
+    public void stopQueue()
+    {
         run = false;
         executor.shutdownNow();
         setAndGetCurrentSize(0);
         runnablequeue.clear();
     }
 
-    public long getKeepAliveTime() {
+    public long getKeepAliveTime()
+    {
         return keepAliveTime;
     }
 
-    public int getMaxSpareThreads() {
-        return maxSpareThreads;
-    }
-
-    public int getMaxThreads() {
-        return maxThreads;
-    }
-
-    public void setKeepAliveTime(long keepAliveTime) {
+    public void setKeepAliveTime(long keepAliveTime)
+    {
         this.keepAliveTime = keepAliveTime;
     }
 
-    public void setMaxSpareThreads(int maxSpareThreads) {
+    public int getMaxSpareThreads()
+    {
+        return maxSpareThreads;
+    }
+
+    public void setMaxSpareThreads(int maxSpareThreads)
+    {
         this.maxSpareThreads = maxSpareThreads;
     }
 
-    public void setMaxThreads(int maxThreads) {
+    public int getMaxThreads()
+    {
+        return maxThreads;
+    }
+
+    public void setMaxThreads(int maxThreads)
+    {
         this.maxThreads = maxThreads;
     }
 

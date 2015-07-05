@@ -32,14 +32,16 @@ import java.util.List;
  * classloading hacks involved - see {@link WebappClassLoader#clearReferences()}
  * for details - but the short version is do not just create a new instance of
  * this class with the new keyword.
- * 
+ * <p/>
  * Since this class is loaded by {@link WebappClassLoader}, it can not refer to
  * any internal Tomcat classes as that will cause the security manager to
  * complain.
  */
-public class JdbcLeakPrevention {
+public class JdbcLeakPrevention
+{
 
-    public List<String> clearJdbcDriverRegistrations() throws SQLException {
+    public List<String> clearJdbcDriverRegistrations() throws SQLException
+    {
         List<String> driverNames = new ArrayList<String>();
 
         /*
@@ -53,20 +55,24 @@ public class JdbcLeakPrevention {
          */
         HashSet<Driver> originalDrivers = new HashSet<Driver>();
         Enumeration<Driver> drivers = DriverManager.getDrivers();
-        while (drivers.hasMoreElements()) {
+        while (drivers.hasMoreElements())
+        {
             originalDrivers.add(drivers.nextElement());
         }
         drivers = DriverManager.getDrivers();
-        while (drivers.hasMoreElements()) {
+        while (drivers.hasMoreElements())
+        {
             Driver driver = drivers.nextElement();
             // Only unload the drivers this web app loaded
             if (driver.getClass().getClassLoader() !=
-                this.getClass().getClassLoader()) {
+                    this.getClass().getClassLoader())
+            {
                 continue;
             }
             // Only report drivers that were originally registered. Skip any
             // that were registered as a side-effect of this code.
-            if (originalDrivers.contains(driver)) {
+            if (originalDrivers.contains(driver))
+            {
                 driverNames.add(driver.getClass().getCanonicalName());
             }
             DriverManager.deregisterDriver(driver);

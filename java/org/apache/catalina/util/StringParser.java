@@ -28,19 +28,49 @@ package org.apache.catalina.util;
  * method with the appropriate saved offset values.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public final class StringParser {
+public final class StringParser
+{
 
 
     // ----------------------------------------------------------- Constructors
 
 
     /**
+     * The characters of the current string, as a character array.  Stored
+     * when the string is first specified to speed up access to characters
+     * being compared during parsing.
+     */
+    private char chars[] = null;
+    /**
+     * The zero-relative index of the current point at which we are
+     * positioned within the string being parsed.  <strong>NOTE</strong>:
+     * the value of this index can be one larger than the index of the last
+     * character of the string (i.e. equal to the string length) if you
+     * parse off the end of the string.  This value is useful for extracting
+     * substrings that include the end of the string.
+     */
+    private int index = 0;
+
+
+    // ----------------------------------------------------- Instance Variables
+    /**
+     * The length of the String we are currently parsing.  Stored when the
+     * string is first specified to avoid repeated recalculations.
+     */
+    private int length = 0;
+    /**
+     * The String we are currently parsing.
+     */
+    private String string = null;
+
+
+    /**
      * Construct a string parser with no preset string to be parsed.
      */
-    public StringParser() {
+    public StringParser()
+    {
 
         this(null);
 
@@ -53,7 +83,8 @@ public final class StringParser {
      *
      * @param string The string to be parsed
      */
-    public StringParser(String string) {
+    public StringParser(String string)
+    {
 
         super();
         setString(string);
@@ -61,49 +92,14 @@ public final class StringParser {
     }
 
 
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The characters of the current string, as a character array.  Stored
-     * when the string is first specified to speed up access to characters
-     * being compared during parsing.
-     */
-    private char chars[] = null;
-
-
-    /**
-     * The zero-relative index of the current point at which we are
-     * positioned within the string being parsed.  <strong>NOTE</strong>:
-     * the value of this index can be one larger than the index of the last
-     * character of the string (i.e. equal to the string length) if you
-     * parse off the end of the string.  This value is useful for extracting
-     * substrings that include the end of the string.
-     */
-    private int index = 0;
-
-
-    /**
-     * The length of the String we are currently parsing.  Stored when the
-     * string is first specified to avoid repeated recalculations.
-     */
-    private int length = 0;
-
-
-    /**
-     * The String we are currently parsing.
-     */
-    private String string = null;
-
-
     // ------------------------------------------------------------- Properties
-
 
     /**
      * Return the zero-relative index of our current parsing position
      * within the string being parsed.
      */
-    public int getIndex() {
+    public int getIndex()
+    {
 
         return (this.index);
 
@@ -113,7 +109,8 @@ public final class StringParser {
     /**
      * Return the length of the string we are parsing.
      */
-    public int getLength() {
+    public int getLength()
+    {
 
         return (this.length);
 
@@ -123,7 +120,8 @@ public final class StringParser {
     /**
      * Return the String we are currently parsing.
      */
-    public String getString() {
+    public String getString()
+    {
 
         return (this.string);
 
@@ -136,13 +134,16 @@ public final class StringParser {
      *
      * @param string The string to be parsed.
      */
-    public void setString(String string) {
+    public void setString(String string)
+    {
 
         this.string = string;
-        if (string != null) {
+        if (string != null)
+        {
             this.length = string.length();
             chars = this.string.toCharArray();
-        } else {
+        } else
+        {
             this.length = 0;
             chars = new char[0];
         }
@@ -158,7 +159,8 @@ public final class StringParser {
      * Advance the current parsing position by one, if we are not already
      * past the end of the string.
      */
-    public void advance() {
+    public void advance()
+    {
 
         if (index < length)
             index++;
@@ -173,7 +175,8 @@ public final class StringParser {
      *
      * @param start Starting index, zero relative, inclusive
      */
-    public String extract(int start) {
+    public String extract(int start)
+    {
 
         if ((start < 0) || (start >= length))
             return ("");
@@ -189,9 +192,10 @@ public final class StringParser {
      * not possible, a zero-length string is returned.
      *
      * @param start Starting index, zero relative, inclusive
-     * @param end Ending index, zero relative, exclusive
+     * @param end   Ending index, zero relative, exclusive
      */
-    public String extract(int start, int end) {
+    public String extract(int start, int end)
+    {
 
         if ((start < 0) || (start >= end) || (end > length))
             return ("");
@@ -209,7 +213,8 @@ public final class StringParser {
      *
      * @param ch Character to be found
      */
-    public int findChar(char ch) {
+    public int findChar(char ch)
+    {
 
         while ((index < length) && (ch != chars[index]))
             index++;
@@ -224,7 +229,8 @@ public final class StringParser {
      * if no more non-whitespace characters are found.  The current
      * parsing position is updated to the returned value.
      */
-    public int findText() {
+    public int findText()
+    {
 
         while ((index < length) && isWhite(chars[index]))
             index++;
@@ -239,7 +245,8 @@ public final class StringParser {
      * if no more whitespace characters are found.  The current parsing
      * position is updated to the returned value.
      */
-    public int findWhite() {
+    public int findWhite()
+    {
 
         while ((index < length) && !isWhite(chars[index]))
             index++;
@@ -252,7 +259,8 @@ public final class StringParser {
      * Reset the current state of the parser to the beginning of the
      * current string being parsed.
      */
-    public void reset() {
+    public void reset()
+    {
 
         index = 0;
 
@@ -266,7 +274,8 @@ public final class StringParser {
      *
      * @param ch Character to be skipped
      */
-    public int skipChar(char ch) {
+    public int skipChar(char ch)
+    {
 
         while ((index < length) && (ch == chars[index]))
             index++;
@@ -280,7 +289,8 @@ public final class StringParser {
      * non-whitespace character, or until it moves past the end of the string.
      * Return the final value.
      */
-    public int skipText() {
+    public int skipText()
+    {
 
         while ((index < length) && !isWhite(chars[index]))
             index++;
@@ -294,7 +304,8 @@ public final class StringParser {
      * whitespace character, or until it moves past the end of the string.
      * Return the final value.
      */
-    public int skipWhite() {
+    public int skipWhite()
+    {
 
         while ((index < length) && isWhite(chars[index]))
             index++;
@@ -311,7 +322,8 @@ public final class StringParser {
      *
      * @param ch Character to be checked
      */
-    protected boolean isWhite(char ch) {
+    protected boolean isWhite(char ch)
+    {
 
         if ((ch == ' ') || (ch == '\t') || (ch == '\r') || (ch == '\n'))
             return (true);

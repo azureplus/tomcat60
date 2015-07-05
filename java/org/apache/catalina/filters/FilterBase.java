@@ -17,50 +17,56 @@
 
 package org.apache.catalina.filters;
 
-import java.util.Enumeration;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-
 import org.apache.juli.logging.Log;
 import org.apache.tomcat.util.IntrospectionUtils;
 import org.apache.tomcat.util.res.StringManager;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import java.util.Enumeration;
+
 /**
  * Base class for filters that provides generic initialisation and a simple
- * no-op destruction. 
- * 
+ * no-op destruction.
+ *
  * @author xxd
  */
-public abstract class FilterBase implements Filter {
-    
+public abstract class FilterBase implements Filter
+{
+
     protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
 
     protected abstract Log getLogger();
-    
-    public void init(FilterConfig filterConfig) throws ServletException {
-        
+
+    public void init(FilterConfig filterConfig) throws ServletException
+    {
+
         @SuppressWarnings("unchecked") // Servlet 2.5 doesn't use generics
-        Enumeration paramNames = filterConfig.getInitParameterNames();
-        
-        while (paramNames.hasMoreElements()) {
+                Enumeration paramNames = filterConfig.getInitParameterNames();
+
+        while (paramNames.hasMoreElements())
+        {
             String paramName = (String) paramNames.nextElement();
             if (!IntrospectionUtils.setProperty(this, paramName,
-                    filterConfig.getInitParameter(paramName))) {
+                    filterConfig.getInitParameter(paramName)))
+            {
                 String msg = sm.getString("filterbase.noSuchProperty",
                         paramName, this.getClass().getName());
-                if (isConfigProblemFatal()) {
+                if (isConfigProblemFatal())
+                {
                     throw new ServletException(msg);
-                } else {
+                } else
+                {
                     getLogger().warn(msg);
                 }
             }
-        }    
+        }
     }
 
-    public void destroy() {
+    public void destroy()
+    {
         // NOOP
     }
 
@@ -70,9 +76,10 @@ public abstract class FilterBase implements Filter {
      * turn will prevent the web application from starting.
      *
      * @return <code>true</code> if a problem should trigger the failure of this
-     *         filter, else <code>false</code>
+     * filter, else <code>false</code>
      */
-    protected boolean isConfigProblemFatal() {
+    protected boolean isConfigProblemFatal()
+    {
         return false;
     }
 }

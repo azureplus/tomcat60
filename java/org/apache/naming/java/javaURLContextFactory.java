@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming.java;
@@ -31,11 +31,11 @@ import java.util.Hashtable;
 
 /**
  * Context factory for the "java:" namespace.
- * <p>
+ * <p/>
  * <b>Important note</b> : This factory MUST be associated with the "java" URL
  * prefix, which can be done by either :
  * <ul>
- * <li>Adding a 
+ * <li>Adding a
  * java.naming.factory.url.pkgs=org.apache.naming property
  * to the JNDI properties file</li>
  * <li>Setting an environment variable named Context.URL_PKG_PREFIXES with
@@ -43,13 +43,13 @@ import java.util.Hashtable;
  * More detail about this can be found in the JNDI documentation :
  * {@link javax.naming.spi.NamingManager#getURLContext(java.lang.String, java.util.Hashtable)}.</li>
  * </ul>
- * 
- * @author Remy Maucherat
  *
+ * @author Remy Maucherat
  */
 
 public class javaURLContextFactory
-    implements ObjectFactory, InitialContextFactory {
+        implements ObjectFactory, InitialContextFactory
+{
 
 
     // ----------------------------------------------------------- Constructors
@@ -81,11 +81,14 @@ public class javaURLContextFactory
      */
     public Object getObjectInstance(Object obj, Name name, Context nameCtx,
                                     Hashtable environment)
-        throws NamingException {
-        if ((ContextBindings.isThreadBound()) || 
-            (ContextBindings.isClassLoaderBound())) {
+            throws NamingException
+    {
+        if ((ContextBindings.isThreadBound()) ||
+                (ContextBindings.isClassLoaderBound()))
+        {
             return new SelectorContext(environment);
-        } else {
+        } else
+        {
             return null;
         }
     }
@@ -95,12 +98,15 @@ public class javaURLContextFactory
      * Get a new (writable) initial context.
      */
     public Context getInitialContext(Hashtable environment)
-        throws NamingException {
-        if (ContextBindings.isThreadBound() || 
-            (ContextBindings.isClassLoaderBound())) {
+            throws NamingException
+    {
+        if (ContextBindings.isThreadBound() ||
+                (ContextBindings.isClassLoaderBound()))
+        {
             // Redirect the request to the bound initial context
             return new SelectorContext(environment, true);
-        } else {
+        } else
+        {
             // If the thread is not bound, return a shared writable context
             if (initialContext == null)
                 initialContext = new NamingContext(environment, MAIN);

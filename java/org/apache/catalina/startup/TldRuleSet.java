@@ -28,10 +28,10 @@ import org.apache.tomcat.util.digester.RuleSetBase;
  * descriptor resource.</p>
  *
  * @author Craig R. McClanahan
- *
  */
 
-public class TldRuleSet extends RuleSetBase {
+public class TldRuleSet extends RuleSetBase
+{
 
 
     // ----------------------------------------------------- Instance Variables
@@ -50,7 +50,8 @@ public class TldRuleSet extends RuleSetBase {
      * Construct an instance of this <code>RuleSet</code> with the default
      * matching pattern prefix.
      */
-    public TldRuleSet() {
+    public TldRuleSet()
+    {
 
         this("");
 
@@ -62,9 +63,10 @@ public class TldRuleSet extends RuleSetBase {
      * matching pattern prefix.
      *
      * @param prefix Prefix for matching pattern rules (including the
-     *  trailing slash character)
+     *               trailing slash character)
      */
-    public TldRuleSet(String prefix) {
+    public TldRuleSet(String prefix)
+    {
 
         super();
         this.namespaceURI = null;
@@ -83,12 +85,13 @@ public class TldRuleSet extends RuleSetBase {
      * by a Digester instance.</p>
      *
      * @param digester Digester instance to which the new Rule instances
-     *  should be added.
+     *                 should be added.
      */
-    public void addRuleInstances(Digester digester) {
+    public void addRuleInstances(Digester digester)
+    {
 
         digester.addCallMethod(prefix + "taglib/listener/listener-class",
-                               "addApplicationListener", 0);
+                "addApplicationListener", 0);
 
     }
 

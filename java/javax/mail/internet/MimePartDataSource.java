@@ -16,7 +16,9 @@
  */
 package javax.mail.internet;
 
-public class MimePartDataSource {
-    public MimePartDataSource(MimePart part) {
+public class MimePartDataSource
+{
+    public MimePartDataSource(MimePart part)
+    {
     }
 }

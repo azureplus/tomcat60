@@ -20,14 +20,15 @@ package org.apache.tomcat.util.http;
 
 /**
  * Usefull methods for Content-Type processing
- * 
+ *
  * @author James Duncan Davidson [duncan@eng.sun.com]
  * @author James Todd [gonzo@eng.sun.com]
  * @author Jason Hunter [jch@eng.sun.com]
  * @author Harish Prabandham
  * @author costin@eng.sun.com
  */
-public class ContentType {
+public class ContentType
+{
 
     /**
      * Parse the character encoding from the specified content type header.
@@ -36,7 +37,8 @@ public class ContentType {
      *
      * @param contentType a content type header
      */
-    public static String getCharsetFromContentType(String contentType) {
+    public static String getCharsetFromContentType(String contentType)
+    {
 
         if (contentType == null)
             return (null);
@@ -49,7 +51,7 @@ public class ContentType {
             encoding = encoding.substring(0, end);
         encoding = encoding.trim();
         if ((encoding.length() > 2) && (encoding.startsWith("\""))
-            && (encoding.endsWith("\"")))
+                && (encoding.endsWith("\"")))
             encoding = encoding.substring(1, encoding.length() - 1);
         return (encoding.trim());
 
@@ -64,26 +66,30 @@ public class ContentType {
      * @return true if the given content type contains a charset component,
      * false otherwise
      */
-    public static boolean hasCharset(String type) {
+    public static boolean hasCharset(String type)
+    {
 
         boolean hasCharset = false;
 
         int len = type.length();
         int index = type.indexOf(';');
-        while (index != -1) {
+        while (index != -1)
+        {
             index++;
-            while (index < len && Character.isSpace(type.charAt(index))) {
+            while (index < len && Character.isSpace(type.charAt(index)))
+            {
                 index++;
             }
-            if (index+8 < len
+            if (index + 8 < len
                     && type.charAt(index) == 'c'
-                    && type.charAt(index+1) == 'h'
-                    && type.charAt(index+2) == 'a'
-                    && type.charAt(index+3) == 'r'
-                    && type.charAt(index+4) == 's'
-                    && type.charAt(index+5) == 'e'
-                    && type.charAt(index+6) == 't'
-                    && type.charAt(index+7) == '=') {
+                    && type.charAt(index + 1) == 'h'
+                    && type.charAt(index + 2) == 'a'
+                    && type.charAt(index + 3) == 'r'
+                    && type.charAt(index + 4) == 's'
+                    && type.charAt(index + 5) == 'e'
+                    && type.charAt(index + 6) == 't'
+                    && type.charAt(index + 7) == '=')
+            {
                 hasCharset = true;
                 break;
             }

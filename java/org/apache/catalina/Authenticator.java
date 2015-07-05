@@ -27,10 +27,10 @@ package org.apache.catalina;
  * of an already configured authentication service.
  *
  * @author Craig R. McClanahan
- *
  */
 
-public interface Authenticator {
+public interface Authenticator
+{
 
 
 }

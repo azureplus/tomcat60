@@ -17,7 +17,8 @@
 
 package org.apache;
 
-public interface PeriodicEventListener {
+public interface PeriodicEventListener
+{
     /**
      * Execute a periodic task, such as reloading, etc.
      */

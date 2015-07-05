@@ -20,50 +20,55 @@ import java.util.LinkedList;
 
 
 /**
- *
  * @author Filip Hanik
  * @version 1.0
  */
-class BufferPool14Impl implements BufferPool.BufferPoolAPI {
+class BufferPool14Impl implements BufferPool.BufferPoolAPI
+{
     protected int maxSize;
     protected int size = 0;
     protected LinkedList queue = new LinkedList();
 
-    public void setMaxSize(int bytes) {
-        this.maxSize = bytes;
-    }
-    
-    public synchronized int addAndGet(int val) {
+    public synchronized int addAndGet(int val)
+    {
         size = size + (val);
         return size;
     }
-    
-    
 
-    public synchronized XByteBuffer getBuffer(int minSize, boolean discard) {
-        XByteBuffer buffer = (XByteBuffer)(queue.size()>0?queue.remove(0):null);
-        if ( buffer != null ) addAndGet(-buffer.getCapacity());
-        if ( buffer == null ) buffer = new XByteBuffer(minSize,discard);
-        else if ( buffer.getCapacity() <= minSize ) buffer.expand(minSize);
+    public synchronized XByteBuffer getBuffer(int minSize, boolean discard)
+    {
+        XByteBuffer buffer = (XByteBuffer) (queue.size() > 0 ? queue.remove(0) : null);
+        if (buffer != null) addAndGet(-buffer.getCapacity());
+        if (buffer == null) buffer = new XByteBuffer(minSize, discard);
+        else if (buffer.getCapacity() <= minSize) buffer.expand(minSize);
         buffer.setDiscard(discard);
         buffer.reset();
         return buffer;
     }
 
-    public synchronized void returnBuffer(XByteBuffer buffer) {
-        if ( (size + buffer.getCapacity()) <= maxSize ) {
+    public synchronized void returnBuffer(XByteBuffer buffer)
+    {
+        if ((size + buffer.getCapacity()) <= maxSize)
+        {
             addAndGet(buffer.getCapacity());
             queue.add(buffer);
         }
     }
 
-    public synchronized void clear() {
+    public synchronized void clear()
+    {
         queue.clear();
         size = 0;
     }
 
-    public int getMaxSize() {
+    public int getMaxSize()
+    {
         return maxSize;
+    }
+
+    public void setMaxSize(int bytes)
+    {
+        this.maxSize = bytes;
     }
 
 }

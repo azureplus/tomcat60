@@ -44,42 +44,43 @@ import java.security.AccessController;
  * use a separate class loader for the parser to be used.
  *
  * @author Craig R. McClanahan
- *
  */
-public class ParserUtils {
+public class ParserUtils
+{
 
+    /**
+     * @deprecated Unused. Will be removed in Tomcat 7.
+     * Use {@link ParserUtils#ParserUtils(boolean, boolean)} instead.
+     */
+    @Deprecated
+    public static boolean validating = false;
     /**
      * An entity resolver for use when parsing XML documents.
      */
     static EntityResolver entityResolver;
-
     private final EntityResolver entityResolverInstance;
-
-    /**
-     * @deprecated Unused. Will be removed in Tomcat 7.
-     *             Use {@link ParserUtils#ParserUtils(boolean,boolean)} instead.
-     */
-    @Deprecated
-    public static boolean validating = false;
-
     private final boolean useValidation;
 
     /**
      * @deprecated Unused. Will be removed in Tomcat 7.
-     *             Use {@link ParserUtils#ParserUtils(boolean,boolean)} instead.
+     * Use {@link ParserUtils#ParserUtils(boolean, boolean)} instead.
      */
     @Deprecated
-    public ParserUtils() {
+    public ParserUtils()
+    {
         this(true, Constants.IS_SECURITY_ENABLED);
     }
 
-    public ParserUtils(boolean useValidation, boolean blockExternal) {
+    public ParserUtils(boolean useValidation, boolean blockExternal)
+    {
         this.useValidation = useValidation;
-        if (entityResolver == null) {
+        if (entityResolver == null)
+        {
             this.entityResolverInstance = new LocalResolver(
                     DigesterFactory.SERVLET_API_PUBLIC_IDS,
                     DigesterFactory.SERVLET_API_SYSTEM_IDS, blockExternal);
-        } else {
+        } else
+        {
             this.entityResolverInstance = entityResolver;
         }
     }
@@ -87,43 +88,62 @@ public class ParserUtils {
     // --------------------------------------------------------- Public Methods
 
     /**
+     * Set the EntityResolver.
+     * This is needed when the dtds and Jasper itself are in different
+     * classloaders (e.g. OSGi environment).
+     *
+     * @param er EntityResolver to use.
+     */
+    public static void setEntityResolver(EntityResolver er)
+    {
+
+        entityResolver = er;
+    }
+
+    /**
      * Parse the specified XML document, and return a <code>TreeNode</code>
      * that corresponds to the root node of the document tree.
      *
      * @param location Location (eg URI) of the XML document being parsed
-     * @param is Input source containing the deployment descriptor
-     *
-     * @exception JasperException if an input/output error occurs
-     * @exception JasperException if a parsing error occurs
+     * @param is       Input source containing the deployment descriptor
+     * @throws JasperException if an input/output error occurs
+     * @throws JasperException if a parsing error occurs
      */
     public TreeNode parseXMLDocument(String location, InputSource is)
-        throws JasperException {
+            throws JasperException
+    {
 
         Document document = null;
 
         // Perform an XML parse of this document, via JAXP
         ClassLoader original;
-        if (Constants.IS_SECURITY_ENABLED) {
+        if (Constants.IS_SECURITY_ENABLED)
+        {
             PrivilegedGetTccl pa = new PrivilegedGetTccl();
             original = AccessController.doPrivileged(pa);
-        } else {
+        } else
+        {
             original = Thread.currentThread().getContextClassLoader();
         }
-        try {
-            if (Constants.IS_SECURITY_ENABLED) {
+        try
+        {
+            if (Constants.IS_SECURITY_ENABLED)
+            {
                 PrivilegedSetTccl pa =
                         new PrivilegedSetTccl(ParserUtils.class.getClassLoader());
                 AccessController.doPrivileged(pa);
-            } else {
+            } else
+            {
                 Thread.currentThread().setContextClassLoader(
                         ParserUtils.class.getClassLoader());
             }
-            
+
             DocumentBuilderFactory factory =
-                DocumentBuilderFactory.newInstance();
+                    DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setValidating(useValidation);
-            if (useValidation) {
+            if (useValidation)
+            {
                 // Enable DTD validation
                 factory.setFeature(
                         "http://xml.org/sax/features/validation",
@@ -138,31 +158,44 @@ public class ParserUtils {
             XmlErrorHandler handler = new XmlErrorHandler();
             builder.setErrorHandler(handler);
             document = builder.parse(is);
-            if (!handler.getErrors().isEmpty()) {
+            if (!handler.getErrors().isEmpty())
+            {
                 // throw the first to indicate there was a error during processing
                 throw handler.getErrors().iterator().next();
             }
-        } catch (ParserConfigurationException ex) {
+        }
+        catch (ParserConfigurationException ex)
+        {
             throw new JasperException(
                     Localizer.getMessage("jsp.error.parse.xml", location), ex);
-        } catch (SAXParseException ex) {
+        }
+        catch (SAXParseException ex)
+        {
             throw new JasperException(
                     Localizer.getMessage("jsp.error.parse.xml.line",
                             location,
                             Integer.toString(ex.getLineNumber()),
-        			        Integer.toString(ex.getColumnNumber())),
-			        ex);
-        } catch (SAXException sx) {
+                            Integer.toString(ex.getColumnNumber())),
+                    ex);
+        }
+        catch (SAXException sx)
+        {
             throw new JasperException(
                     Localizer.getMessage("jsp.error.parse.xml", location), sx);
-        } catch (IOException io) {
+        }
+        catch (IOException io)
+        {
             throw new JasperException(
                     Localizer.getMessage("jsp.error.parse.xml", location), io);
-        } finally {
-            if (Constants.IS_SECURITY_ENABLED) {
+        }
+        finally
+        {
+            if (Constants.IS_SECURITY_ENABLED)
+            {
                 PrivilegedSetTccl pa = new PrivilegedSetTccl(original);
                 AccessController.doPrivileged(pa);
-            } else {
+            } else
+            {
                 Thread.currentThread().setContextClassLoader(original);
             }
         }
@@ -171,77 +204,71 @@ public class ParserUtils {
         return (convert(null, document.getDocumentElement()));
     }
 
-
     /**
      * Parse the specified XML document, and return a <code>TreeNode</code>
      * that corresponds to the root node of the document tree.
      *
      * @param uri URI of the XML document being parsed
-     * @param is Input stream containing the deployment descriptor
-     *
-     * @exception JasperException if an input/output error occurs
-     * @exception JasperException if a parsing error occurs
+     * @param is  Input stream containing the deployment descriptor
+     * @throws JasperException if an input/output error occurs
+     * @throws JasperException if a parsing error occurs
      */
     public TreeNode parseXMLDocument(String uri, InputStream is)
-            throws JasperException {
+            throws JasperException
+    {
 
         return (parseXMLDocument(uri, new InputSource(is)));
     }
 
-    /**
-     * Set the EntityResolver.
-     * This is needed when the dtds and Jasper itself are in different
-     * classloaders (e.g. OSGi environment).
-     *
-     * @param er EntityResolver to use.
-     */
-    public static void setEntityResolver(EntityResolver er) {
-
-        entityResolver = er;
-    }
-
     // ------------------------------------------------------ Protected Methods
-
 
     /**
      * Create and return a TreeNode that corresponds to the specified Node,
      * including processing all of the attributes and children nodes.
      *
      * @param parent The parent TreeNode (if any) for the new TreeNode
-     * @param node The XML document Node to be converted
+     * @param node   The XML document Node to be converted
      */
-    protected TreeNode convert(TreeNode parent, Node node) {
+    protected TreeNode convert(TreeNode parent, Node node)
+    {
 
         // Construct a new TreeNode for this node
         TreeNode treeNode = new TreeNode(node.getNodeName(), parent);
 
         // Convert all attributes of this node
         NamedNodeMap attributes = node.getAttributes();
-        if (attributes != null) {
+        if (attributes != null)
+        {
             int n = attributes.getLength();
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < n; i++)
+            {
                 Node attribute = attributes.item(i);
                 treeNode.addAttribute(attribute.getNodeName(),
-                                      attribute.getNodeValue());
+                        attribute.getNodeValue());
             }
         }
 
         // Create and attach all children of this node
         NodeList children = node.getChildNodes();
-        if (children != null) {
+        if (children != null)
+        {
             int n = children.getLength();
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < n; i++)
+            {
                 Node child = children.item(i);
                 if (child instanceof Comment)
                     continue;
-                if (child instanceof Text) {
+                if (child instanceof Text)
+                {
                     String body = ((Text) child).getData();
-                    if (body != null) {
+                    if (body != null)
+                    {
                         body = body.trim();
                         if (body.length() > 0)
                             treeNode.setBody(body);
                     }
-                } else {
+                } else
+                {
                     convert(treeNode, child);
                 }
             }
