@@ -20,19 +20,19 @@
 
   <!-- ===================== Initialize Property Values =================== -->
 
-  <!-- We read customizable properties from the file "build.properties.default" -->
+  <!-- We read customizable properties from the file "build.properties" -->
   <!-- and also from "build.properties" if it exists.                           -->
   <!-- The values in "build.properties" have stronger preference.               -->
   <!-- If you want to customize your build, you can either change the values    -->
   <!-- directly in the default file, or create a new build.properties and set   -->
   <!-- the values there. This way you don't have to change a file which is part -->
   <!-- of the original project source code.                                     -->
-  <!-- See "build.properties.default" in the top level directory for some       -->
+  <!-- See "build.properties" in the top level directory for some       -->
   <!-- property values you may customize.                                       -->
   <property file="${user.home}/build.properties"/>
   <property file="build.properties"/>
 
-  <property file="build.properties.default"/>
+  <property file="build.properties"/>
 
   <!-- Project Properties -->
   <property name="project"               value="apache-tomcat" />
@@ -40,11 +40,12 @@
 
   <property name="version.major"         value="6" />
   <property name="version.minor"         value="0" />
-  <property name="version.build"         value="0" />
+  <property name="version.build"         value="45" />
   <property name="version.patch"         value="0" />
   <property name="version.suffix"        value="-dev" />
 
   <property name="version"               value="${version.major}.${version.minor}.${version.build}${version.suffix}" />
+  <property name="version.dev"           value="${version.major}.${version.minor}.${version.build}" />
   <property name="version.number"        value="${version.major}.${version.minor}.${version.build}.${version.patch}" />
   <property name="version.major.minor"   value="${version.major}.${version.minor}" />
 
@@ -53,16 +54,17 @@
 
   <!-- Build Defaults -->
   <property name="tomcat.home"           value="${basedir}"/>
-  <property name="tomcat.output"         value="${basedir}/output"/>
+  <!--<property name="tomcat.output"         value="${basedir}/output"/>-->
+  <property name="tomcat.build"          value="c:/${project}-${version}"/>
   <property name="tomcat.build"          value="${tomcat.output}/build"/>
   <property name="tomcat.classes"        value="${tomcat.output}/classes"/>
   <property name="tomcat.dist"           value="${tomcat.output}/dist"/>
   <property name="tomcat.manifests"      value="${tomcat.output}/manifests"/>
 
   <!-- Can't be lower - jsp uses templates -->
-  <property name="compile.source" value="1.5"/>
+  <property name="compile.source" value="1.7"/>
   <!-- Can't be higher - must run on 1.5 -->
-  <property name="compile.target" value="1.5"/>
+  <property name="compile.target" value="1.7"/>
 
   <!-- Exact spec versions (for the manifests) -->
   <property name="servlet.revision" value="MR2" />

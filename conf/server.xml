@@ -19,7 +19,7 @@
      define subcomponents such as "Valves" at this level.
      Documentation at /docs/config/server.html
  -->
-<Server port="8005" shutdown="SHUTDOWN">
+<Server port="8001" shutdown="SHUTDOWN">
 
   <!--APR library loader. Documentation at /docs/apr.html -->
   <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
@@ -66,7 +66,7 @@
          APR (HTTP/AJP) Connector: /docs/apr.html
          Define a non-SSL HTTP/1.1 Connector on port 8080
     -->
-    <Connector port="8080" protocol="HTTP/1.1" 
+    <Connector port="9090" protocol="HTTP/1.1" 
                connectionTimeout="20000" 
                redirectPort="8443" />
     <!-- A "Connector" using the shared thread pool-->
@@ -87,7 +87,7 @@
     -->
 
     <!-- Define an AJP 1.3 Connector on port 8009 -->
-    <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />
+    <Connector port="8002" protocol="AJP/1.3" redirectPort="8443" />
 
 
     <!-- An Engine represents the entry point (within Catalina) that processes
@@ -141,7 +141,9 @@
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"  
                prefix="localhost_access_log." suffix=".txt" pattern="common" resolveHosts="false"/>
         -->
-
+          <Logger className="org.apache.catalina.logger.FileLogger" prefix="localhost_log." suffix=".txt" timestamp="true"/>
+          <Valve className="org.apache.catalina.valves.AccessLogValve" fileDateFormat="yyyy-MM-dd" pattern="%h %l %u %t %r %s %b %{Referer}i %{User-Agent}i %{x-jphone-uid}i %{x-up-subno}i" prefix="localhost_access_log." suffix=".txt" directory="D:/dev-tomcat/tomcat60/logs/accesslog" condition="drop"/>
+          <Logger className="org.apache.catalina.logger.FileLogger" prefix="catalina_log." suffix=".txt" timestamp="true"/>
       </Host>
     </Engine>
   </Service>
